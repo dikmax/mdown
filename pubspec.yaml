@@ -1,0 +1,8 @@
+name: markdowntypography
+version: 0.0.1
+description: Markdown typography processor
+dependencies:
+  parsers:
+    path: /Users/dikmax/workspace/parsers
+dev_dependencies:
+  unittest: any
