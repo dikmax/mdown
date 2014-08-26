@@ -15,6 +15,9 @@ Iterable _buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, 
   return result;
 }
 
+final Attr nullAttr = new Attr("", [], {});
+Attr attr(id, classes, attributes) => new Attr(id, classes, attributes);
+
 Document doc([Block a, Block b, Block c, Block d, Block e, Block f, Block g, Block h, Block i, Block j, Block k,
              Block l, Block m, Block n, Block o, Block p, Block q, Block r, Block s, Block t, Block u, Block v,
              Block w, Block x, Block y, Block z]) {
@@ -34,9 +37,6 @@ text = fromList . map conv . breakBySpaces
         is_space '\n' = True
         is_space '\t' = True
         is_space _    = False
-
-str :: String -> Inlines
-str = singleton . Str
 */
 
 Str str(String string) {
@@ -92,7 +92,9 @@ code = codeWith nullAttr
 
 */
 
-Space space = new Space();
+Code code(String code, [Attr attr]) => new Code(attr == null ? nullAttr : attr, code);
+
+final Space space = new Space();
 
 /*
 space :: Inlines
@@ -134,7 +136,6 @@ spanWith attr = singleton . Span attr . toList
 
 */
 
-//List<Block> para(List<Inline> inlines) => [new Para(inlines)];
 Para para([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h, Inline i, Inline j, Inline k,
           Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r, Inline s, Inline t, Inline u, Inline v,
           Inline w, Inline x, Inline y, Inline z]) {

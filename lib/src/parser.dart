@@ -25,6 +25,54 @@ Parser<Document> getParser({bool extIntrawordUnderscores: true}) {
     };
   }
 
+  // Code
+
+  Parser code() {
+    return new Parser((s, pos) {
+      ParseResult start = char('`').many1.run(s, pos);
+      if (!start.isSuccess) {
+        return start;
+      }
+      ParseResult res = skipSpaces.run(s, start.position);
+      if (!res.isSuccess) {
+        return res;
+      }
+
+      Parser codeInner = (noneOf("`\n").many1 ^ (list) => list.join(''))
+        | (char('`').many1 ^ (list) => list.join(''))
+        | (char('\n').notFollowedBy(blankline) ^ (a) => ' ');
+      Parser codeEnd = skipSpaces + string(start.value.join('')).notFollowedBy(char('`')) ^ (a, b) => null;
+
+      ParseResult codeResult = (codeInner + codeInner.manyUntil(codeEnd) ^ (a, b) {
+        List<Inline> res = [a];
+        if (b.length > 0) {
+          res.addAll(b);
+        }
+        return B.code(res.join(''));
+      }).run(s, res.position);
+      if (!codeResult.isSuccess) {
+        return codeResult;
+      }
+      return codeResult;
+    });
+  }
+  /*
+  code :: MarkdownParser (F Inlines)
+  code = try $ do
+    starts <- many1 (char '`')
+    skipSpaces
+    result <- many1Till (many1 (noneOf "`\n") <|> many1 (char '`') <|>
+                         (char '\n' >> notFollowedBy' blankline >> return " "))
+                        (try (skipSpaces >> count (length starts) (char '`') >>
+                        notFollowedBy (char '`')))
+    attr <- option ([],[],[]) (try $ guardEnabled Ext_inline_code_attributes >>
+                                     optional whitespace >> attributes)
+    return $ return $ B.codeWith attr $ trim $ concat result
+
+   */
+
+  // Emphasis or strong
+
   Parser notAfterString() {
     return new Parser((s, Position pos) {
       if (pos.character == 1) {
@@ -53,7 +101,7 @@ Parser<Document> getParser({bool extIntrawordUnderscores: true}) {
     ? char('_').notFollowedBy(alphanum)
     : char('_');
   Parser startUnderscore = extIntrawordUnderscores
-    ? notAfterString() + char('_')
+    ? notAfterString() + char('_') ^ (a, b) => null
     : char('_');
   Parser strongOrEmphUnderscore() {
     return new Parser((s, pos) {
@@ -64,12 +112,15 @@ Parser<Document> getParser({bool extIntrawordUnderscores: true}) {
     });
   }
 
+  // Inline definition
+
   inline = choice([
       whitespace,
       strongOrEmphStar(),
       strongOrEmphUnderscore(),
       str,
       endline,
+      code(),
       symbol
   ]);
 

@@ -1,7 +1,7 @@
 library markdown;
 
 import 'package:parsers/parsers.dart';
-import 'builder.dart' as b;
+import 'builder.dart' as B;
 
 part 'src/definitions.dart';
 part 'src/parser.dart';

@@ -1,9 +1,23 @@
 import 'package:unittest/unittest.dart' as t;
 import 'package:markdowntypography/markdown.dart';
 import 'package:parsers/parsers.dart';
-import 'package:markdowntypography/builder.dart' as b;
+import 'package:markdowntypography/builder.dart' as B;
 
 void main() {
+  t.group('inline code', () {
+    testEquals("simple",
+      "`some code`",
+      B.para(B.code("some code"))
+    );
+    testEquals("with attribute",
+      "`document.write(\"Hello\");`{.javascript}",
+      B.para(B.code("document.write(\"Hello\");"))
+    );
+    testEquals("with attribute space",
+      "`*` {.haskell .special x=\"7\"}",
+      B.para(B.code("document.write(\"Hello\");", B.attr("", ["haskell","special"], {"x": "7"})))
+    );
+  });
   /*
   testGroup "inline code"
           [ "with attribute" =:
@@ -18,25 +32,25 @@ void main() {
   t.group('emph and strong', () {
     testEquals("two strongs in emph",
       "***a**b **c**d*",
-      b.para(b.emph(b.strong(b.str("a")), b.str("b"), b.space, b.strong(b.str("c")), b.str("d"))));
+      B.para(B.emph(B.strong(B.str("a")), B.str("b"), B.space, B.strong(B.str("c")), B.str("d"))));
     testEquals('emph and strong emph alternating',
       "*xxx* ***xxx*** xxx\n*xxx* ***xxx*** xxx",
-      b.para(b.emph(b.str("xxx")), b.space, b.strong(b.emph(b.str("xxx"))),
-        b.space, b.str("xxx"), b.space,
-        b.emph(b.str("xxx")), b.space, b.strong(b.emph(b.str("xxx"))),
-        b.space, b.str("xxx"))
+      B.para(B.emph(B.str("xxx")), B.space, B.strong(B.emph(B.str("xxx"))),
+        B.space, B.str("xxx"), B.space,
+        B.emph(B.str("xxx")), B.space, B.strong(B.emph(B.str("xxx"))),
+        B.space, B.str("xxx"))
     );
     testEquals("emph with spaced strong",
       "*x **xx** x*",
-      b.para(b.emph(b.str("x"), b.space, b.strong(b.str("xx")), b.space, b.str("x")))
+      B.para(B.emph(B.str("x"), B.space, B.strong(B.str("xx")), B.space, B.str("x")))
     );
     testEquals("intraword underscore with opening underscore",
       "_foot_ball_",
-      b.para(b.emph(b.str("foot_ball")))
+      B.para(B.emph(B.str("foot"), B.str("_"), B.str("ball")))
     );
     testEquals("intraword underscore with opening underscore and disabled intrawords",
       "_foot_ball_",
-      b.para(b.emph(b.str("foot")), b.str("ball"), b.str("_")),
+      B.para(B.emph(B.str("foot")), B.str("ball"), B.str("_")),
       noIntrawordUnderscoreParser
     );
   });
@@ -260,6 +274,6 @@ void testEquals(description, String str, result, [Parser parser]) {
     if (parser == null) {
       parser = defaultParser;
     }
-    t.expect(parser.parse(str), t.equals(b.doc(result)));
+    t.expect(parser.parse(str), t.equals(B.doc(result)));
   });
 }
