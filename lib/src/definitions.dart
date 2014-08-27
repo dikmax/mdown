@@ -1,63 +1,10 @@
 part of markdown;
 
-/*
-Class system is inspired by Pandoc
- */
+// Class system is inspired by Pandoc
 
-bool _compareIterable(Iterable a, Iterable b, [int level = 1]) {
-  var aIterator = a.iterator;
-  var bIterator = b.iterator;
-  for (;;) {
-    // Advance in lockstep.
-    var expectedNext = aIterator.moveNext();
-    var actualNext = bIterator.moveNext();
-
-    // If we reached the end of both, we succeeded.
-    if (!expectedNext && !actualNext) {
-      return true;
-    }
-
-    // Fail if their lengths are different.
-    if (!expectedNext || !actualNext) {
-      return false;
-    }
-
-    // Match the elements.
-    if (level > 1) {
-      return _compareIterable(aIterator.current, bIterator.current, level - 1);
-    } else {
-      if (aIterator.current != bIterator.current) {
-        return false;
-      }
-    }
-  }
-}
-
-bool _compareMap(Map a, Map b) {
-  if (a.length != b.length) {
-    return false;
-  }
-
-  for (var key in a.keys) {
-    if (!b.containsKey(key)) {
-      return false;
-    }
-  }
-
-  for (var key in b.keys) {
-    if (!a.containsKey(key)) {
-      return false;
-    }
-  }
-
-  for (var key in a.keys) {
-    if (a[key] != b[key]) {
-      return false;
-    }
-  }
-
-  return true;
-}
+const _iterableEquality = const IterableEquality();
+const _mapEquality = const MapEquality();
+const _deepEquality = const DeepCollectionEquality();
 
 class Document {
   Iterable<Block> blocks;
@@ -66,7 +13,8 @@ class Document {
 
   String toString() => "Document $blocks";
 
-  bool operator== (Document obj) => _compareIterable(blocks, obj.blocks);
+  bool operator== (obj) => obj is Document &&
+    _iterableEquality.equals(blocks, obj.blocks);
 }
 
 
@@ -79,9 +27,14 @@ class Attr {
 
   String toString() => '("$id", $classes, $attributes)';
 
-  bool operator== (Attr obj) => id == obj.id &&
-    _compareIterable(classes, obj.classes) &&
-    _compareMap(attributes, obj.attributes);
+  bool operator+ (Attr obj) => new Attr(obj.id == "" ? id : obj.id,
+    new List.from(classes).addAll(obj.classes),
+    new Map.from(attributes).addAll(obj.attributes));
+
+  bool operator== (obj) => obj is Attr &&
+    id == obj.id &&
+    _iterableEquality.equals(classes, obj.classes) &&
+    _mapEquality.equals(attributes, obj.attributes);
 }
 
 
@@ -98,7 +51,8 @@ class ListNumberDelim {
 
   String toString() => name;
 
-  bool operator== (ListNumberDelim obj) => value == obj.value;
+  bool operator== (obj) => obj is ListNumberDelim &&
+    value == obj.value;
 }
 
 
@@ -118,7 +72,8 @@ class ListNumberStyle {
 
   String toString() => name;
 
-  bool operator== (ListNumberStyle obj) => value == obj.value;
+  bool operator== (obj) => obj is ListNumberStyle &&
+    value == obj.value;
 }
 
 
@@ -131,7 +86,8 @@ class ListAttributes {
 
   String toString() => "($start, $numberStyle, $numberDelim)";
 
-  bool operator== (ListAttributes obj) => start == obj.start &&
+  bool operator== (obj) => obj is ListAttributes &&
+    start == obj.start &&
     numberStyle == obj.numberStyle &&
     numberDelim == obj.numberDelim;
 }
@@ -149,7 +105,8 @@ class Plain extends Block {
 
   String toString() => "Plain $inlines";
 
-  bool operator== (Plain obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Plain &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -160,7 +117,8 @@ class Para extends Block {
 
   String toString() => "Para $inlines";
 
-  bool operator== (Para obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Para &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -172,7 +130,9 @@ class CodeBlock extends Block {
 
   String toString() => 'CodeBlock $attr "$code"';
 
-  bool operator== (CodeBlock obj) => attr == obj.attr && code == obj.code;
+  bool operator== (obj) => obj is CodeBlock &&
+    attr == obj.attr &&
+    code == obj.code;
 }
 
 
@@ -184,7 +144,9 @@ class RawBlock extends Block {
 
   String toString() => 'RawBlock "$format" "$data"';
 
-  bool operator== (RawBlock obj) => format == obj.format && data == obj.data;
+  bool operator== (obj) => obj is RawBlock &&
+    format == obj.format &&
+    data == obj.data;
 }
 
 
@@ -195,7 +157,8 @@ class BlockQuote extends Block {
 
   String toString() => "BlockQuote $blocks";
 
-  bool operator== (BlockQuote obj) => _compareIterable(blocks, obj.blocks);
+  bool operator== (obj) => obj is BlockQuote &&
+    _iterableEquality.equals(blocks, obj.blocks);
 }
 
 
@@ -207,7 +170,9 @@ class OrderedList extends Block {
 
   String toString() => "OrderedList $attributes $items";
 
-  bool operator== (OrderedList obj) => attributes == obj.attributes && _compareIterable(items, obj.items, 2);
+  bool operator== (obj) => obj is OrderedList &&
+    attributes == obj.attributes &&
+    _deepEquality.equals(items, obj.items);
 }
 
 
@@ -218,7 +183,8 @@ class BulletList extends Block {
 
   String toString() => "BulletList $items";
 
-  bool operator== (BulletList obj) => _compareIterable(items, obj.items, 2);
+  bool operator== (obj) => obj is BulletList &&
+    _deepEquality.equals(items, obj.items);
 }
 
 
@@ -230,7 +196,9 @@ class Definition {
 
   String toString() => "Definition $term $definition";
 
-  bool operator== (Definition obj) => _compareIterable(term, obj.term) && _compareIterable(definition, obj.definition, 2);
+  bool operator== (obj) => obj is Definition &&
+    _iterableEquality.equals(term, obj.term) &&
+    _deepEquality.equals(definition, obj.definition);
 }
 
 
@@ -241,7 +209,8 @@ class DefinitionList extends Block {
 
   String toString() => "DefinitionList $items";
 
-  bool operator== (DefinitionList obj) => _compareIterable(items, obj.items);
+  bool operator== (obj) => obj is DefinitionList &&
+    _iterableEquality.equals(items, obj.items);
 }
 
 
@@ -254,8 +223,10 @@ class Header extends Block {
 
   String toString() => "Header $level $attributes $inlines";
 
-  bool operator== (Header obj) => level == obj.level && attributes == obj.attributes &&
-    _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Header &&
+    level == obj.level &&
+    attributes == obj.attributes &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -264,7 +235,7 @@ class HorizontalRule extends Block {
 
   String toString() => "HorizontalRule";
 
-  bool operator== (HorizontalRule obj) => true;
+  bool operator== (obj) => obj is HorizontalRule;
 }
 
 
@@ -289,7 +260,9 @@ class Div {
 
   String toString() => "Div $attributes $blocks";
 
-  bool operator== (Div obj) => attributes == obj.attributes && _compareIterable(blocks, obj.blocks);
+  bool operator== (obj) => obj is Div &&
+    attributes == obj.attributes &&
+    _iterableEquality.equals(blocks, obj.blocks);
 }
 
 
@@ -305,7 +278,8 @@ class Str extends Inline {
 
   String toString() => 'Str "$str"';
 
-  bool operator== (Str obj) => str == obj.str;
+  bool operator== (obj) => obj is Str &&
+    str == obj.str;
 }
 
 
@@ -316,7 +290,8 @@ class Emph extends Inline {
 
   String toString() => "Emph $inlines";
 
-  bool operator== (Emph obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Emph &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -327,7 +302,8 @@ class Strong extends Inline {
 
   String toString() => "Strong $inlines";
 
-  bool operator== (Strong obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Strong &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -338,7 +314,8 @@ class Strikeout extends Inline {
 
   String toString() => "Strikeout $inlines";
 
-  bool operator== (Strikeout obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Strikeout &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -349,7 +326,8 @@ class Superscript extends Inline {
 
   String toString() => "Superscript $inlines";
 
-  bool operator== (Superscript obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Superscript &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -360,7 +338,8 @@ class Subscript extends Inline {
 
   String toString() => "Subscript $inlines";
 
-  bool operator== (Subscript obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Subscript &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -371,7 +350,8 @@ class SmallCaps extends Inline {
 
   String toString() => "SmallCaps $inlines";
 
-  bool operator== (SmallCaps obj) => _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is SmallCaps &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -386,7 +366,8 @@ class QuoteType {
 
   String toString() => name;
 
-  bool operator== (QuoteType obj) => value == obj.value;
+  bool operator== (obj) => obj is QuoteType &&
+    value == obj.value;
 }
 
 
@@ -398,7 +379,9 @@ class Quoted extends Inline {
 
   String toString() => "Quoted $type $inlines";
 
-  bool operator== (Quoted obj) => type == obj.type && _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Quoted &&
+    type == obj.type &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -414,7 +397,8 @@ class CitationMode {
 
   String toString() => name;
 
-  bool operator== (CitationMode obj) => value == obj.value;
+  bool operator== (obj) => obj is CitationMode &&
+    value == obj.value;
 }
 
 
@@ -430,9 +414,10 @@ class Citation {
 
   String toString() => 'Citation "$id" $prefix $suffix $mode $noteNum $hash';
 
-  bool operator== (Citation obj) => id == obj.id &&
-    _compareIterable(prefix, obj.prefix) &&
-    _compareIterable(suffix, obj.suffix) &&
+  bool operator== (obj) => obj is Citation &&
+    id == obj.id &&
+    _iterableEquality.equals(prefix, obj.prefix) &&
+    _iterableEquality.equals(suffix, obj.suffix) &&
     mode == obj.mode &&
     noteNum == obj.noteNum &&
     hash == obj.hash;
@@ -447,8 +432,9 @@ class Cite extends Inline {
 
   String toString() => "Cite $citations $inlines";
 
-  bool operator== (Cite obj) => _compareIterable(citations, obj.citations) &&
-    _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Cite &&
+    _iterableEquality.equals(citations, obj.citations) &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }
 
 
@@ -460,7 +446,9 @@ class Code extends Inline {
 
   String toString() => "Code $attributes $code";
 
-  bool operator== (Code obj) => attributes == obj.attributes && code == obj.code;
+  bool operator== (obj) => obj is Code &&
+    attributes == obj.attributes &&
+    code == obj.code;
 }
 
 
@@ -469,7 +457,7 @@ class Space extends Inline {
 
   String toString() => "Space";
 
-  bool operator== (Space obj) => true;
+  bool operator== (obj) => obj is Space;
 }
 
 
@@ -478,7 +466,7 @@ class LineBreak extends Inline {
 
   String toString() => "LineBreak";
 
-  bool operator== (LineBreak obj) => true;
+  bool operator== (obj) => obj is LineBreak;
 }
 
 
@@ -493,7 +481,8 @@ class MathType {
 
   String toString() => name;
 
-  bool operator== (MathType obj) => value == obj.value;
+  bool operator== (obj) => obj is MathType &&
+    value == obj.value;
 }
 
 
@@ -505,7 +494,9 @@ class Math extends Inline {
 
   String toString() => 'Math $type "$string"';
 
-  bool operator== (Math obj) => type == obj.type && string == obj.string;
+  bool operator== (obj) => obj is Math &&
+    type == obj.type &&
+    string == obj.string;
 }
 
 
@@ -517,7 +508,9 @@ class RawInline extends Inline {
 
   String toString() => 'RawInline "$format" "$data"';
 
-  bool operator== (RawInline obj) => format == obj.format && data == obj.data;
+  bool operator== (obj) => obj is RawInline &&
+    format == obj.format &&
+    data == obj.data;
 }
 
 
@@ -529,7 +522,9 @@ class Target {
 
   String toString() => 'Target "$url" "$title"';
 
-  bool operator== (Target obj) => url == obj.url && title == obj.title;
+  bool operator== (obj) => obj is Target &&
+    url == obj.url &&
+    title == obj.title;
 }
 
 
@@ -541,7 +536,9 @@ class Link extends Inline {
 
   String toString() => "Link $inlines $target";
 
-  bool operator== (Link obj) => _compareIterable(inlines, obj.inlines) && target == obj.target;
+  bool operator== (obj) => obj is Link &&
+    _iterableEquality.equals(inlines, obj.inlines) &&
+    target == obj.target;
 }
 
 
@@ -553,7 +550,9 @@ class Image extends Inline {
 
   String toString() => "Image $inlines $target";
 
-  bool operator== (Image obj) => _compareIterable(inlines, obj.inlines) && target == obj.target;
+  bool operator== (obj) => obj is Image &&
+    _iterableEquality.equals(inlines, obj.inlines) &&
+    target == obj.target;
 }
 
 
@@ -564,7 +563,8 @@ class Note extends Inline {
 
   String toString() => "Note $blocks";
 
-  bool operator== (Note obj) => _compareIterable(blocks, obj.blocks);
+  bool operator== (obj) => obj is Note &&
+    _iterableEquality.equals(blocks, obj.blocks);
 }
 
 
@@ -574,7 +574,9 @@ class Span extends Inline {
 
   Span(this.attributes, this.inlines);
 
-  String toString()
+  String toString() => "Span $attributes $inlines";
 
-  bool operator== (Span obj) => attributes == obj.attributes && _compareIterable(inlines, obj.inlines);
+  bool operator== (obj) => obj is Span &&
+    attributes == obj.attributes &&
+    _iterableEquality.equals(inlines, obj.inlines);
 }

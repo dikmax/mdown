@@ -4,10 +4,20 @@ import 'package:parsers/parsers.dart';
 import 'package:markdowntypography/builder.dart' as B;
 
 void main() {
+  t.group('subparsers', () {
+    t.group('attributes', () {
+      testEquals1("identifierAttr", "#i_d", B.attr('i_d', [], {}), identifierAttr);
+      testEquals1("identifier attribute",  "{#i_d}", B.attr('i_d', [], {}), attributes);
+    });
+  });
   t.group('inline code', () {
     testEquals("simple",
       "`some code`",
       B.para(B.code("some code"))
+    );
+    testEquals("with id",
+      "`some code` {#i_d}",
+      B.para(B.code("some code", B.attr("i_d", [], {})))
     );
     testEquals("with attribute",
       "`document.write(\"Hello\");`{.javascript}",
@@ -268,12 +278,20 @@ bareLinkTests =
 
 final Parser defaultParser = getParser();
 final Parser noIntrawordUnderscoreParser = getParser(extIntrawordUnderscores: false);
-
 void testEquals(description, String str, result, [Parser parser]) {
   t.test(description, () {
     if (parser == null) {
       parser = defaultParser;
     }
     t.expect(parser.parse(str), t.equals(B.doc(result)));
+  });
+}
+
+void testEquals1(description, String str, result, Parser parser) {
+  t.test(description, () {
+    if (parser == null) {
+      parser = defaultParser;
+    }
+    t.expect(parser.parse(str), t.equals(result));
   });
 }

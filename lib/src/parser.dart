@@ -1,10 +1,69 @@
 part of markdown;
 
 // Other parsers
+final Parser spaceChar = oneOf(" \t") % 'space';
+final Parser skipSpaces = spaceChar.skipMany;
 
-Parser<Document> getParser({bool extIntrawordUnderscores: true}) {
-  final Parser spaceChar = oneOf(" \t") % 'space';
-  final Parser skipSpaces = spaceChar.skipMany;
+final Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
+
+final Parser identifier = (letter + (alphanum | oneOf("-_:.")).many) ^ (a, b) {
+  String res = a;
+  if (b != null && b.length > 0) {
+    res += b.join('');
+  }
+  return res;
+};
+final Parser identifierAttr = char('#') + identifier ^ (a, id) => B.attr(id, [], {});
+/*
+
+identifier :: MarkdownParser String
+identifier = do
+  first <- letter
+  rest <- many $ alphaNum <|> oneOf "-_:."
+  return (first:rest)
+
+identifierAttr :: MarkdownParser (Attr -> Attr)
+identifierAttr = try $ do
+  char '#'
+  result <- identifier
+  return $ \(_,cs,kvs) -> (result,cs,kvs)
+
+classAttr :: MarkdownParser (Attr -> Attr)
+classAttr = try $ do
+  char '.'
+  result <- identifier
+  return $ \(id',cs,kvs) -> (id',cs ++ [result],kvs)
+
+keyValAttr :: MarkdownParser (Attr -> Attr)
+keyValAttr = try $ do
+  key <- identifier
+  char '='
+  val <- enclosed (char '"') (char '"') litChar
+     <|> enclosed (char '\'') (char '\'') litChar
+     <|> many (escapedChar' <|> noneOf " \t\n\r}")
+  return $ \(id',cs,kvs) -> (id',cs,kvs ++ [(key,val)])
+
+specialAttr :: MarkdownParser (Attr -> Attr)
+specialAttr = do
+  char '-'
+  return $ \(id',cs,kvs) -> (id',cs ++ ["unnumbered"],kvs)
+
+
+  attribute :: MarkdownParser (Attr -> Attr)
+attribute = identifierAttr <|> classAttr <|> keyValAttr <|> specialAttr
+
+   */
+final Parser attribute = choice([
+    identifierAttr
+]);
+//final Parser attributes = ((char("{") > spnl) > (attribute < spnl).many) < char("}");
+final Parser attributes = char("{") + spnl + (attribute + spnl ^ (a, b) => a).many + char("}") ^ (a, b, Iterable c, d) {
+  return c.reduce((v, e) => v + e);
+};
+
+
+Parser<Document> getParser({bool extInlineCodeAttributes: true,
+                           bool extIntrawordUnderscores: true}) {
   final Parser blankline = skipSpaces > newline % 'blankline';
   final Parser blanklines = blankline.many1 % 'blanklines';
 
@@ -52,6 +111,16 @@ Parser<Document> getParser({bool extIntrawordUnderscores: true}) {
       }).run(s, res.position);
       if (!codeResult.isSuccess) {
         return codeResult;
+      }
+      if (!extInlineCodeAttributes) {
+        return codeResult;
+      }
+      ParseResult attrRes = (whitespace.maybe + attributes ^ (a, b) => b).run(s, codeResult.position);
+      if (attrRes.isSuccess) {
+        Code code = codeResult.value;
+        code.attributes = attrRes.value;
+        ParseResult res = attrRes.copy(value: code);
+        return res;
       }
       return codeResult;
     });
