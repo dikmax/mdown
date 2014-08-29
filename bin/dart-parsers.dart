@@ -1,7 +1,7 @@
 import 'package:markdowntypography/markdown.dart';
 
 void main() {
-  var document = getParser();
+  var document = MarkdownParser.DEFAULT;
   print(document.parse('***a**b **c**d*'));
   print(document.parse('*test**'));
   print(document.parse('_foot_ball_'));

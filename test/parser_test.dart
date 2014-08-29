@@ -6,8 +6,8 @@ import 'package:markdowntypography/builder.dart' as B;
 void main() {
   t.group('subparsers', () {
     t.group('attributes', () {
-      testEquals1("identifierAttr", "#i_d", B.attr('i_d', [], {}), identifierAttr);
-      testEquals1("identifier attribute",  "{#i_d}", B.attr('i_d', [], {}), attributes);
+      testEquals1("identifierAttr", "#i_d", B.attr('i_d', [], {}), MarkdownParser.identifierAttr);
+      testEquals1("identifier attribute",  "{#i_d}", B.attr('i_d', [], {}), MarkdownParser.attributes);
     });
   });
   t.group('inline code', () {
@@ -276,8 +276,8 @@ bareLinkTests =
 
  */
 
-final Parser defaultParser = getParser();
-final Parser noIntrawordUnderscoreParser = getParser(extIntrawordUnderscores: false);
+final Parser defaultParser = MarkdownParser.DEFAULT;
+final Parser noIntrawordUnderscoreParser = new MarkdownParser(new MarkdownParserOptions(extIntrawordUnderscores: false));
 void testEquals(description, String str, result, [Parser parser]) {
   t.test(description, () {
     if (parser == null) {

@@ -1,43 +1,79 @@
 part of markdown;
 
-// Other parsers
-Parser many1Till(Parser parser, Parser end) => parser + parser.manyUntil(end) ^ (a, b) {
-  List<Inline> res = [a];
-  if (b.length > 0) {
-    res.addAll(b);
-  }
-  return res;
-};
+class MarkdownParserOptions {
+  final bool extInlineCodeAttributes;
+  final bool extIntrawordUnderscores;
 
-final Parser spaceChar = oneOf(" \t") % 'space';
-final Parser skipSpaces = spaceChar.skipMany;
+  const MarkdownParserOptions({this.extInlineCodeAttributes: true,
+                 this.extIntrawordUnderscores: true});
 
-final Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
-
-Parser enclosed(Parser start, Parser end, Parser middle) {
-  return (start.notFollowedBy(space) > many1Till(middle, end));
+  static const MarkdownParserOptions PANDOC = const MarkdownParserOptions();
+  static const MarkdownParserOptions DEFAULT = PANDOC;
 }
 
-/*
-enclosed :: Stream s  m Char => ParserT s st m t   -- ^ start parser
-         -> ParserT s st m end  -- ^ end parser
-         -> ParserT s st m a    -- ^ content parser (to be used repeatedly)
-         -> ParserT s st m [a]
-enclosed start end parser = try $
-  start >> notFollowedBy space >> many1Till parser end
+class MarkdownParser {
+  final MarkdownParserOptions options;
+
+  MarkdownParser([this.options = MarkdownParserOptions.DEFAULT]);
+
+  Document parse(String s) => document.parse(s);
+
+  // Simple parsers
+
+  /*
+escapedChar' :: MarkdownParser Char
+escapedChar' = try $ do
+  char '\\'
+  (guardEnabled Ext_all_symbols_escapable >> satisfy (not . isAlphaNum))
+     <|> oneOf "\\`*_{}[]()>#+-.!~\""
 
  */
 
-final Parser identifier = (letter + (alphanum | oneOf("-_:.")).many) ^ (a, b) {
-  String res = a;
-  if (b != null && b.length > 0) {
-    res += b.join('');
+  static Parser spaceChar = oneOf(" \t") % 'space';
+  static Parser skipSpaces = spaceChar.skipMany;
+  static Parser blankline = skipSpaces > newline % 'blankline';
+  static Parser blanklines = blankline.many1 % 'blanklines';
+
+
+//final litChar =
+/*
+litChar :: MarkdownParser Char
+litChar = escapedChar'
+       <|> characterReference
+       <|> noneOf "\n"
+       <|> try (newline >> notFollowedBy blankline >> return ' ')
+
+ */
+
+  static Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
+
+  // Basic combining parsers
+
+  Parser many1Till(Parser parser, Parser end) => parser + parser.manyUntil(end) ^ (a, b) {
+    List<Inline> res = [a];
+    if (b.length > 0) {
+      res.addAll(b);
+    }
+    return res;
+  };
+
+  Parser enclosed(Parser start, Parser end, Parser middle) {
+    return (start.notFollowedBy(space) > many1Till(middle, end));
   }
-  return res;
-};
-final Parser identifierAttr = (char('#') > identifier) ^ (id) => B.attr(id, [], {});
-final Parser classAttr = (char('.') > identifier) ^ (cl) => B.attr("", [cl], {});
-//final Parser keyValAttr = (identifier + char('='))
+
+  // Attributes
+
+  static Parser identifier = (letter + (alphanum | oneOf("-_:.")).many) ^ (a, b) {
+    String res = a;
+    if (b != null && b.length > 0) {
+      res += b.join('');
+    }
+    return res;
+  };
+  static Parser identifierAttr = (char('#') > identifier) ^ (id) => B.attr(id, [], {});
+  static Parser classAttr = (char('.') > identifier) ^ (cl) => B.attr("", [cl], {});
+  /*final Parser keyValAttr = (identifier < char('=')) +
+  ( enclosed(char('"'), char('"'), litChar) )*/
 /*
 
 
@@ -57,21 +93,15 @@ specialAttr = do
 
 
    */
-final Parser attribute = choice([
-    identifierAttr,
-    classAttr
-]);
-//final Parser attributes = ((char("{") > spnl) > (attribute < spnl).many) < char("}");
-final Parser attributes = (char("{") > spnl) > ((attribute < spnl).many < char("}")) ^
-    (Iterable c) => c.reduce((v, e) => v + e);
+  static Parser attribute = choice([
+      identifierAttr,
+      classAttr
+  ]);
+  static Parser attributes = (char("{") > spnl) > ((attribute < spnl).many < char("}")) ^
+      (Iterable c) => c.reduce((v, e) => v + e);
 
-Parser<Document> getParser({bool extInlineCodeAttributes: true,
-                           bool extIntrawordUnderscores: true}) {
-  final Parser blankline = skipSpaces > newline % 'blankline';
-  final Parser blanklines = blankline.many1 % 'blanklines';
 
   // Inline parsers
-  Parser inline; // Defined later
   final Parser whitespace = (spaceChar + skipSpaces ^ (_1, _2) => new Space()) % "whitespace";
   final Parser str = alphanum.many1 ^ (chars) => new Str(chars.join(""));
   final Parser endline = newline.notFollowedBy(blankline) ^ (_) => new Space();
@@ -101,8 +131,8 @@ Parser<Document> getParser({bool extInlineCodeAttributes: true,
       }
 
       Parser codeInner = (noneOf("`\n").many1 ^ (list) => list.join(''))
-        | (char('`').many1 ^ (list) => list.join(''))
-        | (char('\n').notFollowedBy(blankline) ^ (a) => ' ');
+      | (char('`').many1 ^ (list) => list.join(''))
+      | (char('\n').notFollowedBy(blankline) ^ (a) => ' ');
       Parser codeEnd = skipSpaces + string(start.value.join('')).notFollowedBy(char('`')) ^ (a, b) => null;
 
       ParseResult codeResult = (codeInner + codeInner.manyUntil(codeEnd) ^ (a, b) {
@@ -115,7 +145,7 @@ Parser<Document> getParser({bool extInlineCodeAttributes: true,
       if (!codeResult.isSuccess) {
         return codeResult;
       }
-      if (!extInlineCodeAttributes) {
+      if (!options.extInlineCodeAttributes) {
         return codeResult;
       }
       ParseResult attrRes = (whitespace.maybe + attributes ^ (a, b) => b).run(s, codeResult.position);
@@ -164,49 +194,56 @@ Parser<Document> getParser({bool extInlineCodeAttributes: true,
   Parser strongOrEmphStar() {
     return new Parser((s, pos) {
       Parser p = (inlinesBetween(string("**"), string("**")) ^ (a) => new Strong(a))
-        | (inlinesBetween(char("*"), char("*").notFollowedBy(char("*"))) ^ (a) => new Emph(a))
-        | (inlinesBetween(char("*"), char("*")) ^ (a) => new Emph(a));
+      | (inlinesBetween(char("*"), char("*").notFollowedBy(char("*"))) ^ (a) => new Emph(a))
+      | (inlinesBetween(char("*"), char("*")) ^ (a) => new Emph(a));
       return p.run(s, pos);
     });
   }
-  Parser endUnderscore = extIntrawordUnderscores
+  Parser get endUnderscore => options.extIntrawordUnderscores
     ? char('_').notFollowedBy(alphanum)
     : char('_');
-  Parser startUnderscore = extIntrawordUnderscores
+  Parser get startUnderscore => options.extIntrawordUnderscores
     ? notAfterString() + char('_') ^ (a, b) => null
     : char('_');
   Parser strongOrEmphUnderscore() {
     return new Parser((s, pos) {
       Parser p = (inlinesBetween(string("__"), string("__")) ^ (a) => new Strong(a))
-        | (inlinesBetween(startUnderscore, endUnderscore.notFollowedBy(char("_"))) ^ (a) => new Emph(a))
-        | (inlinesBetween(startUnderscore, endUnderscore) ^ (a) => new Emph(a));
+      | (inlinesBetween(startUnderscore, endUnderscore.notFollowedBy(char("_"))) ^ (a) => new Emph(a))
+      | (inlinesBetween(startUnderscore, endUnderscore) ^ (a) => new Emph(a));
       return p.run(s, pos);
     });
   }
 
   // Inline definition
 
-  inline = choice([
-      whitespace,
-      strongOrEmphStar(),
-      strongOrEmphUnderscore(),
-      str,
-      endline,
-      code(),
-      symbol
-  ]);
+  Parser get inline => choice([
+                  whitespace,
+                  strongOrEmphStar(),
+                  strongOrEmphUnderscore(),
+                  str,
+                  endline,
+                  code(),
+                  symbol
+                  ]);
 
-  final Parser para = (newline + blanklines + anyChar.manyUntil(newline) ^ (_1, _2, inlines) {
-    return new Para(inline.run(inlines));
-  }) % "para";
-  final Parser plain = inline.many1 ^ ((inlines) => new Para(inlines));
 
   // Block parsers
-  final Parser block = choice([
+
+  Parser get para => (newline + blanklines + anyChar.manyUntil(newline) ^ (_1, _2, inlines) {
+    return new Para(inline.run(inlines));
+  }) % "para";
+  Parser get plain => inline.many1 ^ ((inlines) => new Para(inlines));
+
+  // Block parsers
+  Parser get block => choice([
       blanklines ^ (_) => null,
       para,
       plain
   ]) % "block";
 
-  return (block.manyUntil(eof) ^ (res) => new Document(res.where((block) => block != null))) % "document";
+
+  // Document
+  Parser get document => (block.manyUntil(eof) ^ (res) => new Document(res.where((block) => block != null))) % "document";
+
+  static MarkdownParser DEFAULT = new MarkdownParser();
 }
