@@ -207,10 +207,33 @@ class MarkdownParser {
 
   // Block parsers
 
-  Parser get para => (newline + blanklines + anyChar.manyUntil(newline) ^ (_1, _2, inlines) {
-    return new Para(inline.run(inlines));
-  }) % "para";
-  Parser get plain => inline.many1 ^ ((inlines) => new Para(inlines));
+  List<Inline> groupInlines(Iterable<Inline> inlines) {
+    List<Inline> result = [];
+    Inline prev;
+    for (Inline inline in inlines) {
+      if (prev == null) {
+        prev = inline;
+        continue;
+      }
+
+      if (inline is Str && prev is Str) {
+        (prev as Str).str += inline.str;
+      } else {
+        result.add(prev);
+        prev = inline;
+      }
+    }
+
+    if (prev != null) {
+      result.add(prev);
+    }
+
+    return result;
+  }
+
+  Parser get para => (((newline > blanklines) > anyChar.manyUntil(newline)) ^
+      (inlines) => new Para(groupInlines(inline.run(inlines)))) % "para";
+  Parser get plain => inline.many1 ^ ((inlines) => new Para(groupInlines(inlines)));
 
   // Block parsers
   Parser get block => choice([

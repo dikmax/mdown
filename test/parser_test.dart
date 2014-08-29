@@ -56,19 +56,18 @@ void main() {
     );
     testEquals("intraword underscore with opening underscore and disabled intrawords",
       "_foot_ball_",
-      B.para(B.emph(B.str("foot")), B.str("ball"), B.str("_")),
+      B.para(B.emph(B.str("foot")), B.str("ball_")),
       noIntrawordUnderscoreParser
     );
   });
+  testEquals("unbalanced brackets",
+    "[[[[[[[[[[[[[[[hi",
+    B.para(B.str("[[[[[[[[[[[[[[[hi")));
 }
 
 /*
 tests :: [Test]
 tests = [
-        , testGroup "emph and strong"
-          [ "intraword underscore with opening underscore (#1121)" =:
-            "_foot_ball_" =?> para (emph (text "foot_ball"))
-          ]
         , testGroup "raw LaTeX"
           [ "in URL" =:
             "\\begin\n" =?> para (text "\\begin")
