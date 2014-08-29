@@ -21,7 +21,7 @@ void main() {
     );
     testEquals("with attribute",
       "`document.write(\"Hello\");`{.javascript}",
-      B.para(B.code("document.write(\"Hello\");"))
+      B.para(B.code("document.write(\"Hello\");", B.attr("", ["javascript"], {})))
     );
     testEquals("with attribute space",
       "`*` {.haskell .special x=\"7\"}",

@@ -1,10 +1,32 @@
 part of markdown;
 
 // Other parsers
+Parser many1Till(Parser parser, Parser end) => parser + parser.manyUntil(end) ^ (a, b) {
+  List<Inline> res = [a];
+  if (b.length > 0) {
+    res.addAll(b);
+  }
+  return res;
+};
+
 final Parser spaceChar = oneOf(" \t") % 'space';
 final Parser skipSpaces = spaceChar.skipMany;
 
 final Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
+
+Parser enclosed(Parser start, Parser end, Parser middle) {
+  return (start.notFollowedBy(space) > many1Till(middle, end));
+}
+
+/*
+enclosed :: Stream s  m Char => ParserT s st m t   -- ^ start parser
+         -> ParserT s st m end  -- ^ end parser
+         -> ParserT s st m a    -- ^ content parser (to be used repeatedly)
+         -> ParserT s st m [a]
+enclosed start end parser = try $
+  start >> notFollowedBy space >> many1Till parser end
+
+ */
 
 final Parser identifier = (letter + (alphanum | oneOf("-_:.")).many) ^ (a, b) {
   String res = a;
@@ -13,26 +35,11 @@ final Parser identifier = (letter + (alphanum | oneOf("-_:.")).many) ^ (a, b) {
   }
   return res;
 };
-final Parser identifierAttr = char('#') + identifier ^ (a, id) => B.attr(id, [], {});
+final Parser identifierAttr = (char('#') > identifier) ^ (id) => B.attr(id, [], {});
+final Parser classAttr = (char('.') > identifier) ^ (cl) => B.attr("", [cl], {});
+//final Parser keyValAttr = (identifier + char('='))
 /*
 
-identifier :: MarkdownParser String
-identifier = do
-  first <- letter
-  rest <- many $ alphaNum <|> oneOf "-_:."
-  return (first:rest)
-
-identifierAttr :: MarkdownParser (Attr -> Attr)
-identifierAttr = try $ do
-  char '#'
-  result <- identifier
-  return $ \(_,cs,kvs) -> (result,cs,kvs)
-
-classAttr :: MarkdownParser (Attr -> Attr)
-classAttr = try $ do
-  char '.'
-  result <- identifier
-  return $ \(id',cs,kvs) -> (id',cs ++ [result],kvs)
 
 keyValAttr :: MarkdownParser (Attr -> Attr)
 keyValAttr = try $ do
@@ -49,18 +56,14 @@ specialAttr = do
   return $ \(id',cs,kvs) -> (id',cs ++ ["unnumbered"],kvs)
 
 
-  attribute :: MarkdownParser (Attr -> Attr)
-attribute = identifierAttr <|> classAttr <|> keyValAttr <|> specialAttr
-
    */
 final Parser attribute = choice([
-    identifierAttr
+    identifierAttr,
+    classAttr
 ]);
 //final Parser attributes = ((char("{") > spnl) > (attribute < spnl).many) < char("}");
-final Parser attributes = char("{") + spnl + (attribute + spnl ^ (a, b) => a).many + char("}") ^ (a, b, Iterable c, d) {
-  return c.reduce((v, e) => v + e);
-};
-
+final Parser attributes = (char("{") > spnl) > ((attribute < spnl).many < char("}")) ^
+    (Iterable c) => c.reduce((v, e) => v + e);
 
 Parser<Document> getParser({bool extInlineCodeAttributes: true,
                            bool extIntrawordUnderscores: true}) {
