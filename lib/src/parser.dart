@@ -1,11 +1,15 @@
 part of markdown;
 
 class MarkdownParserOptions {
+  final bool extAllSymbolsEscapable;
   final bool extInlineCodeAttributes;
   final bool extIntrawordUnderscores;
 
-  const MarkdownParserOptions({this.extInlineCodeAttributes: true,
-                 this.extIntrawordUnderscores: true});
+  const MarkdownParserOptions({
+    this.extAllSymbolsEscapable: true,
+    this.extInlineCodeAttributes: true,
+    this.extIntrawordUnderscores: true
+  });
 
   static const MarkdownParserOptions PANDOC = const MarkdownParserOptions();
   static const MarkdownParserOptions DEFAULT = PANDOC;
@@ -18,32 +22,31 @@ class MarkdownParser {
 
   Document parse(String s) => document.parse(s);
 
+  // OptionsCheck
+
+  Parser guardEnabled(bool option) => option ? success(null) : fail;
+  Parser guardDisabled(bool option) => option ? fail : success(null);
+
   // Simple parsers
 
-  /*
-escapedChar' :: MarkdownParser Char
-escapedChar' = try $ do
-  char '\\'
-  (guardEnabled Ext_all_symbols_escapable >> satisfy (not . isAlphaNum))
-     <|> oneOf "\\`*_{}[]()>#+-.!~\""
+  // TODO move to unicode-parsers library
+  bool isAlphaNum(String ch) => !isLetter(ch.runes.first) && !isDigit(ch.runes.first);
 
- */
-
+  Parser get escapedChar1 => char('\\') >
+    ( guardEnabled(options.extAllSymbolsEscapable) > pred((ch) => !isAlphaNum(ch))
+    | oneOf("\\`*_{}[]()>#+-.!~\"")
+    );
   static Parser spaceChar = oneOf(" \t") % 'space';
   static Parser skipSpaces = spaceChar.skipMany;
   static Parser blankline = skipSpaces > newline % 'blankline';
   static Parser blanklines = blankline.many1 % 'blanklines';
 
-
-//final litChar =
-/*
-litChar :: MarkdownParser Char
-litChar = escapedChar'
-       <|> characterReference
-       <|> noneOf "\n"
-       <|> try (newline >> notFollowedBy blankline >> return ' ')
-
- */
+  Parser get litChar => choice([
+    escapedChar1,
+    // TODO characterReference,
+    noneOf("\n"),
+    newline.notFollowedBy(blankline) > success(' ')
+  ]);
 
   static Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
 
@@ -61,7 +64,7 @@ litChar = escapedChar'
     return (start.notFollowedBy(space) > many1Till(middle, end));
   }
 
-  // Attributes
+  // Identifier
 
   static Parser identifier = (letter + (alphanum | oneOf("-_:.")).many) ^ (a, b) {
     String res = a;
@@ -70,36 +73,25 @@ litChar = escapedChar'
     }
     return res;
   };
+
+  // Attribute parsers
+
   static Parser identifierAttr = (char('#') > identifier) ^ (id) => B.attr(id, [], {});
   static Parser classAttr = (char('.') > identifier) ^ (cl) => B.attr("", [cl], {});
-  /*final Parser keyValAttr = (identifier < char('=')) +
-  ( enclosed(char('"'), char('"'), litChar) )*/
-/*
+  Parser get keyValAttr => (identifier < char('=')) +
+    choice([
+        enclosed(char('"'), char('"'), litChar),
+        enclosed(char('\''), char('\''), litChar),
+        (escapedChar1 | noneOf(" \t\n\r}")).many
+    ]) ^ (key, value) => B.attr("", [], {key: value.join('')});
 
-
-keyValAttr :: MarkdownParser (Attr -> Attr)
-keyValAttr = try $ do
-  key <- identifier
-  char '='
-  val <- enclosed (char '"') (char '"') litChar
-     <|> enclosed (char '\'') (char '\'') litChar
-     <|> many (escapedChar' <|> noneOf " \t\n\r}")
-  return $ \(id',cs,kvs) -> (id',cs,kvs ++ [(key,val)])
-
-specialAttr :: MarkdownParser (Attr -> Attr)
-specialAttr = do
-  char '-'
-  return $ \(id',cs,kvs) -> (id',cs ++ ["unnumbered"],kvs)
-
-
-   */
-  static Parser attribute = choice([
+  Parser get attribute => choice([
       identifierAttr,
-      classAttr
+      classAttr,
+      keyValAttr
   ]);
-  static Parser attributes = (char("{") > spnl) > ((attribute < spnl).many < char("}")) ^
+  Parser get attributes => (char("{") > spnl) > ((attribute < spnl).many < char("}")) ^
       (Iterable c) => c.reduce((v, e) => v + e);
-
 
   // Inline parsers
   final Parser whitespace = (spaceChar + skipSpaces ^ (_1, _2) => new Space()) % "whitespace";
@@ -158,20 +150,6 @@ specialAttr = do
       return codeResult;
     });
   }
-  /*
-  code :: MarkdownParser (F Inlines)
-  code = try $ do
-    starts <- many1 (char '`')
-    skipSpaces
-    result <- many1Till (many1 (noneOf "`\n") <|> many1 (char '`') <|>
-                         (char '\n' >> notFollowedBy' blankline >> return " "))
-                        (try (skipSpaces >> count (length starts) (char '`') >>
-                        notFollowedBy (char '`')))
-    attr <- option ([],[],[]) (try $ guardEnabled Ext_inline_code_attributes >>
-                                     optional whitespace >> attributes)
-    return $ return $ B.codeWith attr $ trim $ concat result
-
-   */
 
   // Emphasis or strong
 

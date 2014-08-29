@@ -4,10 +4,13 @@ import 'package:parsers/parsers.dart';
 import 'package:markdowntypography/builder.dart' as B;
 
 void main() {
+
   t.group('subparsers', () {
     t.group('attributes', () {
       testEquals1("identifierAttr", "#i_d", B.attr('i_d', [], {}), MarkdownParser.identifierAttr);
-      testEquals1("identifier attribute",  "{#i_d}", B.attr('i_d', [], {}), MarkdownParser.attributes);
+      testEquals1("identifier attribute",  "{#i_d}", B.attr('i_d', [], {}), MarkdownParser.DEFAULT.attributes);
+      testEquals1("key-value attribute", "src='value'", B.attr('', [], {"src": "value"}), MarkdownParser.DEFAULT.keyValAttr);
+      testEquals1("attributes", "{.haskell .special x=\"7\"}", B.attr("", ["haskell","special"], {"x": "7"}), MarkdownParser.DEFAULT.attributes);
     });
   });
   t.group('inline code', () {
@@ -25,20 +28,13 @@ void main() {
     );
     testEquals("with attribute space",
       "`*` {.haskell .special x=\"7\"}",
-      B.para(B.code("document.write(\"Hello\");", B.attr("", ["haskell","special"], {"x": "7"})))
+      B.para(B.code("*", B.attr("", ["haskell","special"], {"x": "7"})))
+    );
+    testEquals("with attribute space",
+      "`*\n*` {.haskell .special x=\"7\"}",
+      B.para(B.code("* *", B.attr("", ["haskell","special"], {"x": "7"})))
     );
   });
-  /*
-  testGroup "inline code"
-          [ "with attribute" =:
-            "`document.write(\"Hello\");`{.javascript}"
-            =?> para
-                (codeWith ("",["javascript"],[]) "document.write(\"Hello\");")
-          , "with attribute space" =:
-            "`*` {.haskell .special x=\"7\"}"
-            =?> para (codeWith ("",["haskell","special"],[("x","7")]) "*")
-          ]
-   */
   t.group('emph and strong', () {
     testEquals("two strongs in emph",
       "***a**b **c**d*",
@@ -276,9 +272,9 @@ bareLinkTests =
 
  */
 
-final Parser defaultParser = MarkdownParser.DEFAULT;
-final Parser noIntrawordUnderscoreParser = new MarkdownParser(new MarkdownParserOptions(extIntrawordUnderscores: false));
-void testEquals(description, String str, result, [Parser parser]) {
+final MarkdownParser defaultParser = MarkdownParser.DEFAULT;
+final MarkdownParser noIntrawordUnderscoreParser = new MarkdownParser(new MarkdownParserOptions(extIntrawordUnderscores: false));
+void testEquals(description, String str, result, [MarkdownParser parser]) {
   t.test(description, () {
     if (parser == null) {
       parser = defaultParser;
@@ -289,9 +285,6 @@ void testEquals(description, String str, result, [Parser parser]) {
 
 void testEquals1(description, String str, result, Parser parser) {
   t.test(description, () {
-    if (parser == null) {
-      parser = defaultParser;
-    }
     t.expect(parser.parse(str), t.equals(result));
   });
 }

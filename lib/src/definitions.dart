@@ -27,9 +27,9 @@ class Attr {
 
   String toString() => '("$id", $classes, $attributes)';
 
-  bool operator+ (Attr obj) => new Attr(obj.id == "" ? id : obj.id,
-    new List.from(classes).addAll(obj.classes),
-    new Map.from(attributes).addAll(obj.attributes));
+  Attr operator+ (Attr obj) => new Attr(obj.id == "" ? id : obj.id,
+    new List.from(classes)..addAll(obj.classes),
+    new Map.from(attributes)..addAll(obj.attributes));
 
   bool operator== (obj) => obj is Attr &&
     id == obj.id &&
