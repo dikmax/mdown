@@ -453,7 +453,13 @@ class Code extends Inline {
 
 
 class Space extends Inline {
-  Space();
+  static final Space _instance = new Space._internal();
+
+  factory Space() {
+    return _instance;
+  }
+
+  Space._internal();
 
   String toString() => "Space";
 
@@ -462,7 +468,13 @@ class Space extends Inline {
 
 
 class LineBreak extends Inline {
-  LineBreak();
+  static final LineBreak _instance = new LineBreak._internal();
+
+  factory LineBreak() {
+    return _instance;
+  }
+
+  LineBreak._instance();
 
   String toString() => "LineBreak";
 

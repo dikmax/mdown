@@ -63,6 +63,23 @@ void main() {
   testEquals("unbalanced brackets",
     "[[[[[[[[[[[[[[[hi",
     B.para(B.str("[[[[[[[[[[[[[[[hi")));
+  t.group("backslash escapes", () {
+    testEquals("in URL",
+      "[hi](/there\\))",
+      B.para(B.link("/there)", "", B.str("hi"))));
+    testEquals("in title",
+      "[hi](/there \"a\\\"a\")",
+      B.para(B.link("/there", "a\"a", B.str("hi"))));
+    testEquals("in reference link title",
+      "[hi]\n\n[hi]: /there (a\\)a)",
+      B.para(B.link("/there", "a)a", B.str("hi"))));
+    testEquals("in reference link title",
+      "[hi]\n\n[hi]: /there (a\\)a)",
+      B.para(B.link("/there", "a)a", B.str("hi"))));
+    testEquals("in reference link URL",
+      "[hi]\n\n[hi]: /there\\.0",
+      B.para(B.link("/there.0", "", B.str("hi"))));
+  });
 }
 
 /*
@@ -77,22 +94,6 @@ tests = [
             "<del>test</del>" =?>
             rawBlock "html" "<del>" <> plain (str "test") <>
             rawBlock "html" "</del>"
-          ]
-        , "unbalanced brackets" =:
-            "[[[[[[[[[[[[[[[hi" =?> para (text "[[[[[[[[[[[[[[[hi")
-        , testGroup "backslash escapes"
-          [ "in URL" =:
-            "[hi](/there\\))"
-            =?> para (link "/there)" "" "hi")
-          , "in title" =:
-            "[hi](/there \"a\\\"a\")"
-            =?> para (link "/there" "a\"a" "hi")
-          , "in reference link title" =:
-            "[hi]\n\n[hi]: /there (a\\)a)"
-            =?> para (link "/there" "a)a" "hi")
-          , "in reference link URL" =:
-            "[hi]\n\n[hi]: /there\\.0"
-            =?> para (link "/there.0" "" "hi")
           ]
         , testGroup "bare URIs"
           (map testBareLink bareLinkTests)
@@ -278,7 +279,10 @@ void testEquals(description, String str, result, [MarkdownParser parser]) {
     if (parser == null) {
       parser = defaultParser;
     }
-    t.expect(parser.parse(str), t.equals(B.doc(result)));
+    if (!(result is Document)) {
+      result = B.doc(result);
+    }
+    t.expect(parser.parse(str), t.equals(result));
   });
 }
 

@@ -1,10 +1,11 @@
 import 'package:markdowntypography/markdown.dart';
 
 void main() {
+
+  var source = MarkdownParser.DEFAULT.source;
+  print(source.parse('(<http://google.com/>)'));
+  var link = MarkdownParser.DEFAULT.link();
+  print(link.parse('[link](http://google.com/)'));
   var document = MarkdownParser.DEFAULT;
-  print(document.parse('***a**b **c**d*'));
-  print(document.parse('*test**'));
-  print(document.parse('_foot_ball_'));
-  print(document.parse('**a**'));
-  print(document.parse('123412345\n\n123434563457\n1234678     456\n\n'));
+  print(document.parse('This is a [link](http://google.com) to Google.'));
 }

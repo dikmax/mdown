@@ -48,6 +48,19 @@ class MarkdownParser {
     newline.notFollowedBy(blankline) > success(' ')
   ]);
 
+  Parser get inlinesInBalancedBrackets => everythingBetween(char('['), char(']'), nested: true) ^
+      (string) => groupInlines(inline.many1.run(string));
+
+  List<Inline> trimInlines(List<Inline> inlines) {
+    while (inlines.last == new Space()) {
+      inlines.removeLast();
+    }
+    while (inlines.first == new Space()) {
+      inlines.removeAt(0);
+    }
+    return inlines;
+  }
+
   static Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
 
   // Basic combining parsers
@@ -62,6 +75,22 @@ class MarkdownParser {
 
   Parser enclosed(Parser start, Parser end, Parser middle) {
     return (start.notFollowedBy(space) > many1Till(middle, end));
+  }
+
+  Parser notAfterString() {
+    return new Parser((s, Position pos) {
+      if (pos.character == 1) {
+        return success(null).run(s, pos);
+      }
+      var prevpos = new Position(pos.offset - 1, pos.line, pos.character - 1);
+      var result = alphanum.run(s, prevpos);
+
+      if (result.isSuccess) {
+        return fail.run(s, pos);
+      } else {
+        return success(null).run(s, pos);
+      }
+    });
   }
 
   // Identifier
@@ -153,22 +182,6 @@ class MarkdownParser {
 
   // Emphasis or strong
 
-  Parser notAfterString() {
-    return new Parser((s, Position pos) {
-      if (pos.character == 1) {
-        return success(null).run(s, pos);
-      }
-      var prevpos = new Position(pos.offset - 1, pos.line, pos.character - 1);
-      var result = alphanum.run(s, prevpos);
-
-      if (result.isSuccess) {
-        return fail.run(s, pos);
-      } else {
-        return success(null).run(s, pos);
-      }
-    });
-  }
-
   Parser strongOrEmphStar() {
     return new Parser((s, pos) {
       Parser p = (inlinesBetween(string("**"), string("**")) ^ (a) => new Strong(a))
@@ -192,17 +205,141 @@ class MarkdownParser {
     });
   }
 
+  // Link
+
+
+  static Parser parenthesizedChars = everythingBetween(char('('), char(')'), nested: true) ^ (chars) => '(' + chars.join('') + ')';
+
+  // Get parsed inlines along with raw version
+  Parser get reference => string("[^").notAhead > everythingBetween(char('['), char(']'), nested: true) ^
+      (string) => [(inline.many1 ^ (a) => trimInlines(groupInlines(a))).parse(string), string];
+
+  /*
+  reference :: MarkdownParser (F Inlines, String)
+    reference = do notFollowedBy' (string "[^")   -- footnote reference
+               withRaw $ trimInlinesF <$> inlinesInBalancedBrackets
+
+   */
+
+  /*
+  source :: MarkdownParser (String, String)
+source = do
+  char '('
+  skipSpaces
+  let urlChunk =
+            try parenthesizedChars
+        <|> (notFollowedBy (oneOf " )") >> (count 1 litChar))
+        <|> try (many1 spaceChar <* notFollowedBy (oneOf "\"')"))
+  let sourceURL = (unwords . words . concat) <$> many urlChunk
+  let betweenAngles = try $
+         char '<' >> manyTill litChar (char '>')
+  src <- try betweenAngles <|> sourceURL
+  tit <- option "" $ try $ spnl >> linkTitle
+  skipSpaces
+  char ')'
+  return (escapeURI $ trimr src, tit)
+
+   */
+
+  Parser quotedTitle(c) => (char(c).notFollowedBy(spaces) > (noneOf("\\\n&" + c) | litChar).manyUntil(char(c))).orElse('');
+  /*
+  quotedTitle :: Char -> MarkdownParser String
+quotedTitle c = try $ do
+  char c
+  notFollowedBy spaces
+  let pEnder = try $ char c >> notFollowedBy (satisfy isAlphaNum)
+  let regChunk = many1 (noneOf ['\\','\n','&',c]) <|> count 1 litChar
+  let nestedChunk = (\x -> [c] ++ x ++ [c]) <$> quotedTitle c
+  unwords . words . concat <$> manyTill (nestedChunk <|> regChunk) pEnder
+
+   */
+  Parser get linkTitle => quotedTitle('"') | quotedTitle('\'');
+
+  Parser get urlChunk => parenthesizedChars
+    | (oneOf(" )").notAhead > litChar)
+    | (spaceChar.many1.notFollowedBy(oneOf("\"')")));
+  Parser get sourceURL => urlChunk.many ^ (r) => r.join('');
+  Parser get betweenAngles => char('<') > litChar.manyUntil(char('>')) ^ (r) => r.join('');
+  Parser get source => (((char('(') > skipSpaces) >
+    (((betweenAngles | sourceURL) + (spnl > linkTitle)) ^ B.target)) <
+    skipSpaces) < char(')');
+
+  bool allowLinks = true;
+
+  Parser link() {
+    return new Parser((s, pos) {
+      if (!allowLinks) {
+        return fail.run(s, pos);
+      }
+
+      allowLinks = false;
+
+      ParseResult refRes = reference.run(s, pos);
+
+      allowLinks = true;
+
+      if (!refRes.isSuccess) {
+        // This can't be.
+        return refRes;
+      }
+
+      // TODO Add reference link (referenceLink parser)
+      return regLink(refRes.value).run(s, refRes.position); // Add reference link
+
+    });
+  }
+
+/*
+link :: MarkdownParser (F Inlines)
+link = try $ do
+  st <- getState
+  guard $ stateAllowLinks st
+  setState $ st{ stateAllowLinks = False }
+  (lab,raw) <- reference
+  setState $ st{ stateAllowLinks = True }
+  regLink B.link lab <|> referenceLink B.link (lab,raw)
+ */
+
+  Parser regLink(inlines) => source ^ (Target target) => new Link(inlines, target);
+
+  /*
+  regLink :: (String -> String -> Inlines -> Inlines)
+        -> F Inlines -> MarkdownParser (F Inlines)
+regLink constructor lab = try $ do
+  (src, tit) <- source
+  return $ constructor src tit <$> lab
+
+   */
   // Inline definition
 
   Parser get inline => choice([
-                  whitespace,
-                  strongOrEmphStar(),
-                  strongOrEmphUnderscore(),
-                  str,
-                  endline,
-                  code(),
-                  symbol
-                  ]);
+    whitespace,
+    // bareURL,
+    str,
+    endline,
+    code(),
+    strongOrEmphStar(),
+    strongOrEmphUnderscore(),
+    // note,
+    // cite,
+    link(),
+    // image,
+    // math,
+    // strikeout,
+    // subscript,
+    // superscript,
+    // inlineNote, -- after superscript because of ^[link](/foo)^
+    // autoLink,
+    // spanHtml,
+    // rawHtmlInline,
+    // escapedChar,
+    // rawLaTeXInline'
+    // exampleRef
+    // smart
+    // return . B.singleton <$> charRef
+    symbol
+    // ltSign
+  ]);
 
 
   // Block parsers
@@ -232,7 +369,7 @@ class MarkdownParser {
   }
 
   Parser get para => (((newline > blanklines) > anyChar.manyUntil(newline)) ^
-      (inlines) => new Para(groupInlines(inline.run(inlines)))) % "para";
+      (inlines) => new Para(groupInlines(inline.many1.run(inlines)))) % "para";
   Parser get plain => inline.many1 ^ ((inlines) => new Para(groupInlines(inlines)));
 
   // Block parsers
