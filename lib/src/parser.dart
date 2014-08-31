@@ -4,11 +4,13 @@ class MarkdownParserOptions {
   final bool extAllSymbolsEscapable;
   final bool extInlineCodeAttributes;
   final bool extIntrawordUnderscores;
+  final bool extStrikeout;
 
   const MarkdownParserOptions({
     this.extAllSymbolsEscapable: true,
     this.extInlineCodeAttributes: true,
-    this.extIntrawordUnderscores: true
+    this.extIntrawordUnderscores: true,
+    this.extStrikeout: true
   });
 
   static const MarkdownParserOptions PANDOC = const MarkdownParserOptions();
@@ -129,13 +131,16 @@ class MarkdownParser {
   final Parser symbol = noneOf("<\\\n\t ") ^ (ch) => new Str(ch);
 
   Parser inlinesBetween(Parser start, Parser end) {
-    return start + inline + inline.manyUntil(end) ^ (a, b, c) {
-      List<Inline> res = [b];
-      if (c.length > 0) {
-        res.addAll(c);
-      }
-      return res;
-    };
+    return new Parser((s, pos) {
+      var i = inline;
+      return (start + i + i.manyUntil(end) ^ (a, b, c) {
+        List<Inline> res = [b];
+        if (c.length > 0) {
+          res.addAll(c);
+        }
+        return res;
+      }).run(s, pos);
+    });
   }
 
   // Code
@@ -292,6 +297,12 @@ referenceLink constructor (lab, raw) = do
   // TODO Add reference link (referenceLink parser)
   Parser get image => ((char('!') > reference) + source) ^ (inlines, target) => new Image(inlines[0], target);
 
+  // Strikeout
+
+  Parser get strikeout => options.extStrikeout
+    ? inlinesBetween(string('~~').notFollowedBy(char('~')) > noneOf('\t\n \r').lookAhead, string('~~')) ^ (i) => new Strikeout(i)
+    : fail;
+
   // Inline definition
 
   Parser get inline => choice([
@@ -307,7 +318,7 @@ referenceLink constructor (lab, raw) = do
     link(),
     image,
     // math,
-    // strikeout,
+    strikeout,
     // subscript,
     // superscript,
     // inlineNote, -- after superscript because of ^[link](/foo)^

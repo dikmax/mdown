@@ -8,6 +8,10 @@ void main() {
     testEquals("regular", "![Caption](http://asdf.asdf/asdf.jpg)",
       B.image(B.target("http://asdf.asdf/asdf.jpg", ""), B.str("Caption")));
   });
+  t.group('formatting', () {
+    testEquals("strikeout", "This ~~is strikeout~~ test.",
+      B.para(B.str("This"), B.space, B.strikeout(B.str("is"), B.space, B.str("strikeout")), B.space, B.str("test.")));
+  });
   t.group('subparsers', () {
     t.group('attributes', () {
       testEquals1("identifierAttr", "#i_d", B.attr('i_d', [], {}), MarkdownParser.identifierAttr);
