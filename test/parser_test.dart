@@ -14,6 +14,9 @@ void main() {
 
     testEquals("subscript", "H~2~0",
       B.para(B.str("H"), B.subscript(B.str("2")), B.str('0')));
+
+    testEquals("superscript", "m^3^z",
+      B.para(B.str("m"), B.superscript(B.str("3")), B.str('z')));
   });
 
   t.group('subparsers', () {

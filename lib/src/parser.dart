@@ -315,6 +315,12 @@ referenceLink constructor (lab, raw) = do
     })
     : fail;
 
+  Parser get superscript => options.extSubscript
+    ? new Parser((s, pos) {
+      return (char('^') > many1Till(spaceChar.notAhead > inline, char('^')) ^ (i) => new Superscript(i)).run(s, pos);
+    })
+    : fail;
+
   // Inline definition
 
   Parser get inline => choice([
@@ -332,7 +338,7 @@ referenceLink constructor (lab, raw) = do
     // math,
     strikeout,
     subscript,
-    // superscript,
+    superscript,
     // inlineNote, -- after superscript because of ^[link](/foo)^
     // autoLink,
     // spanHtml,
