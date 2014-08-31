@@ -5,12 +5,16 @@ class MarkdownParserOptions {
   final bool extInlineCodeAttributes;
   final bool extIntrawordUnderscores;
   final bool extStrikeout;
+  final bool extSubscript;
+  final bool extSuperscript;
 
   const MarkdownParserOptions({
     this.extAllSymbolsEscapable: true,
     this.extInlineCodeAttributes: true,
     this.extIntrawordUnderscores: true,
-    this.extStrikeout: true
+    this.extStrikeout: true,
+    this.extSubscript: true,
+    this.extSuperscript: true
   });
 
   static const MarkdownParserOptions PANDOC = const MarkdownParserOptions();
@@ -303,6 +307,14 @@ referenceLink constructor (lab, raw) = do
     ? inlinesBetween(string('~~').notFollowedBy(char('~')) > noneOf('\t\n \r').lookAhead, string('~~')) ^ (i) => new Strikeout(i)
     : fail;
 
+  // Subscript
+
+  Parser get subscript => options.extSubscript
+    ? new Parser((s, pos) {
+      return (char('~') > many1Till(spaceChar.notAhead > inline, char('~')) ^ (i) => new Subscript(i)).run(s, pos);
+    })
+    : fail;
+
   // Inline definition
 
   Parser get inline => choice([
@@ -319,7 +331,7 @@ referenceLink constructor (lab, raw) = do
     image,
     // math,
     strikeout,
-    // subscript,
+    subscript,
     // superscript,
     // inlineNote, -- after superscript because of ^[link](/foo)^
     // autoLink,

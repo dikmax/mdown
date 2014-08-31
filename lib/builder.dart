@@ -49,26 +49,31 @@ Emph emph([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g,
   return new Emph(_buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z));
 }
 
-Strong strong([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h, Inline i, Inline j, Inline k,
-          Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r, Inline s, Inline t, Inline u, Inline v,
-          Inline w, Inline x, Inline y, Inline z]) {
+Strong strong([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h, Inline i, Inline j,
+              Inline k, Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r, Inline s, Inline t,
+              Inline u, Inline v, Inline w, Inline x, Inline y, Inline z]) {
   return new Strong(_buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z));
 }
 
-Strikeout strikeout([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h, Inline i, Inline j, Inline k,
-          Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r, Inline s, Inline t, Inline u, Inline v,
-          Inline w, Inline x, Inline y, Inline z]) {
+Strikeout strikeout([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h, Inline i, Inline j,
+                    Inline k, Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r, Inline s, Inline t,
+                    Inline u, Inline v, Inline w, Inline x, Inline y, Inline z]) {
   return new Strikeout(_buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z));
 }
 
+Superscript superscript([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h, Inline i,
+                        Inline j, Inline k, Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r,
+                        Inline s, Inline t, Inline u, Inline v, Inline w, Inline x, Inline y, Inline z]) {
+  return new Superscript(_buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z));
+}
+
+Subscript subscript([Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h, Inline i, Inline j,
+                    Inline k, Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r, Inline s, Inline t,
+                    Inline u, Inline v, Inline w, Inline x, Inline y, Inline z]) {
+  return new Subscript(_buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z));
+}
 
 /*
-
-superscript :: Inlines -> Inlines
-superscript = singleton . Superscript . toList
-
-subscript :: Inlines -> Inlines
-subscript = singleton . Subscript . toList
 
 smallcaps :: Inlines -> Inlines
 smallcaps = singleton . SmallCaps . toList

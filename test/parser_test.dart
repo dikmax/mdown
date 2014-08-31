@@ -11,7 +11,11 @@ void main() {
   t.group('formatting', () {
     testEquals("strikeout", "This ~~is strikeout~~ test.",
       B.para(B.str("This"), B.space, B.strikeout(B.str("is"), B.space, B.str("strikeout")), B.space, B.str("test.")));
+
+    testEquals("subscript", "H~2~0",
+      B.para(B.str("H"), B.subscript(B.str("2")), B.str('0')));
   });
+
   t.group('subparsers', () {
     t.group('attributes', () {
       testEquals1("identifierAttr", "#i_d", B.attr('i_d', [], {}), MarkdownParser.identifierAttr);
@@ -20,6 +24,7 @@ void main() {
       testEquals1("attributes", "{.haskell .special x=\"7\"}", B.attr("", ["haskell","special"], {"x": "7"}), MarkdownParser.DEFAULT.attributes);
     });
   });
+
   t.group('inline code', () {
     testEquals("simple",
       "`some code`",
