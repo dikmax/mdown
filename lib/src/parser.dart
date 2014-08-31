@@ -247,11 +247,50 @@ class MarkdownParser {
       }
 
       // TODO Add reference link (referenceLink parser)
-      return regLink(refRes.value).run(s, refRes.position); // Add reference link
+      return (source ^ (Target target) => new Link(refRes.value[0], target)).run(s, refRes.position); // Add reference link
     });
   }
 
-  Parser regLink(inlines) => source ^ (Target target) => new Link(inlines, target);
+/*
+-- a link like [this][ref] or [this][] or [this]
+referenceLink :: (String -> String -> Inlines -> Inlines)
+              -> (F Inlines, String) -> MarkdownParser (F Inlines)
+referenceLink constructor (lab, raw) = do
+  sp <- (True <$ lookAhead (char ' ')) <|> return False
+  (ref,raw') <- try
+           (skipSpaces >> optional (newline >> skipSpaces) >> reference)
+           <|> return (mempty, "")
+  let labIsRef = raw' == "" || raw' == "[]"
+  let key = toKey $ if labIsRef then raw else raw'
+  parsedRaw <- parseFromString (mconcat <$> many inline) raw'
+  fallback <- parseFromString (mconcat <$> many inline) $ dropBrackets raw
+  implicitHeaderRefs <- option False $
+                         True <$ guardEnabled Ext_implicit_header_references
+  let makeFallback = do
+       parsedRaw' <- parsedRaw
+       fallback' <- fallback
+       return $ B.str "[" <> fallback' <> B.str "]" <>
+                (if sp && not (null raw) then B.space else mempty) <>
+                parsedRaw'
+  return $ do
+    keys <- asksF stateKeys
+    case M.lookup key keys of
+       Nothing        -> do
+         headers <- asksF stateHeaders
+         ref' <- if labIsRef then lab else ref
+         if implicitHeaderRefs
+            then case M.lookup ref' headers of
+                   Just ident -> constructor ('#':ident) "" <$> lab
+                   Nothing    -> makeFallback
+            else makeFallback
+       Just (src,tit) -> constructor src tit <$> lab
+ */
+
+  // Image
+
+  // TODO readerDefaultImageExtension support
+  // TODO Add reference link (referenceLink parser)
+  Parser get image => ((char('!') > reference) + source) ^ (inlines, target) => new Image(inlines[0], target);
 
   // Inline definition
 
@@ -266,7 +305,7 @@ class MarkdownParser {
     // note,
     // cite,
     link(),
-    // image,
+    image,
     // math,
     // strikeout,
     // subscript,

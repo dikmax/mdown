@@ -124,13 +124,14 @@ Link link(Target tt, [Inline a, Inline b, Inline c, Inline d, Inline e, Inline f
     tt);
 }
 
-/*
+Image image(Target tt, [Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h,
+          Inline i, Inline j, Inline k, Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r, Inline s,
+          Inline t, Inline u, Inline v, Inline w, Inline x, Inline y, Inline z]) {
+  return new Image(_buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z),
+    tt);
+}
 
-image :: String  -- ^ URL
-      -> String  -- ^ Title
-      -> Inlines -- ^ Alt text
-      -> Inlines
-image url title x = singleton $ Image (toList x) (url, title)
+/*
 
 note :: Blocks -> Inlines
 note = singleton . Note . toList

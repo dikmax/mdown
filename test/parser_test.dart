@@ -4,7 +4,10 @@ import 'package:parsers/parsers.dart';
 import 'package:markdowntypography/builder.dart' as B;
 
 void main() {
-
+  t.group('images', () {
+    testEquals("regular", "![Caption](http://asdf.asdf/asdf.jpg)",
+      B.image(B.target("http://asdf.asdf/asdf.jpg", ""), B.str("Caption")));
+  });
   t.group('subparsers', () {
     t.group('attributes', () {
       testEquals1("identifierAttr", "#i_d", B.attr('i_d', [], {}), MarkdownParser.identifierAttr);
@@ -66,19 +69,19 @@ void main() {
   t.group("backslash escapes", () {
     testEquals("in URL",
       "[hi](/there\\))",
-      B.para(B.link("/there)", "", B.str("hi"))));
+      B.para(B.link(B.target("/there)", ""), B.str("hi"))));
     testEquals("in title",
       "[hi](/there \"a\\\"a\")",
-      B.para(B.link("/there", "a\"a", B.str("hi"))));
+      B.para(B.link(B.target("/there", "a\"a"), B.str("hi"))));
+    /*testEquals("in reference link title",
+      "[hi]\n\n[hi]: /there (a\\)a)",
+      B.para(B.link(B.target("/there", "a)a"), B.str("hi"))));
     testEquals("in reference link title",
       "[hi]\n\n[hi]: /there (a\\)a)",
-      B.para(B.link("/there", "a)a", B.str("hi"))));
-    testEquals("in reference link title",
-      "[hi]\n\n[hi]: /there (a\\)a)",
-      B.para(B.link("/there", "a)a", B.str("hi"))));
+      B.para(B.link(B.target("/there", "a)a"), B.str("hi"))));
     testEquals("in reference link URL",
       "[hi]\n\n[hi]: /there\\.0",
-      B.para(B.link("/there.0", "", B.str("hi"))));
+      B.para(B.link(B.target("/there.0", ""), B.str("hi"))));*/
   });
 }
 
@@ -279,7 +282,10 @@ void testEquals(description, String str, result, [MarkdownParser parser]) {
     if (parser == null) {
       parser = defaultParser;
     }
-    if (!(result is Document)) {
+
+    if (result is Inline) {
+      result = B.doc(B.para(result));
+    } else if (result is Block) {
       result = B.doc(result);
     }
     t.expect(parser.parse(str), t.equals(result));
