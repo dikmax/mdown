@@ -18,6 +18,12 @@ void main() {
     testEquals("superscript", "m^3^z",
       B.para(B.str("m"), B.superscript(B.str("3")), B.str('z')));
   });
+  t.group('escaped chars', () {
+    testEquals("nbsp", "a\\ b",
+      B.para(B.str("a"), B.nbsp, B.str("b")));
+    testEquals("linebreak", "a\\\nb",
+      B.para(B.str("a"), B.linebreak, B.str("b")));
+  });
 
   t.group('subparsers', () {
     t.group('attributes', () {

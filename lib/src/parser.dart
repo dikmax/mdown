@@ -2,6 +2,7 @@ part of markdown;
 
 class MarkdownParserOptions {
   final bool extAllSymbolsEscapable;
+  final bool extEscapedLineBreaks;
   final bool extInlineCodeAttributes;
   final bool extIntrawordUnderscores;
   final bool extStrikeout;
@@ -10,6 +11,7 @@ class MarkdownParserOptions {
 
   const MarkdownParserOptions({
     this.extAllSymbolsEscapable: true,
+    this.extEscapedLineBreaks: true,
     this.extInlineCodeAttributes: true,
     this.extIntrawordUnderscores: true,
     this.extStrikeout: true,
@@ -36,10 +38,10 @@ class MarkdownParser {
   // Simple parsers
 
   // TODO move to unicode-parsers library
-  bool isAlphaNum(String ch) => !isLetter(ch.runes.first) && !isDigit(ch.runes.first);
+  bool isAlphaNum(String ch) => isLetter(ch.runes.first) || isDigit(ch.runes.first);
 
   Parser get escapedChar1 => char('\\') >
-    ( guardEnabled(options.extAllSymbolsEscapable) > pred((ch) => !isAlphaNum(ch))
+    ( (guardEnabled(options.extAllSymbolsEscapable) > pred((ch) => !isAlphaNum(ch)))
     | oneOf("\\`*_{}[]()>#+-.!~\"")
     );
   static Parser spaceChar = oneOf(" \t") % 'space';
@@ -321,6 +323,36 @@ referenceLink constructor (lab, raw) = do
     })
     : fail;
 
+  // Escaped char
+
+  Parser escapedChar() {
+    return new Parser((s, pos) {
+      ParseResult res = escapedChar1.run(s, pos);
+      if (!res.isSuccess) {
+        return res;
+      }
+
+      switch(res.value) {
+        case ' ':
+          res = res.copy(value: new NonBreakableSpace());
+          break;
+
+        case '\n':
+          if (options.extEscapedLineBreaks) {
+            res = res.copy(value: new LineBreak());
+          } else {
+            return fail.run(s, pos);
+          }
+          break;
+
+        default:
+          res = res.copy(value: new Str(res.value));
+      }
+
+      return res;
+    });
+  }
+
   // Inline definition
 
   Parser get inline => choice([
@@ -343,7 +375,7 @@ referenceLink constructor (lab, raw) = do
     // autoLink,
     // spanHtml,
     // rawHtmlInline,
-    // escapedChar,
+    escapedChar(),
     // rawLaTeXInline'
     // exampleRef
     // smart
@@ -351,7 +383,6 @@ referenceLink constructor (lab, raw) = do
     symbol
     // ltSign
   ]);
-
 
   // Block parsers
 

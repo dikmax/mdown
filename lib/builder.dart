@@ -104,13 +104,11 @@ Code code(String code, [Attr attr]) => new Code(attr == null ? nullAttr : attr, 
 
 final Space space = new Space();
 
+final NonBreakableSpace nbsp = new NonBreakableSpace();
+
+final LineBreak linebreak = new LineBreak();
+
 /*
-space :: Inlines
-space = singleton Space
-
-linebreak :: Inlines
-linebreak = singleton LineBreak
-
 -- | Inline math
 math :: String -> Inlines
 math = singleton . Math InlineMath

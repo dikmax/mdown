@@ -467,6 +467,21 @@ class Space extends Inline {
 }
 
 
+class NonBreakableSpace extends Inline {
+  static final NonBreakableSpace _instance = new NonBreakableSpace._internal();
+
+  factory NonBreakableSpace() {
+    return _instance;
+  }
+
+  NonBreakableSpace._internal();
+
+  String toString() => "NonBreakableSpace";
+
+  bool operator== (obj) => obj is NonBreakableSpace;
+}
+
+
 class LineBreak extends Inline {
   static final LineBreak _instance = new LineBreak._internal();
 
@@ -474,7 +489,7 @@ class LineBreak extends Inline {
     return _instance;
   }
 
-  LineBreak._instance();
+  LineBreak._internal();
 
   String toString() => "LineBreak";
 
