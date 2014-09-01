@@ -2,6 +2,5 @@ import 'package:markdowntypography/markdown.dart';
 
 void main() {
   var document = MarkdownParser.DEFAULT;
-  var c = document.escapedChar();
-  print(document.parse("a\\ b"));
+  print(document.parse("aaaaa\n\n~~~~~~javascript\nasdfasdfa\n~~~~~~\n\n\nasdfasdfasd\n"));
 }

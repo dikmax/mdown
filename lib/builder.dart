@@ -162,14 +162,13 @@ plain ils = if isNull ils
                then mempty
                else singleton . Plain . toList $ ils
 
--- | A code block with attributes.
-codeBlockWith :: Attr -> String -> Blocks
-codeBlockWith attrs = singleton . CodeBlock attrs
+*/
 
--- | A plain code block.
-codeBlock :: String -> Blocks
-codeBlock = codeBlockWith nullAttr
+CodeBlock codeBlock(String code, [Attr attr]) {
+  return new CodeBlock(attr == null ? nullAttr : attr, code);
+}
 
+/*
 rawBlock :: String -> String -> Blocks
 rawBlock format = singleton . RawBlock (Format format)
 

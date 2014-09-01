@@ -2,7 +2,10 @@ part of markdown;
 
 class MarkdownParserOptions {
   final bool extAllSymbolsEscapable;
+  final bool extBacktickCodeBlocks;
   final bool extEscapedLineBreaks;
+  final bool extFencedCodeAttributes;
+  final bool extFencedCodeBlocks;
   final bool extInlineCodeAttributes;
   final bool extIntrawordUnderscores;
   final bool extStrikeout;
@@ -11,7 +14,10 @@ class MarkdownParserOptions {
 
   const MarkdownParserOptions({
     this.extAllSymbolsEscapable: true,
+    this.extBacktickCodeBlocks: true,
     this.extEscapedLineBreaks: true,
+    this.extFencedCodeAttributes: true,
+    this.extFencedCodeBlocks: true,
     this.extInlineCodeAttributes: true,
     this.extIntrawordUnderscores: true,
     this.extStrikeout: true,
@@ -45,6 +51,7 @@ class MarkdownParser {
     | oneOf("\\`*_{}[]()>#+-.!~\"")
     );
   static Parser spaceChar = oneOf(" \t") % 'space';
+  static Parser nonSpaceChar = noneOf("\t\n \r");
   static Parser skipSpaces = spaceChar.skipMany;
   static Parser blankline = skipSpaces > newline % 'blankline';
   static Parser blanklines = blankline.many1 % 'blanklines';
@@ -68,6 +75,26 @@ class MarkdownParser {
     }
     return inlines;
   }
+
+  Parser get anyLine => new Parser((s, Position pos) {
+    String result = '';
+    int offset = pos.offset, len = s.length;
+    if (offset >= len) {
+      return new ParseResult(s, new Expectations.empty(pos), pos, false, false, null);
+    }
+    while (offset < len && s[offset] != '\n') {
+      result += s[offset];
+      ++offset;
+    }
+    var newPos;
+    if (offset < len && s[offset] == '\n') {
+      newPos = new Position(offset + 1, pos.line + 1, 1);
+    } else {
+      newPos = new Position(offset, pos.line, pos.character + result.length);
+    }
+    print(result);
+    return new ParseResult(s, new Expectations.empty(newPos), newPos, true, false, result);
+  });
 
   static Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
 
@@ -98,6 +125,25 @@ class MarkdownParser {
       } else {
         return success(null).run(s, pos);
       }
+    });
+  }
+
+  Parser count(int l, Parser p) {
+    return new Parser((s, pos) {
+      var position = pos;
+      var value = [];
+      ParseResult res;
+      for (int i = 0; i < l; ++i) {
+        res = p.run(s, position);
+        if (res.isSuccess) {
+          value.add(res.value);
+          position = res.position;
+        } else {
+          return res;
+        }
+      }
+
+      return res.copy(value: value);
     });
   }
 
@@ -410,17 +456,96 @@ referenceLink constructor (lab, raw) = do
     return result;
   }
 
+  // Para
   Parser get para => (((newline > blanklines) > anyChar.manyUntil(newline)) ^
       (inlines) => new Para(groupInlines(inline.many1.run(inlines)))) % "para";
+
+  // Plain
   Parser get plain => inline.many1 ^ ((inlines) => new Para(groupInlines(inlines)));
+
+  // Code Block Fenced
+
+  Parser blockDelimiter(String c, [int len]) {
+    if (len != null) {
+      return (count(len, char(c)) > char(c).many) ^ (_) => len;
+    } else {
+      return (count(3, char(c)) > char(c).many) ^ (res) => res.length + 3;
+    }
+  }
+
+  String toLanguageId(String id) {
+    id = id.toLowerCase();
+    switch (id) {
+      case 'c++':
+        return 'cpp';
+
+      case 'objective-c':
+        return 'objectivec';
+
+      default:
+        return id;
+    }
+  }
+
+  Parser get codeBlockFenced => new Parser((s, pos) {
+    var c;
+    if (options.extFencedCodeBlocks) {
+      var testRes = char('~').lookAhead.run(s, pos);
+      if (testRes.isSuccess) {
+        c = '~';
+      }
+    }
+    if (c == null && options.extBacktickCodeBlocks) {
+      var testRes = char('`').lookAhead.run(s, pos);
+      if (testRes.isSuccess) {
+        c = '`';
+      }
+    }
+
+    if (c == null) { // TODO expose _failure and _success functions
+      fail.run(s, pos);
+    }
+
+    ParseResult startRes = blockDelimiter(c).run(s, pos);
+    if (!startRes.isSuccess) {
+      return startRes;
+    }
+    var size = startRes.value;
+    ParseResult attrRes = (spaceChar.skipMany > ((guardEnabled(options.extFencedCodeAttributes) > attributes) |
+      (nonSpaceChar.many1 ^ (str) => B.attr("", [toLanguageId(str.join(''))], {})))).orElse(B.nullAttr).run(s, startRes.position);
+    assert(attrRes.isSuccess);
+    var attr = attrRes.value;
+    return (((blankline > anyLine.manyUntil(blockDelimiter(c, size))) < blanklines) ^
+        (lines) => B.codeBlock(lines.join('\n'), attr)).run(s, attrRes.position);
+  });
+
 
   // Block parsers
   Parser get block => choice([
       blanklines ^ (_) => null,
+      codeBlockFenced,
+      // yamlMetaBlock,
+      // guardEnabled Ext_latex_macros *> (macro >>= return . return)
+      // bulletList
+      // header
+      // lhsCodeBlock
+      // rawTeXBlock
+      // divHtml
+      // htmlBlock
+      // table
+      // lineBlock
+      // codeBlockIndented
+      // blockQuote
+      // hrule
+      // orderedList
+      // definitionList
+      // noteBlock
+      // referenceKey
+      // abbrevKey
       para,
-      plain
-  ]) % "block";
+      plain,
 
+  ]) % "block";
 
   // Document
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(res.where((block) => block != null))) % "document";
