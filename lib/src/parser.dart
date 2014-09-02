@@ -1,34 +1,5 @@
 part of markdown;
 
-class MarkdownParserOptions {
-  final bool extAllSymbolsEscapable;
-  final bool extBacktickCodeBlocks;
-  final bool extEscapedLineBreaks;
-  final bool extFencedCodeAttributes;
-  final bool extFencedCodeBlocks;
-  final bool extInlineCodeAttributes;
-  final bool extIntrawordUnderscores;
-  final bool extStrikeout;
-  final bool extSubscript;
-  final bool extSuperscript;
-
-  const MarkdownParserOptions({
-    this.extAllSymbolsEscapable: true,
-    this.extBacktickCodeBlocks: true,
-    this.extEscapedLineBreaks: true,
-    this.extFencedCodeAttributes: true,
-    this.extFencedCodeBlocks: true,
-    this.extInlineCodeAttributes: true,
-    this.extIntrawordUnderscores: true,
-    this.extStrikeout: true,
-    this.extSubscript: true,
-    this.extSuperscript: true
-  });
-
-  static const MarkdownParserOptions PANDOC = const MarkdownParserOptions();
-  static const MarkdownParserOptions DEFAULT = PANDOC;
-}
-
 class MarkdownParser {
   final MarkdownParserOptions options;
 
@@ -39,6 +10,7 @@ class MarkdownParser {
   // OptionsCheck
 
   Parser guardEnabled(bool option) => option ? success(null) : fail;
+
   Parser guardDisabled(bool option) => option ? fail : success(null);
 
   // Simple parsers
@@ -47,9 +19,10 @@ class MarkdownParser {
   bool isAlphaNum(String ch) => isLetter(ch.runes.first) || isDigit(ch.runes.first);
 
   Parser get escapedChar1 => char('\\') >
-    ( (guardEnabled(options.extAllSymbolsEscapable) > pred((ch) => !isAlphaNum(ch)))
-    | oneOf("\\`*_{}[]()>#+-.!~\"")
-    );
+  ( (guardEnabled(options.allSymbolsEscapable) > pred((ch) => !isAlphaNum(ch)))
+  | oneOf("\\`*_{}[]()>#+-.!~\"")
+  );
+
   static Parser spaceChar = oneOf(" \t") % 'space';
   static Parser nonSpaceChar = noneOf("\t\n \r");
   static Parser skipSpaces = spaceChar.skipMany;
@@ -57,10 +30,10 @@ class MarkdownParser {
   static Parser blanklines = blankline.many1 % 'blanklines';
 
   Parser get litChar => choice([
-    escapedChar1,
-    // TODO characterReference,
-    noneOf("\n"),
-    newline.notFollowedBy(blankline) > success(' ')
+      escapedChar1,
+      // TODO characterReference,
+      noneOf("\n"),
+      newline.notFollowedBy(blankline) > success(' ')
   ]);
 
   Parser get inlinesInBalancedBrackets => everythingBetween(char('['), char(']'), nested: true) ^
@@ -159,20 +132,26 @@ class MarkdownParser {
 
   // Attribute parsers
 
-  static Parser identifierAttr = (char('#') > identifier) ^ (id) => B.attr(id, [], {});
-  static Parser classAttr = (char('.') > identifier) ^ (cl) => B.attr("", [cl], {});
+  static Parser identifierAttr = (char('#') > identifier) ^ (id) => B.attr(id, [], {
+  });
+  static Parser classAttr = (char('.') > identifier) ^ (cl) => B.attr("", [cl], {
+  });
+
   Parser get keyValAttr => (identifier < char('=')) +
-    choice([
-        enclosed(char('"'), char('"'), litChar),
-        enclosed(char('\''), char('\''), litChar),
-        (escapedChar1 | noneOf(" \t\n\r}")).many
-    ]) ^ (key, value) => B.attr("", [], {key: value.join('')});
+  choice([
+      enclosed(char('"'), char('"'), litChar),
+      enclosed(char('\''), char('\''), litChar),
+      (escapedChar1 | noneOf(" \t\n\r}")).many
+  ]) ^ (key, value) => B.attr("", [], {
+      key: value.join('')
+  });
 
   Parser get attribute => choice([
       identifierAttr,
       classAttr,
       keyValAttr
   ]);
+
   Parser get attributes => (char("{") > spnl) > ((attribute < spnl).many < char("}")) ^
       (Iterable c) => c.reduce((v, e) => v + e);
 
@@ -223,7 +202,7 @@ class MarkdownParser {
       if (!codeResult.isSuccess) {
         return codeResult;
       }
-      if (!options.extInlineCodeAttributes) {
+      if (!options.inlineCodeAttributes) {
         return codeResult;
       }
       ParseResult attrRes = (whitespace.maybe + attributes ^ (a, b) => b).run(s, codeResult.position);
@@ -247,12 +226,15 @@ class MarkdownParser {
       return p.run(s, pos);
     });
   }
-  Parser get endUnderscore => options.extIntrawordUnderscores
-    ? char('_').notFollowedBy(alphanum)
-    : char('_');
-  Parser get startUnderscore => options.extIntrawordUnderscores
-    ? notAfterString() + char('_') ^ (a, b) => null
-    : char('_');
+
+  Parser get endUnderscore => options.intrawordUnderscores
+  ? char('_').notFollowedBy(alphanum)
+  : char('_');
+
+  Parser get startUnderscore => options.intrawordUnderscores
+  ? notAfterString() + char('_') ^ (a, b) => null
+  : char('_');
+
   Parser strongOrEmphUnderscore() {
     return new Parser((s, pos) {
       Parser p = (inlinesBetween(string("__"), string("__")) ^ (a) => new Strong(a))
@@ -276,13 +258,16 @@ class MarkdownParser {
   Parser get linkTitle => quotedTitle('"') | quotedTitle('\'');
 
   Parser get _urlChunk => parenthesizedChars
-    | (oneOf(" )").notAhead > litChar)
-    | (spaceChar.many1.notFollowedBy(oneOf("\"')")));
+  | (oneOf(" )").notAhead > litChar)
+  | (spaceChar.many1.notFollowedBy(oneOf("\"')")));
+
   Parser get _sourceURL => _urlChunk.many ^ (r) => r.join('');
+
   Parser get _betweenAngles => char('<') > litChar.manyUntil(char('>')) ^ (r) => r.join('');
+
   Parser get source => (((char('(') > skipSpaces) >
-    (((_betweenAngles | _sourceURL) + (spnl > linkTitle)) ^ B.target)) <
-    skipSpaces) < char(')');
+  (((_betweenAngles | _sourceURL) + (spnl > linkTitle)) ^ B.target)) <
+  skipSpaces) < char(')');
 
   bool allowLinks = true;
 
@@ -304,7 +289,8 @@ class MarkdownParser {
       }
 
       // TODO Add reference link (referenceLink parser)
-      return (source ^ (Target target) => new Link(refRes.value[0], target)).run(s, refRes.position); // Add reference link
+      return (source ^ (Target target) => new Link(refRes.value[0], target)).run(s, refRes.position);
+      // Add reference link
     });
   }
 
@@ -351,23 +337,23 @@ referenceLink constructor (lab, raw) = do
 
   // Strikeout
 
-  Parser get strikeout => options.extStrikeout
-    ? inlinesBetween(string('~~').notFollowedBy(char('~')) > noneOf('\t\n \r').lookAhead, string('~~')) ^ (i) => new Strikeout(i)
-    : fail;
+  Parser get strikeout => options.strikeout
+  ? inlinesBetween(string('~~').notFollowedBy(char('~')) > noneOf('\t\n \r').lookAhead, string('~~')) ^ (i) => new Strikeout(i)
+  : fail;
 
   // Subscript
 
-  Parser get subscript => options.extSubscript
-    ? new Parser((s, pos) {
-      return (char('~') > many1Till(spaceChar.notAhead > inline, char('~')) ^ (i) => new Subscript(i)).run(s, pos);
-    })
-    : fail;
+  Parser get subscript => options.subscript
+  ? new Parser((s, pos) {
+    return (char('~') > many1Till(spaceChar.notAhead > inline, char('~')) ^ (i) => new Subscript(i)).run(s, pos);
+  })
+  : fail;
 
-  Parser get superscript => options.extSubscript
-    ? new Parser((s, pos) {
-      return (char('^') > many1Till(spaceChar.notAhead > inline, char('^')) ^ (i) => new Superscript(i)).run(s, pos);
-    })
-    : fail;
+  Parser get superscript => options.superscript
+  ? new Parser((s, pos) {
+    return (char('^') > many1Till(spaceChar.notAhead > inline, char('^')) ^ (i) => new Superscript(i)).run(s, pos);
+  })
+  : fail;
 
   // Escaped char
 
@@ -378,13 +364,13 @@ referenceLink constructor (lab, raw) = do
         return res;
       }
 
-      switch(res.value) {
+      switch (res.value) {
         case ' ':
           res = res.copy(value: new NonBreakableSpace());
           break;
 
         case '\n':
-          if (options.extEscapedLineBreaks) {
+          if (options.escapedLineBreaks) {
             res = res.copy(value: new LineBreak());
           } else {
             return fail.run(s, pos);
@@ -402,32 +388,32 @@ referenceLink constructor (lab, raw) = do
   // Inline definition
 
   Parser get inline => choice([
-    whitespace,
-    // bareURL,
-    str,
-    endline,
-    code(),
-    strongOrEmphStar(),
-    strongOrEmphUnderscore(),
-    // note,
-    // cite,
-    link(),
-    image,
-    // math,
-    strikeout,
-    subscript,
-    superscript,
-    // inlineNote, -- after superscript because of ^[link](/foo)^
-    // autoLink,
-    // spanHtml,
-    // rawHtmlInline,
-    escapedChar(),
-    // rawLaTeXInline'
-    // exampleRef
-    // smart
-    // return . B.singleton <$> charRef
-    symbol
-    // ltSign
+      whitespace,
+      // bareURL,
+      str,
+      endline,
+      code(),
+      strongOrEmphStar(),
+      strongOrEmphUnderscore(),
+      // note,
+      // cite,
+      link(),
+      image,
+      // math,
+      strikeout,
+      subscript,
+      superscript,
+      // inlineNote, -- after superscript because of ^[link](/foo)^
+      // autoLink,
+      // spanHtml,
+      // rawHtmlInline,
+      escapedChar(),
+      // rawLaTeXInline'
+      // exampleRef
+      // smart
+      // return . B.singleton <$> charRef
+      symbol
+      // ltSign
   ]);
 
   // Block parsers
@@ -460,6 +446,32 @@ referenceLink constructor (lab, raw) = do
   Parser get para => (((newline > blanklines) > anyChar.manyUntil(newline)) ^
       (inlines) => new Para(groupInlines(inline.many1.run(inlines)))) % "para";
 
+  /*
+  para :: MarkdownParser (F Blocks)
+para = try $ do
+  exts <- getOption readerExtensions
+  result <- trimInlinesF . mconcat <$> many1 inline
+  option (B.plain <$> result)
+    $ try $ do
+            newline
+            (blanklines >> return mempty)
+              <|> (guardDisabled Ext_blank_before_blockquote >> () <$ lookAhead blockQuote)
+              <|> (guardEnabled Ext_backtick_code_blocks >> () <$ lookAhead codeBlockFenced)
+              <|> (guardDisabled Ext_blank_before_header >> () <$ lookAhead header)
+              <|> (guardEnabled Ext_lists_without_preceding_blankline >>
+                       () <$ lookAhead listStart)
+            return $ do
+              result' <- result
+              case B.toList result' of
+                   [Image alt (src,tit)]
+                     | Ext_implicit_figures `Set.member` exts ->
+                        -- the fig: at beginning of title indicates a figure
+                        return $ B.para $ B.singleton
+                               $ Image alt (src,'f':'i':'g':':':tit)
+                   _ -> return $ B.para result'
+
+   */
+
   // Plain
   Parser get plain => inline.many1 ^ ((inlines) => new Para(groupInlines(inlines)));
 
@@ -489,20 +501,21 @@ referenceLink constructor (lab, raw) = do
 
   Parser get codeBlockFenced => new Parser((s, pos) {
     var c;
-    if (options.extFencedCodeBlocks) {
+    if (options.fencedCodeBlocks) {
       var testRes = char('~').lookAhead.run(s, pos);
       if (testRes.isSuccess) {
         c = '~';
       }
     }
-    if (c == null && options.extBacktickCodeBlocks) {
+    if (c == null && options.backtickCodeBlocks) {
       var testRes = char('`').lookAhead.run(s, pos);
       if (testRes.isSuccess) {
         c = '`';
       }
     }
 
-    if (c == null) { // TODO expose _failure and _success functions
+    if (c == null) {
+      // TODO expose _failure and _success functions
       fail.run(s, pos);
     }
 
@@ -511,14 +524,91 @@ referenceLink constructor (lab, raw) = do
       return startRes;
     }
     var size = startRes.value;
-    ParseResult attrRes = (spaceChar.skipMany > ((guardEnabled(options.extFencedCodeAttributes) > attributes) |
-      (nonSpaceChar.many1 ^ (str) => B.attr("", [toLanguageId(str.join(''))], {})))).orElse(B.nullAttr).run(s, startRes.position);
+    ParseResult attrRes = (spaceChar.skipMany > ((guardEnabled(options.fencedCodeAttributes) > attributes) |
+    (nonSpaceChar.many1 ^ (str) => B.attr("", [toLanguageId(str.join(''))], {
+    })))).orElse(B.nullAttr).run(s, startRes.position);
     assert(attrRes.isSuccess);
     var attr = attrRes.value;
     return (((blankline > anyLine.manyUntil(blockDelimiter(c, size))) < blanklines) ^
         (lines) => B.codeBlock(lines.join('\n'), attr)).run(s, attrRes.position);
   });
 
+
+  // Header
+
+  Parser get header => /*setextHeader | */
+  atxHeader % "header";
+
+  /*
+header :: MarkdownParser (F Blocks)
+header = setextHeader <|> atxHeader <?> "header"
+*/
+
+  Parser get atxHeader => new Parser((s, pos) {
+    Parser startParser = char('#').many1;
+    if (options.fancyLists) {
+      startParser = startParser.notFollowedBy(oneOf(".)"));
+    }
+    ParseResult startRes = startParser.run(s, pos);
+    if (!startRes.isSuccess) {
+      return startRes;
+    }
+    int level = startRes.value.length;
+  });
+
+
+  /*
+atxHeader :: MarkdownParser (F Blocks)
+atxHeader = try $ do
+  level <- many1 (char '#') >>= return . length
+  notFollowedBy $ guardEnabled Ext_fancy_lists >>
+                  (char '.' <|> char ')') -- this would be a list
+  skipSpaces
+  text <- trimInlinesF . mconcat <$> many (notFollowedBy atxClosing >> inline)
+  attr <- atxClosing
+  attr' <- registerHeader attr (runF text defaultParserState)
+  return $ B.headerWith attr' level <$> text
+
+atxClosing :: MarkdownParser Attr
+atxClosing = try $ do
+  attr' <- option nullAttr
+             (guardEnabled Ext_mmd_header_identifiers >> mmdHeaderIdentifier)
+  skipMany (char '#')
+  skipSpaces
+  attr <- option attr'
+             (guardEnabled Ext_header_attributes >> attributes)
+  blanklines
+  return attr
+
+setextHeaderEnd :: MarkdownParser Attr
+setextHeaderEnd = try $ do
+  attr <- option nullAttr
+          $ (guardEnabled Ext_mmd_header_identifiers >> mmdHeaderIdentifier)
+           <|> (guardEnabled Ext_header_attributes >> attributes)
+  blanklines
+  return attr
+
+mmdHeaderIdentifier :: MarkdownParser Attr
+mmdHeaderIdentifier = do
+  ident <- stripFirstAndLast . snd <$> reference
+  skipSpaces
+  return (ident,[],[])
+
+setextHeader :: MarkdownParser (F Blocks)
+setextHeader = try $ do
+  -- This lookahead prevents us from wasting time parsing Inlines
+  -- unless necessary -- it gives a significant performance boost.
+  lookAhead $ anyLine >> many1 (oneOf setextHChars) >> blankline
+  text <- trimInlinesF . mconcat <$> many1 (notFollowedBy setextHeaderEnd >> inline)
+  attr <- setextHeaderEnd
+  underlineChar <- oneOf setextHChars
+  many (char underlineChar)
+  blanklines
+  let level = (fromMaybe 0 $ findIndex (== underlineChar) setextHChars) + 1
+  attr' <- registerHeader attr (runF text defaultParserState)
+  return $ B.headerWith attr' level <$> text
+
+   */
 
   // Block parsers
   Parser get block => choice([
