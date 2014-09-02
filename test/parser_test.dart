@@ -4,23 +4,47 @@ import 'package:parsers/parsers.dart';
 import 'package:markdowntypography/builder.dart' as B;
 
 void main() {
-  t.group('images', () {
-    testEquals("regular", "![Caption](http://asdf.asdf/asdf.jpg)",
-      B.image(B.target("http://asdf.asdf/asdf.jpg", ""), B.str("Caption")));
-  });
+  MarkdownParser emptyParser = new MarkdownParser(new MarkdownParserOptions(headerAttributes: false));
 
   t.group('headers', () {
-    testEquals("atx", '## Header ### {#header}\n\nParagraph',
+    MarkdownParser headerAttributes = new MarkdownParser(new MarkdownParserOptions(headerAttributes: true));
+    MarkdownParser mmdHeaderIdentifiers = new MarkdownParser(new MarkdownParserOptions(mmdHeaderIdentifiers: true));
+    testEquals("atx with header attributes", '## Header ### {#header}\n\nParagraph',
       B.doc(B.header(2, B.attr('header', [], {}), B.str('Header')),
-        B.para(B.str("Paragraph"))));
+        B.para(B.str("Paragraph"))), headerAttributes);
+    testEquals("atx with mmd identifiers", '## Header [mmd-header]###\n\nParagraph',
+      B.doc(B.header(2, B.attr('mmd-header', [], {}), B.str('Header')),
+        B.para(B.str("Paragraph"))), mmdHeaderIdentifiers);
+    testEquals("atx without header attributes", '## Header ### {#header}\n\nParagraph',
+      B.doc(B.header(2, B.nullAttr, B.str('Header'), B.space, B.str('###'), B.space, B.str('{#header}')),
+        B.para(B.str("Paragraph"))), emptyParser);
 
-    testEquals("setext", "Header 1\n=======\nHeader 2 {#id2}\n------\n\nParagraph",
+    testEquals("setext with header attributes", "Header 1\n=======\nHeader 2 {#id2}\n------\n\nParagraph",
       B.doc(
           B.header(1, B.nullAttr, B.str('Header'), B.space, B.str('1')),
           B.header(2, B.attr('id2', [], {}), B.str('Header'), B.space, B.str('2')),
           B.para(B.str("Paragraph"))
-      )
+      ), headerAttributes
     );
+    testEquals("setext with mmd identifiers", "Header 1 [id1] z\n=======\nHeader 2 [id2]\n------\n\nParagraph",
+      B.doc(
+          B.header(1, B.nullAttr, B.str('Header'), B.space, B.str('1'), B.space, B.str('[id1]'), B.space, B.str('z')),
+          B.header(2, B.attr('id2', [], {}), B.str('Header'), B.space, B.str('2')),
+          B.para(B.str("Paragraph"))
+      ), mmdHeaderIdentifiers
+    );
+    testEquals("setext without header attributes", "Header 1\n=======\nHeader 2 {#id2}\n------\n\nParagraph",
+      B.doc(
+          B.header(1, B.nullAttr, B.str('Header'), B.space, B.str('1')),
+          B.header(2, B.nullAttr, B.str('Header'), B.space, B.str('2'), B.space, B.str('{#id2}')),
+          B.para(B.str("Paragraph"))
+      ), emptyParser
+    );
+  });
+
+  t.group('images', () {
+    testEquals("regular", "![Caption](http://asdf.asdf/asdf.jpg)",
+    B.image(B.target("http://asdf.asdf/asdf.jpg", ""), B.str("Caption")));
   });
 
   t.group('formatting', () {
