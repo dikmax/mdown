@@ -1,9 +1,14 @@
 part of markdown;
 
 class MarkdownParser {
-  final MarkdownParserOptions options;
+  final MarkdownParserExtensions extensions;
+  MarkdownParserOptions options;
 
-  MarkdownParser([this.options = MarkdownParserOptions.DEFAULT]);
+  MarkdownParser([this.extensions = MarkdownParserExtensions.DEFAULT, this.options]) {
+    if (options == null) {
+      options = new MarkdownParserOptions();
+    }
+  }
 
   Document parse(String s) => document.parse(s);
 
@@ -13,15 +18,25 @@ class MarkdownParser {
 
   Parser guardDisabled(bool option) => option ? fail : success(null);
 
+  // Aux methods
+
+  String stripTrailingNewlines(String str) {
+    var l = str.length;
+    while (l > 0 && str[l - 1] == '\n') {
+      --l;
+    }
+    return str.substring(0, l);
+  }
+
   // Simple parsers
 
   // TODO move to unicode-parsers library
   bool isAlphaNum(String ch) => isLetter(ch.runes.first) || isDigit(ch.runes.first);
 
   Parser get escapedChar1 => char('\\') >
-  ( (guardEnabled(options.allSymbolsEscapable) > pred((ch) => !isAlphaNum(ch)))
-  | oneOf("\\`*_{}[]()>#+-.!~\"")
-  );
+    ( (guardEnabled(extensions.allSymbolsEscapable) > pred((ch) => !isAlphaNum(ch)))
+    | oneOf("\\`*_{}[]()>#+-.!~\"")
+    );
 
   static Parser spaceChar = oneOf(" \t") % 'space';
   static Parser nonSpaceChar = noneOf("\t\n \r");
@@ -69,6 +84,8 @@ class MarkdownParser {
   });
 
   static Parser spnl = (skipSpaces > newline.maybe) > skipSpaces.notFollowedBy(char('\n'));
+
+  Parser get indentSpaces => count(options.tabStop, char(' ')) | char('\t') % "indentation";
 
   // Basic combining parsers
 
@@ -201,7 +218,7 @@ class MarkdownParser {
       if (!codeResult.isSuccess) {
         return codeResult;
       }
-      if (!options.inlineCodeAttributes) {
+      if (!extensions.inlineCodeAttributes) {
         return codeResult;
       }
       ParseResult attrRes = (whitespace.maybe + attributes ^ (a, b) => b).run(s, codeResult.position);
@@ -226,11 +243,11 @@ class MarkdownParser {
     });
   }
 
-  Parser get endUnderscore => options.intrawordUnderscores
+  Parser get endUnderscore => extensions.intrawordUnderscores
   ? char('_').notFollowedBy(alphanum)
   : char('_');
 
-  Parser get startUnderscore => options.intrawordUnderscores
+  Parser get startUnderscore => extensions.intrawordUnderscores
   ? notAfterString() + char('_') ^ (a, b) => null
   : char('_');
 
@@ -336,19 +353,19 @@ referenceLink constructor (lab, raw) = do
 
   // Strikeout
 
-  Parser get strikeout => options.strikeout
+  Parser get strikeout => extensions.strikeout
   ? inlinesBetween(string('~~').notFollowedBy(char('~')) > noneOf('\t\n \r').lookAhead, string('~~')) ^ (i) => new Strikeout(i)
   : fail;
 
   // Subscript
 
-  Parser get subscript => options.subscript
+  Parser get subscript => extensions.subscript
   ? new Parser((s, pos) {
     return (char('~') > many1Till(spaceChar.notAhead > inline, char('~')) ^ (i) => new Subscript(i)).run(s, pos);
   })
   : fail;
 
-  Parser get superscript => options.superscript
+  Parser get superscript => extensions.superscript
   ? new Parser((s, pos) {
     return (char('^') > many1Till(spaceChar.notAhead > inline, char('^')) ^ (i) => new Superscript(i)).run(s, pos);
   })
@@ -369,7 +386,7 @@ referenceLink constructor (lab, raw) = do
           break;
 
         case '\n':
-          if (options.escapedLineBreaks) {
+          if (extensions.escapedLineBreaks) {
             res = res.copy(value: new LineBreak());
           } else {
             return fail.run(s, pos);
@@ -474,7 +491,7 @@ para = try $ do
   // Plain
   Parser get plain => inline.many1 ^ ((inlines) => new Para(groupInlines(inlines)));
 
-  // Code Block Fenced
+  // Fenced code block
 
   Parser blockDelimiter(String c, [int len]) {
     if (len != null) {
@@ -500,13 +517,13 @@ para = try $ do
 
   Parser get codeBlockFenced => new Parser((s, pos) {
     var c;
-    if (options.fencedCodeBlocks) {
+    if (extensions.fencedCodeBlocks) {
       var testRes = char('~').lookAhead.run(s, pos);
       if (testRes.isSuccess) {
         c = '~';
       }
     }
-    if (c == null && options.backtickCodeBlocks) {
+    if (c == null && extensions.backtickCodeBlocks) {
       var testRes = char('`').lookAhead.run(s, pos);
       if (testRes.isSuccess) {
         c = '`';
@@ -523,7 +540,7 @@ para = try $ do
       return startRes;
     }
     var size = startRes.value;
-    ParseResult attrRes = (spaceChar.skipMany > ((guardEnabled(options.fencedCodeAttributes) > attributes) |
+    ParseResult attrRes = (spaceChar.skipMany > ((guardEnabled(extensions.fencedCodeAttributes) > attributes) |
     (nonSpaceChar.many1 ^ (str) => B.attr("", [toLanguageId(str.join(''))], {
     })))).orElse(B.nullAttr).run(s, startRes.position);
     assert(attrRes.isSuccess);
@@ -539,7 +556,7 @@ para = try $ do
 
   Parser get atxHeader => new Parser((s, pos) {
     Parser startParser = char('#').many1;
-    if (options.fancyLists) {
+    if (extensions.fancyLists) {
       startParser = startParser.notFollowedBy(oneOf(".)"));
     }
     ParseResult startRes = startParser.run(s, pos);
@@ -561,7 +578,7 @@ para = try $ do
     Attr attr = B.nullAttr;
     ParseResult res;
     Position start = pos;
-    if (options.mmdHeaderIdentifiers) {
+    if (extensions.mmdHeaderIdentifiers) {
       res = mmdHeaderIdentifier.run(s, pos);
       if (res.isSuccess) {
         attr = res.value;
@@ -570,7 +587,7 @@ para = try $ do
     }
     res = (char('#').skipMany > skipSpaces).run(s, start);
     assert(res.isSuccess);
-    if (options.headerAttributes) {
+    if (extensions.headerAttributes) {
       res = attributes.run(s, res.position);
       if (res.isSuccess) {
         attr = res.value;
@@ -620,14 +637,14 @@ para = try $ do
     Attr attr = B.nullAttr;
     ParseResult res;
     Position start = pos;
-    if (options.mmdHeaderIdentifiers) {
+    if (extensions.mmdHeaderIdentifiers) {
       res = mmdHeaderIdentifier.run(s, start);
       if (res.isSuccess) {
         attr = res.value;
         start = res.position;
       }
     }
-    if (options.headerAttributes) {
+    if (extensions.headerAttributes) {
       res = attributes.run(s, start);
       if (res.isSuccess) {
         attr = res.value;
@@ -642,7 +659,18 @@ para = try $ do
     }
   });
 
+  // Indented code blocks
+
+  Parser get indentedLine => (indentSpaces > anyLine) ^ (line) => line + "\n";
+
+  Parser get codeBlockIndented =>
+    ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many1 < blanklines.maybe) ^ (c) =>
+      B.codeBlock(stripTrailingNewlines(c.join('')), B.attr("", options.indentedCodeClasses, {}));
+
+  //
   // Block parsers
+  //
+
   Parser get block => choice([
       blanklines ^ (_) => null,
       codeBlockFenced,
@@ -656,7 +684,7 @@ para = try $ do
       // htmlBlock
       // table
       // lineBlock
-      // codeBlockIndented
+      codeBlockIndented,
       // blockQuote
       // hrule
       // orderedList
@@ -672,11 +700,11 @@ para = try $ do
   // Document
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(res.where((block) => block != null))) % "document";
 
-  static MarkdownParser PANDOC = new MarkdownParser(MarkdownParserOptions.PANDOC);
-  static MarkdownParser PHPEXTRA = new MarkdownParser(MarkdownParserOptions.PHPEXTRA);
-  static MarkdownParser GITHUB = new MarkdownParser(MarkdownParserOptions.GITHUB);
-  static MarkdownParser MMD = new MarkdownParser(MarkdownParserOptions.MMD);
-  static MarkdownParser STRICT = new MarkdownParser(MarkdownParserOptions.STRICT);
+  static MarkdownParser PANDOC = new MarkdownParser(MarkdownParserExtensions.PANDOC);
+  static MarkdownParser PHPEXTRA = new MarkdownParser(MarkdownParserExtensions.PHPEXTRA);
+  static MarkdownParser GITHUB = new MarkdownParser(MarkdownParserExtensions.GITHUB);
+  static MarkdownParser MMD = new MarkdownParser(MarkdownParserExtensions.MMD);
+  static MarkdownParser STRICT = new MarkdownParser(MarkdownParserExtensions.STRICT);
 
   static MarkdownParser DEFAULT = new MarkdownParser();
 }

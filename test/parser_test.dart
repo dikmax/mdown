@@ -4,10 +4,10 @@ import 'package:parsers/parsers.dart';
 import 'package:markdowntypography/builder.dart' as B;
 
 void main() {
-  MarkdownParser emptyParser = new MarkdownParser(new MarkdownParserOptions(headerAttributes: false));
+  MarkdownParser emptyParser = new MarkdownParser(new MarkdownParserExtensions(headerAttributes: false));
   t.group('headers', () {
-    MarkdownParser headerAttributes = new MarkdownParser(new MarkdownParserOptions(headerAttributes: true));
-    MarkdownParser mmdHeaderIdentifiers = new MarkdownParser(new MarkdownParserOptions(mmdHeaderIdentifiers: true));
+    MarkdownParser headerAttributes = new MarkdownParser(new MarkdownParserExtensions(headerAttributes: true));
+    MarkdownParser mmdHeaderIdentifiers = new MarkdownParser(new MarkdownParserExtensions(mmdHeaderIdentifiers: true));
     testEquals("atx with header attributes", '## Header ### {#header}\n\nParagraph',
       B.doc(B.header(2, B.attr('header', [], {}), B.str('Header')),
         B.para(B.str("Paragraph"))), headerAttributes);
@@ -41,13 +41,24 @@ void main() {
     );
   });
 
+  t.group("indented code block", () {
+    testEquals('single line', '    code\n', B.codeBlock('code'), emptyParser);
+    testEquals('include leading whitespace after indentation',
+      '    zero\n     one\n      two\n       three',
+      B.codeBlock('zero\n one\n  two\n   three'), emptyParser);
+    testEquals('code blocks separated by newlines form one block',
+      '    zero\n    one\n\n    two\n\n    three\n',
+      B.codeBlock('zero\none\n\ntwo\n\n\nthree'), emptyParser);
+  });
+
   t.group("fenched code block", () {
-    MarkdownParser backtickCodeBlocks = new MarkdownParser(new MarkdownParserOptions(backtickCodeBlocks: true));
-    MarkdownParser fencedCodeBlocks = new MarkdownParser(new MarkdownParserOptions(fencedCodeBlocks: true));
-    MarkdownParser codeBlocks = new MarkdownParser(new MarkdownParserOptions(
+    MarkdownParser backtickCodeBlocks = new MarkdownParser(new MarkdownParserExtensions(backtickCodeBlocks: true));
+    MarkdownParser fencedCodeBlocks = new MarkdownParser(new MarkdownParserExtensions(fencedCodeBlocks: true));
+    MarkdownParser codeBlocks = new MarkdownParser(new MarkdownParserExtensions(
         backtickCodeBlocks: true,
         fencedCodeBlocks: true,
-        fencedCodeAttributes: true));
+        fencedCodeAttributes: true
+    ));
     testEquals("without an optional language identifier", "```\ncode\n```\n",
       B.codeBlock("code", B.nullAttr), backtickCodeBlocks);
     testEquals("with an optional language identifier", "```dart\ncode\n```\n",
@@ -353,7 +364,7 @@ bareLinkTests =
  */
 
 final MarkdownParser defaultParser = MarkdownParser.DEFAULT;
-final MarkdownParser noIntrawordUnderscoreParser = new MarkdownParser(new MarkdownParserOptions(intrawordUnderscores: false));
+final MarkdownParser noIntrawordUnderscoreParser = new MarkdownParser(new MarkdownParserExtensions(intrawordUnderscores: false));
 void testEquals(description, String str, result, [MarkdownParser parser]) {
   t.test(description, () {
     if (parser == null) {

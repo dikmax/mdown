@@ -1,7 +1,7 @@
 part of markdown;
 
 // TODO recheck all options after implementation
-class MarkdownParserOptions {
+class MarkdownParserExtensions {
   /**
    * Pandoc/PHP/MMD style footnotes
    */
@@ -262,7 +262,7 @@ class MarkdownParserOptions {
    */
   final bool lineBlocks;
 
-  const MarkdownParserOptions({
+  const MarkdownParserExtensions({
                               this.footnotes: false,
                               this.inlineNotes: false,
                               this.pandocTitleBlock: false,
@@ -317,7 +317,7 @@ class MarkdownParserOptions {
                               this.lineBlocks: false
                               });
 
-  MarkdownParserOptions setOption({
+  MarkdownParserExtensions setOption({
                                   footnotes,
                                   inlineNotes,
                                   pandocTitleBlock,
@@ -370,7 +370,7 @@ class MarkdownParserOptions {
                                   mmdHeaderIdentifiers,
                                   implicitHeaderReferences,
                                   lineBlocks
-                                  }) => const MarkdownParserOptions(
+                                  }) => const MarkdownParserExtensions(
       footnotes: footnotes == null ? this.footnotes : footnotes,
       inlineNotes: inlineNotes == null ? this.inlineNotes : inlineNotes,
       pandocTitleBlock: pandocTitleBlock == null ? this.pandocTitleBlock : pandocTitleBlock,
@@ -422,10 +422,12 @@ class MarkdownParserOptions {
       headerAttributes: headerAttributes == null ? this.headerAttributes : headerAttributes,
       mmdHeaderIdentifiers: mmdHeaderIdentifiers == null ? this.mmdHeaderIdentifiers : mmdHeaderIdentifiers,
       implicitHeaderReferences: implicitHeaderReferences == null ? this.implicitHeaderReferences : implicitHeaderReferences,
-      lineBlocks: lineBlocks == null ? this.lineBlocks : lineBlocks
+      lineBlocks: lineBlocks == null ? this.lineBlocks : lineBlocks,
+
+      tabStop: tabStop == null ? this.tabStop : tabStop
   );
 
-  static const MarkdownParserOptions PANDOC = const MarkdownParserOptions(
+  static const MarkdownParserExtensions PANDOC = const MarkdownParserExtensions(
       footnotes: true,
       inlineNotes: true,
       pandocTitleBlock: true,
@@ -467,7 +469,7 @@ class MarkdownParserOptions {
       lineBlocks: true
   );
 
-  static const MarkdownParserOptions PHPEXTRA = const MarkdownParserOptions(
+  static const MarkdownParserExtensions PHPEXTRA = const MarkdownParserExtensions(
       footnotes: true,
       pipeTables: true,
       rawHtml: true,
@@ -479,7 +481,7 @@ class MarkdownParserOptions {
       abbreviations: true
   );
 
-  static const MarkdownParserOptions GITHUB = const MarkdownParserOptions(
+  static const MarkdownParserExtensions GITHUB = const MarkdownParserExtensions(
       pipeTables: true,
       rawHtml: true,
       texMathSingleBackslash: true,
@@ -493,7 +495,7 @@ class MarkdownParserOptions {
       hardLineBreaks: true
   );
 
-  static const MarkdownParserOptions MMD = const MarkdownParserOptions(
+  static const MarkdownParserExtensions MMD = const MarkdownParserExtensions(
       pipeTables: true,
       rawHtml: true,
       markdownAttribute: true,
@@ -510,9 +512,27 @@ class MarkdownParserOptions {
       mmdHeaderIdentifiers: true
   );
 
-  static const MarkdownParserOptions STRICT = const MarkdownParserOptions(
+  static const MarkdownParserExtensions STRICT = const MarkdownParserExtensions(
       rawHtml: true
   );
 
-  static const MarkdownParserOptions DEFAULT = PANDOC;
+  static const MarkdownParserExtensions DEFAULT = PANDOC;
+}
+
+class MarkdownParserOptions {
+  /**
+   * Tab stop
+   */
+  int tabStop;
+
+  /**
+   * Default classes for indented code blocks
+   */
+  List<String> indentedCodeClasses;
+
+  MarkdownParserOptions([this.tabStop = 4, this.indentedCodeClasses]) {
+    if (indentedCodeClasses == null) {
+      indentedCodeClasses = [];
+    }
+  }
 }
