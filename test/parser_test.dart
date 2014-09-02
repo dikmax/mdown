@@ -5,7 +5,6 @@ import 'package:markdowntypography/builder.dart' as B;
 
 void main() {
   MarkdownParser emptyParser = new MarkdownParser(new MarkdownParserOptions(headerAttributes: false));
-
   t.group('headers', () {
     MarkdownParser headerAttributes = new MarkdownParser(new MarkdownParserOptions(headerAttributes: true));
     MarkdownParser mmdHeaderIdentifiers = new MarkdownParser(new MarkdownParserOptions(mmdHeaderIdentifiers: true));
@@ -40,6 +39,27 @@ void main() {
           B.para(B.str("Paragraph"))
       ), emptyParser
     );
+  });
+
+  t.group("fenched code block", () {
+    MarkdownParser backtickCodeBlocks = new MarkdownParser(new MarkdownParserOptions(backtickCodeBlocks: true));
+    MarkdownParser fencedCodeBlocks = new MarkdownParser(new MarkdownParserOptions(fencedCodeBlocks: true));
+    MarkdownParser codeBlocks = new MarkdownParser(new MarkdownParserOptions(
+        backtickCodeBlocks: true,
+        fencedCodeBlocks: true,
+        fencedCodeAttributes: true));
+    testEquals("without an optional language identifier", "```\ncode\n```\n",
+      B.codeBlock("code", B.nullAttr), backtickCodeBlocks);
+    testEquals("with an optional language identifier", "```dart\ncode\n```\n",
+      B.codeBlock("code", B.attr("", ["dart"], {})), backtickCodeBlocks);
+    testEquals("pandoc style without language identifier", "~~~~~\ncode\n~~~~~\n",
+      B.codeBlock("code", B.nullAttr), fencedCodeBlocks);
+    testEquals("pandoc style with language identifier", "~~~~~dart\ncode\n~~~~~\n",
+      B.codeBlock("code", B.attr("", ["dart"], {})), fencedCodeBlocks);
+    testEquals("pandoc style with inner tildes row", "~~~~~\n~~~\ncode\n~~~\n~~~~~\n",
+      B.codeBlock("~~~\ncode\n~~~", B.nullAttr), fencedCodeBlocks);
+    testEquals("backticks with attributes", "``` {.dart #id}\ncode\n```\n",
+      B.codeBlock("code", B.attr("id", ["dart"], {})), codeBlocks);
   });
 
   t.group('images', () {
