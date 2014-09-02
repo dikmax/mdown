@@ -188,7 +188,15 @@ bulletList = singleton . BulletList . map toList
 
 definitionList :: [(Inlines, [Blocks])] -> Blocks
 definitionList = singleton . DefinitionList .  map (toList *** map toList)
+*/
 
+Header header(int level, Attr attr, [Inline a, Inline b, Inline c, Inline d, Inline e, Inline f, Inline g, Inline h,
+              Inline i, Inline j, Inline k, Inline l, Inline m, Inline n, Inline o, Inline p, Inline q, Inline r,
+              Inline s, Inline t, Inline u, Inline v, Inline w, Inline x, Inline y, Inline z]) {
+  return new Header(level, attr, _buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z));
+}
+
+/*
 header :: Int  -- ^ Level
        -> Inlines
        -> Blocks

@@ -8,6 +8,21 @@ void main() {
     testEquals("regular", "![Caption](http://asdf.asdf/asdf.jpg)",
       B.image(B.target("http://asdf.asdf/asdf.jpg", ""), B.str("Caption")));
   });
+
+  t.group('headers', () {
+    testEquals("atx", '## Header ### {#header}\n\nParagraph',
+      B.doc(B.header(2, B.attr('header', [], {}), B.str('Header')),
+        B.para(B.str("Paragraph"))));
+
+    testEquals("setext", "Header 1\n=======\nHeader 2 {#id2}\n------\n\nParagraph",
+      B.doc(
+          B.header(1, B.nullAttr, B.str('Header'), B.space, B.str('1')),
+          B.header(2, B.attr('id2', [], {}), B.str('Header'), B.space, B.str('2')),
+          B.para(B.str("Paragraph"))
+      )
+    );
+  });
+
   t.group('formatting', () {
     testEquals("strikeout", "This ~~is strikeout~~ test.",
       B.para(B.str("This"), B.space, B.strikeout(B.str("is"), B.space, B.str("strikeout")), B.space, B.str("test.")));
@@ -294,7 +309,7 @@ bareLinkTests =
  */
 
 final MarkdownParser defaultParser = MarkdownParser.DEFAULT;
-final MarkdownParser noIntrawordUnderscoreParser = new MarkdownParser(new MarkdownParserOptions(extIntrawordUnderscores: false));
+final MarkdownParser noIntrawordUnderscoreParser = new MarkdownParser(new MarkdownParserOptions(intrawordUnderscores: false));
 void testEquals(description, String str, result, [MarkdownParser parser]) {
   t.test(description, () {
     if (parser == null) {

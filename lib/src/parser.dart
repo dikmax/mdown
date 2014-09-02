@@ -65,7 +65,6 @@ class MarkdownParser {
     } else {
       newPos = new Position(offset, pos.line, pos.character + result.length);
     }
-    print(result);
     return new ParseResult(s, new Expectations.empty(newPos), newPos, true, false, result);
   });
 
@@ -536,8 +535,7 @@ para = try $ do
 
   // Header
 
-  Parser get header => /*setextHeader | */
-  atxHeader % "header";
+  Parser get header => setextHeader | atxHeader % "header";
 
   Parser get atxHeader => new Parser((s, pos) {
     Parser startParser = char('#').many1;
@@ -586,14 +584,41 @@ para = try $ do
   });
 
   Parser get mmdHeaderIdentifier => (reference < skipSpaces) ^ (v) => new Attr(v[1], [], {});
+
+  static const String setextHChars = "=-";
+
+  Parser get setextHeader => new Parser((s, pos) {
+    // Lookahead test
+    ParseResult testRes = ((anyLine > oneOf(setextHChars).many1) > blankline).lookAhead.run(s, pos);
+    //print("test $testRes");
+    if (!testRes.isSuccess) {
+      return testRes;
+    }
+
+    ParseResult textRes = (setextHeaderEnd.notAhead > inline).many1.run(s, pos);
+    //print("text $textRes");
+    if (!textRes.isSuccess) {
+      return textRes;
+    }
+    var text = trimInlines(groupInlines(textRes.value));
+
+    var attrRes = setextHeaderEnd.run(s, textRes.position);
+    //print("attr $attrRes");
+    if (!attrRes.isSuccess) {
+      return attrRes;
+    }
+    var attr = attrRes.value;
+
+    var levelRes = (oneOf(setextHChars).many1 ^ (v) => v[0] == '=' ? 1 : 2).run(s, attrRes.position);
+    //print("level $levelRes");
+    if (!levelRes.isSuccess) {
+      return levelRes;
+    }
+    int level = levelRes.value;
+
+    return (blanklines ^ (_) => new Header(level, attr, text)).run(s, levelRes.position);
+  });
   /*
-setextHeaderEnd :: MarkdownParser Attr
-setextHeaderEnd = try $ do
-  attr <- option nullAttr
-          $ (guardEnabled Ext_mmd_header_identifiers >> mmdHeaderIdentifier)
-           <|> (guardEnabled Ext_header_attributes >> attributes)
-  blanklines
-  return attr
 
 setextHeader :: MarkdownParser (F Blocks)
 setextHeader = try $ do
@@ -608,8 +633,42 @@ setextHeader = try $ do
   let level = (fromMaybe 0 $ findIndex (== underlineChar) setextHChars) + 1
   attr' <- registerHeader attr (runF text defaultParserState)
   return $ B.headerWith attr' level <$> text
-
    */
+
+  Parser get setextHeaderEnd => new Parser((s, pos) {
+    Attr attr = B.nullAttr;
+    ParseResult res;
+    Position start = pos;
+    if (options.mmdHeaderIdentifiers) {
+      res = mmdHeaderIdentifier.run(s, start);
+      if (res.isSuccess) {
+        attr = res.value;
+        start = res.position;
+      }
+    }
+    if (options.headerAttributes) {
+      res = attributes.run(s, start);
+      if (res.isSuccess) {
+        attr = res.value;
+        start = res.position;
+      }
+    }
+    res = blankline.run(s, start);
+    if (res.isSuccess) {
+      return res.copy(value: attr);
+    } else {
+      return res.copy(position: pos);
+    }
+  });
+  /*
+setextHeaderEnd :: MarkdownParser Attr
+setextHeaderEnd = try $ do
+  attr <- option nullAttr
+          $ (guardEnabled Ext_mmd_header_identifiers >> mmdHeaderIdentifier)
+           <|> (guardEnabled Ext_header_attributes >> attributes)
+  blanklines
+  return attr
+  */
 
   // Block parsers
   Parser get block => choice([
