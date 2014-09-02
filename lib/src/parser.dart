@@ -429,7 +429,7 @@ referenceLink constructor (lab, raw) = do
 
       if (inline is Str && prev is Str) {
         (prev as Str).str += inline.str;
-      } else {
+      } else if (inline is! Space || prev is! Space) {
         result.add(prev);
         prev = inline;
       }
@@ -539,11 +539,6 @@ para = try $ do
   Parser get header => /*setextHeader | */
   atxHeader % "header";
 
-  /*
-header :: MarkdownParser (F Blocks)
-header = setextHeader <|> atxHeader <?> "header"
-*/
-
   Parser get atxHeader => new Parser((s, pos) {
     Parser startParser = char('#').many1;
     if (options.fancyLists) {
@@ -554,32 +549,44 @@ header = setextHeader <|> atxHeader <?> "header"
       return startRes;
     }
     int level = startRes.value.length;
+    ParseResult textRes = (atxClosing.notAhead > inline).many.run(s, startRes.position);
+    assert(textRes.isSuccess);
+    var text = trimInlines(groupInlines(textRes.value));
+    ParseResult attrRes = atxClosing.run(s, textRes.position);
+    assert(attrRes.isSuccess);
+    var attr = attrRes.value;
+    // attr' <- registerHeader attr (runF text defaultParserState)
+    return attrRes.copy(value: new Header(level, attr, text));
   });
 
+  Parser get atxClosing => new Parser((s, pos) {
+    Attr attr = B.nullAttr;
+    ParseResult res;
+    Position start = pos;
+    if (options.mmdHeaderIdentifiers) {
+      res = mmdHeaderIdentifier.run(s, pos);
+      if (res.isSuccess) {
+        attr = res.value;
+        start = res.position;
+      }
+    }
+    res = (char('#').skipMany > skipSpaces).run(s, start);
+    assert(res.isSuccess);
+    if (options.headerAttributes) {
+      res = attributes.run(s, res.position);
+      if (res.isSuccess) {
+        attr = res.value;
+      }
+    }
+    res = blanklines.run(s, res.position);
+    if (!res.isSuccess) {
+      return res.copy(position: pos);
+    }
+    return res.copy(value: attr);
+  });
 
+  Parser get mmdHeaderIdentifier => (reference < skipSpaces) ^ (v) => new Attr(v[1], [], {});
   /*
-atxHeader :: MarkdownParser (F Blocks)
-atxHeader = try $ do
-  level <- many1 (char '#') >>= return . length
-  notFollowedBy $ guardEnabled Ext_fancy_lists >>
-                  (char '.' <|> char ')') -- this would be a list
-  skipSpaces
-  text <- trimInlinesF . mconcat <$> many (notFollowedBy atxClosing >> inline)
-  attr <- atxClosing
-  attr' <- registerHeader attr (runF text defaultParserState)
-  return $ B.headerWith attr' level <$> text
-
-atxClosing :: MarkdownParser Attr
-atxClosing = try $ do
-  attr' <- option nullAttr
-             (guardEnabled Ext_mmd_header_identifiers >> mmdHeaderIdentifier)
-  skipMany (char '#')
-  skipSpaces
-  attr <- option attr'
-             (guardEnabled Ext_header_attributes >> attributes)
-  blanklines
-  return attr
-
 setextHeaderEnd :: MarkdownParser Attr
 setextHeaderEnd = try $ do
   attr <- option nullAttr
@@ -587,12 +594,6 @@ setextHeaderEnd = try $ do
            <|> (guardEnabled Ext_header_attributes >> attributes)
   blanklines
   return attr
-
-mmdHeaderIdentifier :: MarkdownParser Attr
-mmdHeaderIdentifier = do
-  ident <- stripFirstAndLast . snd <$> reference
-  skipSpaces
-  return (ident,[],[])
 
 setextHeader :: MarkdownParser (F Blocks)
 setextHeader = try $ do
@@ -617,7 +618,7 @@ setextHeader = try $ do
       // yamlMetaBlock,
       // guardEnabled Ext_latex_macros *> (macro >>= return . return)
       // bulletList
-      // header
+      header,
       // lhsCodeBlock
       // rawTeXBlock
       // divHtml
@@ -639,6 +640,12 @@ setextHeader = try $ do
 
   // Document
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(res.where((block) => block != null))) % "document";
+
+  static MarkdownParser PANDOC = new MarkdownParser(MarkdownParserOptions.PANDOC);
+  static MarkdownParser PHPEXTRA = new MarkdownParser(MarkdownParserOptions.PHPEXTRA);
+  static MarkdownParser GITHUB = new MarkdownParser(MarkdownParserOptions.GITHUB);
+  static MarkdownParser MMD = new MarkdownParser(MarkdownParserOptions.MMD);
+  static MarkdownParser STRICT = new MarkdownParser(MarkdownParserOptions.STRICT);
 
   static MarkdownParser DEFAULT = new MarkdownParser();
 }
