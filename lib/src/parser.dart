@@ -590,50 +590,31 @@ para = try $ do
   Parser get setextHeader => new Parser((s, pos) {
     // Lookahead test
     ParseResult testRes = ((anyLine > oneOf(setextHChars).many1) > blankline).lookAhead.run(s, pos);
-    //print("test $testRes");
     if (!testRes.isSuccess) {
       return testRes;
     }
 
     ParseResult textRes = (setextHeaderEnd.notAhead > inline).many1.run(s, pos);
-    //print("text $textRes");
     if (!textRes.isSuccess) {
       return textRes;
     }
     var text = trimInlines(groupInlines(textRes.value));
 
     var attrRes = setextHeaderEnd.run(s, textRes.position);
-    //print("attr $attrRes");
     if (!attrRes.isSuccess) {
       return attrRes;
     }
     var attr = attrRes.value;
 
     var levelRes = (oneOf(setextHChars).many1 ^ (v) => v[0] == '=' ? 1 : 2).run(s, attrRes.position);
-    //print("level $levelRes");
     if (!levelRes.isSuccess) {
       return levelRes;
     }
     int level = levelRes.value;
 
+    //   attr' <- registerHeader attr (runF text defaultParserState)
     return (blanklines ^ (_) => new Header(level, attr, text)).run(s, levelRes.position);
   });
-  /*
-
-setextHeader :: MarkdownParser (F Blocks)
-setextHeader = try $ do
-  -- This lookahead prevents us from wasting time parsing Inlines
-  -- unless necessary -- it gives a significant performance boost.
-  lookAhead $ anyLine >> many1 (oneOf setextHChars) >> blankline
-  text <- trimInlinesF . mconcat <$> many1 (notFollowedBy setextHeaderEnd >> inline)
-  attr <- setextHeaderEnd
-  underlineChar <- oneOf setextHChars
-  many (char underlineChar)
-  blanklines
-  let level = (fromMaybe 0 $ findIndex (== underlineChar) setextHChars) + 1
-  attr' <- registerHeader attr (runF text defaultParserState)
-  return $ B.headerWith attr' level <$> text
-   */
 
   Parser get setextHeaderEnd => new Parser((s, pos) {
     Attr attr = B.nullAttr;
@@ -660,15 +641,6 @@ setextHeader = try $ do
       return res.copy(position: pos);
     }
   });
-  /*
-setextHeaderEnd :: MarkdownParser Attr
-setextHeaderEnd = try $ do
-  attr <- option nullAttr
-          $ (guardEnabled Ext_mmd_header_identifiers >> mmdHeaderIdentifier)
-           <|> (guardEnabled Ext_header_attributes >> attributes)
-  blanklines
-  return attr
-  */
 
   // Block parsers
   Parser get block => choice([
