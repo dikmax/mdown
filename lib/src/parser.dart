@@ -1,4 +1,4 @@
-part of markdown;
+part of markdownf;
 
 class MarkdownParser {
   final MarkdownParserExtensions extensions;
@@ -14,6 +14,7 @@ class MarkdownParser {
 
   // OptionsCheck
 
+  // TODO Remove guards
   Parser guardEnabled(bool option) => option ? success(null) : fail;
 
   Parser guardDisabled(bool option) => option ? fail : success(null);
@@ -43,6 +44,42 @@ class MarkdownParser {
   static Parser skipSpaces = spaceChar.skipMany;
   static Parser blankline = skipSpaces > newline % 'blankline';
   static Parser blanklines = blankline.many1 % 'blanklines';
+  Parser get skipNonindentSpaces => atMostSpaces(options.tabStop - 1).notFollowedBy(char(' '));
+
+  /*
+  skipNonindentSpaces :: MarkdownParser Int
+skipNonindentSpaces = do
+  tabStop <- getOption readerTabStop
+  atMostSpaces (tabStop - 1) <* notFollowedBy (char ' ')
+
+   */
+
+  static Parser atMostSpaces(n) {
+    if (n <= 0) {
+      return success(0);
+    }
+
+    return new Parser((s, pos) {
+      int i = 0;
+      Position position = pos;
+      while (i < n) {
+        var res = char(' ').run(s, position);
+        if (!res.isSuccess) {
+          return success(i).run(s, position);
+        }
+        position = res.position;
+        ++i;
+      }
+      return success(i).run(s, position);
+    });
+  }
+
+  /*
+  atMostSpaces :: Int -> MarkdownParser Int
+atMostSpaces n
+  | n > 0     = (char ' ' >> (+1) <$> atMostSpaces (n-1)) <|> return 0
+  | otherwise = return 0
+   */
 
   Parser get litChar => choice([
       escapedChar1,
@@ -64,7 +101,8 @@ class MarkdownParser {
     return inlines;
   }
 
-  Parser get anyLine => new Parser((s, Position pos) {
+  // TODO check dependent rules and make them static
+  static Parser get anyLine => new Parser((s, Position pos) {
     String result = '';
     int offset = pos.offset, len = s.length;
     if (offset >= len) {
@@ -117,7 +155,7 @@ class MarkdownParser {
     });
   }
 
-  Parser count(int l, Parser p) {
+  static Parser count(int l, Parser p) {
     return new Parser((s, pos) {
       var position = pos;
       var value = [];
@@ -493,7 +531,7 @@ para = try $ do
 
   // Fenced code block
 
-  Parser blockDelimiter(String c, [int len]) {
+  static Parser blockDelimiter(String c, [int len]) {
     if (len != null) {
       return (count(len, char(c)) > char(c).many) ^ (_) => len;
     } else {
@@ -671,7 +709,7 @@ para = try $ do
 
   static const String hruleChars = '*-_';
 
-  Parser get hrule => new Parser((s, pos) {
+  static Parser get hrule => new Parser((s, pos) {
     ParseResult startRes = (skipSpaces > oneOf(hruleChars)).run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
@@ -682,6 +720,174 @@ para = try $ do
       success(new HorizontalRule())).run(s, startRes.position);
   });
 
+  // Lists
+
+  Parser get bulletList => listItem(bulletListStart).many1 ^ (items) => new BulletList(items);
+  /*
+  bulletList :: MarkdownParser (F Blocks)
+bulletList = do
+  items <- fmap sequence $ many1 $ listItem  bulletListStart
+  return $ B.bulletList <$> fmap compactify' items
+   */
+
+  Parser listItem(Parser start) => new Parser((s, pos) {
+    ParseResult firstRes = rawListItem(start).run(s, pos);
+    if (!firstRes.isSuccess) {
+      return firstRes;
+    }
+    var first = firstRes.value;
+
+    ParseResult<List<String>> continuationsRes = listContinuation.many.run(s, firstRes.position);
+
+    // TODO context
+
+    String raw = first + continuationsRes.value.join("");
+
+    List<Block> blocks = block.many1.parse(raw);
+
+    return continuationsRes.copy(value: blocks);
+  });
+
+  /*
+  listItem :: MarkdownParser a
+         -> MarkdownParser (F Blocks)
+listItem start = try $ do
+  first <- rawListItem start
+  continuations <- many listContinuation
+  -- parsing with ListItemState forces markers at beginning of lines to
+  -- count as list item markers, even if not separated by blank space.
+  -- see definition of "endline"
+  state <- getState
+  let oldContext = stateParserContext state
+  setState $ state {stateParserContext = ListItemState}
+  -- parse the extracted block, which may contain various block elements:
+  let raw = concat (first:continuations)
+  contents <- parseFromString parseBlocks raw
+  updateState (\st -> st {stateParserContext = oldContext})
+  return contents
+
+   */
+
+  /**
+   * parse raw text for one list item, excluding start marker and continuations
+   */
+  Parser rawListItem(Parser start) =>
+    ((start > listLineCommon) + ((listStart | blankline).notAhead > listLine).many + blankline.many) ^
+      (first, rest, blanks) => first + rest.join('') + blanks.join(''); // TODO
+
+  /*
+rawListItem :: MarkdownParser a
+            -> MarkdownParser String
+rawListItem start = try $ do
+  start
+  first <- listLineCommon
+  rest <- many (notFollowedBy listStart >> notFollowedBy blankline >> listLine)
+  blanks <- many blankline
+  return $ unlines (first:rest) ++ blanks
+   */
+
+  // TODO support for html comments
+  static Parser listLineCommon = anyLine;
+
+  /*
+  listLineCommon :: MarkdownParser String
+listLineCommon = concat <$> manyTill
+              (  many1 (satisfy $ \c -> c /= '\n' && c /= '<')
+             <|> liftM snd (htmlTag isCommentTag)
+             <|> count 1 anyChar
+              ) newline
+   */
+
+  Parser get listStart => bulletListStart; /*| anyOrderedListStart */
+  /*
+  listStart :: MarkdownParser ()
+listStart = bulletListStart <|> (anyOrderedListStart >> return ())
+
+   */
+
+  Parser get bulletListStart => new Parser((s, pos) {
+    var startPosParser = (newline.maybe > position) ^
+        (Position pos) => pos.character;
+    var startPosRes = startPosParser.run(s, pos);
+    if (!startPosRes.isSuccess) {
+      return startPosRes;
+    }
+    int startPos = startPosRes.value;
+
+    var endPosParser = ((skipNonindentSpaces.notFollowedBy(hrule) > bulletListMarker) > position) ^
+        (Position pos) => pos.character;
+    var endPosRes = endPosParser.run(s, startPosRes.position);
+    if (!endPosRes.isSuccess) {
+      return endPosRes;
+    }
+    int endPos = endPosRes.value;
+
+    var restParser = ((newline | spaceChar).lookAhead > atMostSpaces(options.tabStop - (endPos - startPos))) ^ (_) => null;
+    return restParser.run(s, endPosRes.position);
+  });
+
+  static Parser bulletListMarker = oneOf('-+*');
+
+  /*
+bulletListStart :: MarkdownParser ()
+bulletListStart = try $ do
+  optional newline -- if preceded by a Plain block in a list context
+  startpos <- sourceColumn <$> getPosition
+  skipNonindentSpaces
+  notFollowedBy' (() <$ hrule)     -- because hrules start out just like lists
+  satisfy isBulletListMarker
+  endpos <- sourceColumn <$> getPosition
+  tabStop <- getOption readerTabStop
+  lookAhead (newline <|> spaceChar)
+  () <$ atMostSpaces (tabStop - (endpos - startpos))
+   */
+
+  Parser get listLine => (((indentSpaces > spaceChar.many) > listStart).notAhead > indentSpaces.maybe) > listLineCommon;
+
+  /*
+  listLine :: MarkdownParser String
+listLine = try $ do
+  notFollowedBy' (do indentSpaces
+                     many spaceChar
+                     listStart)
+  notFollowedByHtmlCloser
+  optional (() <$ indentSpaces)
+  listLineCommon
+   */
+
+  /**
+   * continuation of a list item - indented and separated by blankline
+   * or (in compact lists) endline.
+   * note: nested lists are parsed as continuations
+   */
+
+  Parser get listContinuation => ((indentSpaces.lookAhead > listContinuationLine.many1) + blankline.many) ^
+    (result, blanks) => result..addAll(blanks);
+
+  /*
+-- continuation of a list item - indented and separated by blankline
+-- or (in compact lists) endline.
+-- note: nested lists are parsed as continuations
+listContinuation :: MarkdownParser String
+listContinuation = try $ do
+  lookAhead indentSpaces
+  result <- many1 listContinuationLine
+  blanks <- many blankline
+  return $ concat result ++ blanks
+`   */
+  Parser get listContinuationLine => (((blankline | listStart).notAhead > indentSpaces.maybe) > anyLine) ^
+      (str) => str + '\n';
+  /*
+  listContinuationLine :: MarkdownParser String
+listContinuationLine = try $ do
+  notFollowedBy blankline
+  notFollowedBy' listStart
+  notFollowedByHtmlCloser
+  optional indentSpaces
+  result <- anyLine
+  return $ result ++ "\n"
+
+   */
   //
   // Block parsers
   //
@@ -691,7 +897,7 @@ para = try $ do
       codeBlockFenced,
       // yamlMetaBlock,
       // guardEnabled Ext_latex_macros *> (macro >>= return . return)
-      // bulletList
+      bulletList,
       header,
       // lhsCodeBlock
       // rawTeXBlock
