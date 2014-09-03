@@ -231,7 +231,13 @@ class Header extends Block {
 
 
 class HorizontalRule extends Block {
-  HorizontalRule();
+  static final HorizontalRule _instance = new HorizontalRule._internal();
+
+  factory HorizontalRule() {
+    return _instance;
+  }
+
+  HorizontalRule._internal();
 
   String toString() => "HorizontalRule";
 

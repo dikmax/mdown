@@ -47,7 +47,7 @@ void main() {
       '    zero\n     one\n      two\n       three',
       B.codeBlock('zero\n one\n  two\n   three'), emptyParser);
     testEquals('code blocks separated by newlines form one block',
-      '    zero\n    one\n\n    two\n\n    three\n',
+      '    zero\n    one\n\n    two\n\n\n    three\n',
       B.codeBlock('zero\none\n\ntwo\n\n\nthree'), emptyParser);
   });
 
@@ -72,6 +72,17 @@ void main() {
     testEquals("backticks with attributes", "``` {.dart #id}\ncode\n```\n",
       B.codeBlock("code", B.attr("id", ["dart"], {})), codeBlocks);
   });
+
+  t.group('horizontal rule', () {
+    testEquals('from dashes', '---\n', B.horizontalRule, emptyParser);
+    testEquals('from asterisks', '*****\n', B.horizontalRule, emptyParser);
+    testEquals('from underscores', '___\n', B.horizontalRule, emptyParser);
+    testEquals('from underscores with spaces', '_    _     _\n', B.horizontalRule, emptyParser);
+    testEquals('from asterisks not at first position', '  *****\n', B.horizontalRule, emptyParser);
+    testEquals('different chars not forms rule', '-_-_-', B.para(B.str('-'), B.emph(B.str('-')), B.str('-')), emptyParser);
+  });
+
+
 
   t.group('images', () {
     testEquals("regular", "![Caption](http://asdf.asdf/asdf.jpg)",

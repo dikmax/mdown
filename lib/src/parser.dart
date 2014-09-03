@@ -667,6 +667,21 @@ para = try $ do
     ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many1 < blanklines.maybe) ^ (c) =>
       B.codeBlock(stripTrailingNewlines(c.join('')), B.attr("", options.indentedCodeClasses, {}));
 
+  // Hrule
+
+  static const String hruleChars = '*-_';
+
+  Parser get hrule => new Parser((s, pos) {
+    ParseResult startRes = (skipSpaces > oneOf(hruleChars)).run(s, pos);
+    if (!startRes.isSuccess) {
+      return startRes;
+    }
+    var start = startRes.value;
+
+    return ((((count(2, skipSpaces > char(start)) > (spaceChar | char(start)).skipMany) > newline) > blanklines.maybe) >
+      success(new HorizontalRule())).run(s, startRes.position);
+  });
+
   //
   // Block parsers
   //
@@ -686,7 +701,7 @@ para = try $ do
       // lineBlock
       codeBlockIndented,
       // blockQuote
-      // hrule
+      hrule,
       // orderedList
       // definitionList
       // noteBlock

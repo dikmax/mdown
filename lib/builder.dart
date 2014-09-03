@@ -196,18 +196,9 @@ Header header(int level, Attr attr, [Inline a, Inline b, Inline c, Inline d, Inl
   return new Header(level, attr, _buildList(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z));
 }
 
+final HorizontalRule horizontalRule = new HorizontalRule();
+
 /*
-header :: Int  -- ^ Level
-       -> Inlines
-       -> Blocks
-header = headerWith nullAttr
-
-headerWith :: Attr -> Int -> Inlines -> Blocks
-headerWith attr level = singleton . Header level attr . toList
-
-horizontalRule :: Blocks
-horizontalRule = singleton HorizontalRule
-
 table :: Inlines               -- ^ Caption
       -> [(Alignment, Double)] -- ^ Column alignments and fractional widths
       -> [Blocks]              -- ^ Headers
