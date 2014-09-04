@@ -743,6 +743,8 @@ bulletList = do
 
     String raw = first + continuationsRes.value.join("");
 
+    print(raw);
+
     List<Block> blocks = block.many1.parse(raw);
 
     return continuationsRes.copy(value: blocks);
@@ -787,7 +789,7 @@ rawListItem start = try $ do
    */
 
   // TODO support for html comments
-  static Parser listLineCommon = anyLine;
+  static Parser listLineCommon = anyLine ^ (l) => l + '\n';
 
   /*
   listLineCommon :: MarkdownParser String
@@ -862,7 +864,7 @@ listLine = try $ do
    */
 
   Parser get listContinuation => ((indentSpaces.lookAhead > listContinuationLine.many1) + blankline.many) ^
-    (result, blanks) => result..addAll(blanks);
+    (result, blanks) => (result..addAll(blanks)).join('');
 
   /*
 -- continuation of a list item - indented and separated by blankline
