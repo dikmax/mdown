@@ -12,6 +12,12 @@ class MarkdownParser {
 
   Document parse(String s) => document.parse(s);
 
+  // State
+
+  int _state = _STATE_DEFAULT;
+  static const int _STATE_DEFAULT = 0;
+  static const int _STATE_LIST_ITEM = 1;
+
   // OptionsCheck
 
   // TODO Remove guards
@@ -210,9 +216,30 @@ atMostSpaces n
       (Iterable c) => c.reduce((v, e) => v + e);
 
   // Inline parsers
-  final Parser whitespace = (spaceChar + skipSpaces ^ (_1, _2) => new Space()) % "whitespace";
-  final Parser str = alphanum.many1 ^ (chars) => new Str(chars.join(""));
-  final Parser endline = newline.notFollowedBy(blankline) ^ (_) => new Space();
+  static final Parser whitespace = (spaceChar + skipSpaces ^ (_1, _2) => new Space()) % "whitespace";
+  static final Parser str = alphanum.many1 ^ (chars) => new Str(chars.join(""));
+  //final Parser endline = newline.notFollowedBy(blankline) ^ (_) => new Space();
+  Parser get endline {
+    Parser nf = blankline;
+    if (_state == _STATE_LIST_ITEM || extensions.listsWithoutPrecedingBlankline) {
+      nf |= listStart;
+    }
+    /*if (!extensions.blankBeforeBlockquote) {
+      nf |= emailBlockQuoteStart;
+    }*/
+    if (!extensions.blankBeforeHeader) {
+      nf |= char('#');
+    }
+    if (extensions.backtickCodeBlocks) {
+      nf |= char('`').lookAhead > codeBlockFenced;
+    }
+    // notFollowedByHtmlCloser
+    var result = extensions.hardLineBreaks ? new LineBreak() : (
+      extensions.ignoreLineBreaks ? null : new Space()
+    );
+    return newline.notFollowedBy(nf) > ((eof > success(null)) | success(result));
+  }
+
   final Parser symbol = noneOf("<\\\n\t ") ^ (ch) => new Str(ch);
 
   Parser inlinesBetween(Parser start, Parser end) {
@@ -739,15 +766,16 @@ bulletList = do
 
     ParseResult<List<String>> continuationsRes = listContinuation.many.run(s, firstRes.position);
 
-    // TODO context
+    int oldState = _state;
+    _state = _STATE_LIST_ITEM;
 
     String raw = first + continuationsRes.value.join("");
 
-    print(raw);
-
     List<Block> blocks = block.many1.parse(raw);
 
-    return continuationsRes.copy(value: blocks);
+    _state = oldState;
+
+    return continuationsRes.copy(value: blocks.where((block) => block != null));
   });
 
   /*
@@ -862,7 +890,6 @@ listLine = try $ do
    * or (in compact lists) endline.
    * note: nested lists are parsed as continuations
    */
-
   Parser get listContinuation => ((indentSpaces.lookAhead > listContinuationLine.many1) + blankline.many) ^
     (result, blanks) => (result..addAll(blanks)).join('');
 
