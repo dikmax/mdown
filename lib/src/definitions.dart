@@ -349,18 +349,6 @@ class Subscript extends Inline {
 }
 
 
-class SmallCaps extends Inline {
-  Iterable<Inline> inlines;
-
-  SmallCaps(this.inlines);
-
-  String toString() => "SmallCaps $inlines";
-
-  bool operator== (obj) => obj is SmallCaps &&
-    _iterableEquality.equals(inlines, obj.inlines);
-}
-
-
 class QuoteType {
   static const QuoteType SingleQuote = const QuoteType._(0, "SingleQuote");
   static const QuoteType DoubleQuote = const QuoteType._(1, "DoubleQuote");
