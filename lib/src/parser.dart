@@ -136,7 +136,10 @@ atMostSpaces n
   ]);
 
   Parser get inlinesInBalancedBrackets => everythingBetween(char('['), char(']'), nested: true) ^
-      (string) => groupInlines(inline.many1.run(string));
+      (string) => gf(inline.many1.run(string));
+
+  List<Inline> tgf(inlines) => trimInlines(groupInlines(flatternInlines(inlines)));
+  List<Inline> gf(inlines) => groupInlines(flatternInlines(inlines));
 
   List<Inline> trimInlines(List<Inline> inlines) {
     while (inlines.last == new Space()) {
@@ -147,6 +150,45 @@ atMostSpaces n
     }
     return inlines;
   }
+
+  List<Inline> flatternInlines(Iterable list) {
+    List<Inline> result = [];
+
+    for (var item in list) {
+      if (item is Iterable) {
+        result.addAll(flatternInlines(item));
+      } else {
+        result.add(item);
+      }
+    }
+
+    return result;
+  }
+
+  List<Inline> groupInlines(Iterable inlines) {
+    List<Inline> result = [];
+    Inline prev;
+    for (Inline inline in inlines) {
+      if (prev == null) {
+        prev = inline;
+        continue;
+      }
+
+      if (inline is Str && prev is Str) {
+        (prev as Str).str += inline.str;
+      } else if (inline is! Space || prev is! Space) {
+        result.add(prev);
+        prev = inline;
+      }
+    }
+
+    if (prev != null) {
+      result.add(prev);
+    }
+
+    return result;
+  }
+
 
   // TODO check dependent rules and make them static
   static Parser get anyLine => new Parser((s, Position pos) {
@@ -186,8 +228,8 @@ atMostSpaces n
     return (start.notFollowedBy(space) > many1Till(middle, end));
   }
 
-  Parser notAfterString() {
-    return new Parser((s, Position pos) {
+  Parser get notAfterString =>
+    new Parser((s, Position pos) {
       if (pos.character == 1) {
         return success(null).run(s, pos);
       }
@@ -200,7 +242,6 @@ atMostSpaces n
         return success(null).run(s, pos);
       }
     });
-  }
 
   static Parser count(int l, Parser p) {
     return new Parser((s, pos) {
@@ -340,40 +381,123 @@ atMostSpaces n
 
   // Emphasis or strong
 
-  Parser strongOrEmphStar() {
+  Parser get strongOrEmph => enclosure('*') | enclosure('_');
+
+  /*
+   * Parses material enclosed in *s, **s, _s, or __s.
+   * Designed to avoid backtracking.
+   */
+  Parser enclosure(String c) {
+    Parser result = new Parser((s, pos) {
+      ParseResult csRes = char(c).many1.run(s, pos);
+      if (!csRes.isSuccess) {
+        return csRes;
+      }
+      String cs = csRes.value.join('');
+      Parser innerParser = whitespace ^ (w) => [new Str(cs), w];
+      switch (cs.length) {
+        case 3:
+          innerParser |= three(c);
+          break;
+
+        case 2:
+          innerParser |= two(c, []);
+          break;
+
+        case 1:
+          innerParser |= one(c, []);
+          break;
+
+        default:
+          innerParser != success(new Str(cs));
+      }
+
+      return innerParser.run(s, csRes.position);
+    });
+    if (!extensions.intrawordUnderscores || c == '*') {
+      return result;
+    } else {
+      return notAfterString > result;
+    }
+  }
+
+  Parser ender(String c, int n) {
+    Parser result = count(n, char(c));
+    if (c != '*' && extensions.intrawordUnderscores) {
+      result = result.notFollowedBy(alphanum);
+    }
+
+    return result;
+  }
+
+  /*
+   * Parse inlines til you hit one c or a sequence of two cs.
+   * If one c, emit emph and then parse two.
+   * If two cs, emit strong and then parse one.
+   * Otherwise, emit ccc then the results.
+   */
+  Parser three(String c) {
     return new Parser((s, pos) {
-      Parser p = (inlinesBetween(string("**"), string("**")) ^ (a) => new Strong(a))
-      | (inlinesBetween(char("*"), char("*").notFollowedBy(char("*"))) ^ (a) => new Emph(a))
-      | (inlinesBetween(char("*"), char("*")) ^ (a) => new Emph(a));
-      return p.run(s, pos);
+      ParseResult contentsRes = (ender(c, 1).notAhead > inline).many.run(s, pos);
+      if (!contentsRes.isSuccess) {
+        return contentsRes;
+      }
+
+      Parser restRes = (ender(c, 3) ^ (_) => new Strong(new Emph(contentsRes.value)))
+        | (ender(c, 2) > one(c, [new Strong(contentsRes.value)]))
+        | (ender(c, 1) > two(c, [new Emph(contentsRes.value)]))
+        | success([new Str(c*3)]..addAll(contentsRes.value));
+
+      return restRes.run(s, contentsRes.position);
     });
   }
 
-  Parser get endUnderscore => extensions.intrawordUnderscores
-  ? char('_').notFollowedBy(alphanum)
-  : char('_');
-
-  Parser get startUnderscore => extensions.intrawordUnderscores
-  ? notAfterString() + char('_') ^ (a, b) => null
-  : char('_');
-
-  Parser strongOrEmphUnderscore() {
+  /*
+   * Parse inlines til you hit two c's, and emit strong.
+   * If you never do hit two cs, emit ** plus inlines parsed.
+   */
+  Parser two(String c, List<Inline> prefix) {
     return new Parser((s, pos) {
-      Parser p = (inlinesBetween(string("__"), string("__")) ^ (a) => new Strong(a))
-      | (inlinesBetween(startUnderscore, endUnderscore.notFollowedBy(char("_"))) ^ (a) => new Emph(a))
-      | (inlinesBetween(startUnderscore, endUnderscore) ^ (a) => new Emph(a));
-      return p.run(s, pos);
+      ParseResult contentsRes = (ender(c, 2).notAhead > inline).many.run(s, pos);
+      if (!contentsRes.isSuccess) {
+        return contentsRes;
+      }
+
+      Parser restRes = (ender(c, 2) ^ (_) => new Strong(new List.from(prefix)..addAll(contentsRes.value)))
+        | success([new Str(c+c)]..addAll(prefix)..addAll(contentsRes.value));
+
+      return restRes.run(s, contentsRes.position);
+    });
+  }
+
+  /*
+   * Parse inlines til you hit a c, and emit emph.
+   * If you never hit a c, emit * plus inlines parsed.
+   */
+  Parser one(String c, List<Inline> prefix) {
+    return new Parser((s, pos) {
+      /*ParseResult contentsRes = ((ender(c, 1) > inline)
+        | (string(c + c).notFollowedBy(ender(c, 1)) > two(c, []))).many.run(s, pos);*/
+      ParseResult contentsRes = ((ender(c, 1).notAhead > inline)
+        | (string(c + c).notFollowedBy(ender(c, 1)) > two(c, []))).many.run(s, pos);
+      if (!contentsRes.isSuccess) {
+        return contentsRes;
+      }
+
+      Parser restRes = (ender(c, 1) ^ (_) => new Emph(new List.from(prefix)..addAll(contentsRes.value)))
+        | success([new Str(c)]..addAll(prefix)..addAll(contentsRes.value));
+
+      return restRes.run(s, contentsRes.position);
     });
   }
 
   // Link
 
-
   static Parser parenthesizedChars = everythingBetween(char('('), char(')'), nested: true) ^ (chars) => '(' + chars.join('') + ')';
 
   // Get parsed inlines along with raw version
   Parser get reference => string("[^").notAhead > everythingBetween(char('['), char(']'), nested: true) ^
-      (string) => [(inline.many1 ^ (a) => trimInlines(groupInlines(a))).parse(string), string];
+      (string) => [(inline.many1 ^ (a) => tgf(a)).parse(string), string];
 
   Parser quotedTitle(c) => (char(c) > (noneOf("\\\n&" + c) | litChar).manyUntil(char(c))).orElse(['']) ^ (a) => a.join('');
 
@@ -515,8 +639,7 @@ referenceLink constructor (lab, raw) = do
       str,
       endline,
       code(),
-      strongOrEmphStar(),
-      strongOrEmphUnderscore(),
+      strongOrEmph,
       // note,
       // cite,
       link(),
@@ -539,30 +662,6 @@ referenceLink constructor (lab, raw) = do
   ]);
 
   // Block parsers
-
-  List<Inline> groupInlines(Iterable<Inline> inlines) {
-    List<Inline> result = [];
-    Inline prev;
-    for (Inline inline in inlines) {
-      if (prev == null) {
-        prev = inline;
-        continue;
-      }
-
-      if (inline is Str && prev is Str) {
-        (prev as Str).str += inline.str;
-      } else if (inline is! Space || prev is! Space) {
-        result.add(prev);
-        prev = inline;
-      }
-    }
-
-    if (prev != null) {
-      result.add(prev);
-    }
-
-    return result;
-  }
 
   // Para
   Parser get para => new Parser((s, pos) {
@@ -588,14 +687,14 @@ referenceLink constructor (lab, raw) = do
     ParseResult endRes = (newline > check).run(s, res.position);
     if (endRes.isSuccess) {
       // TODO implicitFigures
-      return endRes.copy(value: new Para(groupInlines(res.value)));
+      return endRes.copy(value: new Para(gf(res.value)));
     } else {
-      return res.copy(value: new Plain(groupInlines(res.value)));
+      return res.copy(value: new Plain(gf(res.value)));
     }
   });
 
   // Plain
-  Parser get plain => inline.many1 ^ ((inlines) => new Para(groupInlines(inlines)));
+  Parser get plain => inline.many1 ^ ((inlines) => new Para(gf(inlines)));
 
   // Fenced code block
 
@@ -672,7 +771,7 @@ referenceLink constructor (lab, raw) = do
     int level = startRes.value.length;
     ParseResult textRes = (atxClosing.notAhead > inline).many.run(s, startRes.position);
     assert(textRes.isSuccess);
-    var text = trimInlines(groupInlines(textRes.value));
+    var text = tgf(textRes.value);
     ParseResult attrRes = atxClosing.run(s, textRes.position);
     assert(attrRes.isSuccess);
     var attr = attrRes.value;
@@ -721,7 +820,7 @@ referenceLink constructor (lab, raw) = do
     if (!textRes.isSuccess) {
       return textRes;
     }
-    var text = trimInlines(groupInlines(textRes.value));
+    var text = tgf(textRes.value);
 
     var attrRes = setextHeaderEnd.run(s, textRes.position);
     if (!attrRes.isSuccess) {

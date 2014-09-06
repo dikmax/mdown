@@ -3,7 +3,7 @@ import 'package:markdowntypography/htmlWriter.dart';
 
 void main() {
   var document = MarkdownParser.PANDOC;
-  print(write(document.parse('**\n--\n__')));
+  print(write(document.parse('***\n---\n___')));
   //print(write(document.parse('\tfoo\tbaz\t\tbim')));
   //print(document.parse('    code\n    code2\n    code3\n\n'));
   //print(document.parse('# Header ### {#header}\n\nParagraph\n'));
