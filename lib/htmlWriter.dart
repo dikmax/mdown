@@ -32,7 +32,7 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
   } else if (block is Header) {
     return writeHeader(block);
   } else if (block is HorizontalRule) {
-    return '<hr>';
+    return '<hr/>';
   }
   throw new UnimplementedError(block.toString());
 }).join();
@@ -53,7 +53,7 @@ String writeBulletList(BulletList list) => "<ul>\n" + list.items.map(writeListIt
 // TODO writeDefinition(term, definition)
 // TODO writeDefinitionList(items)
 
-String writeHeader(Header header) => "<h${header.level}${writeAttributes(header.attributes)}}>${writeInlines(header.inlines)}</h${header.level}>";
+String writeHeader(Header header) => "<h${header.level}${writeAttributes(header.attributes)}>${writeInlines(header.inlines)}</h${header.level}>";
 
 // TODO writeDiv(attributes, blocks)
 
@@ -77,7 +77,7 @@ String writeInlines(Iterable<Inline> inlines) => inlines.map((Inline inline) {
   } else if (inline is NonBreakableSpace) {
     return '&nbsp;';
   } else if (inline is LineBreak) {
-    return '<br>';
+    return '<br/>';
   }
   throw new UnimplementedError(inline.toString());
 }).join();

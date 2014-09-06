@@ -1,4 +1,4 @@
-part of markdownf;
+part of markdown;
 
 class MarkdownParser {
   final MarkdownParserExtensions extensions;
@@ -13,7 +13,7 @@ class MarkdownParser {
   Document parse(String s) {
     // TODO separate preprocess option
 
-    return document.parse(preprocess(s));
+    return document.parse(preprocess(s) + "\n\n");
   }
 
   // Preprocess
@@ -565,34 +565,34 @@ referenceLink constructor (lab, raw) = do
   }
 
   // Para
-  Parser get para => (((newline > blanklines) > anyChar.manyUntil(newline)) ^
-      (inlines) => new Para(groupInlines(inline.many1.run(inlines)))) % "para";
+  Parser get para => new Parser((s, pos) {
+    ParseResult res = inline.many1.run(s, pos);
+    if (!res.isSuccess) {
+      return res;
+    }
 
-  /*
-  para :: MarkdownParser (F Blocks)
-para = try $ do
-  exts <- getOption readerExtensions
-  result <- trimInlinesF . mconcat <$> many1 inline
-  option (B.plain <$> result)
-    $ try $ do
-            newline
-            (blanklines >> return mempty)
-              <|> (guardDisabled Ext_blank_before_blockquote >> () <$ lookAhead blockQuote)
-              <|> (guardEnabled Ext_backtick_code_blocks >> () <$ lookAhead codeBlockFenced)
-              <|> (guardDisabled Ext_blank_before_header >> () <$ lookAhead header)
-              <|> (guardEnabled Ext_lists_without_preceding_blankline >>
-                       () <$ lookAhead listStart)
-            return $ do
-              result' <- result
-              case B.toList result' of
-                   [Image alt (src,tit)]
-                     | Ext_implicit_figures `Set.member` exts ->
-                        -- the fig: at beginning of title indicates a figure
-                        return $ B.para $ B.singleton
-                               $ Image alt (src,'f':'i':'g':':':tit)
-                   _ -> return $ B.para result'
+    Parser check = blanklines;
+    /*if (!extensions.blankBeforeBlockquote) {
+      check |= blockQuote.lookAhead;
+    }*/
+    if (extensions.backtickCodeBlocks) {
+      check |= codeBlockFenced.lookAhead;
+    }
+    if (!extensions.blankBeforeHeader) {
+      check |= header.lookAhead;
+    }
+    if (extensions.listsWithoutPrecedingBlankline) {
+      check |= listStart.lookAhead;
+    }
 
-   */
+    ParseResult endRes = (newline > check).run(s, res.position);
+    if (endRes.isSuccess) {
+      // TODO implicitFigures
+      return endRes.copy(value: new Para(groupInlines(res.value)));
+    } else {
+      return res.copy(value: new Plain(groupInlines(res.value)));
+    }
+  });
 
   // Plain
   Parser get plain => inline.many1 ^ ((inlines) => new Para(groupInlines(inlines)));
@@ -790,7 +790,13 @@ para = try $ do
 
   // Lists
 
-  Parser get bulletList => listItem(bulletListStart).many1 ^ (items) => new BulletList(items);
+  Iterable<Iterable<Block>> compactify(Iterable<Iterable<Block>> blocks) => blocks.map(
+          (blocks) => blocks.length == 1 && blocks.elementAt(0) is Para
+          ? [new Plain(blocks.elementAt(0).inlines)]
+          : blocks
+  );
+
+  Parser get bulletList => listItem(bulletListStart).many1 ^ (items) => new BulletList(compactify(items));
   /*
   bulletList :: MarkdownParser (F Blocks)
 bulletList = do
@@ -803,7 +809,7 @@ bulletList = do
     if (!firstRes.isSuccess) {
       return firstRes;
     }
-    var first = firstRes.value;
+    String first = firstRes.value;
 
     ParseResult<List<String>> continuationsRes = listContinuation.many.run(s, firstRes.position);
 
@@ -858,7 +864,7 @@ rawListItem start = try $ do
    */
 
   // TODO support for html comments
-  static Parser listLineCommon = anyLine ^ (l) => l + '\n';
+  static Parser listLineCommon = anyLine ^ (l) => l;
 
   /*
   listLineCommon :: MarkdownParser String

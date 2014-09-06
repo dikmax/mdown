@@ -121,7 +121,7 @@ void main() {
 
   t.group('images', () {
     testEquals("regular", "![Caption](http://asdf.asdf/asdf.jpg)",
-    B.image(B.target("http://asdf.asdf/asdf.jpg", ""), B.str("Caption")));
+    B.para(B.image(B.target("http://asdf.asdf/asdf.jpg", ""), B.str("Caption"))));
   });
 
   t.group('formatting', () {
@@ -418,7 +418,7 @@ void testEquals(description, String str, result, [MarkdownParser parser]) {
     }
 
     if (result is Inline) {
-      result = B.doc(B.para(result));
+      result = B.doc(B.plain(result));
     } else if (result is Block) {
       result = B.doc(result);
     }
