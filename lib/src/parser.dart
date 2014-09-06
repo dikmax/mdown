@@ -687,9 +687,9 @@ referenceLink constructor (lab, raw) = do
     ParseResult endRes = (newline > check).run(s, res.position);
     if (endRes.isSuccess) {
       // TODO implicitFigures
-      return endRes.copy(value: new Para(gf(res.value)));
+      return endRes.copy(value: new Para(tgf(res.value)));
     } else {
-      return res.copy(value: new Plain(gf(res.value)));
+      return res.copy(value: new Plain(tgf(res.value)));
     }
   });
 
