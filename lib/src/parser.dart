@@ -276,7 +276,7 @@ atMostSpaces n
     }
     // notFollowedByHtmlCloser
     var result = extensions.hardLineBreaks ? new LineBreak() : (
-      extensions.ignoreLineBreaks ? null : new Space()
+      extensions.ignoreLineBreaks ? null : new Str('\n')
     );
     return newline.notFollowedBy(nf) > ((eof > success(null)) | success(result));
   }
