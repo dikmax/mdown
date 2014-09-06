@@ -1,9 +1,44 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:unittest/unittest.dart' as t;
 import 'package:markdowntypography/markdown.dart';
 import 'package:parsers/parsers.dart';
 import 'package:markdowntypography/builder.dart' as B;
+import 'package:markdowntypography/htmlWriter.dart' as HW;
+
+const int STATE_WAIT = 0;
+const int STATE_MARKDOWN = 1;
+const int STATE_HTML = 2;
 
 void main() {
+  // Common Markdown tests
+  t.group("STMD", () {
+    File file = new File("stmd/spec.txt");
+    int state = STATE_WAIT;
+    List<String> html = [];
+    List<String> markdown = [];
+    List<String> lines = file.readAsLinesSync();
+    int testNo = 0;
+    for (String line in lines) {
+      if (line == ".") {
+        state++;
+        if (state == 3) {
+          ++testNo;
+          testCommonMarkdown(testNo, markdown.join('\n') + "\n", html.join('\n') + "\n");
+          state = STATE_WAIT;
+          html = [];
+          markdown = [];
+        }
+      } else if (state == STATE_MARKDOWN) {
+        markdown.add(line);
+      } else if (state == STATE_HTML) {
+        html.add(line);
+      }
+    }
+  });
+
+  // My tests
   MarkdownParser emptyParser = new MarkdownParser(new MarkdownParserExtensions(headerAttributes: false));
   t.group('headers', () {
     MarkdownParser headerAttributes = new MarkdownParser(new MarkdownParserExtensions(headerAttributes: true));
@@ -394,5 +429,53 @@ void testEquals(description, String str, result, [MarkdownParser parser]) {
 void testEquals1(description, String str, result, Parser parser) {
   t.test(description, () {
     t.expect(parser.parse(str), t.equals(result));
+  });
+}
+
+final commonMarkdownParser = MarkdownParser.STRICT;
+
+RegExp leadingSpacesRegExp = new RegExp(r'^ *');
+RegExp trailingSpacesRegExp = new RegExp(r' *$');
+RegExp consecutiveSpacesRegExp = new RegExp(r' +');
+RegExp spaceBeforeTagCloseRegExp = new RegExp(r' *\/>');
+String tidy(String html) {
+  List<String> lines = html.split('\n');
+  bool inPre = false;
+  List<String> result = [];
+  for (String line in lines) {
+    if (line.contains("<pre")) {
+      inPre = true;
+    } else if (line.contains("</pre")) {
+      inPre = false;
+    }
+    if (inPre) {
+      result.add(line);
+    } else {
+      // remove leading spaces
+      line = line.replaceAll(leadingSpacesRegExp, '');
+      // remove trailing spaces
+      line = line.replaceAll(trailingSpacesRegExp, '');
+      // collapse consecutive spaces
+      line = line.replaceAll(consecutiveSpacesRegExp, ' ');
+      // collapse space before /> in tag
+      line = line.replaceAll(spaceBeforeTagCloseRegExp, '/>');
+      // skip blank line
+      if (line == '') {
+        continue;
+      }
+      result.add(line);
+    }
+  }
+
+  return result.join('\n');
+}
+void testCommonMarkdown(int num, String md, String html) {
+  md = md.replaceAll("→", "\t").replaceAll("␣", " ");
+  html = html.replaceAll("→", "\t").replaceAll("␣", " ");
+
+  t.test(num.toString(), () {
+    Document doc = commonMarkdownParser.parse(md);
+    String result = HW.write(doc);
+    t.expect(tidy(HW.write(doc)), t.equals(tidy(html)));
   });
 }
