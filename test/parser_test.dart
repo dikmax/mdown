@@ -77,13 +77,13 @@ void main() {
   });
 
   t.group("indented code block", () {
-    testEquals('single line', '    code\n', B.codeBlock('code'), emptyParser);
+    testEquals('single line', '    code\n', B.codeBlock('code\n'), emptyParser);
     testEquals('include leading whitespace after indentation',
       '    zero\n     one\n      two\n       three',
-      B.codeBlock('zero\n one\n  two\n   three'), emptyParser);
+      B.codeBlock('zero\n one\n  two\n   three\n'), emptyParser);
     testEquals('code blocks separated by newlines form one block',
       '    zero\n    one\n\n    two\n\n\n    three\n',
-      B.codeBlock('zero\none\n\ntwo\n\n\nthree'), emptyParser);
+      B.codeBlock('zero\none\n\ntwo\n\n\nthree\n'), emptyParser);
   });
 
   t.group("fenched code block", () {
@@ -488,13 +488,13 @@ String tidy(String html) {
 
   return result.join('\n');
 }
-void testCommonMarkdown(int num, String md, String html) {
-  md = md.replaceAll("→", "\t").replaceAll("␣", " ");
+void testCommonMarkdown(int num, String mdOrig, String html) {
+  String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
   html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
   t.test(num.toString(), () {
     Document doc = commonMarkdownParser.parse(md);
     String result = HW.write(doc);
-    t.expect(tidy(HW.write(doc)), new ExampleDescription(t.equals(tidy(html)), md));
+    t.expect(tidy(HW.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
   });
 }

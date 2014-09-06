@@ -10,7 +10,48 @@ class MarkdownParser {
     }
   }
 
-  Document parse(String s) => document.parse(s);
+  Document parse(String s) {
+    // TODO separate preprocess option
+
+    return document.parse(preprocess(s));
+  }
+
+  // Preprocess
+
+  String preprocess(String s) {
+    StringBuffer sb = new StringBuffer();
+
+    int i = 0, len = s.length;
+    int pos = 1;
+    while (i < len) {
+      if (s[i] == "\r") {
+        if (i + 1 < len && s[i + 1] == "\n") {
+          ++i;
+        }
+
+        sb.write("\n");
+        pos = 0;
+      } else if (s[i] == "\n") {
+        if (i + 1 < len && s[i + 1] == "\r") {
+          ++i;
+        }
+
+        sb.write("\n");
+        pos = 0;
+      } else if (s[i] == "\t") {
+        int expandSize = (options.tabStop - pos) % options.tabStop;
+        sb.write(" " * (expandSize + 1));
+        pos += expandSize;
+      } else {
+        sb.write(s[i]);
+      }
+
+      ++i;
+      ++pos;
+    }
+
+    return sb.toString();
+  }
 
   // State
 
@@ -730,7 +771,7 @@ para = try $ do
 
   Parser get codeBlockIndented =>
     ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many1 < blanklines.maybe) ^ (c) =>
-      B.codeBlock(stripTrailingNewlines(c.join('')), B.attr("", options.indentedCodeClasses, {}));
+      B.codeBlock(stripTrailingNewlines(c.join('')) + '\n', B.attr("", options.indentedCodeClasses, {}));
 
   // Hrule
 

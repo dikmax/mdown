@@ -47,8 +47,8 @@ String writeCodeBlock(CodeBlock codeBlock) => "<pre${writeAttributes(codeBlock.a
 // TODO writeBlockQuote(blocks)
 // TODO writeOrderedList(attributes, items)
 
-String writeListItem(Iterable<Block> blocks) => "<li>${writeBlocks(blocks)}</li>";
-String writeBulletList(BulletList list) => "<ul>" + list.items.map(writeListItem).join() + "</ul>";
+String writeListItem(Iterable<Block> blocks) => "<li>${writeBlocks(blocks)}</li>\n";
+String writeBulletList(BulletList list) => "<ul>\n" + list.items.map(writeListItem).join() + "</ul>";
 
 // TODO writeDefinition(term, definition)
 // TODO writeDefinitionList(items)
