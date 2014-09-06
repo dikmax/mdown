@@ -432,8 +432,27 @@ void testEquals1(description, String str, result, Parser parser) {
   });
 }
 
-final commonMarkdownParser = MarkdownParser.STRICT;
+class ExampleDescription extends t.Matcher {
+  t.Matcher inner;
+  String example;
 
+  ExampleDescription(this.inner, this.example);
+
+  bool matches(item, Map matchState) => inner.matches(item, matchState);
+
+  t.Description describe(t.Description description) => inner.describe(description);
+
+  t.Description describeMismatch(item, t.Description mismatchDescription,
+                                 Map matchState, bool verbose) {
+    t.Description d = inner.describeMismatch(item, mismatchDescription, matchState, verbose);
+    d.add("\n  Source: \n" + example);
+    return d;
+  }
+
+
+}
+
+final commonMarkdownParser = MarkdownParser.STRICT;
 RegExp leadingSpacesRegExp = new RegExp(r'^ *');
 RegExp trailingSpacesRegExp = new RegExp(r' *$');
 RegExp consecutiveSpacesRegExp = new RegExp(r' +');
@@ -476,6 +495,6 @@ void testCommonMarkdown(int num, String md, String html) {
   t.test(num.toString(), () {
     Document doc = commonMarkdownParser.parse(md);
     String result = HW.write(doc);
-    t.expect(tidy(HW.write(doc)), t.equals(tidy(html)));
+    t.expect(tidy(HW.write(doc)), new ExampleDescription(t.equals(tidy(html)), md));
   });
 }
