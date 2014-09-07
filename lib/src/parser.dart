@@ -142,10 +142,10 @@ atMostSpaces n
   List<Inline> gf(inlines) => groupInlines(flatternInlines(inlines));
 
   List<Inline> trimInlines(List<Inline> inlines) {
-    while (inlines.last == new Space()) {
+    while (inlines.length > 0 && inlines.last == new Space()) {
       inlines.removeLast();
     }
-    while (inlines.first == new Space()) {
+    while (inlines.length > 0 && inlines.first == new Space()) {
       inlines.removeAt(0);
     }
     return inlines;
@@ -321,7 +321,7 @@ atMostSpaces n
     return newline.notFollowedBy(nf) > ((eof > success(null)) | success(result));
   }
 
-  final Parser symbol = noneOf("<\\\n\t ") ^ (ch) => new Str(ch);
+  final Parser symbol = noneOf("<\n\t ") ^ (ch) => new Str(ch);
 
   Parser inlinesBetween(Parser start, Parser end) {
     return new Parser((s, pos) {
@@ -338,8 +338,7 @@ atMostSpaces n
 
   // Code
 
-  Parser code() {
-    return new Parser((s, pos) {
+  Parser get code => new Parser((s, pos) {
       ParseResult start = char('`').many1.run(s, pos);
       if (!start.isSuccess) {
         return start;
@@ -350,8 +349,8 @@ atMostSpaces n
       }
 
       Parser codeInner = (noneOf("`\n").many1 ^ (list) => list.join(''))
-      | (char('`').many1 ^ (list) => list.join(''))
-      | (char('\n').notFollowedBy(blankline) ^ (a) => ' ');
+        | (char('`').many1 ^ (list) => list.join(''))
+        | (char('\n').notFollowedBy(blankline) ^ (a) => ' ');
       Parser codeEnd = skipSpaces + string(start.value.join('')).notFollowedBy(char('`')) ^ (a, b) => null;
 
       ParseResult codeResult = (codeInner + codeInner.manyUntil(codeEnd) ^ (a, b) {
@@ -359,7 +358,7 @@ atMostSpaces n
         if (b.length > 0) {
           res.addAll(b);
         }
-        return B.code(res.join(''));
+        return B.code(res.join('').trim());
       }).run(s, res.position);
       if (!codeResult.isSuccess) {
         return codeResult;
@@ -376,7 +375,6 @@ atMostSpaces n
       }
       return codeResult;
     });
-  }
 
   // Emphasis or strong
 
@@ -595,40 +593,38 @@ referenceLink constructor (lab, raw) = do
   : fail;
 
   Parser get superscript => extensions.superscript
-  ? new Parser((s, pos) {
-    return (char('^') > many1Till(spaceChar.notAhead > inline, char('^')) ^ (i) => new Superscript(i)).run(s, pos);
-  })
-  : fail;
+    ? new Parser((s, pos) {
+      return (char('^') > many1Till(spaceChar.notAhead > inline, char('^')) ^ (i) => new Superscript(i)).run(s, pos);
+    })
+    : fail;
 
   // Escaped char
 
-  Parser escapedChar() {
-    return new Parser((s, pos) {
-      ParseResult res = escapedChar1.run(s, pos);
-      if (!res.isSuccess) {
-        return res;
-      }
-
-      switch (res.value) {
-        case ' ':
-          res = res.copy(value: new NonBreakableSpace());
-          break;
-
-        case '\n':
-          if (extensions.escapedLineBreaks) {
-            res = res.copy(value: new LineBreak());
-          } else {
-            return fail.run(s, pos);
-          }
-          break;
-
-        default:
-          res = res.copy(value: new Str(res.value));
-      }
-
+  Parser get escapedChar => new Parser((s, pos) {
+    ParseResult res = escapedChar1.run(s, pos);
+    if (!res.isSuccess) {
       return res;
-    });
-  }
+    }
+
+    switch (res.value) {
+      case ' ':
+        res = res.copy(value: new NonBreakableSpace());
+        break;
+
+      case '\n':
+        if (extensions.escapedLineBreaks) {
+          res = res.copy(value: new LineBreak());
+        } else {
+          return fail.run(s, pos);
+        }
+        break;
+
+      default:
+        res = res.copy(value: new Str(res.value));
+    }
+
+    return res;
+  });
 
   // Inline definition
 
@@ -637,7 +633,7 @@ referenceLink constructor (lab, raw) = do
       // bareURL,
       str,
       endline,
-      code(),
+      code,
       strongOrEmph,
       // note,
       // cite,
@@ -651,7 +647,7 @@ referenceLink constructor (lab, raw) = do
       // autoLink,
       // spanHtml,
       // rawHtmlInline,
-      escapedChar(),
+      escapedChar,
       // rawLaTeXInline'
       // exampleRef
       // smart
