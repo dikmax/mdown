@@ -768,6 +768,9 @@ referenceLink constructor (lab, raw) = do
       return startRes;
     }
     int level = startRes.value.length;
+    if (level > 6) {
+      return fail.run(s, pos);
+    }
     ParseResult textRes = (atxClosing.notAhead > inline).many.run(s, startRes.position);
     assert(textRes.isSuccess);
     var text = tgf(textRes.value);
