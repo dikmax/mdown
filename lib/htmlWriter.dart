@@ -53,7 +53,7 @@ String writeBulletList(BulletList list) => "<ul>\n" + list.items.map(writeListIt
 // TODO writeDefinition(term, definition)
 // TODO writeDefinitionList(items)
 
-String writeHeader(Header header) => "<h${header.level}${writeAttributes(header.attributes)}>${writeInlines(header.inlines)}</h${header.level}>";
+String writeHeader(Header header) => "<h${header.level}${writeAttributes(header.attributes)}>${writeInlines(header.inlines)}</h${header.level}>\n";
 
 // TODO writeDiv(attributes, blocks)
 
