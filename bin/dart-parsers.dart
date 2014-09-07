@@ -2,8 +2,9 @@ import 'package:markdowntypography/markdown.dart';
 import 'package:markdowntypography/htmlWriter.dart';
 
 void main() {
-  var document = MarkdownParser.STRICT;
-  print(write(document.parse('`Foo\n----\n`')));
+  var document = CommonMarkParser.DEFAULT;
+  print(write(document.parse('-----\n')));
+  //print(write(document.parse('`Foo\n----\n`')));
   //print(write(document.parse('`Foo\n----\n`\n\n<a title="a lot\n---\nof dashes"/>')));
   //print(write(document.parse('* * *')));
   //print(write(document.parse('- Item 1\nItem 2\n- Item 3')));
