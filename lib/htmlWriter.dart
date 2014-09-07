@@ -32,28 +32,28 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
   } else if (block is Header) {
     return writeHeader(block);
   } else if (block is HorizontalRule) {
-    return '<hr/>\n';
+    return '<hr/>';
   }
   throw new UnimplementedError(block.toString());
-}).join();
+}).join('\n');
 
 String writePlain(Plain plain) => writeInlines(plain.inlines);
 
-String writePara(Para para) => "<p>${writeInlines(para.inlines)}</p>\n";
+String writePara(Para para) => "<p>${writeInlines(para.inlines)}</p>";
 
-String writeCodeBlock(CodeBlock codeBlock) => "<pre${writeAttributes(codeBlock.attr)}><code>${codeBlock.code}</code></pre>\n";
+String writeCodeBlock(CodeBlock codeBlock) => "<pre${writeAttributes(codeBlock.attr)}><code>${codeBlock.code}</code></pre>";
 
 // TODO writeRawBlock(format, data)
 // TODO writeBlockQuote(blocks)
 // TODO writeOrderedList(attributes, items)
 
 String writeListItem(Iterable<Block> blocks) => "<li>${writeBlocks(blocks)}</li>\n";
-String writeBulletList(BulletList list) => "<ul>\n" + list.items.map(writeListItem).join() + "</ul>\n";
+String writeBulletList(BulletList list) => "<ul>\n" + list.items.map(writeListItem).join() + "</ul>";
 
 // TODO writeDefinition(term, definition)
 // TODO writeDefinitionList(items)
 
-String writeHeader(Header header) => "<h${header.level}${writeAttributes(header.attributes)}>${writeInlines(header.inlines)}</h${header.level}>\n";
+String writeHeader(Header header) => "<h${header.level}${writeAttributes(header.attributes)}>${writeInlines(header.inlines)}</h${header.level}>";
 
 // TODO writeDiv(attributes, blocks)
 

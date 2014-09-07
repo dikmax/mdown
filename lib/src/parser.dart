@@ -916,7 +916,7 @@ bulletList = do
 
     String raw = first + continuationsRes.value.join("");
 
-    List<Block> blocks = block.many1.parse(raw);
+    List<Block> blocks = block.manyUntil(eof).parse(raw);
 
     _state = oldState;
 
