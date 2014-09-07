@@ -300,9 +300,8 @@ atMostSpaces n
   // Inline parsers
   static final Parser whitespace = (spaceChar + skipSpaces ^ (_1, _2) => new Space()) % "whitespace";
   static final Parser str = alphanum.many1 ^ (chars) => new Str(chars.join(""));
-  //final Parser endline = newline.notFollowedBy(blankline) ^ (_) => new Space();
   Parser get endline {
-    Parser nf = blankline;
+    Parser nf = blankline; // | hrule;
     if (_state == _STATE_LIST_ITEM || extensions.listsWithoutPrecedingBlankline) {
       nf |= listStart;
     }
@@ -670,7 +669,7 @@ referenceLink constructor (lab, raw) = do
       return res;
     }
 
-    Parser check = blanklines;
+    Parser check = blanklines /*| hrule.lookAhead*/;
     /*if (!extensions.blankBeforeBlockquote) {
       check |= blockQuote.lookAhead;
     }*/
@@ -949,7 +948,7 @@ listItem start = try $ do
    */
   Parser rawListItem(Parser start) =>
     ((start > listLineCommon) + ((listStart | blankline).notAhead > listLine).many + blankline.many) ^
-      (first, rest, blanks) => first + rest.join('') + blanks.join(''); // TODO
+      (first, rest, blanks) => first + '\n' + rest.join('') + blanks.join(''); // TODO
 
   /*
 rawListItem :: MarkdownParser a
