@@ -759,10 +759,11 @@ referenceLink constructor (lab, raw) = do
   Parser get header => setextHeader | atxHeader % "header";
 
   Parser get atxHeader => new Parser((s, pos) {
-    Parser startParser = char('#').many1;
+    Parser startParser = skipNonindentSpaces > char('#').many1;
     if (extensions.fancyLists) {
       startParser = startParser.notFollowedBy(oneOf(".)"));
     }
+    startParser = (startParser < spaceChar) < skipSpaces;
     ParseResult startRes = startParser.run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
