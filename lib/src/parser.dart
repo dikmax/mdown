@@ -101,11 +101,13 @@ class CommonMarkParser {
   });
 
   static Parser spaceChar = oneOf(" \t") % 'space';
+  static Parser nonSpaceChar = noneOf("\t\n \r");
   static Parser skipSpaces = spaceChar.skipMany;
   static Parser blankline = skipSpaces > newline % 'blankline';
   static Parser blanklines = blankline.many1 % 'blanklines';
   Parser get indentSpaces => count(TAB_STOP, char(' ')) | char('\t') % "indentation";
   Parser get skipNonindentSpaces => atMostSpaces(TAB_STOP - 1).notFollowedBy(char(' '));
+  static Parser spnl = (skipSpaces > newline);
 
   static Parser atMostSpaces(n) {
     if (n <= 0) {
@@ -155,7 +157,8 @@ class CommonMarkParser {
       hrule,
       atxHeader,
       setextHeader,
-      codeBlockIndented
+      codeBlockIndented,
+      codeBlockFenced
   ]);
 
   // Horizontal rule
@@ -220,6 +223,37 @@ class CommonMarkParser {
   Parser get codeBlockIndented =>
     ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many1 < blanklines.maybe) ^
         (c) => B.codeBlock(stripTrailingNewlines(c.join('')) + '\n', B.nullAttr);
+
+  // Fenced code
+
+  Parser get codeBlockFenced => new Parser((s, pos) {
+    Parser fenceStartParser = (skipNonindentSpaces + (string('~~~') | string('```'))).list;
+    ParseResult fenceStartRes = fenceStartParser.run(s, pos);
+    if (!fenceStartRes.isSuccess) {
+      return false;
+    }
+    int indent = fenceStartRes.value[0];
+    String fenceChar = fenceStartRes.value[1][0];
+
+    Parser infoStringParser = ((skipSpaces > noneOf("\n " + fenceChar).many) < noneOf("\n" + fenceChar).many) < newline;
+    Parser topFenceParser = (char(fenceChar).many + infoStringParser).list;
+    ParseResult topFenceRes = topFenceParser.run(s, fenceStartRes.position);
+    if (!topFenceRes.isSuccess) {
+      return topFenceRes;
+    }
+
+    int fenceSize = topFenceRes.value[0].length + 3;
+    String infoString = topFenceRes.value[1].join();
+
+    Parser lineParser = anyLine;
+    if (indent > 0) {
+      lineParser = atMostSpaces(indent) > lineParser;
+    }
+    Parser endFenceParser = ((skipSpaces > string(fenceChar * fenceSize)) > skipSpaces) > newline;
+    Parser restParser = lineParser.manyUntil(endFenceParser) ^ (lines) => [new CodeBlock(B.nullAttr, lines.join('\n') + '\n')];
+
+    return restParser.run(s, topFenceRes.position);
+  });
 
   //
   // Document
