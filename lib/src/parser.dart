@@ -195,7 +195,7 @@ class CommonMarkParser {
     String raw = textRes.value.join();
     // TODO parse inlines
 
-    return textRes.copy(value: [new Header(level, B.nullAttr, [new Str(raw)])]);
+    return textRes.copy(value: [new Header(level, [new Str(raw)])]);
   });
 
   // Setext Header
@@ -213,7 +213,7 @@ class CommonMarkParser {
     int level = res.value[1][0] == '=' ? 1 : 2;
     // TODO parse inlines
 
-    return res.copy(value: [new Header(level, B.nullAttr, [new Str(raw)])]);
+    return res.copy(value: [new Header(level, [new Str(raw)])]);
   });
 
   // Indented code
@@ -222,7 +222,7 @@ class CommonMarkParser {
 
   Parser get codeBlockIndented =>
     ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many1 < blanklines.maybe) ^
-        (c) => B.codeBlock(stripTrailingNewlines(c.join('')) + '\n', B.nullAttr);
+        (c) => new IndentedCodeBlock(stripTrailingNewlines(c.join('')) + '\n');
 
   // Fenced code
 
@@ -250,7 +250,8 @@ class CommonMarkParser {
       lineParser = atMostSpaces(indent) > lineParser;
     }
     Parser endFenceParser = ((skipSpaces > string(fenceChar * fenceSize)) > skipSpaces) > newline;
-    Parser restParser = lineParser.manyUntil(endFenceParser) ^ (lines) => [new CodeBlock(B.nullAttr, lines.join('\n') + '\n')];
+    Parser restParser = lineParser.manyUntil(endFenceParser) ^
+        (lines) => [new FencedCodeBlock(lines.join('\n') + '\n', new InfoString(infoString))];
 
     return restParser.run(s, topFenceRes.position);
   });
