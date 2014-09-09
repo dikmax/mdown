@@ -1,5 +1,13 @@
 part of markdown;
 
+class _UnparsedInlines extends Inlines {
+  String raw;
+
+  _UnparsedInlines(this.raw);
+
+  String toString() => raw;
+}
+
 // CommonMark parser
 class CommonMarkParser {
   static const int TAB_STOP = 4;
@@ -184,6 +192,12 @@ class CommonMarkParser {
   });
 
   //
+  // Inlines
+  //
+
+  List<_UnparsedInlines> _unparsedInlines = [];
+
+  //
   // Blocks
   //
 
@@ -231,7 +245,9 @@ class CommonMarkParser {
     String raw = textRes.value.join();
     // TODO parse inlines
 
-    return textRes.copy(value: [new Header(level, [new Str(raw)])]);
+    _UnparsedInlines inlines = new _UnparsedInlines(raw);
+    _unparsedInlines.add(inlines);
+    return textRes.copy(value: [new Header(level, inlines)]);
   });
 
   // Setext Header
@@ -249,7 +265,9 @@ class CommonMarkParser {
     int level = res.value[1][0] == '=' ? 1 : 2;
     // TODO parse inlines
 
-    return res.copy(value: [new Header(level, [new Str(raw)])]);
+    _UnparsedInlines inlines = new _UnparsedInlines(raw);
+    _unparsedInlines.add(inlines);
+    return res.copy(value: [new SetextHeader(level, inlines)]);
   });
 
   // Indented code

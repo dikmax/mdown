@@ -1,5 +1,6 @@
 library markdown;
 
+import 'dart:collection';
 import 'dart:convert';
 import 'package:parsers/parsers.dart';
 import 'package:collection/equality.dart';

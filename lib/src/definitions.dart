@@ -75,14 +75,14 @@ class HorizontalRule extends Block {
 
 abstract class Header extends Block {
   int level;
-  Iterable<Inline> contents;
+  Inlines contents;
 
   Header(this.level, this.contents);
 }
 
 
 class AtxHeader extends Header {
-  AtxHeader(int level, Iterable<Inline> contents) : super(level, contents);
+  AtxHeader(int level, Inlines contents) : super(level, contents);
 
   String toString() => "AtxHeader $level $contents";
 
@@ -93,7 +93,7 @@ class AtxHeader extends Header {
 
 
 class SetextHeader extends Header {
-  SetextHeader(int level, Iterable<Inline> contents) : super(level, contents);
+  SetextHeader(int level, Inlines contents) : super(level, contents);
 
   String toString() => "SetextHeader $level $contents";
 
@@ -148,7 +148,32 @@ class HtmlRawBlock extends RawBlock {
     contents == obj.contents;
 }
 
+
 // Inlines
+
+class Inlines extends ListBase<Inline> {
+  List _inlines = new List();
+
+  int get length => _inlines.length;
+
+  void set length(int length) {
+    _inlines.length = length;
+  }
+
+  void operator[]=(int index, Inline value) {
+    _inlines[index] = value;
+  }
+
+  Inline operator [](int index) => _inlines[index];
+
+  // Though not strictly necessary, for performance reasons
+  // you should implement add and addAll.
+
+  void add(Inline value) => _inlines.add(value);
+
+  void addAll(Iterable<Inline> all) => _inlines.addAll(all);
+}
+
 
 abstract class Inline {
 
@@ -163,7 +188,7 @@ class Str extends Inline {
   String toString() => 'Str "$contents"';
 
   bool operator== (obj) => obj is Str &&
-    contents == obj.str;
+    contents == obj.contents;
 }
 
 

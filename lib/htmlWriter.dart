@@ -36,15 +36,21 @@ String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeB
   "${codeBlock.contents}</code></pre>";
 
 // Inlines
-String writeInlines(Iterable<Inline> inlines) => inlines.map((Inline inline) {
-  if (inline is Str) {
-    return inline.contents;
-  } else if (inline is Space) {
-    return ' ';
-  } else if (inline is NonBreakableSpace) {
-    return '&nbsp;';
-  } else if (inline is LineBreak) {
-    return '<br/>';
+String writeInlines(Iterable<Inline> inlines) {
+  // TODO better parsing
+  if (inlines.raw != null) {
+    return inlines.raw;
   }
-  throw new UnimplementedError(inline.toString());
-}).join();
+  return inlines.map((Inline inline) {
+    if (inline is Str) {
+      return inline.contents;
+    } else if (inline is Space) {
+      return ' ';
+    } else if (inline is NonBreakableSpace) {
+      return '&nbsp;';
+    } else if (inline is LineBreak) {
+      return '<br/>';
+    }
+    throw new UnimplementedError(inline.toString());
+  }).join();
+}
