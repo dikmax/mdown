@@ -132,6 +132,22 @@ class FencedCodeBlock extends CodeBlock {
 }
 
 
+abstract class RawBlock extends Block {
+  String contents;
+
+  RawBlock(this.contents);
+}
+
+
+class HtmlRawBlock extends RawBlock {
+  HtmlRawBlock(String contents) : super(contents);
+
+  String toString() => "HtmlRawBlock $contents";
+
+  bool operator== (obj) => obj is HtmlRawBlock &&
+    contents == obj.contents;
+}
+
 // Inlines
 
 abstract class Inline {

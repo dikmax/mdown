@@ -24,6 +24,8 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
     return writeHeader(block);
   } else if (block is CodeBlock) {
     return writeCodeBlock(block);
+  } else if (block is RawBlock) {
+    return block.contents;
   }
   throw new UnimplementedError(block.toString());
 }).join('\n');

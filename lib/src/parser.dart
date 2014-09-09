@@ -148,6 +148,41 @@ class CommonMarkParser {
     });
   }
 
+  // HTML
+
+  static final String _lower = "abcdefghijklmnopqrstuvwxyz";
+  static final String _upper = _lower.toUpperCase();
+  static final String _alpha = "$_lower$_upper";
+  static final String _digit = "1234567890";
+  static final String _alphanum = "$_alpha$_digit";
+  static final Set<String> _allowedTags = new Set.from(["article", "header", "aside", "hgroup", "blockquote", "hr", "iframe",
+    "body", "li", "map", "button", "object", "canvas", "ol", "caption", "output", "col", "p", "colgroup", "pre", "dd",
+    "progress", "div", "section", "dl", "table", "td", "dt", "tbody", "embed", "textarea", "fieldset", "tfoot",
+    "figcaption", "th", "figure", "thead", "footer", "footer", "tr", "form", "ul", "h1", "h2", "h3", "h4", "h5", "h6",
+    "video", "script", "style"]);
+  static Parser spaceOrNL = oneOf(" \t\n");
+
+  static Parser htmlAttributeName = (oneOf(_alpha + "_:") > oneOf(_alphanum + "_.:-").many).record;
+  static Parser htmlAttiributeValue = (spaceOrNL.many + char('=') + spaceOrNL.many +
+    (htmlUnquotedAttributeValue | htmlSingleQuotedAttributeValue | htmlDoubleQuotedAttributeValue)).list.record;
+  static Parser htmlUnquotedAttributeValue = noneOf(" \t\n\"'=<>`").many1;
+  static Parser htmlSingleQuotedAttributeValue = (char("'") > noneOf("'\n").many) < char("'");
+  static Parser htmlDoubleQuotedAttributeValue = (char('"') > noneOf('"\n').many) < char('"');
+
+  Parser get htmlAttribute => (spaceOrNL.many1 + htmlAttributeName + htmlAttiributeValue.maybe).list.record;
+  Parser get htmlOpenTag => new Parser((s, pos) {
+    Parser p = ((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>');
+    ParseResult res = p.run(s, pos);
+    if (!res.isSuccess) {
+      return res;
+    }
+
+    if (_allowedTags.contains(res.value.join().toLowerCase())) {
+      return res.copy(value: s.substring(pos.offset, res.position.offset));
+    }
+    return fail.run(s, pos);
+  });
+
   //
   // Blocks
   //
@@ -158,7 +193,8 @@ class CommonMarkParser {
       atxHeader,
       setextHeader,
       codeBlockIndented,
-      codeBlockFenced
+      codeBlockFenced,
+      rawHtml
   ]);
 
   // Horizontal rule
@@ -230,7 +266,7 @@ class CommonMarkParser {
     Parser fenceStartParser = (skipNonindentSpaces + (string('~~~') | string('```'))).list;
     ParseResult fenceStartRes = fenceStartParser.run(s, pos);
     if (!fenceStartRes.isSuccess) {
-      return false;
+      return fenceStartRes;
     }
     int indent = fenceStartRes.value[0];
     String fenceChar = fenceStartRes.value[1][0];
@@ -254,6 +290,35 @@ class CommonMarkParser {
         (lines) => [new FencedCodeBlock(lines.join('\n') + '\n', new InfoString(infoString))];
 
     return restParser.run(s, topFenceRes.position);
+  });
+
+  // Raw html block
+
+  Parser get rawHtml => new Parser((s, pos) {
+    // Simple test
+    ParseResult testRes = (skipNonindentSpaces < char('<')).run(s, pos);
+    if (!testRes.isSuccess) {
+      return testRes;
+    }
+
+    int firstLineIndent = testRes.value;
+
+    Parser contentParser = anyLine.manyUntil(blankline);
+    ParseResult contentRes = contentParser.run(s, testRes.position);
+    if (!contentRes.isSuccess) {
+      return contentRes;
+    }
+    if (contentRes.value.length == 0) {
+      return fail.run(s, pos);
+    }
+    String content = "<" + contentRes.value.join('\n');
+
+    ParseResult tagRes = htmlOpenTag.run(content);
+    if (!tagRes.isSuccess) {
+      return fail.run(s, pos);
+    }
+
+    return contentRes.copy(value: [new HtmlRawBlock((" " * firstLineIndent) + content)]);
   });
 
   //

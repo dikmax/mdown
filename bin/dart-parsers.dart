@@ -3,7 +3,9 @@ import 'package:markdowntypography/htmlWriter.dart';
 
 void main() {
   var document = CommonMarkParser.DEFAULT;
-  print(write(document.parse(' ```\n  Test\n```\n')));
+  //print(document.parse('   <div>\n<b>\n<c>\n</z>'));
+  print(write(document.parse('   <div>\n<b>\n                   <c>\n</z>')));
+
   //print(write(document.parse('`Foo\n----\n`')));
   //print(write(document.parse('`Foo\n----\n`\n\n<a title="a lot\n---\nof dashes"/>')));
   //print(write(document.parse('* * *')));
