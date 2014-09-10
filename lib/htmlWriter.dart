@@ -131,7 +131,7 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
 String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.contents)}</h${header.level}>";
 
 String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeBlock.attributes)}>" +
-  "${codeBlock.contents}</code></pre>";
+  "${HTML_ESCAPE.convert(codeBlock.contents)}</code></pre>";
 
 String writePara(Para para) => "<p>${writeInlines(para.contents)}</p>";
 
