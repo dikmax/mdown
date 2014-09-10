@@ -154,7 +154,7 @@ class CommonMarkParser {
   static Parser blankline = skipSpaces > newline % 'blankline';
   static Parser blanklines = blankline.many1 % 'blanklines';
   Parser get indentSpaces => count(TAB_STOP, char(' ')) | char('\t') % "indentation";
-  Parser get skipNonindentSpaces => atMostSpaces(TAB_STOP - 1).notFollowedBy(char(' '));
+  static Parser get skipNonindentSpaces => atMostSpaces(TAB_STOP - 1).notFollowedBy(char(' '));
   static Parser spnl = (skipSpaces > newline);
 
   static Parser atMostSpaces(n) {
@@ -278,7 +278,7 @@ class CommonMarkParser {
   static const String hruleChars = '*-_';
 
   static Parser get hrule => new Parser((s, pos) {
-    ParseResult startRes = (skipSpaces > oneOf(hruleChars)).run(s, pos);
+    ParseResult startRes = (skipNonindentSpaces > oneOf(hruleChars)).run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
     }
@@ -438,12 +438,12 @@ class CommonMarkParser {
 
   // TODO paragraph could be ended by other block types
   Parser get para => new Parser((s, pos) {
-    ParseResult res = many1Until(anyLine, blankline | eof).run(s, pos);
+    ParseResult res = many1Until(anyLine, blankline).run(s, pos);
     if (!res.isSuccess) {
       return res;
     }
 
-    _UnparsedInlines inlines = new _UnparsedInlines(res.value.join("\n"));
+    _UnparsedInlines inlines = new _UnparsedInlines(res.value.join("\n").trim());
     _unparsedInlines.add(inlines);
     return (blankline.many ^ (_) => new Para(inlines)).run(s, res.position);
   });
