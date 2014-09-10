@@ -300,7 +300,7 @@ class CommonMarkParser {
     if (level > 6) {
       return fail.run(s, pos);
     }
-    ParseResult textRes = anyChar.manyUntil(char('#').many > newline).run(s, startRes.position);
+    ParseResult textRes = anyChar.manyUntil(char('#').many > blankline).run(s, startRes.position);
     if (!textRes.isSuccess) {
       return textRes;
     }
