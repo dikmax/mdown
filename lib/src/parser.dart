@@ -307,7 +307,7 @@ class CommonMarkParser {
     String raw = textRes.value.join();
     // TODO parse inlines
 
-    _UnparsedInlines inlines = new _UnparsedInlines(raw);
+    _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
     _unparsedInlines.add(inlines);
     return textRes.copy(value: [new AtxHeader(level, inlines)]);
   });
@@ -327,7 +327,7 @@ class CommonMarkParser {
     int level = res.value[1][0] == '=' ? 1 : 2;
     // TODO parse inlines
 
-    _UnparsedInlines inlines = new _UnparsedInlines(raw);
+    _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
     _unparsedInlines.add(inlines);
     return res.copy(value: [new SetextHeader(level, inlines)]);
   });
