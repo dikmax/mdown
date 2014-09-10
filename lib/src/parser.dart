@@ -309,7 +309,7 @@ class CommonMarkParser {
 
     _UnparsedInlines inlines = new _UnparsedInlines(raw);
     _unparsedInlines.add(inlines);
-    return textRes.copy(value: [new Header(level, inlines)]);
+    return textRes.copy(value: [new AtxHeader(level, inlines)]);
   });
 
   // Setext Header
@@ -443,7 +443,7 @@ class CommonMarkParser {
       return res;
     }
 
-    return (blankline.many ^ (_) => new Para(new _UnparsedInlines(res.value.join()))).run(s, res.position);
+    return (blankline.many ^ (_) => new Para(new _UnparsedInlines(res.value.join("\n")))).run(s, res.position);
   });
 
   //
