@@ -26,6 +26,8 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
     return writeCodeBlock(block);
   } else if (block is RawBlock) {
     return block.contents;
+  } else if (block is Para) {
+    return writePara(block);
   }
   throw new UnimplementedError(block.toString());
 }).join('\n');
@@ -34,6 +36,8 @@ String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.co
 
 String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeBlock.attributes)}>" +
   "${codeBlock.contents}</code></pre>";
+
+String writePara(Para para) => "<p>${writeInlines(para.contents)}</p>";
 
 // Inlines
 String writeInlines(Iterable<Inline> inlines) {

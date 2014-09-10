@@ -6,6 +6,9 @@ class _UnparsedInlines extends Inlines {
   _UnparsedInlines(this.raw);
 
   String toString() => raw;
+
+  bool operator==(obj) => obj is _UnparsedInlines &&
+    raw == obj.raw;
 }
 
 
@@ -193,6 +196,15 @@ class CommonMarkParser {
     });
   }
 
+  Parser many1Until(Parser parser, Parser end) => parser + parser.manyUntil(end) ^ (a, b) {
+    List<Inline> res = [a];
+    if (b.length > 0) {
+      res.addAll(b);
+    }
+    return res;
+  };
+
+
   // HTML
 
   static final String _lower = "abcdefghijklmnopqrstuvwxyz";
@@ -257,7 +269,8 @@ class CommonMarkParser {
       codeBlockIndented,
       codeBlockFenced,
       rawHtml,
-      linkReference
+      linkReference,
+      para
   ]);
 
   // Horizontal rule
@@ -418,6 +431,20 @@ class CommonMarkParser {
     ((blankline.maybe > skipSpaces) > linkTitle).maybe) ^
       (String label, String link, Option<String> title) =>
         new _LinkReference(label, new Target(link, title.isDefined ? title.value : null))) < blankline;
+
+  //
+  // Paragraph
+  //
+
+  // TODO paragraph could be ended by other block types
+  Parser get para => new Parser((s, pos) {
+    ParseResult res = many1Until(anyLine, blankline | eof).run(s, pos);
+    if (!res.isSuccess) {
+      return res;
+    }
+
+    return (blankline.many ^ (_) => new Para(new _UnparsedInlines(res.value.join()))).run(s, res.position);
+  });
 
   //
   // Document

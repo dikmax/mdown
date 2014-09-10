@@ -159,6 +159,19 @@ class HtmlRawBlock extends RawBlock {
 }
 
 
+class Para extends Block {
+  Inlines contents;
+
+  Para(this.contents);
+
+  String toString() => "Para $contents";
+
+  bool operator== (obj) => obj is Para &&
+    level == obj.level &&
+    _iterableEquality.equals(contents, obj.contents);
+}
+
+
 // Inlines
 
 class Inlines extends ListBase<Inline> {
