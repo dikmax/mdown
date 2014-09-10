@@ -438,7 +438,8 @@ class CommonMarkParser {
 
   // TODO paragraph could be ended by other block types
   Parser get para => new Parser((s, pos) {
-    ParseResult res = many1Until(anyLine, blankline).run(s, pos);
+    Parser end = blankline | hrule;
+    ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
     }
