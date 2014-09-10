@@ -37,7 +37,7 @@ String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeB
 
 // Inlines
 String writeInlines(Iterable<Inline> inlines) {
-  // TODO better parsing
+  // TODO remove raw check
   if (inlines.raw != null) {
     return inlines.raw;
   }

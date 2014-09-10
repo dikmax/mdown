@@ -51,6 +51,16 @@ class InfoString extends Attr {
 }
 
 
+class Target {
+  String link;
+  String title;
+
+  Target(this.link, this.title);
+
+  String toString() => 'Target "${link}" ${title == null ? "null" : "\"${title}\""}';
+}
+
+
 // Blocks
 
 abstract class Block {

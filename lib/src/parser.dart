@@ -8,16 +8,37 @@ class _UnparsedInlines extends Inlines {
   String toString() => raw;
 }
 
+
+class _LinkReference extends Block {
+  String reference;
+  Target target;
+
+  _LinkReference(this.reference, this.target);
+}
+
+
 // CommonMark parser
 class CommonMarkParser {
   static const int TAB_STOP = 4;
 
   CommonMarkParser();
 
+  Map<String, Target> _references;
+  List<_UnparsedInlines> _unparsedInlines;
+
+  Map<String, Target> get references => _references; // TODO remove later
+
   Document parse(String s) {
     // TODO separate preprocess option
 
-    return document.parse(preprocess(s) + "\n\n");
+    _references = {};
+    _unparsedInlines = [];
+
+    var doc = document.parse(preprocess(s) + "\n\n");
+
+    // TODO parse inlines
+    return doc;
+
   }
 
   // Preprocess
@@ -60,6 +81,22 @@ class CommonMarkParser {
   //
   // Aux methods
   //
+
+  List<Block> precessParsedBlocks(Iterable blocks) {
+    List list = flatten(blocks);
+    List result = [];
+    list.forEach((Block block) {
+      if (block is _LinkReference) {
+        if (!_references.containsKey(block.reference)) {
+          _references[block.reference] = block.target;
+        }
+      } else {
+        result.add(block);
+      }
+    });
+    return result;
+  }
+
 
   static List flatten(Iterable list) {
     List result = [];
@@ -177,25 +214,36 @@ class CommonMarkParser {
   static Parser htmlSingleQuotedAttributeValue = (char("'") > noneOf("'\n").many) < char("'");
   static Parser htmlDoubleQuotedAttributeValue = (char('"') > noneOf('"\n').many) < char('"');
 
-  Parser get htmlAttribute => (spaceOrNL.many1 + htmlAttributeName + htmlAttiributeValue.maybe).list.record;
-  Parser get htmlOpenTag => new Parser((s, pos) {
-    Parser p = ((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>');
-    ParseResult res = p.run(s, pos);
-    if (!res.isSuccess) {
-      return res;
-    }
+  static Parser get htmlAttribute => (spaceOrNL.many1 + htmlAttributeName + htmlAttiributeValue.maybe).list.record;
+  static Parser htmlBlockTag(Parser p) {
+    return new Parser((s, pos) {
+      ParseResult res = p.run(s, pos);
+      if (!res.isSuccess) {
+        return res;
+      }
 
-    if (_allowedTags.contains(res.value.join().toLowerCase())) {
-      return res.copy(value: s.substring(pos.offset, res.position.offset));
-    }
-    return fail.run(s, pos);
-  });
+      if (_allowedTags.contains(res.value.join().toLowerCase())) {
+        return res.copy(value: s.substring(pos.offset, res.position.offset));
+      }
+      return fail.run(s, pos);
+    });
+  }
+  Parser get htmlOpenTag => htmlBlockTag(
+      ((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')
+  );
+
+  Parser get htmlCloseTag => htmlBlockTag(
+      ((string("</") > alphanum.many1) < spaceOrNL.many) < char('>')
+  );
+
+  Parser get htmlCompleteComment => (string('<!--') > anyChar.manyUntil(string('-->'))).record;
+  Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
+  Parser get htmlDeclaration => (string('<!') + upper.many1 + spaceOrNL.many1 + anyChar.manyUntil(char('>'))).list.record;
+  Parser get htmlCompleteCDATA => (string('<![CDATA[') > anyChar.manyUntil(string(']]>'))).record;
 
   //
   // Inlines
   //
-
-  List<_UnparsedInlines> _unparsedInlines = [];
 
   //
   // Blocks
@@ -208,7 +256,8 @@ class CommonMarkParser {
       setextHeader,
       codeBlockIndented,
       codeBlockFenced,
-      rawHtml
+      rawHtml,
+      linkReference
   ]);
 
   // Horizontal rule
@@ -331,7 +380,14 @@ class CommonMarkParser {
     }
     String content = "<" + contentRes.value.join('\n');
 
-    ParseResult tagRes = htmlOpenTag.run(content);
+    // TODO add support for partial html comments, pi and CDATA.
+
+    ParseResult tagRes = (htmlOpenTag
+      | htmlCloseTag
+      | htmlCompleteComment
+      | htmlCompletePI
+      | htmlDeclaration
+      | htmlCompleteCDATA).run(content);
     if (!tagRes.isSuccess) {
       return fail.run(s, pos);
     }
@@ -339,11 +395,35 @@ class CommonMarkParser {
     return contentRes.copy(value: [new HtmlRawBlock((" " * firstLineIndent) + content)]);
   });
 
+  // Link reference
+
+  // TODO complete inlines parser for label
+  Parser get linkLabel => ((char("[") > noneOf("]\n").many1) < string("]:")) ^ (i) => i.join();
+
+  // TODO proper parentheses ()
+  Parser get linkDestination => (
+    ((char("<") > noneOf("<>\n").many1) < char(">")) |
+    noneOf("\t\n ()").many1
+  ) ^ (i) => i.join();
+
+  // TODO support escaping
+  Parser get linkTitle => (
+      ((char("'") > noneOf("'\n")) < char("'")) |
+      ((char('"') > noneOf('"\n')) < char('"')) |
+      ((char('(') > noneOf(')\n')) < char(')'))
+  ) ^ (i) => i.join();
+
+  Parser get linkReference => (((skipNonindentSpaces > linkLabel) +
+    ((blankline.maybe > skipSpaces) > linkDestination) +
+    ((blankline.maybe > skipSpaces) > linkTitle).maybe) ^
+      (String label, String link, Option<String> title) =>
+        new _LinkReference(label, new Target(link, title.isDefined ? title.value : null))) < blankline;
+
   //
   // Document
   //
 
-  Parser get document => (block.manyUntil(eof) ^ (res) => new Document(flatten(res))) % "document";
+  Parser get document => (block.manyUntil(eof) ^ (res) => new Document(precessParsedBlocks(res))) % "document";
 
   static CommonMarkParser DEFAULT = new CommonMarkParser();
 }

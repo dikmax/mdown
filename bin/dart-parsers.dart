@@ -5,8 +5,8 @@ void main() {
   var document = CommonMarkParser.DEFAULT;
   //print(document.parse('   <div>\n<b>\n<c>\n</z>'));
   //print(write(document.parse('   <div>\n<b>\n                   <c>\n</z>')));
-
-  print(write(document.parse('Header 1\n----\n')));
+  print(write(document.parse('[test]: http://google.com/')));
+  print(document.references);
   //print(write(document.parse('`Foo\n----\n`')));
   //print(write(document.parse('`Foo\n----\n`\n\n<a title="a lot\n---\nof dashes"/>')));
   //print(write(document.parse('* * *')));
