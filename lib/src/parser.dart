@@ -291,7 +291,7 @@ class CommonMarkParser {
   // ATX Header
 
   Parser get atxHeader => new Parser((s, pos) {
-    Parser startParser = ((skipNonindentSpaces > char('#').many1) < spaceChar) < skipSpaces;
+    Parser startParser = skipNonindentSpaces > char('#').many1;
     ParseResult startRes = startParser.run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
@@ -300,7 +300,9 @@ class CommonMarkParser {
     if (level > 6) {
       return fail.run(s, pos);
     }
-    ParseResult textRes = anyChar.manyUntil(char('#').many > blankline).run(s, startRes.position);
+
+    ParseResult textRes = (((spaceChar > skipSpaces) > anyChar.manyUntil(char('#').many > blankline)) |
+      (newline ^ (_) => [])).run(s, startRes.position);
     if (!textRes.isSuccess) {
       return textRes;
     }
@@ -438,7 +440,7 @@ class CommonMarkParser {
 
   // TODO paragraph could be ended by other block types
   Parser get para => new Parser((s, pos) {
-    Parser end = blankline | hrule;
+    Parser end = blankline | hrule | atxHeader;
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
