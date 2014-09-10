@@ -92,7 +92,7 @@ String tidy(String html) {
     }
   }
 
-  return result.join('\n');
+  return result.join('\n').trim();
 }
 void testCommonMarkdown(int num, String mdOrig, String html) {
   String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");

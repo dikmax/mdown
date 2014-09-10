@@ -367,9 +367,16 @@ class CommonMarkParser {
     if (indent > 0) {
       lineParser = atMostSpaces(indent) > lineParser;
     }
-    Parser endFenceParser = ((skipSpaces > string(fenceChar * fenceSize)) > skipSpaces) > newline;
-    Parser restParser = lineParser.manyUntil(endFenceParser) ^
-        (lines) => [new FencedCodeBlock(lines.join('\n') + '\n', new InfoString(infoString))];
+    Parser endFenceParser = (((skipSpaces > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
+    Parser restParser = (lineParser.manyUntil(endFenceParser) ^
+        (lines) => [new FencedCodeBlock(lines.map((i) => i + '\n').join(), new InfoString(infoString))])
+      | (lineParser.manyUntil(eof) ^ (List lines) {
+        // If fenced code block is ended by eof trim last two new lines;
+        if (lines.length > 0 && lines.last == "") {
+          lines.removeLast();
+        }
+        return [new FencedCodeBlock(lines.join('\n'), new InfoString(infoString))];
+      });
 
     return restParser.run(s, topFenceRes.position);
   });
@@ -440,7 +447,8 @@ class CommonMarkParser {
 
   // TODO paragraph could be ended by other block types
   Parser get para => new Parser((s, pos) {
-    Parser end = blankline | hrule | atxHeader;
+    // TODO replace codeBlockFenced with starting fence test
+    Parser end = blankline | hrule | atxHeader | codeBlockFenced;
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
