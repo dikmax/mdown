@@ -443,7 +443,9 @@ class CommonMarkParser {
       return res;
     }
 
-    return (blankline.many ^ (_) => new Para(new _UnparsedInlines(res.value.join("\n")))).run(s, res.position);
+    _UnparsedInlines inlines = new _UnparsedInlines(res.value.join("\n"));
+    _unparsedInlines.add(inlines);
+    return (blankline.many ^ (_) => new Para(inlines)).run(s, res.position);
   });
 
   //
