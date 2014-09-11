@@ -159,6 +159,17 @@ class HtmlRawBlock extends RawBlock {
 }
 
 
+class Blockquote extends Block {
+  Iterable<Block> contents;
+
+  Blockquote(this.contents);
+
+  String toString() => "Blockquote $contents";
+
+  bool operator== (obj) => obj is Blockquote &&
+    _iterableEquality.equals(contents, obj.contents);
+}
+
 class Para extends Block {
   Inlines contents;
 

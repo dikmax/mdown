@@ -19,6 +19,9 @@ class _LinkReference extends Block {
   _LinkReference(this.reference, this.target);
 }
 
+// TODO make aux parsers private
+
+// TODO extract constant parsers from parsers methods
 
 // CommonMark parser
 class CommonMarkParser {
@@ -44,7 +47,9 @@ class CommonMarkParser {
 
   }
 
+  //
   // Preprocess
+  //
 
   String preprocess(String s) {
     StringBuffer sb = new StringBuffer();
@@ -205,7 +210,9 @@ class CommonMarkParser {
   };
 
 
+  //
   // HTML
+  //
 
   static final String _lower = "abcdefghijklmnopqrstuvwxyz";
   static final String _upper = _lower.toUpperCase();
@@ -270,10 +277,13 @@ class CommonMarkParser {
       codeBlockFenced,
       rawHtml,
       linkReference,
+      blockquote,
       para
   ]);
 
+  //
   // Horizontal rule
+  //
 
   static const String hruleChars = '*-_';
 
@@ -288,7 +298,9 @@ class CommonMarkParser {
       success([new HorizontalRule()])).run(s, startRes.position);
   });
 
+  //
   // ATX Header
+  //
 
   Parser get atxHeader => new Parser((s, pos) {
     Parser startParser = skipNonindentSpaces > char('#').many1;
@@ -314,7 +326,9 @@ class CommonMarkParser {
     return textRes.copy(value: [new AtxHeader(level, inlines)]);
   });
 
+  //
   // Setext Header
+  //
 
   static const String setextHChars = "=-";
 
@@ -334,7 +348,9 @@ class CommonMarkParser {
     return res.copy(value: [new SetextHeader(level, inlines)]);
   });
 
+  //
   // Indented code
+  //
 
   Parser get indentedLine => (indentSpaces > anyLine) ^ (line) => line + "\n";
 
@@ -342,7 +358,9 @@ class CommonMarkParser {
     ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many1 < blanklines.maybe) ^
         (c) => new IndentedCodeBlock(stripTrailingNewlines(c.join('')) + '\n');
 
+  //
   // Fenced code
+  //
 
   Parser get codeBlockFenced => new Parser((s, pos) {
     Parser fenceStartParser = (skipNonindentSpaces + (string('~~~') | string('```'))).list;
@@ -381,7 +399,9 @@ class CommonMarkParser {
     return restParser.run(s, topFenceRes.position);
   });
 
+  //
   // Raw html block
+  //
 
   Parser get rawHtml => new Parser((s, pos) {
     // Simple test
@@ -417,7 +437,9 @@ class CommonMarkParser {
     return contentRes.copy(value: [new HtmlRawBlock((" " * firstLineIndent) + content)]);
   });
 
+  //
   // Link reference
+  //
 
   // TODO complete inlines parser for label
   Parser get linkLabel => ((char("[") > noneOf("]\n").many1) < string("]:")) ^ (i) => i.join();
@@ -457,6 +479,29 @@ class CommonMarkParser {
     _UnparsedInlines inlines = new _UnparsedInlines(res.value.join("\n").trim());
     _unparsedInlines.add(inlines);
     return (blankline.many ^ (_) => new Para(inlines)).run(s, res.position);
+  });
+
+  //
+  // Blockquote
+  //
+
+  static Parser blockquoteFirstLine = ((skipNonindentSpaces > char('>')) > space.maybe) > anyLine;
+  static Parser blockquoteNextLine = ((skipNonindentSpaces > char('>').maybe) > space.maybe) > anyLine;
+  static Parser blockquoteBlock = (blockquoteFirstLine + blockquoteNextLine.manyUntil(blankline | eof)) ^ (first, next) {
+    String res = first + "\n";
+    if (next.length > 0) {
+      res += next.join("\n") + "\n";
+    }
+    return res;
+  };
+  Parser get blockquote => new Parser((s, pos) {
+    ParseResult res = blockquoteBlock.run(s, pos);
+    if (!res.isSuccess) {
+      return res;
+    }
+
+    Blockquote innerRes = (block.manyUntil(eof) ^ (res) => new Blockquote(precessParsedBlocks(res))).parse(res.value);
+    return res.copy(value: innerRes);
   });
 
   //

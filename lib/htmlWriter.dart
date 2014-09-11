@@ -114,19 +114,23 @@ String writeAttributes(Attr attr) {
 
 // Blocks
 String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
-  if (block is HorizontalRule) {
-    return '<hr/>';
+  if (block is Para) {
+    return writePara(block);
   } else if (block is Header) {
     return writeHeader(block);
+  } else if (block is HorizontalRule) {
+    return '<hr/>';
   } else if (block is CodeBlock) {
     return writeCodeBlock(block);
+  } else if (block is Blockquote) {
+    return writeBlockquote(block);
   } else if (block is RawBlock) {
     return block.contents;
-  } else if (block is Para) {
-    return writePara(block);
   }
   throw new UnimplementedError(block.toString());
 }).join('\n');
+
+String writeBlockquote(Blockquote blockquote) => "<blockquote>\n${writeBlocks(blockquote.contents)}\n</blockquote>";
 
 String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.contents)}</h${header.level}>";
 
