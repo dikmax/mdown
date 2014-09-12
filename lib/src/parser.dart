@@ -333,7 +333,7 @@ class CommonMarkParser {
   static const String setextHChars = "=-";
 
   Parser get setextHeader => new Parser((s, pos) {
-    ParseResult res = (((skipNonindentSpaces > anyLine) +
+    ParseResult res = (((skipNonindentSpaces.notFollowedBy(char('>')) > anyLine) +
       (skipNonindentSpaces > oneOf(setextHChars).many1)).list < blankline).run(s, pos);
     if (!res.isSuccess) {
       return res;
@@ -487,10 +487,11 @@ class CommonMarkParser {
 
   static Parser blockquoteFirstLine = ((skipNonindentSpaces > char('>')) > space.maybe) > anyLine;
   static Parser blockquoteNextLine = ((skipNonindentSpaces > char('>').maybe) > space.maybe) > anyLine;
-  static Parser blockquoteBlock = (blockquoteFirstLine + blockquoteNextLine.manyUntil(blankline | eof)) ^ (first, next) {
+  static Parser blockquoteEnd = (blankline | eof | hrule);
+  static Parser blockquoteBlock = (blockquoteFirstLine + blockquoteNextLine.manyUntil(blockquoteEnd.lookAhead).maybe) ^ (first, Option next) {
     String res = first + "\n";
-    if (next.length > 0) {
-      res += next.join("\n") + "\n";
+    if (next.isDefined && next.value.length > 0) {
+      res += next.value.join("\n") + "\n";
     }
     return res;
   };
