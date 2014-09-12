@@ -116,6 +116,8 @@ String writeAttributes(Attr attr) {
 String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
   if (block is Para) {
     return writePara(block);
+  } else if (block is Plain) {
+    return writePlain(block);
   } else if (block is Header) {
     return writeHeader(block);
   } else if (block is HorizontalRule) {
@@ -126,18 +128,27 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
     return writeBlockquote(block);
   } else if (block is RawBlock) {
     return block.contents;
+  } else if (block is UnorderedList) {
+    return writeUnorderedList(block);
+  } else if (block is OrderedList) {
+    return writeOrderedList(block);
   }
   throw new UnimplementedError(block.toString());
-}).map((l) => l + "\n").join();
+}).join();
 
-String writeBlockquote(Blockquote blockquote) => "<blockquote>\n${writeBlocks(blockquote.contents)}</blockquote>";
+String writeBlockquote(Blockquote blockquote) => "<blockquote>\n${writeBlocks(blockquote.contents)}</blockquote>\n";
 
-String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.contents)}</h${header.level}>";
+String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.contents)}</h${header.level}>\n";
 
 String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeBlock.attributes)}>" +
-  "${HTML_ESCAPE.convert(codeBlock.contents)}</code></pre>";
+  "${HTML_ESCAPE.convert(codeBlock.contents)}</code></pre>\n";
 
-String writePara(Para para) => "<p>${writeInlines(para.contents)}</p>";
+String writeListItems(List<ListItem> items) => items.map((ListItem item) => "<li>${writeBlocks(item.contents)}</li>\n").join();
+String writeUnorderedList(UnorderedList list) => "<ul>\n${writeListItems(list.items)}</ul>\n";
+String writeOrderedList(OrderedList list) => "<ol${list.startIndex != 1 ? ' start="${list.startIndex}"' : ''}>\n${writeListItems(list.items)}</ol>\n";
+
+String writePara(Para para) => "<p>${writeInlines(para.contents)}</p>\n";
+String writePlain(Plain plain) => writeInlines(plain.contents);
 
 // Inlines
 String writeInlines(Iterable<Inline> inlines) {

@@ -278,6 +278,7 @@ class CommonMarkParser {
       rawHtml,
       linkReference,
       blockquote,
+      unorderedList,
       para
   ]);
 
@@ -507,6 +508,7 @@ class CommonMarkParser {
         } else if (blocks.last is Blockquote) {
           return acceptLazy(blocks.last.contents, s);
         }
+        // TODO add list support
       }
 
       return false;
@@ -539,6 +541,7 @@ class CommonMarkParser {
         if (buffer.length > 0) {
           buildBuffer();
           List<Block> lineBlock = block.parse(line + "\n");
+          // TODO fix condition
           if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para && acceptLazy(blocks, lineBlock[0].contents.raw)) {
 
           } else {
@@ -554,6 +557,172 @@ class CommonMarkParser {
     }
 
     return firstLineRes.copy(position: position, value: new Blockquote(blocks));
+  });
+
+  //
+  // Lists
+  //
+
+  static Parser get unorderedListMarkerTest => ((skipNonindentSpaces > oneOf('-+*')) < char(' '));
+  static Parser listFirstLine(int indent, Parser marker) => (atMostSpaces(indent) + marker + anyLine).list;
+  static Parser listStrictLine(int indent) => atMostSpaces(indent) > anyLine;
+  static Parser get listLazyLine => skipNonindentSpaces > anyLine;
+  static Parser listLine(int indent, Parser marker) => // There are three types of lines in list
+    (listFirstLine(indent - 1, marker) ^ (l) => [0,  l[0], l[1], l[2]]) // List item start
+    | (listStrictLine(indent) ^ (l) => [1, l])                          // List item strict continuation
+    | (listLazyLine ^ (l) => [2, l])                                    // List item lazy continuation
+    | (blankline ^ (l) => [3]);                                         // Blank line
+
+  Parser list(Parser marker) => new Parser((s, pos) {
+    ParseResult firstLineRes = listFirstLine(TAB_STOP - 1, marker).run(s, pos);
+    if (!firstLineRes.isSuccess) {
+      return firstLineRes;
+    }
+
+    List<ListItem> items = [];
+    List<Block> blocks = [];
+    String line = firstLineRes.value[2];
+    List<String> buffer = [line];
+    bool closeParagraph = false;
+
+    bool acceptLazy(List<Block> blocks, String s) {
+      if (blocks.length > 0) {
+        if (blocks.last is Para) {
+          blocks.last.contents.raw += "\n" + s;
+          return true;
+        } else if (blocks.last is Blockquote) {
+          return acceptLazy(blocks.last.contents, s);
+        }
+        // TODO add list support
+      }
+
+      return false;
+    }
+
+    void buildBuffer() {
+      String s = buffer.map((l) => l + "\n").join();
+      List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
+      if (!closeParagraph && innerRes.length > 0 && innerRes.first is Para && acceptLazy(blocks, innerRes.first.contents.raw)) {
+        innerRes.removeAt(0);
+      }
+      if (innerRes.length > 0) {
+        blocks.addAll(innerRes);
+      }
+      buffer = [];
+    }
+
+    void addItem() {
+      if (buffer.length > 0) {
+        buildBuffer();
+      }
+      if (blocks.length == 1 && blocks[0] is Para) {
+        items.add(new ListItem([new Plain(new _UnparsedInlines(blocks[0].contents.raw))]));
+      } else {
+        items.add(new ListItem(blocks));
+      }
+      blocks = [];
+    }
+
+    int indent = firstLineRes.value[0] + firstLineRes.value[1].length;
+    String substring = line.substring(0, min(line.length, 4));
+    if (substring != "    ") {
+      indent += 4 - substring.trimLeft().length;
+    }
+
+    Position position = firstLineRes.position;
+    loop: while (true) {
+      ParseResult res = listLine(indent, marker).run(s, position);
+      if (!res.isSuccess) {
+        break;
+      }
+
+      switch (res.value[0]) {
+        case 0: // New list item start
+          addItem();
+
+          line = res.value[3];
+          buffer.add(line);
+          indent = res.value[1] + res.value[2].length;
+          String substring = line.substring(0, min(line.length, 4));
+          if (substring != "    ") {
+            indent += 4 - substring.trimLeft().length;
+          }
+
+          closeParagraph = false;
+          break;
+
+        case 1: // Strict line
+          buffer.add(res.value[1]);
+          closeParagraph = false;
+          break;
+
+        case 2: // Lazy line
+          if (buffer.length > 0) {
+            buildBuffer();
+            List<Block> lineBlock = block.parse(line + "\n");
+            // TODO fix condition
+            if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para && acceptLazy(blocks, lineBlock[0].contents.raw)) {
+
+            } else {
+              break loop;
+            }
+          }
+
+          closeParagraph = false;
+          break;
+
+        case 3: // Blank line
+          // TODO fenced code block test
+          if (closeParagraph) {
+            // Second blank line. Closing list
+            break loop;
+          } else {
+            closeParagraph = true;
+          }
+          break;
+      }
+
+      position = res.position;
+    }
+
+    if (buffer.length > 0) {
+      buildBuffer();
+    }
+
+    addItem();
+
+    return firstLineRes.copy(position: position, value: items);
+  });
+
+  Parser get unorderedList => new Parser((s, pos) {
+    ParseResult testRes = unorderedListMarkerTest.run(s, pos);
+    if (!testRes.isSuccess) {
+      return testRes;
+    }
+    String markerChar = testRes.value;
+
+    return (list(string(markerChar + " ")) ^ (items) {
+      BulletType type;
+      switch(markerChar) {
+        case '+':
+          type = BulletType.PlusBullet;
+          break;
+
+        case '-':
+          type = BulletType.MinusBullet;
+          break;
+
+        case '*':
+          type = BulletType.StarBullet;
+          break;
+
+        default:
+          assert(false);
+          type = BulletType.PlusBullet;
+      }
+
+      return [new UnorderedList(items, type)];
+    }).run(s, pos);
   });
 
   //

@@ -132,6 +132,7 @@ class IndentedCodeBlock extends CodeBlock {
 
 
 class FencedCodeBlock extends CodeBlock {
+  // TODO fence parameters
   FencedCodeBlock(String contents, Attr attributes) : super(contents, attributes);
 
   String toString() => "FencedCodeBlock $attributes $contents";
@@ -170,6 +171,86 @@ class Blockquote extends Block {
     _iterableEquality.equals(contents, obj.contents);
 }
 
+class ListItem {
+  Iterable<Block> contents;
+
+  ListItem(this.contents);
+
+  String toString() => "ListItem $contents";
+
+  bool operator== (obj) => obj is ListItem &&
+    _iterableEquality.equals(contents, obj.contents);
+}
+
+
+class BulletType {
+  static const BulletType MinusBullet = const BulletType._(0, "MinusBullet");
+  static const BulletType PlusBullet = const BulletType._(1, "PlusBullet");
+  static const BulletType StarBullet = const BulletType._(2, "StarBullet");
+
+  final int value;
+  final String name;
+
+  const BulletType._(this.value, this.name);
+
+  String toString() => name;
+
+  bool operator== (obj) => obj is BulletType &&
+    value == obj.value;
+}
+
+
+class IndexSeparator {
+  static const IndexSeparator DotSeparator = const IndexSeparator._(0, "DotSeparator");
+  static const IndexSeparator ParenthesisSeparator = const IndexSeparator._(1, "ParenthesisSeparator");
+
+  final int value;
+  final String name;
+
+  const IndexSeparator._(this.value, this.name);
+
+  String toString() => name;
+
+  bool operator== (obj) => obj is IndexSeparator &&
+    value == obj.value;
+}
+
+// List class name is already taken by dart
+abstract class ListBlock extends Block {
+  Iterable<ListItem> items;
+
+  ListBlock(this.items);
+}
+
+
+class UnorderedList extends ListBlock {
+  BulletType bulletType;
+
+  UnorderedList(items, this.bulletType) : super(items);
+
+  String toString() => "UnorderedList $bulletType $items";
+
+  bool operator== (obj) => obj is UnorderedList &&
+    bulletType == obj.bulletType &&
+    _iterableEquality(items, obj.items);
+}
+
+
+class OrderedList extends ListBlock {
+  IndexSeparator indexSeparator;
+  int startIndex;
+
+  OrderedList(items, this.indexSeparator, this.startIndex) : super(items);
+
+  String toString() => "OrderedList start=$startIndex $indexSeparator $items";
+
+  bool operator== (obj) => obj is OrderedList &&
+    indexSeparator == obj.indexSeparator &&
+    startIndex == obj.startIndex &&
+    _iterableEquality(items, obj.items);
+}
+
+
 class Para extends Block {
   Inlines contents;
 
@@ -178,7 +259,18 @@ class Para extends Block {
   String toString() => "Para $contents";
 
   bool operator== (obj) => obj is Para &&
-    level == obj.level &&
+    _iterableEquality.equals(contents, obj.contents);
+}
+
+
+class Plain extends Block {
+  Inlines contents;
+
+  Plain(this.contents);
+
+  String toString() => "Plain $contents";
+
+  bool operator== (obj) => obj is Para &&
     _iterableEquality.equals(contents, obj.contents);
 }
 
