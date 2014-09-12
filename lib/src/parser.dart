@@ -30,7 +30,7 @@ class CommonMarkParser {
   CommonMarkParser();
 
   Map<String, Target> _references;
-  List<_UnparsedInlines> _unparsedInlines;
+  List<_UnparsedInlines> _unparsedInlines; // TODO REMOVE. Use tree walk instead
 
   Map<String, Target> get references => _references; // TODO remove later
 
@@ -90,7 +90,7 @@ class CommonMarkParser {
   // Aux methods
   //
 
-  List<Block> precessParsedBlocks(Iterable blocks) {
+  List<Block> processParsedBlocks(Iterable blocks) {
     List list = flatten(blocks);
     List result = [];
     list.forEach((Block block) {
@@ -478,38 +478,75 @@ class CommonMarkParser {
 
     _UnparsedInlines inlines = new _UnparsedInlines(res.value.join("\n").trim());
     _unparsedInlines.add(inlines);
-    return (blankline.many ^ (_) => new Para(inlines)).run(s, res.position);
+    return (blankline.many ^ (_) => [new Para(inlines)]).run(s, res.position);
   });
 
   //
   // Blockquote
   //
 
-  static Parser blockquoteFirstLine = ((skipNonindentSpaces > char('>')) > space.maybe) > anyLine;
-  static Parser blockquoteNextLine = ((skipNonindentSpaces > char('>').maybe) > space.maybe) > anyLine;
-  static Parser blockquoteEnd = (blankline | eof | hrule);
-  static Parser blockquoteBlock = (blockquoteFirstLine + blockquoteNextLine.manyUntil(blockquoteEnd.lookAhead).maybe) ^ (first, Option next) {
-    String res = first + "\n";
-    if (next.isDefined && next.value.length > 0) {
-      res += next.value.join("\n") + "\n";
-    }
-    return res;
-  };
+  static Parser blockquoteStrictLine = ((skipNonindentSpaces > char('>')) > space.maybe) > anyLine;
+  static Parser blockquoteLazyLine = skipNonindentSpaces > anyLine;
+  static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
+    | (blockquoteLazyLine ^ (l) => [false, l]);
+
   Parser get blockquote => new Parser((s, pos) {
-    ParseResult res = blockquoteBlock.run(s, pos);
-    if (!res.isSuccess) {
-      return res;
+    ParseResult firstLineRes = blockquoteStrictLine.run(s, pos);
+    if (!firstLineRes.isSuccess) {
+      return firstLineRes;
+    }
+    List<String> buffer = [firstLineRes.value];
+    List<Block> blocks = [];
+
+    void buildBuffer() {
+      String s = buffer.map((l) => l + "\n").join();
+      List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
+      if (blocks.length > 0 && blocks.last is Para && innerRes.first is Para) {
+        blocks.last.contents.raw += "\n" + innerRes.first.contents.raw;
+        innerRes.removeAt(0);
+      }
+      if (innerRes.length > 0) {
+        blocks.addAll(innerRes);
+      }
+      buffer = [];
     }
 
-    Blockquote innerRes = (block.manyUntil(eof) ^ (res) => new Blockquote(precessParsedBlocks(res))).parse(res.value);
-    return res.copy(value: innerRes);
+    Position position = firstLineRes.position;
+    while(true) {
+      ParseResult res = blockquoteLine.run(s, position);
+      if (!res.isSuccess) {
+        break;
+      }
+      bool isStrict = res.value[0];
+      String line = res.value[1];
+      if (isStrict) {
+        buffer.add(line);
+      } else {
+        if (buffer.length > 0) {
+          buildBuffer();
+          List<Block> lineBlock = block.parse(line + "\n");
+          if (lineBlock.length == 1 && lineBlock[0] is Para && blocks.last is Para) {
+            blocks.last.contents.raw += "\n" + lineBlock[0].contents.raw;
+          } else {
+            break;
+          }
+        }
+      }
+      position = res.position;
+    }
+
+    if (buffer.length > 0) {
+      buildBuffer();
+    }
+
+    return firstLineRes.copy(position: position, value: new Blockquote(blocks));
   });
 
   //
   // Document
   //
 
-  Parser get document => (block.manyUntil(eof) ^ (res) => new Document(precessParsedBlocks(res))) % "document";
+  Parser get document => (block.manyUntil(eof) ^ (res) => new Document(processParsedBlocks(res))) % "document";
 
   static CommonMarkParser DEFAULT = new CommonMarkParser();
 }
