@@ -113,7 +113,11 @@ String writeAttributes(Attr attr) {
 }
 
 // Blocks
-String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
+String writeBlocks(Iterable<Block> blocks) => writeBlocks_(blocks).map((item) => item + "\n").join();
+
+String writeBlocksTight(Iterable<Block> blocks) => writeBlocks_(blocks).join('\n');
+
+Iterable<String> writeBlocks_(Iterable<Block> blocks) => blocks.map((Block block) {
   if (block is Para) {
     return writePara(block);
   } else if (block is Plain) {
@@ -134,20 +138,20 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
     return writeOrderedList(block);
   }
   throw new UnimplementedError(block.toString());
-}).join();
+});
 
-String writeBlockquote(Blockquote blockquote) => "<blockquote>\n${writeBlocks(blockquote.contents)}</blockquote>\n";
+String writeBlockquote(Blockquote blockquote) => "<blockquote>\n${writeBlocks(blockquote.contents)}</blockquote>";
 
-String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.contents)}</h${header.level}>\n";
+String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.contents)}</h${header.level}>";
 
 String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeBlock.attributes)}>" +
-  "${HTML_ESCAPE.convert(codeBlock.contents)}</code></pre>\n";
+  "${HTML_ESCAPE.convert(codeBlock.contents)}</code></pre>";
 
-String writeListItems(List<ListItem> items) => items.map((ListItem item) => "<li>${writeBlocks(item.contents)}</li>\n").join();
-String writeUnorderedList(UnorderedList list) => "<ul>\n${writeListItems(list.items)}</ul>\n";
-String writeOrderedList(OrderedList list) => "<ol${list.startIndex != 1 ? ' start="${list.startIndex}"' : ''}>\n${writeListItems(list.items)}</ol>\n";
+String writeListItems(List<ListItem> items) => items.map((ListItem item) => "<li>${writeBlocksTight(item.contents).trim()}</li>\n").join();
+String writeUnorderedList(UnorderedList list) => "<ul>\n${writeListItems(list.items)}</ul>";
+String writeOrderedList(OrderedList list) => "<ol${list.startIndex != 1 ? ' start="${list.startIndex}"' : ''}>\n${writeListItems(list.items)}</ol>";
 
-String writePara(Para para) => "<p>${writeInlines(para.contents)}</p>\n";
+String writePara(Para para) => "<p>${writeInlines(para.contents)}</p>";
 String writePlain(Plain plain) => writeInlines(plain.contents);
 
 // Inlines

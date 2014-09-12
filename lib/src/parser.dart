@@ -471,7 +471,7 @@ class CommonMarkParser {
   // TODO paragraph could be ended by other block types
   Parser get para => new Parser((s, pos) {
     // TODO replace codeBlockFenced with starting fence test
-    Parser end = blankline | hrule | atxHeader | codeBlockFenced | (skipNonindentSpaces > char('>'));
+    Parser end = blankline | hrule | atxHeader | codeBlockFenced | (skipNonindentSpaces > oneOf('>+-*'));
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
@@ -556,22 +556,23 @@ class CommonMarkParser {
       buildBuffer();
     }
 
-    return firstLineRes.copy(position: position, value: new Blockquote(blocks));
+    return firstLineRes.copy(position: position, value: [new Blockquote(blocks)]);
   });
 
   //
   // Lists
   //
 
-  static Parser get unorderedListMarkerTest => ((skipNonindentSpaces > oneOf('-+*')) < char(' '));
-  static Parser listFirstLine(int indent, Parser marker) => (atMostSpaces(indent) + marker + anyLine).list;
-  static Parser listStrictLine(int indent) => atMostSpaces(indent) > anyLine;
+  static Parser get unorderedListMarkerTest => ((skipNonindentSpaces.notFollowedBy(hrule) > oneOf('-+*')) < char(' '));
+  static Parser listFirstLine(int indent, Parser marker) => (atMostSpaces(indent).notFollowedBy(hrule) + marker + anyLine).list;
+  static Parser listStrictLine(int indent) => string(" " * indent) > anyLine;
   static Parser get listLazyLine => skipNonindentSpaces > anyLine;
   static Parser listLine(int indent, Parser marker) => // There are three types of lines in list
     (listFirstLine(indent - 1, marker) ^ (l) => [0,  l[0], l[1], l[2]]) // List item start
+    | (blankline ^ (l) => [3])                                          // Blank line
     | (listStrictLine(indent) ^ (l) => [1, l])                          // List item strict continuation
-    | (listLazyLine ^ (l) => [2, l])                                    // List item lazy continuation
-    | (blankline ^ (l) => [3]);                                         // Blank line
+    | (listLazyLine ^ (l) => [2, l]);                                   // List item lazy continuation
+
 
   Parser list(Parser marker) => new Parser((s, pos) {
     ParseResult firstLineRes = listFirstLine(TAB_STOP - 1, marker).run(s, pos);
@@ -615,21 +616,19 @@ class CommonMarkParser {
       if (buffer.length > 0) {
         buildBuffer();
       }
-      if (blocks.length == 1 && blocks[0] is Para) {
-        items.add(new ListItem([new Plain(new _UnparsedInlines(blocks[0].contents.raw))]));
-      } else {
-        items.add(new ListItem(blocks));
-      }
+      items.add(new ListItem(blocks));
       blocks = [];
     }
 
     int indent = firstLineRes.value[0] + firstLineRes.value[1].length;
-    String substring = line.substring(0, min(line.length, 4));
+    int size = min(line.length, 4);
+    String substring = line.substring(0, size);
     if (substring != "    ") {
-      indent += 4 - substring.trimLeft().length;
+      indent += size - substring.trimLeft().length;
     }
 
     Position position = firstLineRes.position;
+    bool tight = true;
     loop: while (true) {
       ParseResult res = listLine(indent, marker).run(s, position);
       if (!res.isSuccess) {
@@ -638,20 +637,29 @@ class CommonMarkParser {
 
       switch (res.value[0]) {
         case 0: // New list item start
+          if (closeParagraph) {
+            tight = false;
+          }
+          closeParagraph = true;
           addItem();
 
           line = res.value[3];
           buffer.add(line);
           indent = res.value[1] + res.value[2].length;
-          String substring = line.substring(0, min(line.length, 4));
+          int size = min(line.length, 4);
+          String substring = line.substring(0, size);
           if (substring != "    ") {
-            indent += 4 - substring.trimLeft().length;
+            indent += size - substring.trimLeft().length;
           }
 
           closeParagraph = false;
           break;
 
         case 1: // Strict line
+          if (closeParagraph) {
+            tight = false;
+            buildBuffer();
+          }
           buffer.add(res.value[1]);
           closeParagraph = false;
           break;
@@ -659,7 +667,7 @@ class CommonMarkParser {
         case 2: // Lazy line
           if (buffer.length > 0) {
             buildBuffer();
-            List<Block> lineBlock = block.parse(line + "\n");
+            List<Block> lineBlock = block.parse(res.value[1] + "\n");
             // TODO fix condition
             if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para && acceptLazy(blocks, lineBlock[0].contents.raw)) {
 
@@ -690,6 +698,17 @@ class CommonMarkParser {
     }
 
     addItem();
+
+    if (tight) {
+      items.forEach((ListItem item) {
+        item.contents = item.contents.map((Block block) {
+          if (block is Para) {
+            return new Plain(block.contents);
+          }
+          return block;
+        });
+      });
+    }
 
     return firstLineRes.copy(position: position, value: items);
   });
