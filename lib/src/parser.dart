@@ -498,11 +498,24 @@ class CommonMarkParser {
     List<String> buffer = [firstLineRes.value];
     List<Block> blocks = [];
 
+    bool closeParagraph = false;
+    bool acceptLazy(List<Block> blocks, String s) {
+      if (blocks.length > 0) {
+        if (blocks.last is Para) {
+          blocks.last.contents.raw += "\n" + s;
+          return true;
+        } else if (blocks.last is Blockquote) {
+          return acceptLazy(blocks.last.contents, s);
+        }
+      }
+
+      return false;
+    }
+
     void buildBuffer() {
       String s = buffer.map((l) => l + "\n").join();
       List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
-      if (blocks.length > 0 && blocks.last is Para && innerRes.first is Para) {
-        blocks.last.contents.raw += "\n" + innerRes.first.contents.raw;
+      if (!closeParagraph && innerRes.length > 0 && innerRes.first is Para && acceptLazy(blocks, innerRes.first.contents.raw)) {
         innerRes.removeAt(0);
       }
       if (innerRes.length > 0) {
@@ -520,13 +533,14 @@ class CommonMarkParser {
       bool isStrict = res.value[0];
       String line = res.value[1];
       if (isStrict) {
+        closeParagraph = line.trim() == "";
         buffer.add(line);
       } else {
         if (buffer.length > 0) {
           buildBuffer();
           List<Block> lineBlock = block.parse(line + "\n");
-          if (lineBlock.length == 1 && lineBlock[0] is Para && blocks.last is Para) {
-            blocks.last.contents.raw += "\n" + lineBlock[0].contents.raw;
+          if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para && acceptLazy(blocks, lineBlock[0].contents.raw)) {
+
           } else {
             break;
           }
