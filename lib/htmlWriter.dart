@@ -128,9 +128,9 @@ String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
     return block.contents;
   }
   throw new UnimplementedError(block.toString());
-}).join('\n');
+}).map((l) => l + "\n").join();
 
-String writeBlockquote(Blockquote blockquote) => "<blockquote>\n${writeBlocks(blockquote.contents)}\n</blockquote>";
+String writeBlockquote(Blockquote blockquote) => "<blockquote>\n${writeBlocks(blockquote.contents)}</blockquote>";
 
 String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.contents)}</h${header.level}>";
 

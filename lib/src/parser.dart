@@ -470,7 +470,7 @@ class CommonMarkParser {
   // TODO paragraph could be ended by other block types
   Parser get para => new Parser((s, pos) {
     // TODO replace codeBlockFenced with starting fence test
-    Parser end = blankline | hrule | atxHeader | codeBlockFenced;
+    Parser end = blankline | hrule | atxHeader | codeBlockFenced | (skipNonindentSpaces > char('>'));
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
@@ -485,7 +485,7 @@ class CommonMarkParser {
   // Blockquote
   //
 
-  static Parser blockquoteStrictLine = ((skipNonindentSpaces > char('>')) > space.maybe) > anyLine;
+  static Parser blockquoteStrictLine = ((skipNonindentSpaces > char('>')) > char(' ').maybe) > anyLine;
   static Parser blockquoteLazyLine = skipNonindentSpaces > anyLine;
   static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
     | (blockquoteLazyLine ^ (l) => [false, l]);
