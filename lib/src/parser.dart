@@ -277,6 +277,7 @@ class CommonMarkParser {
       linkReference,
       blockquote,
       unorderedList,
+      orderedList,
       para
   ]);
 
@@ -290,6 +291,7 @@ class CommonMarkParser {
       linkReference,
       blockquote,
       unorderedList,
+      orderedList,
       para
   ]);
 
@@ -506,7 +508,7 @@ class CommonMarkParser {
   static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
     | (blockquoteLazyLine ^ (l) => [false, l]);
 
-  bool acceptLazy(List<Block> blocks, String s) {
+  bool acceptLazy(Iterable<Block> blocks, String s) {
     if (blocks.length > 0) {
       if (blocks.last is Para) {
         blocks.last.contents.raw += "\n" + s;
@@ -514,7 +516,7 @@ class CommonMarkParser {
       } else if (blocks.last is Blockquote) {
         return acceptLazy(blocks.last.contents, s);
       } else if (blocks.last is ListBlock) {
-        return acceptLazy(blocks.last.items.last, s);
+        return acceptLazy(blocks.last.items.last.contents, s);
       }
       // TODO add list support
     }
@@ -582,6 +584,7 @@ class CommonMarkParser {
   //
 
   static Parser get unorderedListMarkerTest => ((skipNonindentSpaces.notFollowedBy(hrule) > oneOf('-+*')) < char(' '));
+  static Parser get orderedListMarkerTest => ((skipNonindentSpaces > digit.many1) + (oneOf('.)') < char(' '))).list;
   static Parser listFirstLine(int indent, Parser marker) => (atMostSpaces(indent).notFollowedBy(hrule) + marker + anyLine).list;
   static Parser listStrictLine(int indent) => string(" " * indent) > anyLine;
   static Parser get listLazyLine => skipNonindentSpaces > anyLine;
@@ -757,6 +760,34 @@ class CommonMarkParser {
       }
 
       return [new UnorderedList(items, type)];
+    }).run(s, pos);
+  });
+
+  Parser get orderedList => new Parser((s, pos) {
+    ParseResult testRes = orderedListMarkerTest.run(s, pos);
+    if (!testRes.isSuccess) {
+      return testRes;
+    }
+    int startIndex = num.parse(testRes.value[0].join());
+    String indexSeparator = testRes.value[1];
+
+    return (list(digit.many1 > string(indexSeparator + " ")) ^ (items) {
+      IndexSeparator separator;
+      switch(indexSeparator) {
+        case '.':
+          separator = IndexSeparator.DotSeparator;
+          break;
+
+        case ')':
+          separator = IndexSeparator.ParenthesisSeparator;
+          break;
+
+        default:
+          assert(false);
+          separator = IndexSeparator.DotSeparator;
+      }
+
+      return [new OrderedList(items, separator, startIndex)];
     }).run(s, pos);
   });
 
