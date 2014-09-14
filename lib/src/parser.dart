@@ -30,7 +30,6 @@ class CommonMarkParser {
   CommonMarkParser();
 
   Map<String, Target> _references;
-  List<_UnparsedInlines> _unparsedInlines; // TODO REMOVE. Use tree walk instead
 
   Map<String, Target> get references => _references; // TODO remove later
 
@@ -38,7 +37,6 @@ class CommonMarkParser {
     // TODO separate preprocess option
 
     _references = {};
-    _unparsedInlines = [];
 
     var doc = document.parse(preprocess(s) + "\n\n");
 
@@ -282,6 +280,19 @@ class CommonMarkParser {
       para
   ]);
 
+  Parser<List<Block>> get blockTight => choice([
+      hrule,
+      atxHeader,
+      setextHeader,
+      codeBlockIndented,
+      codeBlockFenced,
+      rawHtml,
+      linkReference,
+      blockquote,
+      unorderedList,
+      para
+  ]);
+
   //
   // Horizontal rule
   //
@@ -323,7 +334,6 @@ class CommonMarkParser {
     // TODO parse inlines
 
     _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
-    _unparsedInlines.add(inlines);
     return textRes.copy(value: [new AtxHeader(level, inlines)]);
   });
 
@@ -345,7 +355,6 @@ class CommonMarkParser {
     // TODO parse inlines
 
     _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
-    _unparsedInlines.add(inlines);
     return res.copy(value: [new SetextHeader(level, inlines)]);
   });
 
@@ -471,15 +480,21 @@ class CommonMarkParser {
   // TODO paragraph could be ended by other block types
   Parser get para => new Parser((s, pos) {
     // TODO replace codeBlockFenced with starting fence test
-    Parser end = blankline | hrule | atxHeader | codeBlockFenced | (skipNonindentSpaces > oneOf('>+-*'));
+    Parser end = blankline
+      | hrule
+      | atxHeader
+      | codeBlockFenced
+      | (skipNonindentSpaces > (
+        char('>')
+        | (oneOf('+-*') > char(' '))));
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
     }
 
     _UnparsedInlines inlines = new _UnparsedInlines(res.value.join("\n").trim());
-    _unparsedInlines.add(inlines);
-    return (blankline.many ^ (_) => [new Para(inlines)]).run(s, res.position);
+    return res.copy(value: [new Para(inlines)]);
+    //return (blankline.many ^ (_) => [new Para(inlines)]).run(s, res.position);
   });
 
   //
@@ -491,6 +506,22 @@ class CommonMarkParser {
   static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
     | (blockquoteLazyLine ^ (l) => [false, l]);
 
+  bool acceptLazy(List<Block> blocks, String s) {
+    if (blocks.length > 0) {
+      if (blocks.last is Para) {
+        blocks.last.contents.raw += "\n" + s;
+        return true;
+      } else if (blocks.last is Blockquote) {
+        return acceptLazy(blocks.last.contents, s);
+      } else if (blocks.last is ListBlock) {
+        return acceptLazy(blocks.last.items.last, s);
+      }
+      // TODO add list support
+    }
+
+    return false;
+  }
+
   Parser get blockquote => new Parser((s, pos) {
     ParseResult firstLineRes = blockquoteStrictLine.run(s, pos);
     if (!firstLineRes.isSuccess) {
@@ -500,19 +531,6 @@ class CommonMarkParser {
     List<Block> blocks = [];
 
     bool closeParagraph = false;
-    bool acceptLazy(List<Block> blocks, String s) {
-      if (blocks.length > 0) {
-        if (blocks.last is Para) {
-          blocks.last.contents.raw += "\n" + s;
-          return true;
-        } else if (blocks.last is Blockquote) {
-          return acceptLazy(blocks.last.contents, s);
-        }
-        // TODO add list support
-      }
-
-      return false;
-    }
 
     void buildBuffer() {
       String s = buffer.map((l) => l + "\n").join();
@@ -585,29 +603,29 @@ class CommonMarkParser {
     String line = firstLineRes.value[2];
     List<String> buffer = [line];
     bool closeParagraph = false;
-
-    bool acceptLazy(List<Block> blocks, String s) {
-      if (blocks.length > 0) {
-        if (blocks.last is Para) {
-          blocks.last.contents.raw += "\n" + s;
-          return true;
-        } else if (blocks.last is Blockquote) {
-          return acceptLazy(blocks.last.contents, s);
-        }
-        // TODO add list support
-      }
-
-      return false;
-    }
+    bool tight = true;
 
     void buildBuffer() {
       String s = buffer.map((l) => l + "\n").join();
-      List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
-      if (!closeParagraph && innerRes.length > 0 && innerRes.first is Para && acceptLazy(blocks, innerRes.first.contents.raw)) {
-        innerRes.removeAt(0);
+      List<Block> innerBlocks;
+      if (tight) {
+        // TODO
+        ParseResult innerRes = (blockTight.manyUntil(eof) ^ (res) => processParsedBlocks(res)).run(s);
+        if (innerRes.isSuccess) {
+          innerBlocks = innerRes.value;
+        } else {
+          tight = false;
+        }
       }
-      if (innerRes.length > 0) {
-        blocks.addAll(innerRes);
+
+      if (!tight) {
+        innerBlocks = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
+      }
+      if (!closeParagraph && innerBlocks.length > 0 && innerBlocks.first is Para && acceptLazy(blocks, innerBlocks.first.contents.raw)) {
+        innerBlocks.removeAt(0);
+      }
+      if (innerBlocks.length > 0) {
+        blocks.addAll(innerBlocks);
       }
       buffer = [];
     }
@@ -628,7 +646,6 @@ class CommonMarkParser {
     }
 
     Position position = firstLineRes.position;
-    bool tight = true;
     loop: while (true) {
       ParseResult res = listLine(indent, marker).run(s, position);
       if (!res.isSuccess) {
@@ -657,8 +674,7 @@ class CommonMarkParser {
 
         case 1: // Strict line
           if (closeParagraph) {
-            tight = false;
-            buildBuffer();
+            buffer.add('');
           }
           buffer.add(res.value[1]);
           closeParagraph = false;
