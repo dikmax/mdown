@@ -269,6 +269,7 @@ class CommonMarkParser {
   Parser<List<Block>> get block => choice([
       blanklines ^ (_) => [],
       hrule,
+      unorderedList,
       atxHeader,
       setextHeader,
       codeBlockIndented,
@@ -276,13 +277,13 @@ class CommonMarkParser {
       rawHtml,
       linkReference,
       blockquote,
-      unorderedList,
       orderedList,
       para
   ]);
 
   Parser<List<Block>> get blockTight => choice([
       hrule,
+      unorderedList,
       atxHeader,
       setextHeader,
       codeBlockIndented,
@@ -290,7 +291,6 @@ class CommonMarkParser {
       rawHtml,
       linkReference,
       blockquote,
-      unorderedList,
       orderedList,
       para
   ]);
@@ -366,9 +366,9 @@ class CommonMarkParser {
 
   Parser get indentedLine => (indentSpaces > anyLine) ^ (line) => line + "\n";
 
-  Parser get codeBlockIndented =>
-    ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many1 < blanklines.maybe) ^
-        (c) => new IndentedCodeBlock(stripTrailingNewlines(c.join('')) + '\n');
+  Parser get codeBlockIndented => (indentedLine +
+    ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many)) ^
+      (f, c) => new IndentedCodeBlock(stripTrailingNewlines(f + c.join('')) + '\n');
 
   //
   // Fenced code
@@ -583,16 +583,16 @@ class CommonMarkParser {
   // Lists
   //
 
-  static Parser get unorderedListMarkerTest => ((skipNonindentSpaces.notFollowedBy(hrule) > oneOf('-+*')) < char(' '));
-  static Parser get orderedListMarkerTest => ((skipNonindentSpaces > digit.many1) + (oneOf('.)') < char(' '))).list;
+  static Parser get unorderedListMarkerTest => ((skipNonindentSpaces.notFollowedBy(hrule) > oneOf('-+*')) < oneOf(' \n'));
+  static Parser get orderedListMarkerTest => ((skipNonindentSpaces > digit.many1) + (oneOf('.)') < oneOf(' \n'))).list;
   static Parser listFirstLine(int indent, Parser marker) => (atMostSpaces(indent).notFollowedBy(hrule) + marker + anyLine).list;
   static Parser listStrictLine(int indent) => string(" " * indent) > anyLine;
-  static Parser get listLazyLine => skipNonindentSpaces > anyLine;
+  static Parser listLazyLine(int indent) => atMostSpaces(indent - 1).notFollowedBy(char(' ')) > anyLine;
   static Parser listLine(int indent, Parser marker) => // There are three types of lines in list
     (listFirstLine(indent - 1, marker) ^ (l) => [0,  l[0], l[1], l[2]]) // List item start
     | (blankline ^ (l) => [3])                                          // Blank line
     | (listStrictLine(indent) ^ (l) => [1, l])                          // List item strict continuation
-    | (listLazyLine ^ (l) => [2, l]);                                   // List item lazy continuation
+    | (listLazyLine(indent) ^ (l) => [2, l]);                                   // List item lazy continuation
 
 
   Parser list(Parser marker) => new Parser((s, pos) {
@@ -611,8 +611,13 @@ class CommonMarkParser {
     void buildBuffer() {
       String s = buffer.map((l) => l + "\n").join();
       List<Block> innerBlocks;
+      if (s == "\n" && blocks.length == 0) {
+        // Test for empty items
+        blocks = [new Para(new _UnparsedInlines(""))]; // TODO replace with inlines
+        buffer = [];
+        return;
+      }
       if (tight) {
-        // TODO
         ParseResult innerRes = (blockTight.manyUntil(eof) ^ (res) => processParsedBlocks(res)).run(s);
         if (innerRes.isSuccess) {
           innerBlocks = innerRes.value;
@@ -739,7 +744,7 @@ class CommonMarkParser {
     }
     String markerChar = testRes.value;
 
-    return (list(string(markerChar + " ")) ^ (items) {
+    return (list((char(markerChar) > (char(' ') | char('\n').lookAhead)).record) ^ (items) {
       BulletType type;
       switch(markerChar) {
         case '+':
@@ -771,7 +776,7 @@ class CommonMarkParser {
     int startIndex = num.parse(testRes.value[0].join());
     String indexSeparator = testRes.value[1];
 
-    return (list((digit.many1 > string(indexSeparator + " ")).record) ^ (items) {
+    return (list(((digit.many1 > char(indexSeparator)) > (char(' ') | char('\n').lookAhead)).record) ^ (items) {
       IndexSeparator separator;
       switch(indexSeparator) {
         case '.':
