@@ -613,7 +613,7 @@ class CommonMarkParser {
       List<Block> innerBlocks;
       if (s == "\n" && blocks.length == 0) {
         // Test for empty items
-        blocks = [new Para(new _UnparsedInlines(""))]; // TODO replace with inlines
+        blocks = [new Plain(new _UnparsedInlines(""))]; // TODO replace with inlines
         buffer = [];
         return;
       }
@@ -654,6 +654,7 @@ class CommonMarkParser {
     }
 
     Position position = firstLineRes.position;
+    Position lastNonBlankPosition = position;
     loop: while (true) {
       ParseResult res = listLine(indent, marker).run(s, position);
       if (!res.isSuccess) {
@@ -715,6 +716,9 @@ class CommonMarkParser {
       }
 
       position = res.position;
+      if (res.value[0] != 3) {
+        lastNonBlankPosition = position;
+      }
     }
 
     if (buffer.length > 0) {
@@ -734,7 +738,7 @@ class CommonMarkParser {
       });
     }
 
-    return firstLineRes.copy(position: position, value: items);
+    return firstLineRes.copy(position: lastNonBlankPosition, value: items);
   });
 
   Parser get unorderedList => new Parser((s, pos) {
