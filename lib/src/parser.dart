@@ -771,7 +771,7 @@ class CommonMarkParser {
     int startIndex = num.parse(testRes.value[0].join());
     String indexSeparator = testRes.value[1];
 
-    return (list(digit.many1 > string(indexSeparator + " ")) ^ (items) {
+    return (list((digit.many1 > string(indexSeparator + " ")).record) ^ (items) {
       IndexSeparator separator;
       switch(indexSeparator) {
         case '.':
