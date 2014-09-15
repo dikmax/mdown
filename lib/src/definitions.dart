@@ -113,6 +113,22 @@ class SetextHeader extends Header {
 }
 
 
+class FenceType {
+  static const FenceType BacktickFence = const FenceType._(0, "BacktickFence");
+  static const FenceType TildeFence = const FenceType._(1, "TildeFence");
+
+  final int value;
+  final String name;
+
+  const FenceType._(this.value, this.name);
+
+  String toString() => name;
+
+  bool operator== (obj) => obj is FenceType &&
+    value == obj.value;
+}
+
+
 abstract class CodeBlock extends Block {
   String contents;
   Attr attributes;
@@ -132,14 +148,17 @@ class IndentedCodeBlock extends CodeBlock {
 
 
 class FencedCodeBlock extends CodeBlock {
-  // TODO fence parameters
-  FencedCodeBlock(String contents, Attr attributes) : super(contents, attributes);
+  FenceType fenceType;
+  int fenceSize;
+  FencedCodeBlock(String contents, this.fenceType, this.fenceSize, Attr attributes) : super(contents, attributes);
 
   String toString() => "FencedCodeBlock $attributes $contents";
 
   bool operator== (obj) => obj is FencedCodeBlock &&
     contents == obj.contents &&
-    attributes == obj.attributes;
+    attributes == obj.attributes &&
+    fenceType == obj.fenceType &&
+    fenceSize == obj.fenceSize;
 }
 
 

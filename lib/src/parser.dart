@@ -382,6 +382,10 @@ class CommonMarkParser {
     }
     int indent = fenceStartRes.value[0];
     String fenceChar = fenceStartRes.value[1][0];
+    FenceType fenceType = FenceType.BacktickFence;
+    if (fenceChar == '~') {
+      fenceType = FenceType.TildeFence;
+    }
 
     Parser infoStringParser = ((skipSpaces > noneOf("\n " + fenceChar).many) < noneOf("\n" + fenceChar).many) < newline;
     Parser topFenceParser = (char(fenceChar).many + infoStringParser).list;
@@ -399,13 +403,13 @@ class CommonMarkParser {
     }
     Parser endFenceParser = (((skipSpaces > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
     Parser restParser = (lineParser.manyUntil(endFenceParser) ^
-        (lines) => [new FencedCodeBlock(lines.map((i) => i + '\n').join(), new InfoString(infoString))])
+        (lines) => [new FencedCodeBlock(lines.map((i) => i + '\n').join(), fenceType, fenceSize, new InfoString(infoString))])
       | (lineParser.manyUntil(eof) ^ (List lines) {
         // If fenced code block is ended by eof trim last two new lines;
         if (lines.length > 0 && lines.last == "") {
           lines.removeLast();
         }
-        return [new FencedCodeBlock(lines.join('\n'), new InfoString(infoString))];
+        return [new FencedCodeBlock(lines.join('\n'), fenceType, fenceSize, new InfoString(infoString))];
       });
 
     return restParser.run(s, topFenceRes.position);
