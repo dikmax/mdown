@@ -374,7 +374,7 @@ class CommonMarkParser {
   // Fenced code
   //
 
-  Parser get codeBlockFenced => new Parser((s, pos) {
+  Parser get openFence => new Parser((s, pos) {
     Parser fenceStartParser = (skipNonindentSpaces + (string('~~~') | string('```'))).list;
     ParseResult fenceStartRes = fenceStartParser.run(s, pos);
     if (!fenceStartRes.isSuccess) {
@@ -396,6 +396,23 @@ class CommonMarkParser {
 
     int fenceSize = topFenceRes.value[0].length + 3;
     String infoString = topFenceRes.value[1].join();
+    return topFenceRes.copy(value: [indent, fenceChar, fenceSize, infoString]);
+  });
+
+  Parser get codeBlockFenced => new Parser((s, pos) {
+    ParseResult openFenceRes = openFence.run(s, pos);
+    if (!openFenceRes.isSuccess) {
+      return openFenceRes;
+    }
+    int indent = openFenceRes.value[0];
+    String fenceChar = openFenceRes.value[1];
+    int fenceSize = openFenceRes.value[2];
+    String infoString = openFenceRes.value[3];
+
+    FenceType fenceType = FenceType.BacktickFence;
+    if (fenceChar == '~') {
+      fenceType = FenceType.TildeFence;
+    }
 
     Parser lineParser = anyLine;
     if (indent > 0) {
@@ -412,7 +429,7 @@ class CommonMarkParser {
         return [new FencedCodeBlock(lines.join('\n'), fenceType, fenceSize, new InfoString(infoString))];
       });
 
-    return restParser.run(s, topFenceRes.position);
+    return restParser.run(s, openFenceRes.position);
   });
 
   //
