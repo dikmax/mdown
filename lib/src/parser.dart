@@ -37,6 +37,7 @@ class CommonMarkParser {
     // TODO separate preprocess option
 
     _references = {};
+    _clearListStack();
 
     var doc = document.parse(preprocess(s) + "\n\n");
 
@@ -432,6 +433,56 @@ class CommonMarkParser {
     return restParser.run(s, openFenceRes.position);
   });
 
+  // TODO fenced block in list parser
+
+  Parser listCodeBlockFenced(int listIndentValue) => new Parser((s, pos) {
+    assert(listIndentValue > 0);
+    Parser listIndent = string(" " * listIndentValue);
+    ParseResult openFenceRes = (listIndent.maybe > openFence).run(s, pos);
+    if (!openFenceRes.isSuccess) {
+      return openFenceRes;
+    }
+    int indent = openFenceRes.value[0];
+    String fenceChar = openFenceRes.value[1];
+    int fenceSize = openFenceRes.value[2];
+    String infoString = openFenceRes.value[3];
+
+    FenceType fenceType = FenceType.BacktickFence;
+    if (fenceChar == '~') {
+      fenceType = FenceType.TildeFence;
+    }
+
+    // TODO
+
+    Parser endFenceParser = ((((listIndent > skipSpaces) > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
+    Parser lineParser;
+    if (indent > 0) {
+      lineParser = (listIndent > atMostSpaces(indent)) > anyLine;
+    } else {
+      lineParser = listIndent > anyLine;
+    }
+
+    Position position = openFenceRes.position;
+    List<String> res = [];
+    while (true) {
+      ParseResult endParserRes = (endFenceParser | eof).run(s, position);
+      if (endParserRes.isSuccess) {
+        position = endParserRes.position;
+        break;
+      }
+
+      ParseResult lineParserRes = (lineParser | (blankline ^ (_) => "")).run(s, position);
+      if (!lineParserRes.isSuccess) {
+        break;
+      }
+
+      res.add(lineParserRes.value);
+      position = lineParserRes.position;
+    }
+
+    return success([new FencedCodeBlock(res.join("\n"), fenceType, fenceSize, new InfoString(infoString))]).run(s, position);
+  });
+
   //
   // Raw html block
   //
@@ -539,7 +590,6 @@ class CommonMarkParser {
       } else if (blocks.last is ListBlock) {
         return acceptLazy(blocks.last.items.last.contents, s);
       }
-      // TODO add list support
     }
 
     return false;
@@ -609,12 +659,35 @@ class CommonMarkParser {
   static Parser listFirstLine(int indent, Parser marker) => (atMostSpaces(indent).notFollowedBy(hrule) + marker + anyLine).list;
   static Parser listStrictLine(int indent) => string(" " * indent) > anyLine;
   static Parser listLazyLine(int indent) => atMostSpaces(indent - 1).notFollowedBy(char(' ')) > anyLine;
+  static Parser listFencedCodeStartTest(int indent) =>
+    (string(" " * indent) + char(' ').many + (string('```') | string('~~~')) + anyLine).list.record;
   static Parser listLine(int indent, Parser marker) => // There are three types of lines in list
     (listFirstLine(indent - 1, marker) ^ (l) => [0,  l[0], l[1], l[2]]) // List item start
     | (blankline ^ (l) => [3])                                          // Blank line
+    | (listFencedCodeStartTest(indent) ^ (l) => [4, l])                 // Special case for fenced code, because it can
+                                                                        //   have more than 1 blank line inside
     | (listStrictLine(indent) ^ (l) => [1, l])                          // List item strict continuation
-    | (listLazyLine(indent) ^ (l) => [2, l]);                                   // List item lazy continuation
+    | (listLazyLine(indent) ^ (l) => [2, l]);                           // List item lazy continuation
 
+
+  int _listStackPosition;
+  List<int> _listStack;
+  void _clearListStack() {
+    _listStackPosition = -1;
+    _listStack = [];
+  }
+  int _getListStackPosition() {
+    ++_listStackPosition;
+    return _listStackPosition;
+  }
+  void _updateListStack(int position, int indent) {
+    if (position + 1 > _listStack.length) {
+      _listStack.add(indent);
+    }
+    if (position + 1 < _listStack.length) {
+      _listStack.removeRange(position, _listStack.length);
+    }
+  }
 
   Parser list(Parser marker) => new Parser((s, pos) {
     ParseResult firstLineRes = listFirstLine(TAB_STOP - 1, marker).run(s, pos);
@@ -667,12 +740,26 @@ class CommonMarkParser {
       blocks = [];
     }
 
+    bool addAtLevel(List<Block> blocks, Iterable<Block> add, int level) {
+      if (level == 1) {
+        blocks.addAll(add);
+        return true;
+      } else if (blocks.last is ListBlock) {
+        return addAtLevel(blocks.last.items.last.contents, add, level - 1);
+      }
+
+      return false;
+    }
+
     int indent = firstLineRes.value[0] + firstLineRes.value[1].length;
     int size = min(line.length, 4);
     String substring = line.substring(0, size);
     if (substring != "    ") {
       indent += size - substring.trimLeft().length;
     }
+
+    int stackPosition = _getListStackPosition();
+    _updateListStack(stackPosition, indent);
 
     Position position = firstLineRes.position;
     Position lastNonBlankPosition = position;
@@ -699,7 +786,10 @@ class CommonMarkParser {
             indent += size - substring.trimLeft().length;
           }
 
+          _updateListStack(stackPosition, indent);
+
           closeParagraph = false;
+          // TODO there also could start code block
           break;
 
         case 1: // Strict line
@@ -732,6 +822,41 @@ class CommonMarkParser {
             break loop;
           } else {
             closeParagraph = true;
+          }
+          break;
+
+        case 4: // Possible fenced code start
+          // TODO
+          if (buffer.length > 0) {
+            buildBuffer();
+
+            ParseResult codeResult;
+            while (_listStack.length > 0) {
+              var codeIndent = _listStack.reduce((a, b) => a + b);
+              Parser codeParser = listCodeBlockFenced(codeIndent);
+              codeResult = codeParser.run(s, position);
+              if (codeResult.isSuccess) {
+                break;
+              }
+
+              _listStack.removeLast();
+            }
+
+            if (codeResult == null || !codeResult.isSuccess) {
+              String line = res.value[1];
+
+              int size = min(line.length, indent);
+              String substring = line.substring(0, size);
+              if (substring != " " * size) {
+                break loop;
+              }
+
+              buffer.add(line.substring(size, line.length));
+              break;
+            }
+
+            addAtLevel(blocks, codeResult.value, _listStack.length);
+            res = codeResult;
           }
           break;
       }
