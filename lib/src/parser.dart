@@ -476,11 +476,11 @@ class CommonMarkParser {
         break;
       }
 
-      res.add(lineParserRes.value);
+      res.add(lineParserRes.value + "\n");
       position = lineParserRes.position;
     }
 
-    return success([new FencedCodeBlock(res.join("\n"), fenceType, fenceSize, new InfoString(infoString))]).run(s, position);
+    return success([new FencedCodeBlock(res.join(), fenceType, fenceSize, new InfoString(infoString))]).run(s, position);
   });
 
   //
@@ -698,9 +698,52 @@ class CommonMarkParser {
     List<ListItem> items = [];
     List<Block> blocks = [];
     String line = firstLineRes.value[2];
-    List<String> buffer = [line];
+    Position position = pos;
+    List<String> buffer = [];
+
+    int indent = firstLineRes.value[0] + firstLineRes.value[1].length;
+    int size = min(line.length, 4);
+    String substring = line.substring(0, size);
+    if (substring != "    ") {
+      indent += size - substring.trimLeft().length;
+    }
+
+    ParseResult testForFencedCodeBlockAsFirstListBlock(res, indentLength, markerStr) {
+      // Line could be fenced code block start
+      var codeTestResult = ((orderedListMarkerTest | unorderedListMarkerTest).many.record < openFence).run(line + "\n");
+      if (!codeTestResult.isSuccess) {
+        buffer.add(line);
+      } else {
+        // TODO
+        int codeIndent = indentLength + markerStr.length + codeTestResult.value.length;
+
+        Parser codeParser = listCodeBlockFenced(codeIndent).record;
+        var codeStartPosition = new Position(position.offset + codeIndent, position.line, position.character + codeIndent);
+        // TODO fix position
+        ParseResult codeResult = codeParser.run(s, codeStartPosition);
+        if (codeResult.isSuccess) {
+          buffer.addAll((codeTestResult.value + codeResult.value).split('\n').map((String l) {
+            if (l.substring(0, min(codeIndent, l.length)) == " " * codeIndent) {
+              return l.substring(min(codeIndent, l.length), l.length);
+            } else {
+              return l;
+            }
+          }));
+          res = codeResult;
+        } else {
+          buffer.add(line);
+        }
+      }
+
+      return res;
+    }
+
+    firstLineRes = testForFencedCodeBlockAsFirstListBlock(firstLineRes, firstLineRes.value[0], firstLineRes.value[1]);
+    position = firstLineRes.position;
+
     bool closeParagraph = false;
     bool tight = true;
+
 
     void buildBuffer() {
       String s = buffer.map((l) => l + "\n").join();
@@ -751,17 +794,9 @@ class CommonMarkParser {
       return false;
     }
 
-    int indent = firstLineRes.value[0] + firstLineRes.value[1].length;
-    int size = min(line.length, 4);
-    String substring = line.substring(0, size);
-    if (substring != "    ") {
-      indent += size - substring.trimLeft().length;
-    }
-
     int stackPosition = _getListStackPosition();
     _updateListStack(stackPosition, indent);
 
-    Position position = firstLineRes.position;
     Position lastNonBlankPosition = position;
     loop: while (true) {
       ParseResult res = listLine(indent, marker).run(s, position);
@@ -778,13 +813,14 @@ class CommonMarkParser {
           addItem();
 
           line = res.value[3];
-          buffer.add(line);
           indent = res.value[1] + res.value[2].length;
           int size = min(line.length, 4);
           String substring = line.substring(0, size);
           if (substring != "    ") {
             indent += size - substring.trimLeft().length;
           }
+
+          res = testForFencedCodeBlockAsFirstListBlock(res, res.value[1], res.value[2]);
 
           _updateListStack(stackPosition, indent);
 
@@ -826,7 +862,6 @@ class CommonMarkParser {
           break;
 
         case 4: // Possible fenced code start
-          // TODO
           if (buffer.length > 0) {
             buildBuffer();
 
@@ -852,11 +887,13 @@ class CommonMarkParser {
               }
 
               buffer.add(line.substring(size, line.length));
+              closeParagraph = false;
               break;
             }
 
             addAtLevel(blocks, codeResult.value, _listStack.length);
             res = codeResult;
+            closeParagraph = false;
           }
           break;
       }
