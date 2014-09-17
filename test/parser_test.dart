@@ -11,10 +11,11 @@ const int STATE_WAIT = 0;
 const int STATE_MARKDOWN = 1;
 const int STATE_HTML = 2;
 
-void main() {
-  // Common Markdown tests
-  t.group("STMD", () {
-    File file = new File("stmd/spec.txt");
+// TODO add own tests specially for fenced code block in list
+
+void fileTest(name, fileName) {
+  t.group(name, () {
+    File file = new File(fileName);
     int state = STATE_WAIT;
     List<String> html = [];
     List<String> markdown = [];
@@ -37,6 +38,13 @@ void main() {
       }
     }
   });
+}
+
+void main() {
+  // My tests
+  fileTest("My", "tests.txt");
+  // CommonMark tests
+  fileTest("stmd", "stmd/spec.txt");
 }
 
 class ExampleDescription extends t.Matcher {

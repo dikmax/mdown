@@ -806,6 +806,7 @@ class CommonMarkParser {
 
       switch (res.value[0]) {
         case 0: // New list item start
+          // TODO merge with first line code
           if (closeParagraph) {
             tight = false;
           }

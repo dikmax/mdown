@@ -1,0 +1,7 @@
+Simple test just to check that testing system is working.
+
+.
+Simple test
+.
+<p>Simple test</p>
+.
