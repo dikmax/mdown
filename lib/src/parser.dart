@@ -795,7 +795,7 @@ class CommonMarkParser {
 
       // TODO lazy line support
 
-      if (position.character == 0 && getSubIndent() > 0) {
+      if (position.character == 1 && getSubIndent() > 0) {
         // Waiting for indent
         ParseResult indentRes = string(" " * getSubIndent()).run(s, position);
         if (indentRes.isSuccess) {
@@ -876,10 +876,18 @@ class CommonMarkParser {
       // TODO fenced code
 
       // Strict line
-      ParseResult lineRes = anyLine.run(s, position);
-      assert(lineRes.isSuccess);
-      buffer.add(lineRes.value);
-      position = lineRes.position;
+      if (position.character > 1) {
+        ParseResult lineRes = anyLine.run(s, position);
+        assert(lineRes.isSuccess);
+        if (closeParagraph) {
+          buffer.add("");
+          closeParagraph = false;
+        }
+        buffer.add(lineRes.value);
+        position = lineRes.position;
+      } else {
+        break;
+      }
     }
 
 
