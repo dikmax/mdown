@@ -813,8 +813,6 @@ class CommonMarkParser {
             stack.removeLast();
           }
         }
-      } else if (stack.length > 0) {
-        nextLevel = false;
       }
 
       // Test marker start
@@ -857,6 +855,10 @@ class CommonMarkParser {
         } else {
           newListBlock = new UnorderedList([new ListItem([])], bulletType);
           subIndent = markerRes.value[0][1] + 1;
+        }
+
+        if (stack.length > 0) {
+          addToListItem(stack.last.block.items.last, [newListBlock]);
         }
 
         int indent = getIndent();
@@ -935,6 +937,7 @@ class CommonMarkParser {
           }
 
           blocks.add(new FencedCodeBlock(code.map((i) => i + '\n').join(), fenceType, fenceSize, new InfoString(infoString)));
+          closeParagraph = false;
           continue;
         }
 
