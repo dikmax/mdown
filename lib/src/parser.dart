@@ -23,6 +23,15 @@ class _LinkReference extends Block {
 
 // TODO extract constant parsers from parsers methods
 
+class _ListStackItem {
+  int indent;
+  int subIndent;
+  ListBlock block;
+  bool tight;
+
+  _ListStackItem(this.indent, this.subIndent, this.block, [this.tight = true]);
+}
+
 // CommonMark parser
 class CommonMarkParser {
   static const int TAB_STOP = 4;
@@ -37,7 +46,6 @@ class CommonMarkParser {
     // TODO separate preprocess option
 
     _references = {};
-    _clearListStack();
 
     var doc = document.parse(preprocess(s) + "\n\n");
 
@@ -270,21 +278,19 @@ class CommonMarkParser {
   Parser<List<Block>> get block => choice([
       blanklines ^ (_) => [],
       hrule,
-      unorderedList,
       atxHeader,
       setextHeader,
+      list,
       codeBlockIndented,
       codeBlockFenced,
       rawHtml,
       linkReference,
       blockquote,
-      orderedList,
       para
   ]);
 
   Parser<List<Block>> get blockTight => choice([
       hrule,
-      unorderedList,
       atxHeader,
       setextHeader,
       codeBlockIndented,
@@ -292,7 +298,6 @@ class CommonMarkParser {
       rawHtml,
       linkReference,
       blockquote,
-      orderedList,
       para
   ]);
 
@@ -560,7 +565,7 @@ class CommonMarkParser {
       | codeBlockFenced
       | (skipNonindentSpaces > (
         char('>')
-        | (oneOf('+-*') > char(' '))));
+        /*| (oneOf('+-*') > char(' '))*/)); // TODO uncomment after lists are implemented
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
@@ -654,17 +659,258 @@ class CommonMarkParser {
   // Lists
   //
 
-  static Parser get unorderedListMarkerTest => ((skipNonindentSpaces.notFollowedBy(hrule) > oneOf('-+*')) < oneOf(' \n'));
-  static Parser get orderedListMarkerTest => ((skipNonindentSpaces > digit.many1) + (oneOf('.)') < oneOf(' \n'))).list;
+  static const _LIST_TYPE_ORDERED = 0;
+  static const _LIST_TYPE_UNORDERED = 1;
+  static ParserAccumulator3 get orderedListMarkerTest => skipNonindentSpaces + digit.many1 + oneOf('.)');
+  static ParserAccumulator2 get unorderedListMarkerTest => skipNonindentSpaces.notFollowedBy(hrule) + oneOf('-+*');
+  static Parser get listMarkerTest => (((orderedListMarkerTest ^ (sp, d, c) => [_LIST_TYPE_ORDERED, sp, d, c])
+    | (unorderedListMarkerTest ^ (sp, c) => [_LIST_TYPE_UNORDERED, sp, c])) + (char("\n") | char(' ').many1)).list;
+
+  Parser get list => new Parser((s, pos) {
+    List<_ListStackItem> stack = [];
+
+    int getSubIndent() => stack.length > 0 ? stack.last.subIndent : 0;
+    int getIndent() => stack.length > 0 ? stack.last.indent : 0;
+    bool getTight() => stack.length > 0 ? stack.last.tight : true;
+    void setTight(bool tight) {
+      if (stack.length > 0) {
+        stack.last.tight = tight;
+      }
+    }
+
+    void convertToTight(bool tight, Iterable<ListItem> items) {
+      if (tight) {
+        items.forEach((ListItem item) {
+          item.contents = item.contents.map((Block block) {
+            if (block is Para) {
+              return new Plain(block.contents);
+            }
+            return block;
+          });
+        });
+      }
+    }
+
+    bool closeParagraph = false;
+    List<Block> blocks = [];
+    List<String> buffer = [];
+    void buildBuffer() {
+      String s = buffer.map((l) => l + "\n").join();
+      List<Block> innerBlocks;
+      if (s == "\n" && blocks.length == 0) {
+        // Test for empty items
+        blocks = [new Plain(new _UnparsedInlines(""))]; // TODO replace with inlines
+        buffer = [];
+        return;
+      }
+      if (getTight()) {
+        ParseResult innerRes = (blockTight.manyUntil(eof) ^ (res) => processParsedBlocks(res)).run(s);
+        if (innerRes.isSuccess) {
+          innerBlocks = innerRes.value;
+        } else {
+          setTight(false);
+        }
+      }
+
+      if (!getTight()) {
+        innerBlocks = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
+      }
+      if (!closeParagraph && innerBlocks.length > 0 && innerBlocks.first is Para &&
+          acceptLazy(blocks, ((innerBlocks.first as Para).contents as _UnparsedInlines).raw)) {
+        innerBlocks.removeAt(0);
+      }
+      if (innerBlocks.length > 0) {
+        blocks.addAll(innerBlocks);
+      }
+      buffer = [];
+    }
+
+    void addToListItem(ListItem item, Iterable<Block> c) {
+      if (item.contents is List) {
+        (item.contents as List).addAll(c);
+        return;
+      }
+      List<Block> contents = new List.from(item.contents);
+      contents.addAll(c);
+      item.contents = contents;
+    }
+
+    bool addListItem(int type, {IndexSeparator indexSeparator, BulletType bulletType}) {
+      bool success = false;
+      if (stack.length == 0) {
+        return false;
+      }
+      ListBlock block = stack.last.block;
+      if (type == _LIST_TYPE_ORDERED && block is OrderedList && block.indexSeparator == indexSeparator) {
+        success = true;
+      }
+      if (type == _LIST_TYPE_UNORDERED && block is UnorderedList && block.bulletType == bulletType) {
+        success = true;
+      }
+      if (success) {
+        buildBuffer();
+        addToListItem(block.items.last, blocks);
+        blocks = [];
+        if (block.items is List) {
+          (block.items as List).add(new ListItem([]));
+        } else {
+          List<ListItem> list = new List.from(block.items);
+          list.add(new ListItem([]));
+          block.items = list;
+        }
+      }
+      return success;
+    }
+
+    Position getNewPositionAfterListMarker(ParseResult res) {
+      if (res.value[1] == "\n" || res.value[1].length <= 4) {
+        return res.position;
+      } else {
+        int diff = res.value[1].length - 1;
+        return new Position(res.position.offset - diff, res.position.line, res.position.character - diff);
+      }
+    }
+
+    Position position = pos;
+
+    bool nextLevel = true;
+
+    while (true) {
+      ParseResult eofRes = eof.run(s, position);
+      if (eofRes.isSuccess) {
+        // End of input reached
+        break;
+      }
+
+      // Test for inner elements
+      ParseResult blanklineRes = blankline.run(s, position);
+      if (blanklineRes.isSuccess) {
+        if (closeParagraph) {
+          break;
+        }
+        closeParagraph = true;
+        position = blanklineRes.position;
+        continue;
+      }
+
+      // TODO lazy line support
+
+      if (position.character == 0 && getSubIndent() > 0) {
+        // Waiting for indent
+        ParseResult indentRes = string(" " * getSubIndent()).run(s, position);
+        if (indentRes.isSuccess) {
+          position = indentRes.position;
+          nextLevel = true;
+        } else {
+          nextLevel = false;
+          while (getIndent() > 0) {
+            ParseResult indentRes = string(" " * getIndent()).run(s, position);
+            if (indentRes.isSuccess) {
+              position = indentRes.position;
+              break;
+            }
+            convertToTight(getTight(), stack.last.block.items);
+            stack.removeLast();
+          }
+        }
+      } else if (stack.length > 0) {
+        nextLevel = false;
+      }
+
+      // Test marker start
+      ParseResult markerRes = listMarkerTest.run(s, position);
+      if (markerRes.isSuccess) {
+        int type = markerRes.value[0][0];
+        IndexSeparator indexSeparator = (type == _LIST_TYPE_ORDERED ? IndexSeparator.fromChar(markerRes.value[0][3]) : null);
+        int startIndex = type == _LIST_TYPE_ORDERED ? int.parse(markerRes.value[0][2].join(), onError: (_) => 1) : 1;
+        BulletType bulletType = (type == _LIST_TYPE_UNORDERED ? BulletType.fromChar(markerRes.value[0][2]) : null);
+
+        if (!nextLevel) {
+
+          bool addSuccess = addListItem(type, indexSeparator: indexSeparator, bulletType: bulletType);
+          if (!addSuccess) {
+            if (stack.length == 1) {
+              // It's a new list on top level. Stopping here
+              break;
+            }
+            // New list on same level
+            stack.removeLast();
+          } else {
+            // TODO update offsets in stack
+            position = getNewPositionAfterListMarker(markerRes);
+            continue;
+          }
+        }
+
+        // Flush buffer
+        if (stack.length > 0 && (buffer.length > 0 || blocks.length > 0)) {
+          buildBuffer();
+          addToListItem(stack.last.block.items.last, blocks);
+          blocks = [];
+        }
+
+        ListBlock newListBlock;
+        int subIndent;
+        if (type == _LIST_TYPE_ORDERED) {
+          newListBlock = new OrderedList([new ListItem([])], indexSeparator, startIndex);
+          subIndent = markerRes.value[0][1] + markerRes.value[0][2].length + 1;
+        } else {
+          newListBlock = new UnorderedList([new ListItem([])], bulletType);
+          subIndent = markerRes.value[0][1] + 1;
+        }
+
+        int indent = getIndent();
+        if (markerRes.value[1] == "\n" || markerRes.value[1].length > 4) {
+          stack.add(new _ListStackItem(indent, indent + subIndent + 1, newListBlock));
+        } else {
+          stack.add(new _ListStackItem(indent, indent + subIndent + markerRes.value[1].length, newListBlock));
+        }
+        position = getNewPositionAfterListMarker(markerRes);
+        nextLevel = true;
+        continue;
+      } else if (stack.length == 0) {
+        // That was first marker test and it's failed
+        return markerRes;
+      }
+
+      // TODO fenced code
+
+      // Strict line
+      ParseResult lineRes = anyLine.run(s, position);
+      assert(lineRes.isSuccess);
+      buffer.add(lineRes.value);
+      position = lineRes.position;
+    }
+
+
+    if (stack.length > 0) {
+      if (buffer.length > 0 || blocks.length > 0) {
+        buildBuffer();
+        addToListItem(stack.last.block.items.last, blocks);
+      }
+
+      stack.forEach((_ListStackItem stackItem) {
+        convertToTight(stackItem.tight, stackItem.block.items);
+      });
+
+      return success([stack.first.block]).run(s, position);
+    } else {
+      return fail.run(s, pos);
+    }
+
+
+  });
+
+  /*
   static Parser listFirstLine(int indent, Parser marker) => (atMostSpaces(indent).notFollowedBy(hrule) + marker + anyLine).list;
   static Parser listStrictLine(int indent) => string(" " * indent) > anyLine;
   static Parser listLazyLine(int indent) => atMostSpaces(indent - 1).notFollowedBy(char(' ')) > anyLine;
   static Parser listFencedCodeStartTest(int indent) =>
-    (string(" " * indent) + char(' ').many + (string('```') | string('~~~')) + anyLine).list.record;
+    (string(" " * indent) + (char(' ') | unorderedListMarkerTest | orderedListMarkerTest).many + (string('```') | string('~~~')) + anyLine).list;
   static Parser listLine(int indent, Parser marker) => // There are three types of lines in list
     (listFirstLine(indent - 1, marker) ^ (l) => [0,  l[0], l[1], l[2]]) // List item start
     | (blankline ^ (l) => [3])                                          // Blank line
-    | (listFencedCodeStartTest(indent) ^ (l) => [4, l])                 // Special case for fenced code, because it can
+    | (listFencedCodeStartTest(indent) ^ (l) => [4, l[0], l[1], l[2], l[3]]) // Special case for fenced code, because it can
                                                                         //   have more than 1 blank line inside
     | (listStrictLine(indent) ^ (l) => [1, l])                          // List item strict continuation
     | (listLazyLine(indent) ^ (l) => [2, l]);                           // List item lazy continuation
@@ -714,17 +960,18 @@ class CommonMarkParser {
       if (!codeTestResult.isSuccess) {
         buffer.add(line);
       } else {
-        // TODO
         int codeIndent = indentLength + markerStr.length + codeTestResult.value.length;
 
         Parser codeParser = listCodeBlockFenced(codeIndent).record;
         var codeStartPosition = new Position(position.offset + codeIndent, position.line, position.character + codeIndent);
         // TODO fix position
         ParseResult codeResult = codeParser.run(s, codeStartPosition);
+        print(s);
         if (codeResult.isSuccess) {
+          int i = indentLength + markerStr.length;
           buffer.addAll((codeTestResult.value + codeResult.value).split('\n').map((String l) {
-            if (l.substring(0, min(codeIndent, l.length)) == " " * codeIndent) {
-              return l.substring(min(codeIndent, l.length), l.length);
+            if (l.substring(0, min(i, l.length)) == " " * i) {
+              return l.substring(min(i, l.length), l.length);
             } else {
               return l;
             }
@@ -821,6 +1068,7 @@ class CommonMarkParser {
             indent += size - substring.trimLeft().length;
           }
 
+          print(res);
           res = testForFencedCodeBlockAsFirstListBlock(res, res.value[1], res.value[2]);
 
           _updateListStack(stackPosition, indent);
@@ -863,6 +1111,7 @@ class CommonMarkParser {
           break;
 
         case 4: // Possible fenced code start
+          print(res);
           if (buffer.length > 0) {
             buildBuffer();
 
@@ -982,7 +1231,7 @@ class CommonMarkParser {
 
       return [new OrderedList(items, separator, startIndex)];
     }).run(s, pos);
-  });
+  });*/
 
   //
   // Document

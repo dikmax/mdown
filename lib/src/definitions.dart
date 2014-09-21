@@ -212,6 +212,29 @@ class BulletType {
 
   const BulletType._(this.value, this.name);
 
+  static BulletType fromChar(markerChar) {
+    BulletType type;
+    switch(markerChar) {
+      case '+':
+        type = BulletType.PlusBullet;
+        break;
+
+      case '-':
+        type = BulletType.MinusBullet;
+        break;
+
+      case '*':
+        type = BulletType.StarBullet;
+        break;
+
+      default:
+        assert(false);
+        type = BulletType.PlusBullet;
+    }
+
+    return type;
+  }
+
   String toString() => name;
 
   bool operator== (obj) => obj is BulletType &&
@@ -227,6 +250,25 @@ class IndexSeparator {
   final String name;
 
   const IndexSeparator._(this.value, this.name);
+
+  static IndexSeparator fromChar(String indexSeparator) {
+    IndexSeparator separator;
+    switch(indexSeparator) {
+      case '.':
+        separator = IndexSeparator.DotSeparator;
+        break;
+
+      case ')':
+        separator = IndexSeparator.ParenthesisSeparator;
+        break;
+
+      default:
+        assert(false);
+        separator = IndexSeparator.DotSeparator;
+    }
+
+    return separator;
+  }
 
   String toString() => name;
 

@@ -5,3 +5,66 @@ Simple test
 .
 <p>Simple test</p>
 .
+
+Fenced code block in list
+
+.
+- - ```
+    a
+
+
+    b
+    ```
+.
+<ul>
+<li><ul>
+<li><pre><code>a
+
+
+b
+</code></pre></li>
+</ul></li>
+</ul>
+.
+
+
+.
+- - ```
+    a
+
+
+   b
+    ```
+.
+<ul>
+<li><ul>
+<li><pre><code>a
+
+
+</code></pre></li>
+</ul>
+b
+<pre><code></code></pre></li>
+</ul>
+.
+
+.
+- - c
+  - ```
+    a
+
+
+    b
+    ```
+.
+<ul>
+<li><ul>
+<li>c</li>
+<li><pre><code>a
+
+
+b
+</code></pre></li>
+</ul></li>
+</ul>
+.
