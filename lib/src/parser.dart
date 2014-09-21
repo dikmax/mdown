@@ -873,10 +873,72 @@ class CommonMarkParser {
         return markerRes;
       }
 
-      // TODO fenced code
-
-      // Strict line
       if (position.character > 1) {
+        // Fenced code block
+        ParseResult openFenceRes = openFence.run(s, position);
+        if (openFenceRes.isSuccess) {
+          if (buffer.length > 0) {
+            buildBuffer();
+          }
+
+          int indent = openFenceRes.value[0];
+          String fenceChar = openFenceRes.value[1];
+          int fenceSize = openFenceRes.value[2];
+          String infoString = openFenceRes.value[3];
+
+          FenceType fenceType = FenceType.BacktickFence;
+          if (fenceChar == '~') {
+            fenceType = FenceType.TildeFence;
+          }
+
+          position = openFenceRes.position;
+
+          Parser indentParser = string(" " * getSubIndent());
+          Parser endFenceParser = (((skipSpaces > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
+          Parser lineParser = anyLine;
+          if (indent > 0) {
+            lineParser = atMostSpaces(indent) > lineParser;
+          }
+
+          List<String> code = [];
+          while (true) {
+            ParseResult eofRes = eof.run(s, position);
+            if (eofRes.isSuccess) {
+              break;
+            }
+
+            ParseResult blanklineRes = blankline.run(s, position);
+            if (blanklineRes.isSuccess) {
+              position = blanklineRes.position;
+              code.add("");
+              continue;
+            }
+
+            ParseResult indentRes = indentParser.run(s, position);
+            if (!indentRes.isSuccess) {
+              break;
+            }
+            position = indentRes.position;
+
+            ParseResult endFenceRes = endFenceParser.run(s, position);
+            if (endFenceRes.isSuccess) {
+              position = endFenceRes.position;
+              break;
+            }
+
+            ParseResult lineRes = lineParser.run(s, position);
+            if (!lineRes.isSuccess) {
+              break;
+            }
+            code.add(lineRes.value);
+            position = lineRes.position;
+          }
+
+          blocks.add(new FencedCodeBlock(code.map((i) => i + '\n').join(), fenceType, fenceSize, new InfoString(infoString)));
+          continue;
+        }
+
+        // Strict line
         ParseResult lineRes = anyLine.run(s, position);
         assert(lineRes.isSuccess);
         if (closeParagraph) {
