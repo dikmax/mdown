@@ -851,12 +851,11 @@ class CommonMarkParser {
             // New list on same level
             stack.removeLast();
           } else {
-            int subIndent = 1;
+            int subIndent = markerRes.value[0][1] + 1;
             if (type == _LIST_TYPE_ORDERED) {
               subIndent += markerRes.value[0][2].length;
             }
-            stack.last.indent += markerRes.value[0][1];
-            stack.last.subIndent = stack.last.indent + subIndent;
+            stack.last.subIndent = getIndent() + subIndent;
             if (markerRes.value[1] != "\n" && markerRes.value[1].length <= 4) {
               stack.last.subIndent += markerRes.value[1].length;
             }
@@ -874,7 +873,7 @@ class CommonMarkParser {
         }
 
         ListBlock newListBlock;
-        int subIndent = 1;
+        int subIndent = markerRes.value[0][1] + 1;
         if (type == _LIST_TYPE_ORDERED) {
           newListBlock = new OrderedList([new ListItem([])], indexSeparator, startIndex);
           subIndent += markerRes.value[0][2].length;
@@ -886,7 +885,7 @@ class CommonMarkParser {
           addToListItem(stack.last.block.items.last, [newListBlock]);
         }
 
-        int indent = getIndent() + markerRes.value[0][1];
+        int indent = getSubIndent();
         if (markerRes.value[1] == "\n" || markerRes.value[1].length > 4) {
           stack.add(new _ListStackItem(indent, indent + subIndent + 1, newListBlock));
         } else {
