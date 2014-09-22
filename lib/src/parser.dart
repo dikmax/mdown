@@ -827,12 +827,12 @@ class CommonMarkParser {
           nextLevel = false;
           while (getIndent() > 0) {
             ParseResult indentRes = string(" " * getIndent()).run(s, position);
+            convertToTight(getTight(), stack.last.block.items);
+            stack.removeLast();
             if (indentRes.isSuccess) {
               position = indentRes.position;
               break;
             }
-            convertToTight(getTight(), stack.last.block.items);
-            stack.removeLast();
           }
         }
       }
