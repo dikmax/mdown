@@ -774,9 +774,9 @@ class CommonMarkParser {
 
     bool nextLevel = true;
 
-
     // TODO Split loop to smaller parts
     while (true) {
+      bool closeListItem = false;
       ParseResult eofRes = eof.run(s, position);
       if (eofRes.isSuccess) {
         // End of input reached
@@ -827,12 +827,13 @@ class CommonMarkParser {
           nextLevel = false;
           while (getIndent() > 0) {
             ParseResult indentRes = string(" " * getIndent()).run(s, position);
-            convertToTight(getTight(), stack.last.block.items);
-            stack.removeLast();
             if (indentRes.isSuccess) {
               position = indentRes.position;
+              closeListItem = true;
               break;
             }
+            convertToTight(getTight(), stack.last.block.items);
+            stack.removeLast();
           }
         }
       }
@@ -902,6 +903,15 @@ class CommonMarkParser {
       } else if (stack.length == 0) {
         // That was first marker test and it's failed
         return markerRes;
+      }
+
+      if (closeListItem) {
+        convertToTight(getTight(), stack.last.block.items);
+        if (stack.length > 1) {
+          stack.removeLast();
+        } else {
+          break;
+        }
       }
 
       if (position.character > 1) {
