@@ -808,6 +808,7 @@ class CommonMarkParser {
               buildBuffer();
             }
 
+            // TODO Speedup by checking impossible starts
             ParseResult lineRes = anyLine.run(s, position);
             assert(lineRes.isSuccess);
             List<Block> lineBlock = block.parse(lineRes.value.trimLeft() + "\n");
@@ -850,7 +851,16 @@ class CommonMarkParser {
             // New list on same level
             stack.removeLast();
           } else {
-            // TODO update offsets in stack
+            int subIndent = 1;
+            if (type == _LIST_TYPE_ORDERED) {
+              subIndent += markerRes.value[0][2].length;
+            }
+            stack.last.indent += markerRes.value[0][1];
+            stack.last.subIndent = stack.last.indent + subIndent;
+            if (markerRes.value[1] != "\n" && markerRes.value[1].length <= 4) {
+              stack.last.subIndent += markerRes.value[1].length;
+            }
+
             position = getNewPositionAfterListMarker(markerRes);
             continue;
           }
@@ -864,20 +874,19 @@ class CommonMarkParser {
         }
 
         ListBlock newListBlock;
-        int subIndent;
+        int subIndent = 1;
         if (type == _LIST_TYPE_ORDERED) {
           newListBlock = new OrderedList([new ListItem([])], indexSeparator, startIndex);
-          subIndent = markerRes.value[0][1] + markerRes.value[0][2].length + 1;
+          subIndent += markerRes.value[0][2].length;
         } else {
           newListBlock = new UnorderedList([new ListItem([])], bulletType);
-          subIndent = markerRes.value[0][1] + 1;
         }
 
         if (stack.length > 0) {
           addToListItem(stack.last.block.items.last, [newListBlock]);
         }
 
-        int indent = getIndent();
+        int indent = getIndent() + markerRes.value[0][1];
         if (markerRes.value[1] == "\n" || markerRes.value[1].length > 4) {
           stack.add(new _ListStackItem(indent, indent + subIndent + 1, newListBlock));
         } else {
