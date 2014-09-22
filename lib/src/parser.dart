@@ -278,9 +278,9 @@ class CommonMarkParser {
   Parser<List<Block>> get block => choice([
       blanklines ^ (_) => [],
       hrule,
+      list,
       atxHeader,
       setextHeader,
-      list,
       codeBlockIndented,
       codeBlockFenced,
       rawHtml,
@@ -565,7 +565,7 @@ class CommonMarkParser {
       | codeBlockFenced
       | (skipNonindentSpaces > (
         char('>')
-        /*| (oneOf('+-*') > char(' '))*/)); // TODO uncomment after lists are implemented
+        | (oneOf('+-*') > char(' '))));
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
@@ -573,7 +573,6 @@ class CommonMarkParser {
 
     _UnparsedInlines inlines = new _UnparsedInlines(res.value.join("\n").trim());
     return res.copy(value: [new Para(inlines)]);
-    //return (blankline.many ^ (_) => [new Para(inlines)]).run(s, res.position);
   });
 
   //
@@ -817,6 +816,12 @@ class CommonMarkParser {
               position = lineRes.position;
               continue;
             }
+          }
+
+          if (buffer.length > 0 || blocks.length > 0) {
+            buildBuffer();
+            addToListItem(stack.last.block.items.last, blocks);
+            blocks = [];
           }
 
           nextLevel = false;
