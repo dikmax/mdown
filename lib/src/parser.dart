@@ -374,7 +374,7 @@ class CommonMarkParser {
 
   Parser get codeBlockIndented => (indentedLine +
     ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many)) ^
-      (f, c) => new IndentedCodeBlock(stripTrailingNewlines(f + c.join('')) + '\n');
+      (f, c) => [new IndentedCodeBlock(stripTrailingNewlines(f + c.join('')) + '\n')];
 
   //
   // Fenced code
@@ -775,6 +775,8 @@ class CommonMarkParser {
 
     bool nextLevel = true;
 
+
+    // TODO Split loop to smaller parts
     while (true) {
       ParseResult eofRes = eof.run(s, position);
       if (eofRes.isSuccess) {
@@ -793,8 +795,6 @@ class CommonMarkParser {
         continue;
       }
 
-      // TODO lazy line support
-
       if (position.character == 1 && getSubIndent() > 0) {
         // Waiting for indent
         ParseResult indentRes = string(" " * getSubIndent()).run(s, position);
@@ -802,6 +802,22 @@ class CommonMarkParser {
           position = indentRes.position;
           nextLevel = true;
         } else {
+          // Lazy line
+          if (!closeParagraph) {
+            if (buffer.length > 0) {
+              buildBuffer();
+            }
+
+            ParseResult lineRes = anyLine.run(s, position);
+            assert(lineRes.isSuccess);
+            List<Block> lineBlock = block.parse(lineRes.value.trimLeft() + "\n");
+            if (lineBlock.length == 1 && lineBlock[0] is Para &&
+            acceptLazy(blocks, ((lineBlock[0] as Para).contents as _UnparsedInlines).raw)) {
+              position = lineRes.position;
+              continue;
+            }
+          }
+
           nextLevel = false;
           while (getIndent() > 0) {
             ParseResult indentRes = string(" " * getIndent()).run(s, position);
@@ -955,7 +971,7 @@ class CommonMarkParser {
       }
     }
 
-
+    // End
     if (stack.length > 0) {
       if (buffer.length > 0 || blocks.length > 0) {
         buildBuffer();
