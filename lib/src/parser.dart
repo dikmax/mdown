@@ -49,7 +49,7 @@ class CommonMarkParser {
 
     var doc = document.parse(preprocess(s) + "\n\n"); // TODO maybe remove these two newlines at the end.
 
-    // TODO parse inlines
+    _inlinesInDocument(doc);
     return doc;
 
   }
@@ -94,6 +94,32 @@ class CommonMarkParser {
   }
 
   //
+  // Inlines search
+  //
+
+  void _inlinesInDocument(Document doc) {
+    doc.contents.forEach(_inlinesInBlock);
+  }
+
+  Block _inlinesInBlock(Block block) {
+    if ((block is Header || block is Para || block is Plain) && block.contents is _UnparsedInlines) {
+      block.contents = _parseInlines(block.contents.raw);
+    } else if (block is Blockquote) {
+      block.contents = block.contents.map(_inlinesInBlock);
+    } else if (block is ListBlock) {
+      block.items = block.items.map((ListItem item) {
+        item.contents = item.contents.map(_inlinesInBlock);
+        return item;
+      });
+    }
+    return block;
+  }
+
+  Inlines _parseInlines(String raw) {
+    return inlines.parse(raw);
+  }
+
+  //
   // Aux methods
   //
 
@@ -109,6 +135,13 @@ class CommonMarkParser {
         result.add(block);
       }
     });
+    return result;
+  }
+
+
+  Inlines processParsedInlines(Iterable inlines) {
+    Inlines result = new Inlines();
+    result.addAll(flatten(inlines));
     return result;
   }
 
@@ -270,6 +303,25 @@ class CommonMarkParser {
   //
   // Inlines
   //
+
+  //
+  // whitespace
+  //
+
+  static final Parser whitespace = (spaceChar < skipSpaces) ^ (_) => [new Space()];
+
+  //
+  // str
+  //
+
+  static final Parser str = (spaceChar.notAhead > anyChar).many1 ^ (chars) => new Str(chars.join(""));
+
+  Parser<List<Inline>> get inline => choice([
+      whitespace,
+      str
+  ]);
+
+  Parser<Inlines> get inlines => inline.manyUntil(eof) ^ (res) => processParsedInlines(res);
 
   //
   // Blocks
@@ -677,6 +729,7 @@ class CommonMarkParser {
       }
     }
 
+    // TODO move tight to list definition
     void convertToTight(bool tight, Iterable<ListItem> items) {
       if (tight) {
         items.forEach((ListItem item) {

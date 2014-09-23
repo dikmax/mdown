@@ -147,7 +147,7 @@ String writeHeader(Header header) => "<h${header.level}>${writeInlines(header.co
 String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeBlock.attributes)}>" +
   "${HTML_ESCAPE.convert(codeBlock.contents)}</code></pre>";
 
-String writeListItems(List<ListItem> items) => items.map((ListItem item) => "<li>${writeBlocksTight(item.contents).trim()}</li>\n").join();
+String writeListItems(Iterable<ListItem> items) => items.map((ListItem item) => "<li>${writeBlocksTight(item.contents).trim()}</li>\n").join();
 String writeUnorderedList(UnorderedList list) => "<ul>\n${writeListItems(list.items)}</ul>";
 String writeOrderedList(OrderedList list) => "<ol${list.startIndex != 1 ? ' start="${list.startIndex}"' : ''}>\n${writeListItems(list.items)}</ol>";
 
@@ -156,13 +156,9 @@ String writePlain(Plain plain) => writeInlines(plain.contents);
 
 // Inlines
 String writeInlines(Iterable<Inline> inlines) {
-  // TODO remove raw check
-  if (inlines.raw != null) {
-    return HTML_ESCAPE.convert(inlines.raw);
-  }
   return inlines.map((Inline inline) {
     if (inline is Str) {
-      return inline.contents;
+      return HTML_ESCAPE.convert(inline.contents);
     } else if (inline is Space) {
       return ' ';
     } else if (inline is NonBreakableSpace) {
