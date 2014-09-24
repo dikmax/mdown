@@ -317,10 +317,35 @@ class CommonMarkParser {
   // html entities
   //
 
-  Parser get htmlEntity => ((char('&') > alphanum.many1) < char(';')) ^ (entity) {
-    String e = entity.join();
+  static RegExp decimalEntity = new RegExp(r'^#(\d{1,8})$');
+  static RegExp hexadecimalEntity = new RegExp(r'^#[xX]([0-9a-fA-F]{1,8})$');
+  Parser get htmlEntity => ((char('&') >
+      ((char('#').maybe + alphanum.many1) ^ (Option a, b) => (a.isDefined ? '#' : '') + b.join()) ) <
+      char(';')) ^ (entity) {
+    if (htmlEntities.containsKey(entity)) {
+      return new Str(htmlEntities[entity]);
+    }
 
-    return new Str('&$e;');
+    int code;
+    Match m = decimalEntity.firstMatch(entity);
+    if (m != null) {
+      code = int.parse(m.group(1));
+    }
+
+    m = hexadecimalEntity.firstMatch(entity);
+
+    if (m != null) {
+      code = int.parse(m.group(1), radix: 16);
+    }
+
+    if (code != null) {
+      if (code > 1114111) {
+        code = 0xFFFD;
+      }
+      return new Str(new String.fromCharCode(code));
+    }
+
+    return new Str('&$entity;');
   };
 
   //
