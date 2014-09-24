@@ -310,14 +310,29 @@ class CommonMarkParser {
 
   static final Parser whitespace = (spaceChar < skipSpaces) ^ (_) => [new Space()];
 
+  // TODO better escaped chars support
+  Parser get escapedChar => (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~")) ^ (char) => new Str(char);
+
+  //
+  // html entities
+  //
+
+  Parser get htmlEntity => ((char('&') > alphanum.many1) < char(';')) ^ (entity) {
+    String e = entity.join();
+
+    return new Str('&$e;');
+  };
+
   //
   // str
   //
 
-  static final Parser str = (spaceChar.notAhead > anyChar).many1 ^ (chars) => new Str(chars.join(""));
+  static final Parser str = anyChar ^ (chars) => new Str(chars);
 
   Parser<List<Inline>> get inline => choice([
       whitespace,
+      escapedChar,
+      htmlEntity,
       str
   ]);
 

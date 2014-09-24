@@ -9,4 +9,5 @@ import 'package:persistent/persistent.dart';
 import 'package:unicode_helper/unicode_helper.dart';
 
 part 'src/definitions.dart';
+part 'src/entities.dart';
 part 'src/parser.dart';
