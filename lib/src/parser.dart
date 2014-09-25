@@ -352,16 +352,44 @@ class CommonMarkParser {
   // inline code
   //
 
-  Parser<List<Inline>> get inlineCode => new Parser((s, pos) {
-    ParseResult openRes = char('`').many1.run(s, pos);
+  String _processInlineCode(String code) {
+    return code.trim().replaceAll(new RegExp(r'\s+'), ' ');
+  }
+
+  static Parser _inlineCode1 = char('`').many1;
+  static Parser _inlineCode2 = noneOf('`').many1;
+
+  Parser<List<Inline>> get inlineCode => new Parser((String s, Position pos) {
+    ParseResult openRes = _inlineCode1.run(s, pos);
     if (!openRes.isSuccess) {
       return openRes;
     }
+    if (pos.offset > 0 && s[pos.offset - 1] == '`') {
+      return fail.run(s,pos);
+    }
 
-    ParseResult restRes = (anyChar.manyUntil(string('`' * openRes.value.length).notFollowedBy(char('`'))) ^
-      (l) => [new Code(l.join(), openRes.value.length)]).run(s, openRes.position);
+    int fenceLength = openRes.value.length;
 
-    return restRes;
+    StringBuffer str = new StringBuffer();
+    Position position = openRes.position;
+    while(true) {
+      ParseResult res = _inlineCode2.run(s, position);
+      if (!res.isSuccess) {
+        return res;
+      }
+      str.write(res.value.join());
+      position = res.position;
+
+      res = _inlineCode1.run(s, position);
+      if (!res.isSuccess) {
+        return res;
+      }
+      if (res.value.length == fenceLength) {
+        return res.copy(value: [new Code(_processInlineCode(str.toString()), fenceLength)]);
+      }
+      str.write(res.value.join());
+      position = res.position;
+    }
   });
 
   //
