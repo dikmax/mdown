@@ -79,7 +79,13 @@ String writeInlines(Iterable<Inline> inlines) {
       return '&nbsp;';
     } else if (inline is LineBreak) {
       return '<br/>';
+    } else if (inline is Code) {
+      return writeCodeInline(inline);
     }
     throw new UnimplementedError(inline.toString());
   }).join();
+}
+
+String writeCodeInline(Code code) {
+  return '<code>${htmlEscape(code.contents)}</code>';
 }

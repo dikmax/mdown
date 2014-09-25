@@ -349,15 +349,32 @@ class CommonMarkParser {
   };
 
   //
+  // inline code
+  //
+
+  Parser<List<Inline>> get inlineCode => new Parser((s, pos) {
+    ParseResult openRes = char('`').many1.run(s, pos);
+    if (!openRes.isSuccess) {
+      return openRes;
+    }
+
+    ParseResult restRes = (anyChar.manyUntil(string('`' * openRes.value.length).notFollowedBy(char('`'))) ^
+      (l) => [new Code(l.join(), openRes.value.length)]).run(s, openRes.position);
+
+    return restRes;
+  });
+
+  //
   // str
   //
 
-  static final Parser str = anyChar ^ (chars) => new Str(chars);
+  static final Parser str = anyChar ^ (chars) => [new Str(chars)];
 
   Parser<List<Inline>> get inline => choice([
       whitespace,
       escapedChar,
       htmlEntity,
+      inlineCode,
       str
   ]);
 

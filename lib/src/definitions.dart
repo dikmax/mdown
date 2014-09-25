@@ -422,3 +422,15 @@ class LineBreak extends Inline {
 
   bool operator== (obj) => obj is LineBreak;
 }
+
+class Code extends Inline {
+  String contents;
+  int fenceSize;
+
+  Code(this.contents, this.fenceSize);
+
+  String toString() => 'Code "$contents"';
+
+  bool operator== (obj) => obj is Str &&
+  contents == obj.contents;
+}
