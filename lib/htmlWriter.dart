@@ -79,13 +79,26 @@ String writeInlines(Iterable<Inline> inlines) {
       return '&nbsp;';
     } else if (inline is LineBreak) {
       return '<br/>';
+    } else if (inline is Emph) {
+      return writeEmph(inline);
+    } else if (inline is Strong) {
+      return writeStrong(inline);
     } else if (inline is Code) {
       return writeCodeInline(inline);
     }
+
     throw new UnimplementedError(inline.toString());
   }).join();
 }
 
 String writeCodeInline(Code code) {
   return '<code>${htmlEscape(code.contents)}</code>';
+}
+
+String writeEmph(Emph emph) {
+  return '<em>${writeInlines(emph.contents)}</em>';
+}
+
+String writeStrong(Strong strong) {
+  return '<strong>${writeInlines(strong.contents)}</strong>';
 }

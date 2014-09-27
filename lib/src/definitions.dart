@@ -276,6 +276,7 @@ class IndexSeparator {
     value == obj.value;
 }
 
+
 // List class name is already taken by dart
 abstract class ListBlock extends Block {
   Iterable<ListItem> items;
@@ -423,6 +424,7 @@ class LineBreak extends Inline {
   bool operator== (obj) => obj is LineBreak;
 }
 
+
 class Code extends Inline {
   String contents;
   int fenceSize;
@@ -431,6 +433,30 @@ class Code extends Inline {
 
   String toString() => 'Code "$contents"';
 
-  bool operator== (obj) => obj is Str &&
-  contents == obj.contents;
+  bool operator== (obj) => obj is Code &&
+    contents == obj.contents;
+}
+
+
+class Emph extends Inline {
+  Inlines contents;
+
+  Emph(this.contents);
+
+  String toString() => 'Emph $contents';
+
+  bool operator== (obj) => obj is Emph &&
+    _iterableEquality.equals(contents, obj.contents);
+}
+
+
+class Strong extends Inline {
+  Inlines contents;
+
+  Strong(this.contents);
+
+  String toString() => 'Strong $contents';
+
+  bool operator== (obj) => obj is Strong &&
+    _iterableEquality.equals(contents, obj.contents);
 }
