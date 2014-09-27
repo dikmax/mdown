@@ -431,7 +431,7 @@ class CommonMarkParser {
       return res.copy(value: [new Str(char * numDelims)]);
     }
 
-    Inlines result = new Inlines();
+    List<Inline> result = new Inlines();
     Position position = res.position;
 
     switch (numDelims) {
@@ -467,6 +467,63 @@ class CommonMarkParser {
         }
         break;
 
+      case 3:
+        int leftToClose = 3;
+        Inlines innerRes = new Inlines();
+        while (true) {
+          ParseResult res = scanParser.run(s, position);
+          if (res.isSuccess && res.value[2]) {
+            if (res.value[0] == leftToClose) {
+              if (leftToClose == 1) {
+
+                return res.copy(position: res.position, value: [new Emph(processParsedInlines(result))]);
+              } else if (leftToClose == 2) {
+                return res.copy(position: res.position, value: [new Strong(processParsedInlines(result))]);
+              } else {
+                innerRes.add(new Emph(processParsedInlines(result)));
+                return res.copy(position: res.position, value: [new Strong(innerRes)]);
+              }
+            } else if (leftToClose == 3) {
+              if (res.value[0] == 1) {
+                leftToClose = 2;
+                innerRes = processParsedInlines(result);
+                result = [new Emph(innerRes)];
+                position = res.position;
+              } else {
+                leftToClose = 1;
+                innerRes = processParsedInlines(result);
+                result = [new Strong(result)];
+                position = res.position;
+              }
+              continue;
+            } else {
+              // We should return unparsed result
+              List<Inlines> ret = [new Str(char * 3)];
+              ret.addAll(innerRes);
+              ret.add(new Str(char * (3 - leftToClose)));
+              result.removeAt(0);
+              ret.addAll(result);
+              ret.add(new Str(char * res.value[0]));
+              return res.copy(value: ret);
+            }
+            continue;
+          }
+          res = inline.run(s, position);
+          if (!res.isSuccess) {
+            List<Inlines> ret = [new Str(char * 3)];
+            if (leftToClose < 3) {
+              ret.addAll(innerRes);
+              ret.add(new Str(char * (3 - leftToClose)));
+              result.removeAt(0);
+            }
+            ret.addAll(result);
+            return success(result).run(s, position);
+          }
+          result.addAll(res.value);
+          position = res.position;
+        }
+        break;
+
       default:
         return res.copy(value: [new Str(char * numDelims)]);
     }
@@ -476,6 +533,7 @@ class CommonMarkParser {
   // str
   //
 
+  // TODO optimize: parse to first special char
   static final Parser str = anyChar ^ (chars) => [new Str(chars)];
 
   Parser<List<Inline>> get inline => choice([
