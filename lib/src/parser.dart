@@ -451,6 +451,22 @@ class CommonMarkParser {
         }
         break;
 
+      case 2:
+        while (true) {
+          ParseResult res = scanParser.run(s, position);
+          if (res.isSuccess && res.value[0] >= 2 && res.value[2]) {
+            return res.copy(position: position.addChar(char).addChar(char), value: [new Strong(result)]);
+          }
+          res = inline.run(s, position);
+          if (!res.isSuccess) {
+            result.insert(0, new Str(char * numDelims));
+            return success(result).run(s, position);
+          }
+          result.addAll(res.value);
+          position = res.position;
+        }
+        break;
+
       default:
         return res.copy(value: [new Str(char * numDelims)]);
     }
