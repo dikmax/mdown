@@ -473,29 +473,30 @@ class CommonMarkParser {
         while (true) {
           ParseResult res = scanParser.run(s, position);
           if (res.isSuccess && res.value[2]) {
-            if (res.value[0] == leftToClose) {
-              if (leftToClose == 1) {
-
-                return res.copy(position: res.position, value: [new Emph(processParsedInlines(result))]);
-              } else if (leftToClose == 2) {
-                return res.copy(position: res.position, value: [new Strong(processParsedInlines(result))]);
-              } else {
-                innerRes.add(new Emph(processParsedInlines(result)));
-                return res.copy(position: res.position, value: [new Strong(innerRes)]);
-              }
-            } else if (leftToClose == 3) {
+            if (leftToClose == 3) {
               if (res.value[0] == 1) {
                 leftToClose = 2;
                 innerRes = processParsedInlines(result);
                 result = [new Emph(innerRes)];
                 position = res.position;
-              } else {
+              } else if (res.value[0] == 2) {
                 leftToClose = 1;
                 innerRes = processParsedInlines(result);
                 result = [new Strong(result)];
                 position = res.position;
+              } else {
+                // Close
+                innerRes.add(new Emph(processParsedInlines(result)));
+                return res.copy(position: res.position, value: [new Strong(innerRes)]);
               }
               continue;
+            }
+            if (res.value[0] >= leftToClose) {
+              if (leftToClose == 1) {
+                return res.copy(position: position.addChar(char), value: [new Emph(processParsedInlines(result))]);
+              } else if (leftToClose == 2) {
+                return res.copy(position: position.addChar(char).addChar(char), value: [new Strong(processParsedInlines(result))]);
+              }
             } else {
               // We should return unparsed result
               List<Inlines> ret = [new Str(char * 3)];
@@ -517,7 +518,7 @@ class CommonMarkParser {
               result.removeAt(0);
             }
             ret.addAll(result);
-            return success(result).run(s, position);
+            return success(ret).run(s, position);
           }
           result.addAll(res.value);
           position = res.position;
