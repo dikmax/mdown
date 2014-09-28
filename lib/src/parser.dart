@@ -772,7 +772,7 @@ class CommonMarkParser {
       return fail.run(s, pos);
     }
 
-    ParseResult textRes = (((spaceChar > skipSpaces) > anyChar.manyUntil(char('#').many > blankline)) |
+    ParseResult textRes = (((spaceChar > skipSpaces) > (escapedChar.record | anyChar).manyUntil(char('#').many > blankline)) |
       (newline ^ (_) => [])).run(s, startRes.position);
     if (!textRes.isSuccess) {
       return textRes;
