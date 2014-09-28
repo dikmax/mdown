@@ -656,7 +656,7 @@ class CommonMarkParser {
     String contents = res.value.join();
     int colon = contents.indexOf(":");
     if (colon >= 1) {
-      String schema = contents.substring(0, colon);
+      String schema = contents.substring(0, colon).toLowerCase();
       if (allowedSchemes.contains(schema)) {
         return res.copy(value: [new Autolink(contents)]);
       }
