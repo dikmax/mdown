@@ -534,8 +534,9 @@ class CommonMarkParser {
   // str
   //
 
-  // TODO optimize: parse to first special char
-  static final Parser str = anyChar ^ (chars) => [new Str(chars)];
+  static final String _strSpecialChars = " \n*_`![<\\";
+  static final Parser str = (noneOf(_strSpecialChars).many1 ^ (chars) => [new Str(chars.join())]) |
+    (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]);
 
   Parser<List<Inline>> get inline => choice([
       whitespace,
