@@ -501,6 +501,7 @@ class ReferenceLink extends Link {
 
 class Autolink extends Link {
   Autolink(String link) : super(new Inlines.from([new Str(link)]), new Target(link, null));
+  Autolink.email(String email) : super(new Inlines.from([new Str(email)]), new Target("mailto:" + email, null));
 
   String toString() => 'Autolink (${target.link})';
 

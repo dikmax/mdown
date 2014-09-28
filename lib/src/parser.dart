@@ -607,6 +607,7 @@ class CommonMarkParser {
     return fail.run(s, pos);
   });
 
+  // TODO don't recreate objects. Move common part to separate parser
   Parser<List<Inline>> get image => (char('!') > link) ^ (link) {
     // Transforming link to image
     if (link[0] is InlineLink) {
@@ -616,6 +617,57 @@ class CommonMarkParser {
     }
     return link;
   };
+
+  List<String> allowedSchemes = <String>[
+    "coap", "doi", "javascript", "aaa", "aaas", "about", "acap", "cap",
+    "cid", "crid", "data", "dav", "dict", "dns", "file", "ftp", "geo", "go",
+    "gopher", "h323", "http", "https", "iax", "icap", "im", "imap", "info",
+    "ipp", "iris", "iris.beep", "iris.xpc", "iris.xpcs", "iris.lwz", "ldap",
+    "mailto", "mid", "msrp", "msrps", "mtqp", "mupdate", "news", "nfs",
+    "ni", "nih", "nntp", "opaquelocktoken", "pop", "pres", "rtsp",
+    "service", "session", "shttp", "sieve", "sip", "sips", "sms", "snmp",
+    "soap.beep", "soap.beeps", "tag", "tel", "telnet", "tftp", "thismessage",
+    "tn3270", "tip", "tv", "urn", "vemmi", "ws", "wss", "xcon",
+    "xcon-userid", "xmlrpc.beep", "xmlrpc.beeps", "xmpp", "z39.50r",
+    "z39.50s", "adiumxtra", "afp", "afs", "aim", "apt", "attachment", "aw",
+    "beshare", "bitcoin", "bolo", "callto", "chrome", "chrome-extension",
+    "com-eventbrite-attendee", "content", "cvs", "dlna-playsingle",
+    "dlna-playcontainer", "dtn", "dvb", "ed2k", "facetime", "feed",
+    "finger", "fish", "gg", "git", "gizmoproject", "gtalk", "hcp", "icon",
+    "ipn", "irc", "irc6", "ircs", "itms", "jar", "jms", "keyparc", "lastfm",
+    "ldaps", "magnet", "maps", "market", "message", "mms", "ms-help",
+    "msnim", "mumble", "mvn", "notes", "oid", "palm", "paparazzi",
+    "platform", "proxy", "psyc", "query", "res", "resource", "rmi", "rsync",
+    "rtmp", "secondlife", "sftp", "sgn", "skype", "smb", "soldat",
+    "spotify", "ssh", "steam", "svn", "teamspeak", "things", "udp",
+    "unreal", "ut2004", "ventrilo", "view-source", "webcal", "wtai",
+    "wyciwyg", "xfire", "xri", "ymsgr"
+  ];
+
+  RegExp autolinkEmailRegExp = new RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
+    r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
+
+  Parser<List<Inline>> get autolink => new Parser((String s, Position pos) {
+    ParseResult res = (char('<') >
+      pred((String char) => char.codeUnitAt(0) > 0x20 && char != "<" && char != ">").manyUntil(char('>'))).run(s, pos);
+    if (!res.isSuccess) {
+      return res;
+    }
+    String contents = res.value.join();
+    int colon = contents.indexOf(":");
+    if (colon >= 1) {
+      String schema = contents.substring(0, colon);
+      if (allowedSchemes.contains(schema)) {
+        return res.copy(value: [new Autolink(contents)]);
+      }
+    }
+
+    if (contents.contains(autolinkEmailRegExp)) {
+      return res.copy(value: [new Autolink.email(contents)]);
+    }
+
+    return fail.run(s, pos);
+  });
 
   //
   // str
@@ -633,6 +685,7 @@ class CommonMarkParser {
       emphasis,
       link,
       image,
+      autolink,
       str
   ]);
 
