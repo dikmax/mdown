@@ -78,7 +78,7 @@ String writeInlines(Iterable<Inline> inlines) {
     } else if (inline is NonBreakableSpace) {
       return '&nbsp;';
     } else if (inline is LineBreak) {
-      return '<br/>';
+      return '<br/>\n';
     } else if (inline is Emph) {
       return writeEmph(inline);
     } else if (inline is Strong) {

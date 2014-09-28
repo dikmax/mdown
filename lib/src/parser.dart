@@ -681,6 +681,12 @@ class CommonMarkParser {
     htmlCompleteCDATA]) ^ (result) => [new HtmlRawInline(result)];
 
   //
+  // Line break
+  //
+
+  Parser lineBreak = (((string('  ') < spaceChar.many) < newline) | string("\\\n")) ^ (_) => [new LineBreak()];
+
+  //
   // str
   //
 
@@ -689,6 +695,7 @@ class CommonMarkParser {
     (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]);
 
   Parser<List<Inline>> get inline => choice([
+      lineBreak,
       whitespace,
       escapedChar,
       htmlEntity,
