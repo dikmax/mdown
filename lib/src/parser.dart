@@ -11,12 +11,21 @@ class _UnparsedInlines extends Inlines {
     raw == obj.raw;
 }
 
+String _normalizeReference(String s) {
+  return s.trim()
+    .replaceAll(new RegExp(r'\s+'),' ')
+    .toUpperCase();
+}
+
 
 class _LinkReference extends Block {
   String reference;
+  String normalizedReference;
   Target target;
 
-  _LinkReference(this.reference, this.target);
+  _LinkReference(this.reference, this.target) {
+    normalizedReference = _normalizeReference(reference);
+  }
 }
 
 // TODO make aux parsers private
@@ -128,8 +137,9 @@ class CommonMarkParser {
     List result = [];
     list.forEach((Block block) {
       if (block is _LinkReference) {
-        if (!_references.containsKey(block.reference)) {
-          _references[block.reference] = block.target;
+        String nr = block.normalizedReference;
+        if (!_references.containsKey(nr)) {
+          _references[nr] = block.target;
         }
       } else {
         result.add(block);
@@ -312,9 +322,9 @@ class CommonMarkParser {
 
   // TODO support escaping
   Parser linkTitle = (
-      ((char("'") > noneOf("'\n")) < char("'")) |
-      ((char('"') > noneOf('"\n')) < char('"')) |
-      ((char('(') > noneOf(')\n')) < char(')'))
+      ((char("'") > noneOf("'\n").many) < char("'")) |
+      ((char('"') > noneOf('"\n').many) < char('"')) |
+      ((char('(') > noneOf(')\n').many) < char(')'))
   ) ^ (i) => i.join();
 
 
@@ -574,11 +584,26 @@ class CommonMarkParser {
     if (!labelRes.isSuccess) {
       return labelRes;
     }
+    // Try inline link
     ParseResult destRes = linkInline.run(s, labelRes.position);
-    print(destRes);
     if (destRes.isSuccess) {
       return destRes.copy(value: [new InlineLink(inlines.parse(labelRes.value), destRes.value)]);
     }
+    // Try reference link
+    ParseResult refRes = (whitespace.maybe > linkLabel).run(s, labelRes.position);
+    if (refRes.isSuccess) {
+      String reference = refRes.value == "" ? labelRes.value : refRes.value;
+      String normalizedReference = _normalizeReference(reference);
+      if (_references.containsKey(normalizedReference)) {
+        return refRes.copy(value: [new ReferenceLink(reference, inlines.parse(labelRes.value), _references[normalizedReference])]);
+      }
+    } else {
+      String normalizedReference = _normalizeReference(labelRes.value);
+      if (_references.containsKey(normalizedReference)) {
+        return labelRes.copy(value: [new ReferenceLink(labelRes.value, inlines.parse(labelRes.value), _references[normalizedReference])]);
+      }
+    }
+
     return fail.run(s, pos);
   });
 
