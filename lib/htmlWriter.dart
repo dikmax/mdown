@@ -89,6 +89,8 @@ String writeInlines(Iterable<Inline> inlines) {
       return writeImage(inline);
     } else if (inline is Code) {
       return writeCodeInline(inline);
+    } else if (inline is RawInline) {
+      return inline.contents;
     }
 
     throw new UnimplementedError(inline.toString());

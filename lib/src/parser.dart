@@ -293,13 +293,12 @@ class CommonMarkParser {
     }
     return fail.run(s, pos);
   });
-  Parser get htmlOpenTag => htmlBlockTag(
-      ((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')
-  );
-
-  Parser get htmlCloseTag => htmlBlockTag(
-      ((string("</") > alphanum.many1) < spaceOrNL.many) < char('>')
-  );
+  Parser htmlOpenTag = ((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>');
+  Parser get htmlBlockOpenTag => htmlBlockTag(htmlOpenTag);
+  Parser get htmlInlineOpenTag => htmlOpenTag.record;
+  Parser htmlCloseTag = ((string("</") > alphanum.many1) < spaceOrNL.many) < char('>');
+  Parser get htmlBlockCloseTag => htmlBlockTag(htmlCloseTag);
+  Parser get htmlInlineCloseTag => htmlCloseTag.record;
 
   Parser get htmlCompleteComment => (string('<!--') > anyChar.manyUntil(string('-->'))).record;
   Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
@@ -669,6 +668,18 @@ class CommonMarkParser {
     return fail.run(s, pos);
   });
 
+
+  //
+  // raw html
+  //
+
+  Parser get rawInlineHtml => choice([htmlInlineOpenTag,
+    htmlInlineCloseTag,
+    htmlCompleteComment,
+    htmlCompletePI,
+    htmlDeclaration,
+    htmlCompleteCDATA]) ^ (result) => [new HtmlRawInline(result)];
+
   //
   // str
   //
@@ -686,6 +697,7 @@ class CommonMarkParser {
       link,
       image,
       autolink,
+      rawInlineHtml,
       str
   ]);
 
@@ -933,8 +945,8 @@ class CommonMarkParser {
 
     // TODO add support for partial html comments, pi and CDATA.
 
-    ParseResult tagRes = (htmlOpenTag
-      | htmlCloseTag
+    ParseResult tagRes = (htmlBlockOpenTag
+      | htmlBlockCloseTag
       | htmlCompleteComment
       | htmlCompletePI
       | htmlDeclaration

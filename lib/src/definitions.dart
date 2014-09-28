@@ -541,3 +541,20 @@ class ReferenceImage extends Image {
     target == obj.target &&
     _iterableEquality.equals(label, obj.label);
 }
+
+
+abstract class RawInline extends Inline {
+  String contents;
+
+  RawInline(this.contents);
+}
+
+
+class HtmlRawInline extends RawInline {
+  HtmlRawInline(String contents) : super(contents);
+
+  String toString() => "HtmlRawInline $contents";
+
+  bool operator== (obj) => obj is HtmlRawInline &&
+    contents == obj.contents;
+}
