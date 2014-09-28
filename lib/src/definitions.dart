@@ -340,7 +340,11 @@ class Plain extends Block {
 // Inlines
 
 class Inlines extends ListBase<Inline> {
-  List _inlines = new List();
+  List<Inline> _inlines = new List<Inline>();
+
+  Inlines();
+
+  Inlines.from(Iterable<Inlines> inlines) : _inlines = new List<Inline>.from(inlines);
 
   int get length => _inlines.length;
 
@@ -459,4 +463,47 @@ class Strong extends Inline {
 
   bool operator== (obj) => obj is Strong &&
     _iterableEquality.equals(contents, obj.contents);
+}
+
+
+abstract class Link extends Inline {
+  Inlines label;
+  Target target;
+
+  Link(this.label, this.target);
+}
+
+
+class InlineLink extends Link {
+  InlineLink(Inlines label, Target target) : super(label, target);
+
+  String toString() => 'InlineLink $label ($target)';
+
+  bool operator== (obj) => obj is InlineLink &&
+    target == obj.target &&
+    _iterableEquality.equals(label, obj.label);
+}
+
+
+class ReferenceLink extends Link {
+  String reference;
+
+  ReferenceLink(this.reference, Inlines label, Target target) : super(label, target);
+
+  String toString() => 'ReferenceLink[$reference] $label ($target)';
+
+  bool operator== (obj) => obj is ReferenceLink &&
+    reference == obj.reference &&
+    target == obj.target &&
+    _iterableEquality.equals(label, obj.label);
+}
+
+
+class Autolink extends Link {
+  Autolink(String link) : super(new Inlines.from([new Str(link)]), new Target(link, null));
+
+  String toString() => 'Autolink (${target.link})';
+
+  bool operator== (obj) => obj is Autolink &&
+    target == obj.target;
 }

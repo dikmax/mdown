@@ -83,6 +83,8 @@ String writeInlines(Iterable<Inline> inlines) {
       return writeEmph(inline);
     } else if (inline is Strong) {
       return writeStrong(inline);
+    } else if (inline is Link) {
+      return writeLink(inline);
     } else if (inline is Code) {
       return writeCodeInline(inline);
     }
@@ -101,4 +103,10 @@ String writeEmph(Emph emph) {
 
 String writeStrong(Strong strong) {
   return '<strong>${writeInlines(strong.contents)}</strong>';
+}
+
+String writeLink(Link link) {
+  return '<a href="${link.target.link}"' +
+    (link.target.title != null ? ' title="${htmlEscape(link.target.title)}"' : '') +
+    ">${writeInlines(link.label)}</a>";
 }

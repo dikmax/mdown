@@ -296,6 +296,28 @@ class CommonMarkParser {
   Parser get htmlDeclaration => (string('<!') + upper.many1 + spaceOrNL.many1 + anyChar.manyUntil(char('>'))).list.record;
   Parser get htmlCompleteCDATA => (string('<![CDATA[') > anyChar.manyUntil(string(']]>'))).record;
 
+
+  //
+  // Links aux parsers
+  //
+
+  Parser get linkLabel => (char('[') > choice([whitespace, htmlEntity, inlineCode, str]).manyUntil(char(']')).record) ^
+      (String label) => label.substring(0, label.length - 1);
+
+  // TODO proper parentheses ()
+  Parser linkDestination = (
+      ((char("<") > noneOf("<>\n").many1) < char(">")) |
+      noneOf("\t\n ()").many1
+  ) ^ (i) => i.join();
+
+  // TODO support escaping
+  Parser linkTitle = (
+      ((char("'") > noneOf("'\n")) < char("'")) |
+      ((char('"') > noneOf('"\n')) < char('"')) |
+      ((char('(') > noneOf(')\n')) < char(')'))
+  ) ^ (i) => i.join();
+
+
   //
   // Inlines
   //
@@ -531,10 +553,40 @@ class CommonMarkParser {
   });
 
   //
+  // link
+  //
+
+  // TODO support for html and autolinks
+
+  Parser get linkInline => (char('(') >
+    ((
+        ((whitespace.maybe > linkDestination) < whitespace.maybe) +
+        ((whitespace > linkTitle) < whitespace.maybe).maybe
+    ) ^ (a, Option b) => new Target(a, b.asNullable))
+  ) < char(')');
+
+  Parser<List<Inline>> get link => new Parser((String s, Position pos) {
+    ParseResult testRes = char('[').run(s, pos);
+    if (!testRes.isSuccess) {
+      return testRes;
+    }
+    ParseResult labelRes = linkLabel.run(s, pos);
+    if (!labelRes.isSuccess) {
+      return labelRes;
+    }
+    ParseResult destRes = linkInline.run(s, labelRes.position);
+    print(destRes);
+    if (destRes.isSuccess) {
+      return destRes.copy(value: [new InlineLink(inlines.parse(labelRes.value), destRes.value)]);
+    }
+    return fail.run(s, pos);
+  });
+
+  //
   // str
   //
 
-  static final String _strSpecialChars = " \n*_`![<\\";
+  static final String _strSpecialChars = " \n*_`![]<\\";
   static final Parser str = (noneOf(_strSpecialChars).many1 ^ (chars) => [new Str(chars.join())]) |
     (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]);
 
@@ -544,6 +596,7 @@ class CommonMarkParser {
       htmlEntity,
       inlineCode,
       emphasis,
+      link,
       str
   ]);
 
@@ -808,23 +861,7 @@ class CommonMarkParser {
   // Link reference
   //
 
-  // TODO complete inlines parser for label
-  Parser get linkLabel => ((char("[") > noneOf("]\n").many1) < string("]:")) ^ (i) => i.join();
-
-  // TODO proper parentheses ()
-  Parser get linkDestination => (
-    ((char("<") > noneOf("<>\n").many1) < char(">")) |
-    noneOf("\t\n ()").many1
-  ) ^ (i) => i.join();
-
-  // TODO support escaping
-  Parser get linkTitle => (
-      ((char("'") > noneOf("'\n")) < char("'")) |
-      ((char('"') > noneOf('"\n')) < char('"')) |
-      ((char('(') > noneOf(')\n')) < char(')'))
-  ) ^ (i) => i.join();
-
-  Parser get linkReference => (((skipNonindentSpaces > linkLabel) +
+  Parser get linkReference => ((((skipNonindentSpaces > linkLabel) < char(':')) +
     ((blankline.maybe > skipSpaces) > linkDestination) +
     ((blankline.maybe > skipSpaces) > linkTitle).maybe) ^
       (String label, String link, Option<String> title) =>
