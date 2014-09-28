@@ -507,3 +507,36 @@ class Autolink extends Link {
   bool operator== (obj) => obj is Autolink &&
     target == obj.target;
 }
+
+
+abstract class Image extends Inline {
+  Inlines label;
+  Target target;
+
+  Image(this.label, this.target);
+}
+
+
+class InlineImage extends Image {
+  InlineImage(Inlines label, Target target) : super(label, target);
+
+  String toString() => 'InlineImage $label ($target)';
+
+  bool operator== (obj) => obj is InlineImage &&
+    target == obj.target &&
+    _iterableEquality.equals(label, obj.label);
+}
+
+
+class ReferenceImage extends Image {
+  String reference;
+
+  ReferenceImage(this.reference, Inlines label, Target target) : super(label, target);
+
+  String toString() => 'ReferenceImage[$reference] $label ($target)';
+
+  bool operator== (obj) => obj is ReferenceImage &&
+    reference == obj.reference &&
+    target == obj.target &&
+    _iterableEquality.equals(label, obj.label);
+}

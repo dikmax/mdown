@@ -563,7 +563,7 @@ class CommonMarkParser {
   });
 
   //
-  // link
+  // link and image
   //
 
   // TODO support for html and autolinks
@@ -607,6 +607,16 @@ class CommonMarkParser {
     return fail.run(s, pos);
   });
 
+  Parser<List<Inline>> get image => (char('!') > link) ^ (link) {
+    // Transforming link to image
+    if (link[0] is InlineLink) {
+      return [new InlineImage(link[0].label, link[0].target)];
+    } else if (link[0] is ReferenceLink) {
+      return [new ReferenceImage(link[0].reference, link[0].label, link[0].target)];
+    }
+    return link;
+  };
+
   //
   // str
   //
@@ -622,6 +632,7 @@ class CommonMarkParser {
       inlineCode,
       emphasis,
       link,
+      image,
       str
   ]);
 

@@ -85,6 +85,8 @@ String writeInlines(Iterable<Inline> inlines) {
       return writeStrong(inline);
     } else if (inline is Link) {
       return writeLink(inline);
+    } else if (inline is Image) {
+      return writeImage(inline);
     } else if (inline is Code) {
       return writeCodeInline(inline);
     }
@@ -109,4 +111,10 @@ String writeLink(Link link) {
   return '<a href="${link.target.link}"' +
     (link.target.title != null ? ' title="${htmlEscape(link.target.title)}"' : '') +
     ">${writeInlines(link.label)}</a>";
+}
+
+String writeImage(Image image) {
+  return '<img src="${image.target.link}" alt="${htmlEscape(writeInlines(image.label))}"' +
+  (image.target.title != null ? ' title="${htmlEscape(image.target.title)}"' : '') +
+  " />";
 }
