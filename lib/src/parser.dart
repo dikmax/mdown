@@ -316,16 +316,16 @@ class CommonMarkParser {
       (String label) => label.substring(0, label.length - 1);
 
   // TODO proper parentheses ()
-  Parser linkDestination = (
+  Parser get linkDestination => (
       ((char("<") > noneOf("<>\n").many1) < char(">")) |
-      noneOf("\t\n ").many1
+      (noneOf("\\\n ") | escapedChar1 | char('\\')).many1
   ) ^ (i) => i.join();
 
   // TODO support escaping
-  Parser linkTitle = (
-      ((char("'") > noneOf("'\n").many) < char("'")) |
-      ((char('"') > noneOf('"\n').many) < char('"')) |
-      ((char('(') > noneOf(')\n').many) < char(')'))
+  Parser get linkTitle => (
+      ((char("'") > (noneOf("'\\\n") | escapedChar1 | char('\\')).many) < char("'")) |
+      ((char('"') > (noneOf('"\\\n') | escapedChar1 | char('\\')).many) < char('"')) |
+      ((char('(') > (noneOf(')\\\n') | escapedChar1 | char('\\')).many) < char(')'))
   ) ^ (i) => i.join();
 
 
@@ -340,7 +340,8 @@ class CommonMarkParser {
   static final Parser whitespace = (spaceChar < skipSpaces) ^ (_) => [new Space()];
 
   // TODO better escaped chars support
-  Parser get escapedChar => (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~")) ^ (char) => [new Str(char)];
+  Parser escapedChar1 = (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~"));
+  Parser get escapedChar => escapedChar1 ^ (char) => [new Str(char)];
 
   //
   // html entities
@@ -569,11 +570,10 @@ class CommonMarkParser {
 
   // TODO support for html and autolinks
 
-  Parser get linkInline => (char('(') >
-    ((
-        ((whitespace.maybe > linkDestination) < whitespace.maybe) +
-        ((whitespace > linkTitle) < whitespace.maybe).maybe
-    ) ^ (a, Option b) => new Target(a, b.asNullable))
+  Parser get linkInline => (char('(') > (
+      (
+          (whitespace.maybe > linkDestination) + ((whitespace > linkTitle).maybe < whitespace.maybe)
+      ) ^ (a, Option b) => new Target(a, b.asNullable))
   ) < char(')');
 
   Parser<List<Inline>> get link => new Parser((String s, Position pos) {
