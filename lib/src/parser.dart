@@ -986,6 +986,7 @@ class CommonMarkParser {
       | hrule
       | atxHeader
       | codeBlockFenced
+      | rawHtml
       | (skipNonindentSpaces > (
         char('>')
         | (oneOf('+-*') > char(' '))));
