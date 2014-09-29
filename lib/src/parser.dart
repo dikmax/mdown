@@ -293,12 +293,10 @@ class CommonMarkParser {
     }
     return fail.run(s, pos);
   });
-  Parser htmlOpenTag = ((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>');
-  Parser get htmlBlockOpenTag => htmlBlockTag(htmlOpenTag);
-  Parser get htmlInlineOpenTag => htmlOpenTag.record;
-  Parser htmlCloseTag = ((string("</") > alphanum.many1) < spaceOrNL.many) < char('>');
-  Parser get htmlBlockCloseTag => htmlBlockTag(htmlCloseTag);
-  Parser get htmlInlineCloseTag => htmlCloseTag.record;
+  Parser get htmlBlockOpenTag => htmlBlockTag((char("<") > alphanum.many1));
+  Parser get htmlInlineOpenTag => (((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
+  Parser get htmlBlockCloseTag => htmlBlockTag((string("</") > alphanum.many1));
+  Parser get htmlInlineCloseTag => ((string("</") > alphanum.many1) < spaceOrNL.many) < char('>').record;
 
   Parser get htmlCompleteComment => (string('<!--') > anyChar.manyUntil(string('-->'))).record;
   Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
@@ -953,12 +951,9 @@ class CommonMarkParser {
     // TODO add support for partial html comments, pi and CDATA.
 
     ParseResult tagRes = (htmlBlockOpenTag
-      | htmlBlockCloseTag
-      | htmlCompleteComment
-      | htmlCompletePI
-      | htmlDeclaration
-      | htmlCompleteCDATA).run(content);
+      | htmlBlockCloseTag).run(content);
     if (!tagRes.isSuccess) {
+      if ("<!".matchAsPrefix(content) == null && "<?".matchAsPrefix(content) == null)
       return fail.run(s, pos);
     }
 

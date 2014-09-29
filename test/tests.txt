@@ -68,3 +68,25 @@ b
 </ul></li>
 </ul>
 .
+
+Partial raw Html blocks tests
+
+.
+<!--
+
+*a*
+.
+<!--
+
+<p><em>a</em></p>
+.
+
+.
+<?php
+
+*a*
+.
+<?php
+
+<p><em>a</em></p>
+.
