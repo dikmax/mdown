@@ -979,13 +979,11 @@ class CommonMarkParser {
   // Paragraph
   //
 
-  // TODO paragraph could be ended by other block types
   Parser get para => new Parser((String s, Position pos) {
-    // TODO replace codeBlockFenced with starting fence test
     Parser end = blankline
       | hrule
       | atxHeader
-      | codeBlockFenced
+      | openFence
       | rawHtml
       | (skipNonindentSpaces > (
         char('>')
