@@ -296,7 +296,7 @@ class CommonMarkParser {
   Parser get htmlBlockOpenTag => htmlBlockTag((char("<") > alphanum.many1));
   Parser get htmlInlineOpenTag => (((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
   Parser get htmlBlockCloseTag => htmlBlockTag((string("</") > alphanum.many1));
-  Parser get htmlInlineCloseTag => ((string("</") > alphanum.many1) < spaceOrNL.many) < char('>').record;
+  Parser get htmlInlineCloseTag => (((string("</") > alphanum.many1) < spaceOrNL.many) < char('>')).record;
 
   Parser get htmlCompleteComment => (string('<!--') > anyChar.manyUntil(string('-->'))).record;
   Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
