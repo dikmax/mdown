@@ -56,7 +56,11 @@ class CommonMarkParser {
 
     _references = {};
 
-    var doc = document.parse(preprocess(s) + "\n\n"); // TODO maybe remove these two newlines at the end.
+    s = preprocess(s);
+    if (!s.endsWith("\n")) {
+      s += "\n";
+    }
+    var doc = document.parse(s);
 
     _inlinesInDocument(doc);
     return doc;
@@ -865,11 +869,7 @@ class CommonMarkParser {
     Parser restParser = (lineParser.manyUntil(endFenceParser) ^
         (lines) => [new FencedCodeBlock(lines.map((i) => i + '\n').join(), fenceType, fenceSize, new InfoString(infoString))])
       | (lineParser.manyUntil(eof) ^ (List lines) {
-        // If fenced code block is ended by eof trim last two new lines;
-        if (lines.length > 0 && lines.last == "") {
-          lines.removeLast();
-        }
-        return [new FencedCodeBlock(lines.join('\n'), fenceType, fenceSize, new InfoString(infoString))];
+        return [new FencedCodeBlock(lines.map((l) => l + '\n').join(), fenceType, fenceSize, new InfoString(infoString))];
       });
 
     return restParser.run(s, openFenceRes.position);
@@ -938,7 +938,7 @@ class CommonMarkParser {
 
     int firstLineIndent = testRes.value;
 
-    Parser contentParser = anyLine.manyUntil(blankline);
+    Parser contentParser = anyLine.manyUntil(blankline | eof);
     ParseResult contentRes = contentParser.run(s, testRes.position);
     if (!contentRes.isSuccess) {
       return contentRes;
@@ -947,8 +947,6 @@ class CommonMarkParser {
       return fail.run(s, pos);
     }
     String content = "<" + contentRes.value.join('\n');
-
-    // TODO add support for partial html comments, pi and CDATA.
 
     ParseResult tagRes = (htmlBlockOpenTag
       | htmlBlockCloseTag).run(content);
