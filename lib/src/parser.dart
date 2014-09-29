@@ -308,13 +308,13 @@ class CommonMarkParser {
   // Links aux parsers
   //
 
-  Parser get linkLabel => (char('[') > choice([whitespace, htmlEntity, inlineCode, str]).manyUntil(char(']')).record) ^
+  Parser get linkLabel => (char('[') > choice([whitespace, htmlEntity, inlineCode, escapedChar, str]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   // TODO proper parentheses ()
   Parser linkDestination = (
       ((char("<") > noneOf("<>\n").many1) < char(">")) |
-      noneOf("\t\n ()").many1
+      noneOf("\t\n ").many1
   ) ^ (i) => i.join();
 
   // TODO support escaping
