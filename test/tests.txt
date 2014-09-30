@@ -90,3 +90,11 @@ Partial raw Html blocks tests
 
 <p><em>a</em></p>
 .
+
+Links
+
+.
+[foo](</f&ouml;&ouml;> "f&ouml;&ouml;")
+.
+<p><a href="/f&ouml;&ouml;" title="föö">foo</a></p>
+.
