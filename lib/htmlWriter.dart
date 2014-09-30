@@ -109,14 +109,19 @@ String writeStrong(Strong strong) {
   return '<strong>${writeInlines(strong.contents)}</strong>';
 }
 
+RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
+String urlEncode(String url) {
+  return url.splitMapJoin(_urlEncode, onMatch: (Match m) => m.group(0), onNonMatch: (String s) => Uri.encodeFull(s));
+}
+
 String writeLink(Link link) {
-  return '<a href="${Uri.encodeFull(link.target.link)}"' +
+  return '<a href="${urlEncode(link.target.link)}"' +
     (link.target.title != null ? ' title="${htmlEscape(link.target.title)}"' : '') +
     ">${writeInlines(link.label)}</a>";
 }
 
 String writeImage(Image image) {
-  return '<img src="${Uri.encodeFull(image.target.link)}" alt="${htmlEscape(writeInlines(image.label))}"' +
+  return '<img src="${urlEncode(image.target.link)}" alt="${htmlEscape(writeInlines(image.label))}"' +
   (image.target.title != null ? ' title="${htmlEscape(image.target.title)}"' : '') +
   " />";
 }
