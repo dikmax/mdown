@@ -315,10 +315,17 @@ class CommonMarkParser {
   Parser get linkLabel => (char('[') > choice([whitespace, htmlEntity, inlineCode, escapedChar, str]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
-  // TODO proper parentheses ()
-  Parser get linkDestination => (
+  Parser get linkBalancedParenthesis => ((char("(") > (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1) <
+    char(')')) ^ (i) => "(${i.join()})";
+
+  Parser get linkInlineDestination => (
+      ((char("<") > noneOf("<>\n").many) < char(">")) | // TODO check escaped and entities
+      (noneOf("&\\\n ()") | escapedChar1 | htmlEntity1 | linkBalancedParenthesis | oneOf('&\\')).many
+  ) ^ (i) => i.join();
+
+  Parser get linkBlockDestination => (
       ((char("<") > noneOf("<>\n").many1) < char(">")) | // TODO check escaped and entities
-      (noneOf("&\\\n )") | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1
+      (noneOf("&\\\n ()") | escapedChar1 | htmlEntity1 | linkBalancedParenthesis | oneOf('&\\')).many1
   ) ^ (i) => i.join();
 
   Parser get linkTitle => (
@@ -572,7 +579,7 @@ class CommonMarkParser {
 
   Parser get linkInline => (char('(') > (
       (
-          (whitespace.maybe > linkDestination) + ((whitespace > linkTitle).maybe < whitespace.maybe)
+          (whitespace.maybe > linkInlineDestination) + ((whitespace > linkTitle).maybe < whitespace.maybe)
       ) ^ (a, Option b) => new Target(a, b.asNullable))
   ) < char(')');
 
@@ -964,7 +971,7 @@ class CommonMarkParser {
   //
 
   Parser get linkReference => ((((skipNonindentSpaces > linkLabel) < char(':')) +
-    ((blankline.maybe > skipSpaces) > linkDestination) +
+    ((blankline.maybe > skipSpaces) > linkBlockDestination) +
     ((blankline.maybe > skipSpaces) > linkTitle).maybe) ^
       (String label, String link, Option<String> title) =>
         new _LinkReference(label, new Target(link, title.isDefined ? title.value : null))) < blankline;
