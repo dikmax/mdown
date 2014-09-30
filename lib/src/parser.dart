@@ -317,14 +317,14 @@ class CommonMarkParser {
 
   // TODO proper parentheses ()
   Parser get linkDestination => (
-      ((char("<") > noneOf("<>\n").many1) < char(">")) |
-      (noneOf("\\\n ") | escapedChar1 | char('\\')).many1
+      ((char("<") > noneOf("<>\n").many1) < char(">")) | // TODO check escaped and entities
+      (noneOf("&\\\n )") | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1
   ) ^ (i) => i.join();
 
   Parser get linkTitle => (
-      ((char("'") > (noneOf("'\\\n") | escapedChar1 | char('\\')).many) < char("'")) |
-      ((char('"') > (noneOf('"\\\n') | escapedChar1 | char('\\')).many) < char('"')) |
-      ((char('(') > (noneOf(')\\\n') | escapedChar1 | char('\\')).many) < char(')'))
+      ((char("'") > (noneOf("'&\\\n") | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char("'")) |
+      ((char('"') > (noneOf('"&\\\n') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char('"')) |
+      ((char('(') > (noneOf(')&\\\n') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char(')'))
   ) ^ (i) => i.join();
 
 
@@ -339,7 +339,7 @@ class CommonMarkParser {
   static final Parser whitespace = (spaceChar < skipSpaces) ^ (_) => [new Space()];
 
   // TODO better escaped chars support
-  Parser escapedChar1 = (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~"));
+  Parser escapedChar1 = (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~")) % "escaped char";
   Parser get escapedChar => escapedChar1 ^ (char) => [new Str(char)];
 
   //
@@ -348,11 +348,11 @@ class CommonMarkParser {
 
   static RegExp decimalEntity = new RegExp(r'^#(\d{1,8})$');
   static RegExp hexadecimalEntity = new RegExp(r'^#[xX]([0-9a-fA-F]{1,8})$');
-  Parser get htmlEntity => ((char('&') >
+  Parser<String> get htmlEntity1 => (((char('&') >
       ((char('#').maybe + alphanum.many1) ^ (Option a, b) => (a.isDefined ? '#' : '') + b.join()) ) <
       char(';')) ^ (entity) {
     if (htmlEntities.containsKey(entity)) {
-      return new Str(htmlEntities[entity]);
+      return htmlEntities[entity];
     }
 
     int code;
@@ -371,11 +371,12 @@ class CommonMarkParser {
       if (code > 1114111) {
         code = 0xFFFD;
       }
-      return new Str(new String.fromCharCode(code));
+      return new String.fromCharCode(code);
     }
 
-    return new Str('&$entity;');
-  };
+    return '&$entity;';
+  }) % "html entity";
+  Parser get htmlEntity => htmlEntity1 ^ (str) => new Str(str);
 
   //
   // inline code
@@ -833,7 +834,7 @@ class CommonMarkParser {
       fenceType = FenceType.TildeFence;
     }
 
-    Parser infoStringParser = ((skipSpaces > (noneOf("\n\\ " + fenceChar) | escapedChar1 | char('\\')).many) <
+    Parser infoStringParser = ((skipSpaces > (noneOf("&\n\\ " + fenceChar) | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) <
       noneOf("\n" + fenceChar).many) < newline;
     Parser topFenceParser = (char(fenceChar).many + infoStringParser).list;
     ParseResult topFenceRes = topFenceParser.run(s, fenceStartRes.position);
