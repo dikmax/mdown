@@ -321,7 +321,6 @@ class CommonMarkParser {
       (noneOf("\\\n ") | escapedChar1 | char('\\')).many1
   ) ^ (i) => i.join();
 
-  // TODO support escaping
   Parser get linkTitle => (
       ((char("'") > (noneOf("'\\\n") | escapedChar1 | char('\\')).many) < char("'")) |
       ((char('"') > (noneOf('"\\\n') | escapedChar1 | char('\\')).many) < char('"')) |
@@ -834,7 +833,8 @@ class CommonMarkParser {
       fenceType = FenceType.TildeFence;
     }
 
-    Parser infoStringParser = ((skipSpaces > noneOf("\n " + fenceChar).many) < noneOf("\n" + fenceChar).many) < newline;
+    Parser infoStringParser = ((skipSpaces > (noneOf("\n\\ " + fenceChar) | escapedChar1 | char('\\')).many) <
+      noneOf("\n" + fenceChar).many) < newline;
     Parser topFenceParser = (char(fenceChar).many + infoStringParser).list;
     ParseResult topFenceRes = topFenceParser.run(s, fenceStartRes.position);
     if (!topFenceRes.isSuccess) {
