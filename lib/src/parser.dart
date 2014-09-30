@@ -312,7 +312,7 @@ class CommonMarkParser {
   // Links aux parsers
   //
 
-  Parser get linkLabel => (char('[') > choice([whitespace, htmlEntity, inlineCode, escapedChar, str]).manyUntil(char(']')).record) ^
+  Parser get linkLabel => (char('[') > choice([whitespace, htmlEntity, inlineCode, rawInlineHtml, escapedChar, str]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   Parser get linkBalancedParenthesis => ((char("(") > (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1) <
@@ -576,10 +576,10 @@ class CommonMarkParser {
   //
 
   // TODO support for html and autolinks
-
+  Parser linkWhitespace = (blankline > whitespace) | whitespace;
   Parser get linkInline => (char('(') > (
       (
-          (whitespace.maybe > linkInlineDestination) + ((whitespace > linkTitle).maybe < whitespace.maybe)
+          (linkWhitespace.maybe > linkInlineDestination) + ((linkWhitespace > linkTitle).maybe < linkWhitespace.maybe)
       ) ^ (a, Option b) => new Target(a, b.asNullable))
   ) < char(')');
 
@@ -598,7 +598,7 @@ class CommonMarkParser {
       return destRes.copy(value: [new InlineLink(inlines.parse(labelRes.value), destRes.value)]);
     }
     // Try reference link
-    ParseResult refRes = (whitespace.maybe > linkLabel).run(s, labelRes.position);
+    ParseResult refRes = ((blankline | whitespace).maybe > linkLabel).run(s, labelRes.position);
     if (refRes.isSuccess) {
       String reference = refRes.value == "" ? labelRes.value : refRes.value;
       String normalizedReference = _normalizeReference(reference);
