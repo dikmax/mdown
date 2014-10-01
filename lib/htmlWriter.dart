@@ -111,7 +111,7 @@ String writeStrong(Strong strong) {
 
 RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
 String urlEncode(String url) {
-  return url.splitMapJoin(_urlEncode, onMatch: (Match m) => m.group(0), onNonMatch: (String s) => Uri.encodeFull(s));
+  return htmlEscape(url.splitMapJoin(_urlEncode, onMatch: (Match m) => m.group(0), onNonMatch: (String s) => Uri.encodeFull(s)));
 }
 
 String writeLink(Link link) {
