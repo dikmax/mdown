@@ -282,8 +282,8 @@ class CommonMarkParser {
   static Parser htmlAttiributeValue = (spaceOrNL.many + char('=') + spaceOrNL.many +
     (htmlUnquotedAttributeValue | htmlSingleQuotedAttributeValue | htmlDoubleQuotedAttributeValue)).list.record;
   static Parser htmlUnquotedAttributeValue = noneOf(" \t\n\"'=<>`").many1;
-  static Parser htmlSingleQuotedAttributeValue = (char("'") > noneOf("'\n").many) < char("'");
-  static Parser htmlDoubleQuotedAttributeValue = (char('"') > noneOf('"\n').many) < char('"');
+  static Parser htmlSingleQuotedAttributeValue = (char("'") > noneOf("'").many) < char("'");
+  static Parser htmlDoubleQuotedAttributeValue = (char('"') > noneOf('"').many) < char('"');
 
   static Parser get htmlAttribute => (spaceOrNL.many1 + htmlAttributeName + htmlAttiributeValue.maybe).list.record;
   static Parser htmlBlockTag(Parser p) => new Parser((String s, Position pos) {
