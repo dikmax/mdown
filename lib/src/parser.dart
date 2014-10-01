@@ -303,7 +303,19 @@ class CommonMarkParser {
   Parser get htmlBlockCloseTag => htmlBlockTag((string("</") > alphanum.many1));
   Parser get htmlInlineCloseTag => (((string("</") > ((letter + alphanum.many).list)) < spaceOrNL.many) < char('>')).record;
 
-  Parser get htmlCompleteComment => (string('<!--') > anyChar.manyUntil(string('-->'))).record;
+  Parser _htmlCompleteComment = (string('<!--') > anyChar.manyUntil(string('--'))).record;
+  Parser get htmlCompleteComment => new Parser((String s, Position pos) {
+    ParseResult res = _htmlCompleteComment.run(s, pos);
+    if (!res.isSuccess) {
+      return res;
+    }
+
+    ParseResult res2 = char('>').run(s, res.position);
+    if (res2.isSuccess) {
+      return res2.copy(value: res.value + '>');
+    }
+    return res2;
+  });
   Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
   Parser get htmlDeclaration => (string('<!') + upper.many1 + spaceOrNL.many1 + anyChar.manyUntil(char('>'))).list.record;
   Parser get htmlCompleteCDATA => (string('<![CDATA[') > anyChar.manyUntil(string(']]>'))).record;
