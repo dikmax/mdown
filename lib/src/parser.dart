@@ -298,9 +298,10 @@ class CommonMarkParser {
     return fail.run(s, pos);
   });
   Parser get htmlBlockOpenTag => htmlBlockTag((char("<") > alphanum.many1));
-  Parser get htmlInlineOpenTag => (((((char("<") > alphanum.many1) < htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
+  Parser get htmlInlineOpenTag => (((((char("<") > ((letter + alphanum.many).list)) <
+    htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
   Parser get htmlBlockCloseTag => htmlBlockTag((string("</") > alphanum.many1));
-  Parser get htmlInlineCloseTag => (((string("</") > alphanum.many1) < spaceOrNL.many) < char('>')).record;
+  Parser get htmlInlineCloseTag => (((string("</") > ((letter + alphanum.many).list)) < spaceOrNL.many) < char('>')).record;
 
   Parser get htmlCompleteComment => (string('<!--') > anyChar.manyUntil(string('-->'))).record;
   Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
@@ -697,12 +698,14 @@ class CommonMarkParser {
   // raw html
   //
 
-  Parser get rawInlineHtml => choice([htmlInlineOpenTag,
-    htmlInlineCloseTag,
-    htmlCompleteComment,
-    htmlCompletePI,
-    htmlDeclaration,
-    htmlCompleteCDATA]) ^ (result) => [new HtmlRawInline(result)];
+  Parser get rawInlineHtml => choice([
+      htmlInlineOpenTag,
+      htmlInlineCloseTag,
+      htmlCompleteComment,
+      htmlCompletePI,
+      htmlDeclaration,
+      htmlCompleteCDATA
+  ]) ^ (result) => [new HtmlRawInline(result)];
 
   //
   // Line break
