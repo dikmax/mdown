@@ -312,7 +312,8 @@ class CommonMarkParser {
   // Links aux parsers
   //
 
-  Parser get linkLabel => (char('[') > choice([whitespace, htmlEntity, inlineCode, rawInlineHtml, escapedChar, str]).manyUntil(char(']')).record) ^
+  Parser get linkLabel => (char('[') >
+      choice([whitespace, htmlEntity, inlineCode, rawInlineHtml, escapedChar, str]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   Parser get linkBalancedParenthesis => ((char("(") > (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1) <
@@ -394,7 +395,7 @@ class CommonMarkParser {
   }
 
   static Parser _inlineCode1 = char('`').many1;
-  static Parser _inlineCode2 = noneOf('`').many1;
+  static Parser _inlineCode2 = noneOf('\n`').many;
 
   Parser<List<Inline>> get inlineCode => new Parser((String s, Position pos) {
     ParseResult openRes = _inlineCode1.run(s, pos);
@@ -416,6 +417,19 @@ class CommonMarkParser {
       }
       str.write(res.value.join());
       position = res.position;
+
+      // Checking for paragraph end
+      ParseResult blankRes = char('\n').run(s, position);
+      if (blankRes.isSuccess) {
+        str.write('\n');
+        position = blankRes.position;
+        ParseResult blankRes2 = blankline.run(s, position);
+        if (blankRes2.isSuccess) { // second \n - closing block
+          return fail.run(s, pos);
+        }
+        position = blankRes.position;
+        continue;
+      }
 
       res = _inlineCode1.run(s, position);
       if (!res.isSuccess) {
