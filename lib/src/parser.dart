@@ -129,7 +129,7 @@ class CommonMarkParser {
   }
 
   Inlines _parseInlines(String raw) {
-    return inlines.parse(raw);
+    return inlines().parse(raw);
   }
 
   //
@@ -313,7 +313,7 @@ class CommonMarkParser {
   //
 
   Parser get linkLabel => (char('[') >
-      choice([whitespace, htmlEntity, inlineCode, rawInlineHtml, escapedChar, str]).manyUntil(char(']')).record) ^
+      choice([whitespace, htmlEntity, inlineCode, rawInlineHtml, escapedChar, rec(() => linkLabel), str]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   Parser get linkBalancedParenthesis => ((char("(") > (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1) <
@@ -496,7 +496,7 @@ class CommonMarkParser {
           if (res.isSuccess && res.value[2]) {
             return res.copy(position: position.addChar("*"), value: [new Emph(result)]);
           }
-          res = inline.run(s, position);
+          res = inline().run(s, position);
           if (!res.isSuccess) {
             result.insert(0, new Str(char * numDelims));
             return success(result).run(s, position);
@@ -512,7 +512,7 @@ class CommonMarkParser {
           if (res.isSuccess && res.value[0] >= 2 && res.value[2]) {
             return res.copy(position: position.addChar(char).addChar(char), value: [new Strong(result)]);
           }
-          res = inline.run(s, position);
+          res = inline().run(s, position);
           if (!res.isSuccess) {
             result.insert(0, new Str(char * numDelims));
             return success(result).run(s, position);
@@ -564,7 +564,7 @@ class CommonMarkParser {
             }
             continue;
           }
-          res = inline.run(s, position);
+          res = inline().run(s, position);
           if (!res.isSuccess) {
             List<Inlines> ret = [new Str(char * 3)];
             if (leftToClose < 3) {
@@ -609,7 +609,8 @@ class CommonMarkParser {
     // Try inline link
     ParseResult destRes = linkInline.run(s, labelRes.position);
     if (destRes.isSuccess) {
-      return destRes.copy(value: [new InlineLink(inlines.parse(labelRes.value), destRes.value)]);
+      // Links inside link content are not allowed
+      return destRes.copy(value: [new InlineLink(inlines(noLinks: true).parse(labelRes.value), destRes.value)]);
     }
     // Try reference link
     ParseResult refRes = ((blankline | whitespace).maybe > linkLabel).run(s, labelRes.position);
@@ -617,12 +618,12 @@ class CommonMarkParser {
       String reference = refRes.value == "" ? labelRes.value : refRes.value;
       String normalizedReference = _normalizeReference(reference);
       if (_references.containsKey(normalizedReference)) {
-        return refRes.copy(value: [new ReferenceLink(reference, inlines.parse(labelRes.value), _references[normalizedReference])]);
+        return refRes.copy(value: [new ReferenceLink(reference, inlines(noLinks: true).parse(labelRes.value), _references[normalizedReference])]);
       }
     } else {
       String normalizedReference = _normalizeReference(labelRes.value);
       if (_references.containsKey(normalizedReference)) {
-        return labelRes.copy(value: [new ReferenceLink(labelRes.value, inlines.parse(labelRes.value), _references[normalizedReference])]);
+        return labelRes.copy(value: [new ReferenceLink(labelRes.value, inlines(noLinks: true).parse(labelRes.value), _references[normalizedReference])]);
       }
     }
 
@@ -717,21 +718,21 @@ class CommonMarkParser {
   static final Parser str = (noneOf(_strSpecialChars).many1 ^ (chars) => [new Str(chars.join())]) |
     (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]);
 
-  Parser<List<Inline>> get inline => choice([
+  Parser<List<Inline>> inline({bool noLinks: false}) => choice([
       lineBreak,
       whitespace,
       escapedChar,
       htmlEntity,
       inlineCode,
       emphasis,
-      link,
+      noLinks ? fail : link,
       image,
       autolink,
       rawInlineHtml,
       str
   ]);
 
-  Parser<Inlines> get inlines => inline.manyUntil(eof) ^ (res) => processParsedInlines(res);
+  Parser<Inlines> inlines({bool noLinks: false}) => inline(noLinks: noLinks).manyUntil(eof) ^ (res) => processParsedInlines(res);
 
   //
   // Blocks
