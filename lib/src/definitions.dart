@@ -1,4 +1,7 @@
-part of markdown;
+library md_proc.definitions;
+
+import 'dart:collection';
+import 'package:collection/collection.dart';
 
 // Class system is inspired by Pandoc
 

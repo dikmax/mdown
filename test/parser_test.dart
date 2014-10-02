@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:unittest/unittest.dart' as t;
-import 'package:markdowntypography/markdown.dart';
+import 'package:md_proc/markdown.dart';
 import 'package:parsers/parsers.dart';
-import 'package:markdowntypography/builder.dart' as B;
-import 'package:markdowntypography/htmlWriter.dart' as HW;
 
 const int STATE_WAIT = 0;
 const int STATE_MARKDOWN = 1;
@@ -41,10 +39,11 @@ void fileTest(name, fileName) {
 }
 
 void main() {
-  // My tests
-  fileTest("My", "tests.txt");
   // CommonMark tests
-  fileTest("stmd", "stmd/spec.txt");
+  fileTest("CommonMark", "spec.txt");
+  // Additional tests
+  fileTest("Additional", "tests.txt");
+
 }
 
 class ExampleDescription extends t.Matcher {
@@ -67,6 +66,7 @@ class ExampleDescription extends t.Matcher {
 
 
 final commonMarkParser = CommonMarkParser.DEFAULT;
+final htmlWriter = HtmlWriter.DEFAULT;
 RegExp leadingSpacesRegExp = new RegExp(r'^ *');
 RegExp trailingSpacesRegExp = new RegExp(r' *$');
 RegExp consecutiveSpacesRegExp = new RegExp(r' +');
@@ -108,7 +108,7 @@ void testCommonMarkdown(int num, String mdOrig, String html) {
 
   t.test(num.toString(), () {
     Document doc = commonMarkParser.parse(md);
-    String result = HW.write(doc);
-    t.expect(tidy(HW.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
+    String result = htmlWriter.write(doc);
+    t.expect(tidy(htmlWriter.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
   });
 }

@@ -1,4 +1,4 @@
-part of markdown;
+library md_proc.entities;
 
 Map<String, String> htmlEntities = <String, String>{
   "Aacute": "Á",

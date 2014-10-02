@@ -7,7 +7,7 @@ void main() {
     .then((HttpClientRequest request) => request.close())
     .then((HttpClientResponse response) {
       response.transform(UTF8.decoder).transform(JSON.decoder).first.then((json) {
-        print("part of markdown;\n");
+        print("library md_proc.entities;\n");
         print("Map<String, String> htmlEntities = <String, String>{");
         json.forEach((String k, v) {
           Match match = r.firstMatch(k);

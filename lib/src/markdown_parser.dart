@@ -1,4 +1,11 @@
-part of markdown;
+library md_proc.markdown_parser;
+
+import 'package:parsers/parsers.dart';
+import 'package:persistent/persistent.dart';
+
+import 'definitions.dart';
+import 'entities.dart';
+
 
 class _UnparsedInlines extends Inlines {
   String raw;
@@ -567,7 +574,7 @@ class CommonMarkParser {
               }
             } else {
               // We should return unparsed result
-              List<Inlines> ret = [new Str(char * 3)];
+              List<Inline> ret = [new Str(char * 3)];
               ret.addAll(innerRes);
               ret.add(new Str(char * (3 - leftToClose)));
               result.removeAt(0);
@@ -579,7 +586,7 @@ class CommonMarkParser {
           }
           res = inline().run(s, position);
           if (!res.isSuccess) {
-            List<Inlines> ret = [new Str(char * 3)];
+            List<Inline> ret = [new Str(char * 3)];
             if (leftToClose < 3) {
               ret.addAll(innerRes);
               ret.add(new Str(char * (3 - leftToClose)));
