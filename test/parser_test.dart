@@ -1,9 +1,7 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:unittest/unittest.dart' as t;
 import 'package:md_proc/md_proc.dart';
-import 'package:parsers/parsers.dart';
+import 'package:md_proc/src/markdown_writer.dart';
 
 const int STATE_WAIT = 0;
 const int STATE_MARKDOWN = 1;
@@ -24,7 +22,7 @@ void fileTest(name, fileName) {
         state++;
         if (state == 3) {
           ++testNo;
-          testCommonMarkdown(testNo, markdown.join('\n') + "\n", html.join('\n') + "\n");
+          doTest(testNo, markdown.join('\n') + "\n", html.join('\n') + "\n");
           state = STATE_WAIT;
           html = [];
           markdown = [];
@@ -67,6 +65,7 @@ class ExampleDescription extends t.Matcher {
 
 final commonMarkParser = CommonMarkParser.DEFAULT;
 final htmlWriter = HtmlWriter.DEFAULT;
+final markdownWriter = MarkdownWriter.DEFAULT;
 RegExp leadingSpacesRegExp = new RegExp(r'^ *');
 RegExp trailingSpacesRegExp = new RegExp(r' *$');
 RegExp consecutiveSpacesRegExp = new RegExp(r' +');
@@ -102,12 +101,19 @@ String tidy(String html) {
 
   return result.join('\n').trim();
 }
-void testCommonMarkdown(int num, String mdOrig, String html) {
+
+void doTest(int num, String mdOrig, String html) {
   String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
   html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-  t.test(num.toString(), () {
+
+  t.test('html $num', () {
     Document doc = commonMarkParser.parse(md);
+    String result = htmlWriter.write(doc);
+    t.expect(tidy(htmlWriter.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
+  });
+  t.test('markdown $num', () {
+    Document doc = commonMarkParser.parse(markdownWriter.write(commonMarkParser.parse(md)));
     String result = htmlWriter.write(doc);
     t.expect(tidy(htmlWriter.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
   });
