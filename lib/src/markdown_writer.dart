@@ -13,7 +13,7 @@ class MarkdownWriter {
     } else if (block is Header) {
       return writeHeader(block);
     } else if (block is HorizontalRule) {
-      return '<hr/>';
+      return writeHorizontalRule(block);
     } else if (block is CodeBlock) {
       return writeCodeBlock(block);
     } else if (block is Blockquote) {
@@ -27,7 +27,11 @@ class MarkdownWriter {
     }
 
     throw new UnimplementedError(block.toString());
-  }).join();
+  }).join("\n\n");
+
+  String writeHorizontalRule(HorizontalRule hRule) {
+    return '-' * 10;
+  }
 
   String writePara(Para para) {
     return writeInlines(para.contents);
@@ -35,8 +39,13 @@ class MarkdownWriter {
 
   String writeBlockquote(Blockquote blockquote) => "> ${writeBlocks(blockquote.contents)}";
 
-  // TODO setext
-  String writeHeader(Header header) => "#" * header.level + " " + writeInlines(header.contents);
+  String writeHeader(Header header) {
+    String inlines = writeInlines(header.contents);
+    if (header is SetextHeader && header.level == 2) {
+      return inlines + "\n" + (header.level == 1 ? '=' : '-') * inlines.length;
+    }
+    return "#" * header.level + " " + inlines;
+  }
 
   String writeCodeBlock(CodeBlock codeBlock) => "```\n" + codeBlock.contents + "```\n";
 

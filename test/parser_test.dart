@@ -63,6 +63,27 @@ class ExampleDescription extends t.Matcher {
 }
 
 
+class Example2Description extends t.Matcher {
+  t.Matcher inner;
+  String example;
+  String example2;
+
+  Example2Description(this.inner, this.example, this.example2);
+
+  bool matches(item, Map matchState) => inner.matches(item, matchState);
+
+  t.Description describe(t.Description description) => inner.describe(description);
+
+  t.Description describeMismatch(item, t.Description mismatchDescription,
+                                 Map matchState, bool verbose) {
+    t.Description d = inner.describeMismatch(item, mismatchDescription, matchState, verbose);
+    d.add("\n  Source: \n" + example);
+    d.add("\n  Source 2: \n" + example2);
+    return d;
+  }
+}
+
+
 final commonMarkParser = CommonMarkParser.DEFAULT;
 final htmlWriter = HtmlWriter.DEFAULT;
 final markdownWriter = MarkdownWriter.DEFAULT;
@@ -113,8 +134,9 @@ void doTest(int num, String mdOrig, String html) {
     t.expect(tidy(htmlWriter.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
   });
   t.test('markdown $num', () {
-    Document doc = commonMarkParser.parse(markdownWriter.write(commonMarkParser.parse(md)));
+    var generatedMarkdown = markdownWriter.write(commonMarkParser.parse(md));
+    Document doc = commonMarkParser.parse(generatedMarkdown);
     String result = htmlWriter.write(doc);
-    t.expect(tidy(htmlWriter.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
+    t.expect(tidy(htmlWriter.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
   });
 }
