@@ -1,4 +1,4 @@
-library markdown;
+library md_proc;
 
 import 'src/html_writer.dart';
 import 'src/markdown_parser.dart';
