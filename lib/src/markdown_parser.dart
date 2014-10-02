@@ -56,8 +56,6 @@ class CommonMarkParser {
 
   Map<String, Target> _references;
 
-  Map<String, Target> get references => _references; // TODO remove later
-
   Document parse(String s) {
     // TODO separate preprocess option
 
@@ -340,12 +338,12 @@ class CommonMarkParser {
     char(')')) ^ (i) => "(${i.join()})";
 
   Parser get linkInlineDestination => (
-      ((char("<") > noneOf("<>\n").many) < char(">")) | // TODO check escaped and entities
+      ((char("<") > noneOf("<>\n").many) < char(">")) |
       (noneOf("&\\\n ()") | escapedChar1 | htmlEntity1 | linkBalancedParenthesis | oneOf('&\\')).many
   ) ^ (i) => i.join();
 
   Parser get linkBlockDestination => (
-      ((char("<") > noneOf("<>\n").many1) < char(">")) | // TODO check escaped and entities
+      ((char("<") > noneOf("<>\n").many1) < char(">")) |
       (noneOf("&\\\n ()") | escapedChar1 | htmlEntity1 | linkBalancedParenthesis | oneOf('&\\')).many1
   ) ^ (i) => i.join();
 
@@ -609,7 +607,6 @@ class CommonMarkParser {
   // link and image
   //
 
-  // TODO support for html and autolinks
   Parser linkWhitespace = (blankline > whitespace) | whitespace;
   Parser get linkInline => (char('(') > (
       (
@@ -824,8 +821,6 @@ class CommonMarkParser {
       return textRes;
     }
     String raw = textRes.value.join();
-    // TODO parse inlines
-
     _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
     return textRes.copy(value: [new AtxHeader(level, inlines)]);
   });
@@ -845,8 +840,6 @@ class CommonMarkParser {
 
     String raw = res.value[0];
     int level = res.value[1][0] == '=' ? 1 : 2;
-    // TODO parse inlines
-
     _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
     return res.copy(value: [new SetextHeader(level, inlines)]);
   });
@@ -920,8 +913,6 @@ class CommonMarkParser {
     return restParser.run(s, openFenceRes.position);
   });
 
-  // TODO fenced block in list parser
-
   Parser listCodeBlockFenced(int listIndentValue) => new Parser((String s, Position pos) {
     assert(listIndentValue > 0);
     Parser listIndent = string(" " * listIndentValue);
@@ -938,8 +929,6 @@ class CommonMarkParser {
     if (fenceChar == '~') {
       fenceType = FenceType.TildeFence;
     }
-
-    // TODO
 
     Parser endFenceParser = ((((listIndent > skipSpaces) > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
     Parser lineParser;
@@ -1159,7 +1148,7 @@ class CommonMarkParser {
       List<Block> innerBlocks;
       if (s == "\n" && blocks.length == 0) {
         // Test for empty items
-        blocks = [new Plain(new _UnparsedInlines(""))]; // TODO replace with inlines
+        blocks = [new Plain(new _UnparsedInlines(""))];
         buffer = [];
         return;
       }
