@@ -1,7 +1,6 @@
 library markdown.htmlWriter;
 
 import 'markdown.dart';
-import 'dart:convert';
 
 RegExp _escapedChars = new RegExp(r'[<>&"]');
 Map<String, String> _escape = <String, String>{

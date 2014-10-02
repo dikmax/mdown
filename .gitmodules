@@ -1,3 +1,0 @@
-[submodule "test/stmd"]
-	path = test/stmd
-	url = git@github.com:jgm/stmd.git
