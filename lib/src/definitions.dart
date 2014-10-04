@@ -54,6 +54,8 @@ class InfoString extends Attr {
 }
 
 
+// TODO link type: with or without <>
+// TODO title delimiters ", ' or ()
 class Target {
   String link;
   String title;
@@ -207,14 +209,15 @@ class ListItem {
 
 
 class BulletType {
-  static const BulletType MinusBullet = const BulletType._(0, "MinusBullet");
-  static const BulletType PlusBullet = const BulletType._(1, "PlusBullet");
-  static const BulletType StarBullet = const BulletType._(2, "StarBullet");
+  static const BulletType MinusBullet = const BulletType._(0, "MinusBullet", "-");
+  static const BulletType PlusBullet = const BulletType._(1, "PlusBullet", "+");
+  static const BulletType StarBullet = const BulletType._(2, "StarBullet", "*");
 
   final int value;
   final String name;
+  final String char;
 
-  const BulletType._(this.value, this.name);
+  const BulletType._(this.value, this.name, this.char);
 
   static BulletType fromChar(markerChar) {
     BulletType type;
@@ -247,13 +250,14 @@ class BulletType {
 
 
 class IndexSeparator {
-  static const IndexSeparator DotSeparator = const IndexSeparator._(0, "DotSeparator");
-  static const IndexSeparator ParenthesisSeparator = const IndexSeparator._(1, "ParenthesisSeparator");
+  static const IndexSeparator DotSeparator = const IndexSeparator._(0, "DotSeparator", ".");
+  static const IndexSeparator ParenthesisSeparator = const IndexSeparator._(1, "ParenthesisSeparator", ")");
 
   final int value;
   final String name;
+  final String char;
 
-  const IndexSeparator._(this.value, this.name);
+  const IndexSeparator._(this.value, this.name, this.char);
 
   static IndexSeparator fromChar(String indexSeparator) {
     IndexSeparator separator;

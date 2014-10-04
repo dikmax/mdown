@@ -2,14 +2,20 @@ library md_proc.html_writer;
 
 import 'definitions.dart';
 
+// TODO make all members private
 class MarkdownWriter {
-  String write(Document document) => writeBlocks(document.contents);
+  Map<String, Target> _references;
+  String write(Document document) {
+    _references = <String, Target>{};
+    var blocks = writeBlocks(document.contents) + "\n\n";
+    return blocks + _writeReferences();
+  }
 
   String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
     if (block is Para) {
       return writePara(block);
     } else if (block is Plain) {
-      return writeInlines(block.contents);
+      return writeInlines(block.contents) + "\n";
     } else if (block is Header) {
       return writeHeader(block);
     } else if (block is HorizontalRule) {
@@ -19,7 +25,7 @@ class MarkdownWriter {
     } else if (block is Blockquote) {
       return writeBlockquote(block);
     } else if (block is RawBlock) {
-      return block.contents;
+      return block.contents + "\n";
     } else if (block is UnorderedList) {
       return writeUnorderedList(block);
     } else if (block is OrderedList) {
@@ -27,37 +33,85 @@ class MarkdownWriter {
     }
 
     throw new UnimplementedError(block.toString());
-  }).join("\n\n");
+  }).join("\n");
 
   String writeHorizontalRule(HorizontalRule hRule) {
     return '-' * 10;
   }
 
   String writePara(Para para) {
-    return writeInlines(para.contents);
+    return writeInlines(para.contents) + "\n";
   }
 
-  String writeBlockquote(Blockquote blockquote) => "> ${writeBlocks(blockquote.contents)}";
+  String writeBlockquote(Blockquote blockquote) {
+    String contents = writeBlocks(blockquote.contents);
+    if (contents.endsWith('\n')) {
+      contents = contents.substring(0, contents.length - 1);
+    }
+    return contents.splitMapJoin("\n", onNonMatch: (String str) => "> $str") + "\n";
+  }
 
   String writeHeader(Header header) {
     String inlines = writeInlines(header.contents);
     if (header is SetextHeader && header.level == 2) {
       return inlines + "\n" + (header.level == 1 ? '=' : '-') * inlines.length;
     }
-    return "#" * header.level + " " + inlines;
+    return "#" * header.level + " " + inlines + "\n";
   }
 
   String writeCodeBlock(CodeBlock codeBlock) {
     if (codeBlock is FencedCodeBlock) {
-      return "```\n" + codeBlock.contents + "```\n";
+      String fence = (codeBlock.fenceType == FenceType.BacktickFence ? '`' : '~') * codeBlock.fenceSize;
+      String result = fence;
+      if (codeBlock.attributes is InfoString) {
+        result += ' ${codeBlock.attributes.language}';
+      }
+      result += '\n${codeBlock.contents}${fence}\n';
+      return result;
     }
+    // Indented code block
     return codeBlock.contents.splitMapJoin("\n", onNonMatch: (str) => str == "" ? str : "    " + str);
   }
 
-  String writeListItems(Iterable<ListItem> items) => items.map((ListItem item) =>
-    "* " + writeBlocks(item.contents)).join('\n');
-  String writeUnorderedList(UnorderedList list) => "${writeListItems(list.items)}";
-  String writeOrderedList(OrderedList list) => "${writeListItems(list.items)}";
+  String writeUnorderedList(UnorderedList list) {
+    String result = "";
+    list.items.forEach((ListItem listItem) {
+      String pad;
+      String contents = writeBlocks(listItem.contents);
+      contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
+        if (pad == null) {
+          String marker = list.bulletType.char + " ";
+          pad = " " * marker.length;
+          return marker + str;
+        } else if (str != "") {
+          return pad + str;
+        }
+        return str;
+      });
+      result += contents;
+    });
+    return result;
+  }
+  String writeOrderedList(OrderedList list) {
+    String result = "";
+    int index = list.startIndex;
+    list.items.forEach((ListItem listItem) {
+      String pad;
+      String contents = writeBlocks(listItem.contents);
+      contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
+        if (pad == null) {
+          String marker = index.toString() + list.indexSeparator.char + " ";
+          pad = " " * marker.length;
+          return marker + str;
+        } else if (str != "") {
+          return pad + str;
+        }
+        return str;
+      });
+      result += contents;
+    });
+    return result;
+  }
 
   String writeInlines(Iterable<Inline> inlines) {
     return inlines.map((Inline inline) {
@@ -68,7 +122,7 @@ class MarkdownWriter {
       } else if (inline is NonBreakableSpace) {
         return '&nbsp;';
       } else if (inline is LineBreak) {
-        return '<br/>\n';
+        return '\\\n';
       } else if (inline is Emph) {
         return writeEmph(inline);
       } else if (inline is Strong) {
@@ -91,7 +145,19 @@ class MarkdownWriter {
   String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
   String writeCodeInline(Code code) {
-    return '`'*code.fenceSize + code.contents + '`'*code.fenceSize;
+    String fence = '`' * code.fenceSize;
+    String contents = code.contents;
+    if (contents == '') {
+      contents = ' ';
+    } else {
+      if (contents.startsWith('`')) {
+        contents = ' ' + contents;
+      }
+      if (contents.endsWith('`')) {
+        contents += ' ';
+      }
+    }
+    return fence + contents + fence;
   }
 
   String writeEmph(Emph emph) {
@@ -103,12 +169,41 @@ class MarkdownWriter {
   }
 
   String writeLink(Link link) {
-    return '[${writeInlines(link.label)}](${link.target.link})';
+    String inlines = writeInlines(link.label);
+    if (link is InlineLink) {
+      return '[${inlines}](${_writeTarget(link.target)})';
+    }
+    // Reference link
+    _references[link.reference] = link.target;
+    return '[${inlines}]' + (inlines.toUpperCase() != link.reference.toUpperCase() ? '[${link.reference}]' : '');
   }
 
   String writeImage(Image image) {
     return '![${writeInlines(image.label)}](${image.target.link})';
   }
+
+  String _writeReferences() {
+    String result = "";
+    _references.forEach((String ref, Target target) {
+      result += '[$ref]: ${_writeTarget(target)}\n';
+    });
+
+    return result;
+  }
+
+  String _writeTarget(Target target) {
+    String result = target.link;
+    if (target.link.contains(' ')) {
+      result = '<' + result + '>';
+    }
+
+    if (target.title != null) {
+      result += ' "${escapeString(target.title)}"';
+    }
+    return result;
+
+  }
+
 
   static MarkdownWriter DEFAULT = new MarkdownWriter();
 }
