@@ -11,11 +11,9 @@ class MarkdownWriter {
     return blocks + _writeReferences();
   }
 
-  String writeBlocks(Iterable<Block> blocks) => blocks.map((Block block) {
+  String writeBlocks(Iterable<Block> blocks, [bool tight = false]) => blocks.map((Block block) {
     if (block is Para) {
       return writePara(block);
-    } else if (block is Plain) {
-      return writeInlines(block.contents) + "\n";
     } else if (block is Header) {
       return writeHeader(block);
     } else if (block is HorizontalRule) {
@@ -33,7 +31,7 @@ class MarkdownWriter {
     }
 
     throw new UnimplementedError(block.toString());
-  }).join("\n");
+  }).join(tight ? "" : "\n");
 
   String writeHorizontalRule(HorizontalRule hRule) {
     return '-' * 10;
@@ -77,7 +75,7 @@ class MarkdownWriter {
     String result = "";
     list.items.forEach((ListItem listItem) {
       String pad;
-      String contents = writeBlocks(listItem.contents);
+      String contents = writeBlocks(listItem.contents, list.tight);
       contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
         if (pad == null) {
           String marker = list.bulletType.char + " ";
@@ -88,8 +86,14 @@ class MarkdownWriter {
         }
         return str;
       });
+      if (!list.tight) {
+        contents += '\n';
+      }
       result += contents;
     });
+    if (!list.tight) {
+      result += '\n';
+    }
     return result;
   }
 
@@ -98,7 +102,7 @@ class MarkdownWriter {
     int index = list.startIndex;
     list.items.forEach((ListItem listItem) {
       String pad;
-      String contents = writeBlocks(listItem.contents);
+      String contents = writeBlocks(listItem.contents, list.tight);
       contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
         if (pad == null) {
           String marker = index.toString() + list.indexSeparator.char + " ";
@@ -109,8 +113,14 @@ class MarkdownWriter {
         }
         return str;
       });
+      if (!list.tight) {
+        contents += '\n';
+      }
       result += contents;
     });
+    if (!list.tight) {
+      result += '\n';
+    }
     return result;
   }
 
