@@ -27,15 +27,13 @@ class HtmlWriter {
   }
 
 // Blocks
-  String writeBlocks(Iterable<Block> blocks) => writeBlocks_(blocks).map((item) => item + "\n").join();
+  String writeBlocks(Iterable<Block> blocks) => writeBlocks_(blocks, false).map((item) => item + "\n").join();
 
-  String writeBlocksTight(Iterable<Block> blocks) => writeBlocks_(blocks).join('\n');
+  String writeBlocksTight(Iterable<Block> blocks) => writeBlocks_(blocks, true).join('\n');
 
-  Iterable<String> writeBlocks_(Iterable<Block> blocks) => blocks.map((Block block) {
+  Iterable<String> writeBlocks_(Iterable<Block> blocks, bool tight) => blocks.map((Block block) {
     if (block is Para) {
-      return writePara(block);
-    } else if (block is Plain) {
-      return writePlain(block);
+      return tight ? writeParaTight(block) : writePara(block);
     } else if (block is Header) {
       return writeHeader(block);
     } else if (block is HorizontalRule) {
@@ -61,12 +59,19 @@ class HtmlWriter {
   String writeCodeBlock(CodeBlock codeBlock) => "<pre><code${writeAttributes(codeBlock.attributes)}>" +
   "${htmlEscape(codeBlock.contents)}</code></pre>";
 
-  String writeListItems(Iterable<ListItem> items) => items.map((ListItem item) => "<li>${writeBlocksTight(item.contents).trim()}</li>\n").join();
-  String writeUnorderedList(UnorderedList list) => "<ul>\n${writeListItems(list.items)}</ul>";
-  String writeOrderedList(OrderedList list) => "<ol${list.startIndex != 1 ? ' start="${list.startIndex}"' : ''}>\n${writeListItems(list.items)}</ol>";
+  String writeListItems(ListBlock list) {
+    if (list.tight) {
+      return list.items.map((ListItem item) => "<li>${writeBlocksTight(item.contents).trim()}</li>\n").join();
+    } else {
+      return list.items.map((ListItem item) => "<li>${writeBlocks(item.contents).trim()}</li>\n").join();
+    }
+  }
+  String writeUnorderedList(UnorderedList list) => "<ul>\n${writeListItems(list)}</ul>";
+  String writeOrderedList(OrderedList list) => "<ol${list.startIndex != 1 ? ' start="${list.startIndex}"' : ''}>\n${writeListItems(list)}</ol>";
 
   String writePara(Para para) => "<p>${writeInlines(para.contents)}</p>";
-  String writePlain(Plain plain) => writeInlines(plain.contents);
+
+  String writeParaTight(Para para) => writeInlines(para.contents);
 
 // Inlines
   String writeInlines(Iterable<Inline> inlines) {

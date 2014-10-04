@@ -282,21 +282,23 @@ class IndexSeparator {
 
 // List class name is already taken by dart
 abstract class ListBlock extends Block {
+  bool tight;
   Iterable<ListItem> items;
 
-  ListBlock(this.items);
+  ListBlock(this.tight, this.items);
 }
 
 
 class UnorderedList extends ListBlock {
   BulletType bulletType;
 
-  UnorderedList(items, this.bulletType) : super(items);
+  UnorderedList(bool tight, Iterable<ListItem> items, this.bulletType) : super(tight, items);
 
   String toString() => "UnorderedList $bulletType $items";
 
   bool operator== (obj) => obj is UnorderedList &&
     bulletType == obj.bulletType &&
+    tight == obj.tight &&
     _iterableEquality(items, obj.items);
 }
 
@@ -305,12 +307,13 @@ class OrderedList extends ListBlock {
   IndexSeparator indexSeparator;
   int startIndex;
 
-  OrderedList(items, this.indexSeparator, this.startIndex) : super(items);
+  OrderedList(bool tight, Iterable<ListItem> items, this.indexSeparator, this.startIndex) : super(tight, items);
 
   String toString() => "OrderedList start=$startIndex $indexSeparator $items";
 
   bool operator== (obj) => obj is OrderedList &&
     indexSeparator == obj.indexSeparator &&
+    tight == obj.tight &&
     startIndex == obj.startIndex &&
     _iterableEquality(items, obj.items);
 }
@@ -322,18 +325,6 @@ class Para extends Block {
   Para(this.contents);
 
   String toString() => "Para $contents";
-
-  bool operator== (obj) => obj is Para &&
-    _iterableEquality.equals(contents, obj.contents);
-}
-
-
-class Plain extends Block {
-  Inlines contents;
-
-  Plain(this.contents);
-
-  String toString() => "Plain $contents";
 
   bool operator== (obj) => obj is Para &&
     _iterableEquality.equals(contents, obj.contents);

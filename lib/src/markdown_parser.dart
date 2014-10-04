@@ -43,9 +43,8 @@ class _ListStackItem {
   int indent;
   int subIndent;
   ListBlock block;
-  bool tight;
 
-  _ListStackItem(this.indent, this.subIndent, this.block, [this.tight = true]);
+  _ListStackItem(this.indent, this.subIndent, this.block);
 }
 
 // CommonMark parser
@@ -120,7 +119,7 @@ class CommonMarkParser {
   }
 
   Block _inlinesInBlock(Block block) {
-    if ((block is Header || block is Para || block is Plain) && block.contents is _UnparsedInlines) {
+    if ((block is Header || block is Para) && block.contents is _UnparsedInlines) {
       block.contents = _parseInlines(block.contents.raw);
     } else if (block is Blockquote) {
       block.contents = block.contents.map(_inlinesInBlock);
@@ -1119,24 +1118,10 @@ class CommonMarkParser {
 
     int getSubIndent() => stack.length > 0 ? stack.last.subIndent : 0;
     int getIndent() => stack.length > 0 ? stack.last.indent : 0;
-    bool getTight() => stack.length > 0 ? stack.last.tight : true;
+    bool getTight() => stack.length > 0 ? stack.last.block.tight : true;
     void setTight(bool tight) {
       if (stack.length > 0) {
-        stack.last.tight = tight;
-      }
-    }
-
-    // TODO move tight to list definition
-    void convertToTight(bool tight, Iterable<ListItem> items) {
-      if (tight) {
-        items.forEach((ListItem item) {
-          item.contents = item.contents.map((Block block) {
-            if (block is Para) {
-              return new Plain(block.contents);
-            }
-            return block;
-          });
-        });
+        stack.last.block.tight = tight;
       }
     }
 
@@ -1148,7 +1133,7 @@ class CommonMarkParser {
       List<Block> innerBlocks;
       if (s == "\n" && blocks.length == 0) {
         // Test for empty items
-        blocks = [new Plain(new _UnparsedInlines(""))];
+        blocks = [new Para(new _UnparsedInlines(""))];
         buffer = [];
         return;
       }
@@ -1282,7 +1267,7 @@ class CommonMarkParser {
               closeListItem = true;
               break;
             }
-            convertToTight(getTight(), stack.last.block.items);
+            stack.last.block.tight = getTight();
             stack.removeLast();
           }
         }
@@ -1331,10 +1316,10 @@ class CommonMarkParser {
         ListBlock newListBlock;
         int subIndent = markerRes.value[0][1] + 1;
         if (type == _LIST_TYPE_ORDERED) {
-          newListBlock = new OrderedList([new ListItem([])], indexSeparator, startIndex);
+          newListBlock = new OrderedList(true, [new ListItem([])], indexSeparator, startIndex);
           subIndent += markerRes.value[0][2].length;
         } else {
-          newListBlock = new UnorderedList([new ListItem([])], bulletType);
+          newListBlock = new UnorderedList(true, [new ListItem([])], bulletType);
         }
 
         if (stack.length > 0) {
@@ -1356,7 +1341,7 @@ class CommonMarkParser {
       }
 
       if (closeListItem) {
-        convertToTight(getTight(), stack.last.block.items);
+        stack.last.block.tight = getTight();
         if (stack.length > 1) {
           stack.removeLast();
         } else {
@@ -1450,10 +1435,6 @@ class CommonMarkParser {
         buildBuffer();
         addToListItem(stack.last.block.items.last, blocks);
       }
-
-      stack.forEach((_ListStackItem stackItem) {
-        convertToTight(stackItem.tight, stackItem.block.items);
-      });
 
       return success([stack.first.block]).run(s, position);
     } else {
