@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:unittest/unittest.dart' as t;
-import 'package:md_proc/markdown.dart';
+import 'package:md_proc/md_proc.dart';
 import 'package:parsers/parsers.dart';
 
 const int STATE_WAIT = 0;
