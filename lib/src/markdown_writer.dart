@@ -47,17 +47,22 @@ class MarkdownWriter {
     return "#" * header.level + " " + inlines;
   }
 
-  String writeCodeBlock(CodeBlock codeBlock) => "```\n" + codeBlock.contents + "```\n";
+  String writeCodeBlock(CodeBlock codeBlock) {
+    if (codeBlock is FencedCodeBlock) {
+      return "```\n" + codeBlock.contents + "```\n";
+    }
+    return codeBlock.contents.splitMapJoin("\n", onNonMatch: (str) => str == "" ? str : "    " + str);
+  }
 
   String writeListItems(Iterable<ListItem> items) => items.map((ListItem item) =>
-    "* " + writeBlocks(item.contents)).join();
+    "* " + writeBlocks(item.contents)).join('\n');
   String writeUnorderedList(UnorderedList list) => "${writeListItems(list.items)}";
   String writeOrderedList(OrderedList list) => "${writeListItems(list.items)}";
 
   String writeInlines(Iterable<Inline> inlines) {
     return inlines.map((Inline inline) {
       if (inline is Str) {
-        return inline.contents;
+        return escapeString(inline.contents);
       } else if (inline is Space) {
         return ' ';
       } else if (inline is NonBreakableSpace) {
@@ -81,6 +86,9 @@ class MarkdownWriter {
       throw new UnimplementedError(inline.toString());
     }).join();
   }
+
+  RegExp escapedChars = new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
+  String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
   String writeCodeInline(Code code) {
     return '`'*code.fenceSize + code.contents + '`'*code.fenceSize;

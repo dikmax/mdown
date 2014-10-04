@@ -9,39 +9,59 @@ const int STATE_HTML = 2;
 
 // TODO add own tests specially for fenced code block in list
 
-void fileTest(name, fileName) {
-  t.group(name, () {
-    File file = new File(fileName);
-    int state = STATE_WAIT;
-    List<String> html = [];
-    List<String> markdown = [];
-    List<String> lines = file.readAsLinesSync();
-    int testNo = 0;
-    for (String line in lines) {
-      if (line == ".") {
-        state++;
-        if (state == 3) {
-          ++testNo;
-          doTest(testNo, markdown.join('\n') + "\n", html.join('\n') + "\n");
-          state = STATE_WAIT;
-          html = [];
-          markdown = [];
-        }
-      } else if (state == STATE_MARKDOWN) {
-        markdown.add(line);
-      } else if (state == STATE_HTML) {
-        html.add(line);
+typedef void TestFunc(int num, String source, String destination);
+
+Map<String, String> readFile(fileName) {
+  Map<String, String> result = <String, String>{};
+
+  File file = new File(fileName);
+  int state = STATE_WAIT;
+  List<String> destination = [];
+  List<String> source = [];
+  List<String> lines = file.readAsLinesSync();
+  int testNo = 0;
+  for (String line in lines) {
+    if (line == ".") {
+      state++;
+      if (state == 3) {
+        ++testNo;
+        result[source.map((line) => line + "\n").join()] = destination.map((line) => line + "\n").join();
+        state = STATE_WAIT;
+        destination = [];
+        source = [];
       }
+    } else if (state == STATE_MARKDOWN) {
+      source.add(line);
+    } else if (state == STATE_HTML) {
+      destination.add(line);
     }
+  }
+
+  return result;
+}
+
+void fileTest(name, fileName, TestFunc testFunc) {
+  t.group(name, () {
+    Map<String, String> tests = readFile(fileName);
+
+    int num = 0;
+    tests.forEach((String source, String destination) {
+      ++num;
+      testFunc(num, source, destination);
+    });
   });
 }
 
 void main() {
   // CommonMark tests
-  fileTest("CommonMark", "spec.txt");
+  fileTest("CommonMark", "spec.txt", mdToHtmlTest);
   // Additional tests
-  fileTest("Additional", "tests.txt");
+  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest);
+  // Markdown to markdown tests
+  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest);
 
+  //t.filterTests(" markdown ");
+  //t.filterTests(r"^CommonMark html 3$");
 }
 
 class ExampleDescription extends t.Matcher {
@@ -123,7 +143,7 @@ String tidy(String html) {
   return result.join('\n').trim();
 }
 
-void doTest(int num, String mdOrig, String html) {
+void mdToHtmlTest(int num, String mdOrig, String html) {
   String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
   html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
@@ -138,5 +158,12 @@ void doTest(int num, String mdOrig, String html) {
     Document doc = commonMarkParser.parse(generatedMarkdown);
     String result = htmlWriter.write(doc);
     t.expect(tidy(htmlWriter.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
+  });
+}
+
+void mdToMdTest(int num, String md, String destMd) {
+  t.test(num.toString(), () {
+    var generatedMarkdown = markdownWriter.write(commonMarkParser.parse(md));
+    t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
   });
 }

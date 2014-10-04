@@ -1,0 +1,7 @@
+Indented code
+
+.
+    Simple indented code
+.
+    Simple indented code
+.
