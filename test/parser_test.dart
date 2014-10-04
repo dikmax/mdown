@@ -52,18 +52,6 @@ void fileTest(name, fileName, TestFunc testFunc) {
   });
 }
 
-void main() {
-  // CommonMark tests
-  fileTest("CommonMark", "spec.txt", mdToHtmlTest);
-  // Additional tests
-  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest);
-  // Markdown to markdown tests
-  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest);
-
-  //t.filterTests(" markdown ");
-  //t.filterTests(r"^CommonMark html 3$");
-}
-
 class ExampleDescription extends t.Matcher {
   t.Matcher inner;
   String example;
@@ -167,3 +155,17 @@ void mdToMdTest(int num, String md, String destMd) {
     t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
   });
 }
+
+
+void main() {
+  // CommonMark tests
+  fileTest("CommonMark", "spec.txt", mdToHtmlTest);
+  // Additional tests
+  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest);
+  // Markdown to markdown tests
+  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest);
+
+  //t.filterTests("(md2md | markdown )");
+  //t.filterTests(r"^CommonMark markdown 392$");
+}
+

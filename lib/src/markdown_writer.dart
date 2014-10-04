@@ -92,6 +92,7 @@ class MarkdownWriter {
     });
     return result;
   }
+
   String writeOrderedList(OrderedList list) {
     String result = "";
     int index = list.startIndex;
@@ -172,10 +173,13 @@ class MarkdownWriter {
     String inlines = writeInlines(link.label);
     if (link is InlineLink) {
       return '[${inlines}](${_writeTarget(link.target)})';
+    } else if (link is ReferenceLink) {
+      _references[link.reference] = link.target;
+      return '[${inlines}]' + (inlines.toUpperCase() != link.reference.toUpperCase() ? '[${link.reference}]' : '');
     }
-    // Reference link
-    _references[link.reference] = link.target;
-    return '[${inlines}]' + (inlines.toUpperCase() != link.reference.toUpperCase() ? '[${link.reference}]' : '');
+
+    // Autolink
+    return '<' + link.target.link + '>';
   }
 
   String writeImage(Image image) {
