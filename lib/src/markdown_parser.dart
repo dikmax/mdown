@@ -814,7 +814,13 @@ class CommonMarkParser {
       return fail.run(s, pos);
     }
 
-    ParseResult textRes = (((spaceChar > skipSpaces) > (escapedChar.record | anyChar).manyUntil(char('#').many > blankline)) |
+    // Try empty
+    ParseResult textRes = (((spaceChar > skipSpaces) > (char('#').many > blankline)) |
+      (newline ^ (_) => [])).run(s, startRes.position);
+    if (textRes.isSuccess) {
+      return textRes.copy(value: [new AtxHeader(level, new _UnparsedInlines(''))]);
+    }
+    textRes = (((spaceChar > skipSpaces) > (escapedChar.record | anyChar).manyUntil((string(' #') > char('#').many).maybe > blankline)) |
       (newline ^ (_) => [])).run(s, startRes.position);
     if (!textRes.isSuccess) {
       return textRes;
