@@ -908,7 +908,7 @@ class CommonMarkParser {
     if (indent > 0) {
       lineParser = atMostSpaces(indent) > lineParser;
     }
-    Parser endFenceParser = (((skipSpaces > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
+    Parser endFenceParser = (((skipNonindentSpaces > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
     Parser restParser = (lineParser.manyUntil(endFenceParser) ^
         (lines) => [new FencedCodeBlock(lines.map((i) => i + '\n').join(), fenceType, fenceSize, new InfoString(infoString))])
       | (lineParser.manyUntil(eof) ^ (List lines) {
