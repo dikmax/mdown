@@ -37,7 +37,7 @@ class HtmlWriter {
     } else if (block is Header) {
       return writeHeader(block);
     } else if (block is HorizontalRule) {
-      return '<hr/>\n';
+      return '<hr/>';
     } else if (block is CodeBlock) {
       return writeCodeBlock(block);
     } else if (block is Blockquote) {
@@ -63,7 +63,13 @@ class HtmlWriter {
     if (list.tight) {
       return list.items.map((ListItem item) => "<li>${writeBlocksTight(item.contents)}</li>\n").join();
     } else {
-      return list.items.map((ListItem item) => "<li>${writeBlocks(item.contents)}</li>\n").join();
+      return list.items.map((ListItem item) {
+        String blocks = writeBlocks(item.contents);
+        if (blocks.endsWith("\n")) {
+          blocks = blocks.substring(0, blocks.length - 1);
+        }
+        return "<li>${blocks}</li>\n";
+      }).join();
     }
   }
   String writeUnorderedList(UnorderedList list) => "<ul>\n${writeListItems(list)}</ul>";
