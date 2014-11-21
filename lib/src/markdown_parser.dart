@@ -1019,7 +1019,8 @@ class CommonMarkParser {
       | rawHtml
       | (skipNonindentSpaces > (
         char('>')
-        | (oneOf('+-*') > char(' '))));
+        | (oneOf('+-*') > char(' '))
+        | ((digit.many1 > oneOf('.)')) > char(' '))));
     ParseResult res = (end.notAhead > anyLine).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
