@@ -79,7 +79,7 @@ class HtmlWriter {
 
   String writeParaTight(Para para) => writeInlines(para.contents);
 
-// Inlines
+  // Inlines
   String writeInlines(Iterable<Inline> inlines) {
     return inlines.map((Inline inline) {
       if (inline is Str) {
@@ -108,16 +108,56 @@ class HtmlWriter {
     }).join();
   }
 
+  String writeInlinesStripped(Iterable<Inline> inlines) {
+    return inlines.map((Inline inline) {
+      if (inline is Str) {
+        return htmlEscape(inline.contents);
+      } else if (inline is Space) {
+        return ' ';
+      } else if (inline is NonBreakableSpace) {
+        return '&nbsp;';
+      } else if (inline is LineBreak) {
+        return ' ';
+      } else if (inline is Emph) {
+        return writeEmphStripped(inline);
+      } else if (inline is Strong) {
+        return writeStrongStripped(inline);
+      } else if (inline is Link) {
+        return writeLinkStripped(inline);
+      } else if (inline is Image) {
+        return writeImageStripped(inline);
+      } else if (inline is Code) {
+        return writeCodeInlineStripped(inline);
+      } else if (inline is RawInline) {
+        return inline.contents;
+      }
+
+      throw new UnimplementedError(inline.toString());
+    }).join();
+  }
+
   String writeCodeInline(Code code) {
     return '<code>${htmlEscape(code.contents)}</code>';
+  }
+
+  String writeCodeInlineStripped(Code code) {
+    return htmlEscape(code.contents);
   }
 
   String writeEmph(Emph emph) {
     return '<em>${writeInlines(emph.contents)}</em>';
   }
 
+  String writeEmphStripped(Emph emph) {
+    return writeInlinesStripped(emph.contents);
+  }
+
   String writeStrong(Strong strong) {
     return '<strong>${writeInlines(strong.contents)}</strong>';
+  }
+
+  String writeStrongStripped(Strong strong) {
+    return writeInlinesStripped(strong.contents);
   }
 
   RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
@@ -134,10 +174,18 @@ class HtmlWriter {
     ">${writeInlines(link.label)}</a>";
   }
 
+  String writeLinkStripped(Link link) {
+    return writeInlinesStripped(link.label);
+  }
+
   String writeImage(Image image) {
-    return '<img src="${urlEncode(image.target.link)}" alt="${htmlEscape(writeInlines(image.label))}"' +
+    return '<img src="${urlEncode(image.target.link)}" alt="${htmlEscape(writeInlinesStripped(image.label))}"' +
     (image.target.title != null ? ' title="${htmlEscape(image.target.title)}"' : '') +
     " />";
+  }
+
+  String writeImageStripped(Image image) {
+    return writeInlinesStripped(image.label);
   }
 
   static HtmlWriter DEFAULT = new HtmlWriter();
