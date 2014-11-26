@@ -659,7 +659,7 @@ class CommonMarkParser {
     return false;
   });
 
-  Parser<List<Inline>> get link => new Parser((String s, Position pos) {
+  Parser<List<Inline>> link([bool allowInnerLink = false]) => new Parser((String s, Position pos) {
     ParseResult testRes = char('[').run(s, pos);
     if (!testRes.isSuccess) {
       return testRes;
@@ -671,7 +671,7 @@ class CommonMarkParser {
       return labelRes;
     }
     Inlines linkInlines = inlines.parse(labelRes.value);
-    if (_isContainsLink(linkInlines)) {
+    if (!allowInnerLink && _isContainsLink(linkInlines)) {
       List<Inline> resValue = [new Str('[')];
       resValue.addAll(linkInlines);
       resValue.add(new Str(']'));
@@ -707,7 +707,7 @@ class CommonMarkParser {
   });
 
   // TODO don't recreate objects. Move common part to separate parser
-  Parser<List<Inline>> get image => (char('!') > link) ^ (link) {
+  Parser<List<Inline>> get image => (char('!') > link(true)) ^ (link) {
     // Transforming link to image
     if (link[0] is InlineLink) {
       return [new InlineImage(link[0].label, link[0].target)];
@@ -804,7 +804,7 @@ class CommonMarkParser {
       htmlEntity,
       inlineCode,
       emphasis,
-      link,
+      link(),
       image,
       autolink,
       rawInlineHtml,
