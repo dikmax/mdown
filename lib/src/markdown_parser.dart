@@ -142,7 +142,7 @@ class CommonMarkParser {
   }
 
   Inlines _parseInlines(String raw) {
-    return inlines().parse(raw);
+    return inlines.parse(raw);
   }
 
   //
@@ -605,7 +605,7 @@ class CommonMarkParser {
           break;
         }
 
-        res = inline().run(s, position);
+        res = inline.run(s, position);
         if (!res.isSuccess) {
           break mainloop;
         }
@@ -633,6 +633,22 @@ class CommonMarkParser {
       ) ^ (a, Option b) => new Target(a, b.asNullable))
   ) < char(')');
 
+  bool _isContainsLink(Inlines inlines) => inlines.any((Inline inline) {
+    if (inline is Link) {
+      return true;
+    }
+    if (inline is Emph) {
+      return _isContainsLink(inline.contents);
+    }
+    if (inline is Strong) {
+      return _isContainsLink(inline.contents);
+    }
+    if (inline is Image) {
+      return _isContainsLink(inline.label);
+    }
+    return false;
+  });
+
   Parser<List<Inline>> get link => new Parser((String s, Position pos) {
     ParseResult testRes = char('[').run(s, pos);
     if (!testRes.isSuccess) {
@@ -642,11 +658,20 @@ class CommonMarkParser {
     if (!labelRes.isSuccess) {
       return labelRes;
     }
+
+    Inlines linkInlines = inlines.parse(labelRes.value);
+    if (_isContainsLink(linkInlines)) {
+      List<Inline> resValue = [new Str('[')];
+      resValue.addAll(linkInlines);
+      resValue.add(new Str(']'));
+      return labelRes.copy(value: resValue);
+    }
+
     // Try inline link
     ParseResult destRes = linkInline.run(s, labelRes.position);
     if (destRes.isSuccess) {
       // Links inside link content are not allowed
-      return destRes.copy(value: [new InlineLink(inlines(noLinks: true).parse(labelRes.value), destRes.value)]);
+      return destRes.copy(value: [new InlineLink(linkInlines, destRes.value)]);
     }
     // Try reference link
     ParseResult refRes = ((blankline | whitespace).maybe > linkLabel).run(s, labelRes.position);
@@ -654,12 +679,12 @@ class CommonMarkParser {
       String reference = refRes.value == "" ? labelRes.value : refRes.value;
       String normalizedReference = _normalizeReference(reference);
       if (_references.containsKey(normalizedReference)) {
-        return refRes.copy(value: [new ReferenceLink(reference, inlines(noLinks: true).parse(labelRes.value), _references[normalizedReference])]);
+        return refRes.copy(value: [new ReferenceLink(reference, linkInlines, _references[normalizedReference])]);
       }
     } else {
       String normalizedReference = _normalizeReference(labelRes.value);
       if (_references.containsKey(normalizedReference)) {
-        return labelRes.copy(value: [new ReferenceLink(labelRes.value, inlines(noLinks: true).parse(labelRes.value), _references[normalizedReference])]);
+        return labelRes.copy(value: [new ReferenceLink(labelRes.value, linkInlines, _references[normalizedReference])]);
       }
     }
 
@@ -756,21 +781,21 @@ class CommonMarkParser {
   static final Parser str = (noneOf(_strSpecialChars).many1 ^ (chars) => [new Str(chars.join())]) |
     (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]);
 
-  Parser<List<Inline>> inline({bool noLinks: false}) => choice([
+  Parser<List<Inline>> get inline => choice([
       lineBreak,
       whitespace,
       escapedChar,
       htmlEntity,
       inlineCode,
       emphasis,
-      noLinks ? fail : link,
+      link,
       image,
       autolink,
       rawInlineHtml,
       str
   ]);
 
-  Parser<Inlines> inlines({bool noLinks: false}) => inline(noLinks: noLinks).manyUntil(eof) ^ (res) => processParsedInlines(res);
+  Parser<Inlines> get inlines => inline.manyUntil(eof) ^ (res) => processParsedInlines(res);
 
   //
   // Blocks
