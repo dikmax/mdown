@@ -338,8 +338,18 @@ class CommonMarkParser {
   // Links aux parsers
   //
 
+  Parser get linkText => (char('[') >
+      choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, rec(() => linkText), str]).manyUntil(char(']')).record) ^
+      (String label) => label.substring(0, label.length - 1);
+
+  static final String _linkLabelStrSpecialChars = " *_`!<\\";
+  static final Parser _linkLabelStr = (noneOf(_linkLabelStrSpecialChars + "[]\n").many1 ^ (chars) => [new Str(chars.join())]) |
+    (oneOf(_linkLabelStrSpecialChars) ^ (chars) => [new Str(chars)]) |
+    (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
+
+
   Parser get linkLabel => (char('[') >
-      choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, rec(() => linkLabel), str]).manyUntil(char(']')).record) ^
+      choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, _linkLabelStr]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   Parser get linkBalancedParenthesis => ((char("(") > (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1) <
@@ -654,11 +664,12 @@ class CommonMarkParser {
     if (!testRes.isSuccess) {
       return testRes;
     }
-    ParseResult labelRes = linkLabel.run(s, pos);
+
+    // Try inline link
+    ParseResult labelRes = linkText.run(s, pos);
     if (!labelRes.isSuccess) {
       return labelRes;
     }
-
     Inlines linkInlines = inlines.parse(labelRes.value);
     if (_isContainsLink(linkInlines)) {
       List<Inline> resValue = [new Str('[')];
@@ -666,13 +677,12 @@ class CommonMarkParser {
       resValue.add(new Str(']'));
       return labelRes.copy(value: resValue);
     }
-
-    // Try inline link
     ParseResult destRes = linkInline.run(s, labelRes.position);
     if (destRes.isSuccess) {
       // Links inside link content are not allowed
       return destRes.copy(value: [new InlineLink(linkInlines, destRes.value)]);
     }
+
     // Try reference link
     ParseResult refRes = ((blankline | whitespace).maybe > linkLabel).run(s, labelRes.position);
     if (refRes.isSuccess) {
@@ -682,6 +692,11 @@ class CommonMarkParser {
         return refRes.copy(value: [new ReferenceLink(reference, linkInlines, _references[normalizedReference])]);
       }
     } else {
+      // Try again from beginning because reference couldn't contain brackets
+      labelRes = linkLabel.run(s, pos);
+      if (!labelRes.isSuccess) {
+        return labelRes;
+      }
       String normalizedReference = _normalizeReference(labelRes.value);
       if (_references.containsKey(normalizedReference)) {
         return labelRes.copy(value: [new ReferenceLink(labelRes.value, linkInlines, _references[normalizedReference])]);
@@ -777,9 +792,10 @@ class CommonMarkParser {
   // str
   //
 
-  static final String _strSpecialChars = " \n*_`![]<\\";
-  static final Parser str = (noneOf(_strSpecialChars).many1 ^ (chars) => [new Str(chars.join())]) |
-    (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]);
+  static final String _strSpecialChars = " *_`![]<\\";
+  static final Parser str = (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => [new Str(chars.join())]) |
+    (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]) |
+    (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
 
   Parser<List<Inline>> get inline => choice([
       lineBreak,
