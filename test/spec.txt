@@ -3960,7 +3960,7 @@ always need to be written as entities for security reasons.
 .
 &nbsp; &amp; &copy; &AElig; &Dcaron; &frac34; &HilbertSpace; &DifferentialD; &ClockwiseContourIntegral;
 .
-<p>  &amp; © Æ Ď ¾ ℋ ⅆ ∲</p>
+<p>  &amp; © Æ Ď ¾ ℋ ⅆ ∲</p>
 .
 
 [Decimal entities](@decimal-entities)

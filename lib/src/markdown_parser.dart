@@ -47,6 +47,15 @@ class _ListStackItem {
   _ListStackItem(this.indent, this.subIndent, this.block);
 }
 
+
+class _EmphasisStackItem {
+  String char;
+  int numDelims;
+  Inlines inlines;
+
+  _EmphasisStackItem(this.char, this.numDelims, this.inlines);
+}
+
 // CommonMark parser
 class CommonMarkParser {
   static const int TAB_STOP = 4;
@@ -466,7 +475,13 @@ class CommonMarkParser {
 
   static RegExp _isSpace = new RegExp(r'\s');
   static RegExp _isAlphanum = new RegExp(r'[a-z0-9]', caseSensitive: false);
-  static Parser scanDelims(String c) => new Parser((String s, Position pos) {
+  static Parser scanDelims = new Parser((String s, Position pos) {
+    ParseResult testRes = oneOf("*_").lookAhead.run(s, pos);
+    if (!testRes.isSuccess) {
+      return testRes;
+    }
+    String c = testRes.value;
+
     ParseResult res = char(c).many1.run(s, pos);
     if (!res.isSuccess) {
       return res;
@@ -475,131 +490,136 @@ class CommonMarkParser {
     int numDelims = res.value.length;
     String charBefore = pos.offset == 0 ? '\n' : s[pos.offset - 1];
     String charAfter = res.position.offset < s.length ? s[res.position.offset] : '\n';
-    bool canOpen = numDelims > 0 && numDelims <= 3 && !_isSpace.hasMatch(charAfter);
-    bool canClose = numDelims > 0 && numDelims <= 3 && !_isSpace.hasMatch(charBefore);
+    bool canOpen = numDelims > 0 && !_isSpace.hasMatch(charAfter);
+    bool canClose = numDelims > 0 && !_isSpace.hasMatch(charBefore);
     if (c == '_') {
       canOpen = canOpen && !_isAlphanum.hasMatch(charBefore);
       canClose = canClose && !_isAlphanum.hasMatch(charAfter);
     }
-    return res.copy(value: [numDelims, canOpen, canClose]);
+    return res.copy(value: [numDelims, canOpen, canClose, c]);
   });
 
   Parser get emphasis => new Parser((String s, Position pos) {
-    ParseResult testRes = oneOf("*_").lookAhead.run(s, pos);
-    if (!testRes.isSuccess) {
-      return testRes;
-    }
-    String char = testRes.value;
-
-    Parser scanParser = scanDelims(char);
-    ParseResult res = scanParser.run(s, pos);
+    ParseResult res = scanDelims.run(s, pos);
     if (!res.isSuccess) {
       return res;
     }
     int numDelims = res.value[0];
     bool canOpen = res.value[1];
+    bool canClose = res.value[2];
+    String char = res.value[3];
 
     if (!canOpen) {
       return res.copy(value: [new Str(char * numDelims)]);
     }
 
-    List<Inline> result = new Inlines();
+    List<_EmphasisStackItem> stack = <_EmphasisStackItem>[];
+    Inlines result = new Inlines();
     Position position = res.position;
 
-    switch (numDelims) {
-      case 1:
-        while (true) {
-          ParseResult res = scanParser.run(s, position);
-          if (res.isSuccess && res.value[2]) {
-            return res.copy(position: position.addChar("*"), value: [new Emph(result)]);
-          }
-          res = inline().run(s, position);
-          if (!res.isSuccess) {
-            result.insert(0, new Str(char * numDelims));
-            return success(result).run(s, position);
-          }
-          result.addAll(res.value);
-          position = res.position;
-        }
-        break;
-
-      case 2:
-        while (true) {
-          ParseResult res = scanParser.run(s, position);
-          if (res.isSuccess && res.value[0] >= 2 && res.value[2]) {
-            return res.copy(position: position.addChar(char).addChar(char), value: [new Strong(result)]);
-          }
-          res = inline().run(s, position);
-          if (!res.isSuccess) {
-            result.insert(0, new Str(char * numDelims));
-            return success(result).run(s, position);
-          }
-          result.addAll(res.value);
-          position = res.position;
-        }
-        break;
-
-      case 3:
-        int leftToClose = 3;
-        Inlines innerRes = new Inlines();
-        while (true) {
-          ParseResult res = scanParser.run(s, position);
-          if (res.isSuccess && res.value[2]) {
-            if (leftToClose == 3) {
-              if (res.value[0] == 1) {
-                leftToClose = 2;
-                innerRes = processParsedInlines(result);
-                result = [new Emph(innerRes)];
-                position = res.position;
-              } else if (res.value[0] == 2) {
-                leftToClose = 1;
-                innerRes = processParsedInlines(result);
-                result = [new Strong(result)];
-                position = res.position;
-              } else {
-                // Close
-                innerRes.add(new Emph(processParsedInlines(result)));
-                return res.copy(position: res.position, value: [new Strong(innerRes)]);
-              }
-              continue;
-            }
-            if (res.value[0] >= leftToClose) {
-              if (leftToClose == 1) {
-                return res.copy(position: position.addChar(char), value: [new Emph(processParsedInlines(result))]);
-              } else if (leftToClose == 2) {
-                return res.copy(position: position.addChar(char).addChar(char), value: [new Strong(processParsedInlines(result))]);
-              }
-            } else {
-              // We should return unparsed result
-              List<Inline> ret = [new Str(char * 3)];
-              ret.addAll(innerRes);
-              ret.add(new Str(char * (3 - leftToClose)));
-              result.removeAt(0);
-              ret.addAll(result);
-              ret.add(new Str(char * res.value[0]));
-              return res.copy(value: ret);
-            }
-            continue;
-          }
-          res = inline().run(s, position);
-          if (!res.isSuccess) {
-            List<Inline> ret = [new Str(char * 3)];
-            if (leftToClose < 3) {
-              ret.addAll(innerRes);
-              ret.add(new Str(char * (3 - leftToClose)));
-              result.removeAt(0);
-            }
-            ret.addAll(result);
-            return success(ret).run(s, position);
-          }
-          result.addAll(res.value);
-          position = res.position;
-        }
-        break;
-
-      default:
-        return res.copy(value: [new Str(char * numDelims)]);
+    void mergeWithPrevious() {
+      Inlines inlines = new Inlines();
+      inlines.add(new Str(stack.last.char * stack.last.numDelims));
+      inlines.addAll(stack.last.inlines);
+      stack.removeLast();
+      if (stack.length > 0) {
+        stack.last.inlines.addAll(inlines);
+      } else {
+        result.addAll(inlines);
+      }
     }
+    void addToStack(Inline inline) {
+      if (stack.length > 0) {
+        stack.last.inlines.add(inline);
+      } else {
+        result.add(inline);
+      }
+    }
+    void addAllToStack(List<Inline> inlines) {
+      if (stack.length > 0) {
+        stack.last.inlines.addAll(inlines);
+      } else {
+        result.addAll(inlines);
+      }
+    }
+
+    mainloop: while (true) {
+      // Trying to close
+      if (canClose) {
+        bool openFound = stack.any((item) => item.char == char);
+        while (openFound && numDelims > 0 && stack.length > 0) {
+          while (stack.length > 0 && stack.last.char != char) {
+            mergeWithPrevious();
+          }
+          Inlines inlines = stack.last.inlines;
+          Inline inline;
+          var count = numDelims < stack.last.numDelims  ? numDelims : stack.last.numDelims;
+          numDelims -= count;
+          stack.last.numDelims -= count;
+          if (count & 1 == 1) {
+            inline = new Emph(inlines);
+            inlines = new Inlines();
+            inlines.add(inline);
+            count--;
+          }
+          while (count > 0) {
+            inline = new Strong(inlines);
+            inlines = new Inlines();
+            inlines.add(inline);
+            count -= 2;
+          }
+
+          if (stack.last.numDelims == 0) {
+            stack.removeLast();
+          } else {
+            stack.last.inlines = new Inlines();
+          }
+          addToStack(inline);
+          if (numDelims > 0) {
+            openFound = stack.any((item) => item.char == char);
+          }
+        }
+      }
+      // Trying to open
+      if (canOpen && numDelims > 0) {
+        stack.add(new _EmphasisStackItem(char, numDelims, new Inlines()));
+        numDelims = 0;
+      }
+
+      if (numDelims > 0) {
+        addToStack(new Str(char * numDelims));
+      }
+
+      if (stack.length == 0) {
+        break;
+      }
+
+      while (true) {
+        ParseResult res = scanDelims.run(s, position);
+        if (res.isSuccess) {
+          numDelims = res.value[0];
+          canOpen = res.value[1];
+          canClose = res.value[2];
+          char = res.value[3];
+          position = res.position;
+          break;
+        }
+
+        res = inline().run(s, position);
+        if (!res.isSuccess) {
+          break mainloop;
+        }
+
+        addAllToStack(res.value);
+        position = res.position;
+      }
+    }
+
+    while (stack.length > 0) {
+      mergeWithPrevious();
+    }
+
+    return success(result).run(s, position);
   });
 
   //
