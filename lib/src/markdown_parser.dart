@@ -339,7 +339,7 @@ class CommonMarkParser {
   //
 
   Parser get linkLabel => (char('[') >
-      choice([whitespace, htmlEntity, inlineCode, rawInlineHtml, escapedChar, rec(() => linkLabel), str]).manyUntil(char(']')).record) ^
+      choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, rec(() => linkLabel), str]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   Parser get linkBalancedParenthesis => ((char("(") > (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1) <
