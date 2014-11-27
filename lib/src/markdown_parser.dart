@@ -1182,6 +1182,7 @@ class CommonMarkParser {
     | (unorderedListMarkerTest ^ (sp, c) => [_LIST_TYPE_UNORDERED, sp, c])) + (char("\n") | char(' ').many1)).list;
 
   Parser get list => new Parser((String s, Position pos) {
+    // TODO fast test
     List<_ListStackItem> stack = [];
 
     int getSubIndent() => stack.length > 0 ? stack.last.subIndent : 0;
@@ -1250,6 +1251,10 @@ class CommonMarkParser {
         success = true;
       }
       if (success) {
+        if (closeParagraph) {
+          setTight(false);
+          closeParagraph = false;
+        }
         buildBuffer();
         addToListItem(block.items.last, blocks);
         blocks = [];

@@ -111,3 +111,16 @@ Links
 <li><p>c</p></li>
 </ul>
 .
+
+.
+1. a
+
+2.␣
+3. c
+.
+<ol>
+<li><p>a</p></li>
+<li></li>
+<li><p>c</p></li>
+</ol>
+.
