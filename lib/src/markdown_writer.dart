@@ -12,27 +12,37 @@ class MarkdownWriter {
   }
 
   String writeBlocks(Iterable<Block> blocks,
-                     {bool tight: false, String unorderedListChar: "*"}) => blocks.map((Block block) {
-    if (block is Para) {
-      return writePara(block);
-    } else if (block is Header) {
-      return writeHeader(block);
-    } else if (block is HorizontalRule) {
-      return writeHorizontalRule(block, unorderedListChar);
-    } else if (block is CodeBlock) {
-      return writeCodeBlock(block);
-    } else if (block is Blockquote) {
-      return writeBlockquote(block);
-    } else if (block is RawBlock) {
-      return block.contents + "\n";
-    } else if (block is UnorderedList) {
-      return writeUnorderedList(block);
-    } else if (block is OrderedList) {
-      return writeOrderedList(block);
-    }
+                     {bool tight: false, String unorderedListChar: "*"}) {
+    Block prevBlock = null;
 
-    throw new UnimplementedError(block.toString());
-  }).join(tight ? "" : "\n");
+    return blocks.map((Block block) {
+      Block _b = prevBlock;
+      prevBlock = block;
+      if (block is Para) {
+        return writePara(block);
+      } else if (block is Header) {
+        return writeHeader(block);
+      } else if (block is HorizontalRule) {
+        return writeHorizontalRule(block, unorderedListChar);
+      } else if (block is CodeBlock) {
+        String result = '';
+        if (_b is ListBlock) {
+          result = '\n';
+        }
+        return result + writeCodeBlock(block);
+      } else if (block is Blockquote) {
+        return writeBlockquote(block);
+      } else if (block is RawBlock) {
+        return block.contents + "\n";
+      } else if (block is UnorderedList) {
+        return writeUnorderedList(block, prevBlock: _b);
+      } else if (block is OrderedList) {
+        return writeOrderedList(block, prevBlock: _b);
+      }
+
+      throw new UnimplementedError(block.toString());
+    }).join(tight ? "" : "\n");
+  }
 
   String writeHorizontalRule(HorizontalRule hRule, [String unorderedListChar = "*"]) {
     if (unorderedListChar == "-") {
@@ -75,8 +85,11 @@ class MarkdownWriter {
     return codeBlock.contents.splitMapJoin("\n", onNonMatch: (str) => str == "" ? str : "    " + str);
   }
 
-  String writeUnorderedList(UnorderedList list) {
+  String writeUnorderedList(UnorderedList list, {Block prevBlock: null}) {
     String result = "";
+    if (prevBlock is UnorderedList && prevBlock.bulletType == list.bulletType) {
+      result += "\n";
+    }
     list.items.forEach((ListItem listItem) {
       String pad;
       String contents = writeBlocks(listItem.contents, tight: list.tight, unorderedListChar: list.bulletType.char);
@@ -101,8 +114,11 @@ class MarkdownWriter {
     return result;
   }
 
-  String writeOrderedList(OrderedList list) {
+  String writeOrderedList(OrderedList list, {Block prevBlock: null}) {
     String result = "";
+    if (prevBlock is OrderedList && prevBlock.indexSeparator == list.indexSeparator) {
+      result += "\n";
+    }
     int index = list.startIndex;
     list.items.forEach((ListItem listItem) {
       String pad;
