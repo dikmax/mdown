@@ -124,3 +124,20 @@ Links
 <li><p>c</p></li>
 </ol>
 .
+
+.
+1. a
+   1. b
+
+      c
+2. d
+.
+<ol>
+<li>a
+<ol>
+<li><p>b</p>
+<p>c</p></li>
+</ol></li>
+<li>d</li>
+</ol>
+.

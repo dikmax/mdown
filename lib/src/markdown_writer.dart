@@ -90,10 +90,12 @@ class MarkdownWriter {
     if (prevBlock is UnorderedList && prevBlock.bulletType == list.bulletType) {
       result += "\n";
     }
-    list.items.forEach((ListItem listItem) {
+
+    Iterable<String> items = list.items.map((ListItem listItem) {
       String pad;
       String contents = writeBlocks(listItem.contents, tight: list.tight, unorderedListChar: list.bulletType.char);
-      contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
+
+      return contents.splitMapJoin("\n", onNonMatch: (String str) {
         if (pad == null) {
           String marker = list.bulletType.char + " ";
           pad = " " * marker.length;
@@ -103,15 +105,9 @@ class MarkdownWriter {
         }
         return str;
       });
-      if (!list.tight) {
-        contents += '\n';
-      }
-      result += contents;
     });
-    if (!list.tight) {
-      result += '\n';
-    }
-    return result;
+
+    return result + items.join(list.tight ? "" : "\n");
   }
 
   String writeOrderedList(OrderedList list, {Block prevBlock: null}) {
@@ -120,10 +116,10 @@ class MarkdownWriter {
       result += "\n";
     }
     int index = list.startIndex;
-    list.items.forEach((ListItem listItem) {
+    Iterable<String> items = list.items.map((ListItem listItem) {
       String pad;
       String contents = writeBlocks(listItem.contents, tight: list.tight);
-      contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
+      return contents.splitMapJoin("\n", onNonMatch: (String str) {
         if (pad == null) {
           String marker = index.toString() + list.indexSeparator.char + " ";
           pad = " " * marker.length;
@@ -133,15 +129,9 @@ class MarkdownWriter {
         }
         return str;
       });
-      if (!list.tight) {
-        contents += '\n';
-      }
-      result += contents;
     });
-    if (!list.tight) {
-      result += '\n';
-    }
-    return result;
+
+    return result + items.join(list.tight ? "" : "\n");
   }
 
   String writeInlines(Iterable<Inline> inlines) {
