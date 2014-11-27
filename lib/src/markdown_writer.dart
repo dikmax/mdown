@@ -11,13 +11,14 @@ class MarkdownWriter {
     return blocks + _writeReferences();
   }
 
-  String writeBlocks(Iterable<Block> blocks, [bool tight = false]) => blocks.map((Block block) {
+  String writeBlocks(Iterable<Block> blocks,
+                     {bool tight: false, String unorderedListChar: "*"}) => blocks.map((Block block) {
     if (block is Para) {
       return writePara(block);
     } else if (block is Header) {
       return writeHeader(block);
     } else if (block is HorizontalRule) {
-      return writeHorizontalRule(block);
+      return writeHorizontalRule(block, unorderedListChar);
     } else if (block is CodeBlock) {
       return writeCodeBlock(block);
     } else if (block is Blockquote) {
@@ -33,7 +34,10 @@ class MarkdownWriter {
     throw new UnimplementedError(block.toString());
   }).join(tight ? "" : "\n");
 
-  String writeHorizontalRule(HorizontalRule hRule) {
+  String writeHorizontalRule(HorizontalRule hRule, [String unorderedListChar = "*"]) {
+    if (unorderedListChar == "-") {
+      return '*' * 10;
+    }
     return '-' * 10;
   }
 
@@ -52,7 +56,7 @@ class MarkdownWriter {
   String writeHeader(Header header) {
     String inlines = writeInlines(header.contents);
     if (header is SetextHeader && header.level == 2) {
-      return inlines + "\n" + (header.level == 1 ? '=' : '-') * inlines.length;
+      return inlines + "\n" + (header.level == 1 ? '=' : '-') * inlines.length + "\n";
     }
     return "#" * header.level + " " + inlines + "\n";
   }
@@ -75,7 +79,7 @@ class MarkdownWriter {
     String result = "";
     list.items.forEach((ListItem listItem) {
       String pad;
-      String contents = writeBlocks(listItem.contents, list.tight);
+      String contents = writeBlocks(listItem.contents, tight: list.tight, unorderedListChar: list.bulletType.char);
       contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
         if (pad == null) {
           String marker = list.bulletType.char + " ";
@@ -102,7 +106,7 @@ class MarkdownWriter {
     int index = list.startIndex;
     list.items.forEach((ListItem listItem) {
       String pad;
-      String contents = writeBlocks(listItem.contents, list.tight);
+      String contents = writeBlocks(listItem.contents, tight: list.tight);
       contents = contents.splitMapJoin("\n", onNonMatch: (String str) {
         if (pad == null) {
           String marker = index.toString() + list.indexSeparator.char + " ";
@@ -183,17 +187,21 @@ class MarkdownWriter {
     String inlines = writeInlines(link.label);
     if (link is InlineLink) {
       return '[${inlines}](${_writeTarget(link.target)})';
-    } else if (link is ReferenceLink) {
+    }
+    if (link is ReferenceLink) {
       _references[link.reference] = link.target;
       return '[${inlines}]' + (inlines.toUpperCase() != link.reference.toUpperCase() ? '[${link.reference}]' : '');
     }
 
     // Autolink
+    if (link.label.length > 0 && link.label[0] is Str) {
+      return '<' + link.label[0].contents + '>';
+    }
     return '<' + link.target.link + '>';
   }
 
   String writeImage(Image image) {
-    return '![${writeInlines(image.label)}](${image.target.link})';
+    return '![${writeInlines(image.label)}](${_writeTarget(image.target)})';
   }
 
   String _writeReferences() {
@@ -206,9 +214,12 @@ class MarkdownWriter {
   }
 
   String _writeTarget(Target target) {
-    String result = target.link;
-    if (target.link.contains(' ')) {
-      result = '<' + result + '>';
+    String result;
+
+    if (target.link.contains(' ') && !target.link.contains(r'[<>]')) {
+      result = '<' + target.link + '>';
+    } else {
+      result = escapeString(target.link);
     }
 
     if (target.title != null) {
