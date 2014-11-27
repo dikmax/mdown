@@ -98,3 +98,16 @@ Links
 .
 <p><a href="/f&ouml;&ouml;" title="föö">foo</a></p>
 .
+
+.
+* a
+
+*␣
+* c
+.
+<ul>
+<li><p>a</p></li>
+<li></li>
+<li><p>c</p></li>
+</ul>
+.
