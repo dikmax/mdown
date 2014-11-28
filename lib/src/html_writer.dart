@@ -87,7 +87,7 @@ class HtmlWriter {
       } else if (inline is Space) {
         return ' ';
       } else if (inline is NonBreakableSpace) {
-        return '&nbsp;';
+        return '\u{a0}';
       } else if (inline is LineBreak) {
         return '<br/>\n';
       } else if (inline is Emph) {
@@ -115,7 +115,7 @@ class HtmlWriter {
       } else if (inline is Space) {
         return ' ';
       } else if (inline is NonBreakableSpace) {
-        return '&nbsp;';
+        return '\u{a0}';
       } else if (inline is LineBreak) {
         return ' ';
       } else if (inline is Emph) {

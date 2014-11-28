@@ -343,8 +343,8 @@ class CommonMarkParser {
       (String label) => label.substring(0, label.length - 1);
 
   static final String _linkLabelStrSpecialChars = " *_`!<\\";
-  static final Parser _linkLabelStr = (noneOf(_linkLabelStrSpecialChars + "[]\n").many1 ^ (chars) => [new Str(chars.join())]) |
-    (oneOf(_linkLabelStrSpecialChars) ^ (chars) => [new Str(chars)]) |
+  static final Parser _linkLabelStr = (noneOf(_linkLabelStrSpecialChars + "[]\n").many1 ^ (chars) => _transformString(chars.join())) |
+    (oneOf(_linkLabelStrSpecialChars) ^ (chars) => _transformString(chars)) |
     (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
 
 
@@ -420,7 +420,7 @@ class CommonMarkParser {
 
     return '&$entity;';
   }) % "html entity";
-  Parser get htmlEntity => htmlEntity1 ^ (str) => new Str(str);
+  Parser get htmlEntity => htmlEntity1 ^ (str) => str == "\u{a0}" ? new NonBreakableSpace() : new Str(str);
 
   //
   // inline code
@@ -792,9 +792,27 @@ class CommonMarkParser {
   // str
   //
 
+  static final RegExp _nbspRegExp = new RegExp("\u{a0}");
+  static List<Inline> _transformString(String str) {
+    Match m = _nbspRegExp.firstMatch(str);
+    List<Inline> result = [];
+    while (m != null) {
+      if (m.start > 0) {
+        result.add(new Str(str.substring(0, m.start)));
+      }
+      result.add(new NonBreakableSpace());
+      str = str.substring(m.end);
+      m = _nbspRegExp.firstMatch(str);
+    }
+    if (str.length > 0) {
+      result.add(new Str(str));
+    }
+    return result;
+  }
+
   static final String _strSpecialChars = " *_`![]<\\";
-  static final Parser str = (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => [new Str(chars.join())]) |
-    (oneOf(_strSpecialChars) ^ (chars) => [new Str(chars)]) |
+  static final Parser str = (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => _transformString(chars.join())) |
+    (oneOf(_strSpecialChars) ^ (chars) => _transformString(chars)) |
     (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
 
   Parser<List<Inline>> get inline => choice([
