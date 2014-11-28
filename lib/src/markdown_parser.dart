@@ -1381,6 +1381,10 @@ class CommonMarkParser {
 
         // Flush buffer
         if (stack.length > 0 && (buffer.length > 0 || blocks.length > 0)) {
+          if (closeParagraph) {
+            setTight(false);
+            closeParagraph = false;
+          }
           buildBuffer();
           addToListItem(stack.last.block.items.last, blocks);
           blocks = [];
