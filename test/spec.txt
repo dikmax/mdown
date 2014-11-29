@@ -3129,7 +3129,7 @@ A list item can contain a header:
 <ul>
 <li><h1>Foo</h1></li>
 <li><h2>Bar</h2>
-<p>baz</p></li>
+baz</li>
 </ul>
 .
 

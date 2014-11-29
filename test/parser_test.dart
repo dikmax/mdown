@@ -163,9 +163,9 @@ void main() {
   // Additional tests
   fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest);
   // Markdown to markdown tests
-  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest);
+  //fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest);
 
   //t.filterTests("(md2md | markdown )");
-  //t.filterTests(r"^CommonMark markdown 392$");
+  //t.filterTests(r"^CommonMark html 233$");
 }
 
