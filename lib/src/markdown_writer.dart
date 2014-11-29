@@ -134,32 +134,49 @@ class MarkdownWriter {
     return result + items.join(list.tight ? "" : "\n");
   }
 
-  String writeInlines(Iterable<Inline> inlines) {
-    return inlines.map((Inline inline) {
+  String writeInlines(Iterable<Inline> inlines, {String prevEmph, String prevStrong}) {
+    if (inlines.length == 1 && prevEmph != null) {
+      if (inlines.first is Emph) {
+        return writeEmph(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
+      }
+      if (inlines.first is Strong) {
+        return writeStrong(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
+      }
+    }
+    StringBuffer result = new StringBuffer();
+    Iterator<Inline> it = inlines.iterator;
+    int i = 0;
+    int last = inlines.length - 1;
+    while(it.moveNext()) {
+      Inline inline = it.current;
       if (inline is Str) {
-        return escapeString(inline.contents);
+        result.write(escapeString(inline.contents));
       } else if (inline is Space) {
-        return ' ';
+        result.write(' ');
       } else if (inline is NonBreakableSpace) {
-        return '&nbsp;';
+        result.write('&nbsp;');
       } else if (inline is LineBreak) {
-        return '\\\n';
+        result.write('\\\n');
       } else if (inline is Emph) {
-        return writeEmph(inline);
+        result.write(writeEmph(inline));
       } else if (inline is Strong) {
-        return writeStrong(inline);
+        result.write(writeStrong(inline));
       } else if (inline is Link) {
-        return writeLink(inline);
+        result.write(writeLink(inline));
       } else if (inline is Image) {
-        return writeImage(inline);
+        result.write(writeImage(inline));
       } else if (inline is Code) {
-        return writeCodeInline(inline);
+        result.write(writeCodeInline(inline));
       } else if (inline is RawInline) {
-        return inline.contents;
+        result.write(inline.contents);
+      } else {
+        throw new UnimplementedError(inline.toString());
       }
 
-      throw new UnimplementedError(inline.toString());
-    }).join();
+      ++i;
+    }
+
+    return result.toString();
   }
 
   RegExp escapedChars = new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
@@ -181,12 +198,13 @@ class MarkdownWriter {
     return fence + contents + fence;
   }
 
-  String writeEmph(Emph emph) {
-    return '*${writeInlines(emph.contents)}*';
+  String writeEmph(Emph emph, {String delimiter: "*"}) {
+    return '${delimiter}${writeInlines(emph.contents, prevEmph: delimiter)}${delimiter}';
   }
 
-  String writeStrong(Strong strong) {
-    return '**${writeInlines(strong.contents)}**';
+  String writeStrong(Strong strong, {String delimiter: "*"}) {
+    String delimiterString = delimiter * 2;
+    return '${delimiterString}${writeInlines(strong.contents, prevStrong: delimiter)}${delimiterString}';
   }
 
   String writeLink(Link link) {
