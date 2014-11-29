@@ -13,35 +13,49 @@ class MarkdownWriter {
 
   String writeBlocks(Iterable<Block> blocks,
                      {bool tight: false, String unorderedListChar: "*"}) {
-    Block prevBlock = null;
 
-    return blocks.map((Block block) {
-      Block _b = prevBlock;
-      prevBlock = block;
-      if (block is Para) {
-        return writePara(block);
-      } else if (block is Header) {
-        return writeHeader(block);
-      } else if (block is HorizontalRule) {
-        return writeHorizontalRule(block, unorderedListChar);
-      } else if (block is CodeBlock) {
-        String result = '';
-        if (_b is ListBlock) {
-          result = '\n';
-        }
-        return result + writeCodeBlock(block);
-      } else if (block is Blockquote) {
-        return writeBlockquote(block);
-      } else if (block is RawBlock) {
-        return block.contents + "\n";
-      } else if (block is UnorderedList) {
-        return writeUnorderedList(block, prevBlock: _b);
-      } else if (block is OrderedList) {
-        return writeOrderedList(block, prevBlock: _b);
+    StringBuffer result = new StringBuffer();
+
+    Block prevBlock = null;
+    Iterator<Block> it = blocks.iterator;
+    bool first = true;
+    while (it.moveNext()) {
+      if (first) {
+        first = false;
+      } else if (!tight) {
+        result.write("\n");
       }
 
-      throw new UnimplementedError(block.toString());
-    }).join(tight ? "" : "\n");
+      Block block = it.current;
+      Block _b = prevBlock;
+      prevBlock = block;
+
+      if (block is Para) {
+        result.write(writePara(block));
+      } else if (block is Header) {
+        result.write(writeHeader(block));
+      } else if (block is HorizontalRule) {
+        result.write(writeHorizontalRule(block, unorderedListChar));
+      } else if (block is CodeBlock) {
+        if (_b is ListBlock) {
+          result.write('\n');
+        }
+        result.write(writeCodeBlock(block));
+      } else if (block is Blockquote) {
+        result.write(writeBlockquote(block));
+      } else if (block is RawBlock) {
+        result.write(block.contents);
+        result.write("\n");
+      } else if (block is UnorderedList) {
+        result.write(writeUnorderedList(block, prevBlock: _b));
+      } else if (block is OrderedList) {
+        result.write(writeOrderedList(block, prevBlock: _b));
+      } else {
+        throw new UnimplementedError(block.toString());
+      }
+    }
+
+    return result.toString();
   }
 
   String writeHorizontalRule(HorizontalRule hRule, [String unorderedListChar = "*"]) {
