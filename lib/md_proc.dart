@@ -6,6 +6,7 @@ import 'src/markdown_parser.dart';
 export 'src/definitions.dart';
 export 'src/markdown_parser.dart';
 export 'src/html_writer.dart';
+export 'src/markdown_writer.dart';
 
 /**
  * Converts markdown string to html string.

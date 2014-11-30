@@ -1,4 +1,4 @@
-library md_proc.html_writer;
+library md_proc.markdown_writer;
 
 import 'definitions.dart';
 
@@ -86,7 +86,7 @@ class _MarkdownBuilder extends StringBuffer {
 
 
   void writeHeader(Header header) {
-    if (header is SetextHeader && header.level == 2) {
+    if (header is SetextHeader && header.level <= 2) {
       _MarkdownBuilder inner = new _MarkdownBuilder(_references);
       inner.writeInlines(header.contents);
       String inlines = inner.toString();
