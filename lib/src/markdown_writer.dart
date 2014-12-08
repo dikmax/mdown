@@ -2,16 +2,206 @@ library md_proc.markdown_writer;
 
 import 'definitions.dart';
 
+abstract class _InlinePart {
+  String content;
+
+  _InlinePart(this.content);
+}
+
+
+class _CheckedPart extends _InlinePart {
+  _CheckedPart(String content) : super(content);
+
+  String toString() {
+    return content;
+  }
+}
+
+
+class _NotCheckedPart extends _InlinePart {
+  RegExp escapedChars = new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
+  String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
+
+  _NotCheckedPart(String content) : super(content);
+
+  String toString() {
+    return escapeString(content);
+  }
+}
+
+
+class _InlineRenderer {
+  List<_InlinePart> parts;
+  Map<String, Target> _references;
+
+
+  _InlineRenderer(this._references) : parts = <_InlinePart>[];
+
+
+  void write(String str, [bool checked = true]) {
+    if (parts.length == 0) {
+      parts.add(checked ? new _CheckedPart(str) : new _NotCheckedPart(str));
+      return;
+    }
+    if (checked && parts.last is _CheckedPart || !checked && parts.last is _NotCheckedPart) {
+      parts.last.content += str;
+      return;
+    }
+    parts.add(checked ? new _CheckedPart(str) : new _NotCheckedPart(str));
+  }
+
+  void writeInlines(Iterable<Inline> inlines, {String prevEmph}) {
+    if (inlines.length == 1 && prevEmph != null) {
+      if (inlines.first is Emph) {
+        writeEmph(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
+        return;
+      }
+      if (inlines.first is Strong) {
+        writeStrong(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
+        return;
+      }
+    }
+
+    Iterator<Inline> it = inlines.iterator;
+    while(it.moveNext()) {
+      Inline inline = it.current;
+      if (inline is Str) {
+        write(inline.contents, false);
+      } else if (inline is Space) {
+        write(' ');
+      } else if (inline is NonBreakableSpace) {
+        write('&nbsp;');
+      } else if (inline is LineBreak) {
+        write('\\\n');
+      } else if (inline is Emph) {
+        writeEmph(inline);
+      } else if (inline is Strong) {
+        writeStrong(inline);
+      } else if (inline is Link) {
+        writeLink(inline);
+      } else if (inline is Image) {
+        writeImage(inline);
+      } else if (inline is Code) {
+        writeCodeInline(inline);
+      } else if (inline is RawInline) {
+        write(inline.contents);
+      } else {
+        throw new UnimplementedError(inline.toString());
+      }
+    }
+  }
+
+  void writeCodeInline(Code code) {
+    String fence = '`' * code.fenceSize;
+    String contents = code.contents;
+    if (contents == '') {
+      contents = ' ';
+    } else {
+      if (contents.startsWith('`')) {
+        contents = ' ' + contents;
+      }
+      if (contents.endsWith('`')) {
+        contents += ' ';
+      }
+    }
+    write(fence);
+    write(contents);
+    write(fence);
+  }
+
+  void writeEmph(Emph emph, {String delimiter: "*"}) {
+    write(delimiter);
+    writeInlines(emph.contents, prevEmph: delimiter);
+    write(delimiter);
+  }
+
+  void writeStrong(Strong strong, {String delimiter: "*"}) {
+    String delimiterString = delimiter * 2;
+    write(delimiterString);
+    writeInlines(strong.contents);
+    write(delimiterString);
+  }
+
+  void writeLink(Link link) {
+    if (link is InlineLink) {
+      write('[');
+      writeInlines(link.label);
+      write('](');
+      writeTarget(link.target);
+      write(')');
+      return;
+    }
+
+    if (link is ReferenceLink) {
+      _references[link.reference] = link.target;
+      _MarkdownBuilder builder = new _MarkdownBuilder(_references);
+      builder.writeInlines(link.label);
+      String inlines = builder.toString();
+      write('[');
+      write(inlines);
+      write(']');
+      if (inlines.toUpperCase() != link.reference.toUpperCase()) {
+        write('[');
+        write(link.reference);
+        write(']');
+      }
+      return;
+    }
+
+    // Autolink
+    write('<');
+    if (link.label.length > 0 && link.label[0] is Str) {
+      write(link.label[0].contents);
+    } else {
+      write(link.target.link);
+    }
+    write('>');
+  }
+
+  void writeImage(Image image) {
+    // TODO reference images
+    write('![');
+    writeInlines(image.label);
+    write('](');
+    writeTarget(image.target);
+    write(')');
+  }
+
+  void writeTarget(Target target) {
+    String result;
+
+    if (target.link.contains(' ') && !target.link.contains(r'[<>]')) {
+      write('<' + target.link + '>');
+    } else {
+      write(target.link, false);
+    }
+
+    if (target.title != null) {
+      write(' "');
+      write(target.title, false);
+      write('"');
+    }
+  }
+
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+    for (_InlinePart part in parts) {
+      buffer.write(part);
+    }
+
+    return buffer.toString();
+  }
+}
+
 class _MarkdownBuilder extends StringBuffer {
   Map<String, Target> _references;
 
 
-  _MarkdownBuilder([this._references]) : super();
+  _MarkdownBuilder(this._references) : super();
 
 
   void writeDocument(Document document) {
     writeBlocks(document.contents);
-    write("\n\n");
     writeReferences();
   }
 
@@ -192,150 +382,26 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-
-  // Inlines
-  void writeInlines(Iterable<Inline> inlines, {String prevEmph}) {
-    if (inlines.length == 1 && prevEmph != null) {
-      if (inlines.first is Emph) {
-        writeEmph(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
-        return;
-      }
-      if (inlines.first is Strong) {
-        writeStrong(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
-        return;
-      }
-    }
-
-    Iterator<Inline> it = inlines.iterator;
-    while(it.moveNext()) {
-      Inline inline = it.current;
-      if (inline is Str) {
-        write(escapeString(inline.contents));
-      } else if (inline is Space) {
-        write(' ');
-      } else if (inline is NonBreakableSpace) {
-        write('&nbsp;');
-      } else if (inline is LineBreak) {
-        write('\\\n');
-      } else if (inline is Emph) {
-        writeEmph(inline);
-      } else if (inline is Strong) {
-        writeStrong(inline);
-      } else if (inline is Link) {
-        writeLink(inline);
-      } else if (inline is Image) {
-        writeImage(inline);
-      } else if (inline is Code) {
-        writeCodeInline(inline);
-      } else if (inline is RawInline) {
-        write(inline.contents);
-      } else {
-        throw new UnimplementedError(inline.toString());
-      }
-    }
-  }
-
-  RegExp escapedChars = new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
-  String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
-
-  void writeCodeInline(Code code) {
-    String fence = '`' * code.fenceSize;
-    String contents = code.contents;
-    if (contents == '') {
-      contents = ' ';
-    } else {
-      if (contents.startsWith('`')) {
-        contents = ' ' + contents;
-      }
-      if (contents.endsWith('`')) {
-        contents += ' ';
-      }
-    }
-    write(fence);
-    write(contents);
-    write(fence);
-  }
-
-  void writeEmph(Emph emph, {String delimiter: "*"}) {
-    write(delimiter);
-    writeInlines(emph.contents, prevEmph: delimiter);
-    write(delimiter);
-  }
-
-  void writeStrong(Strong strong, {String delimiter: "*"}) {
-    String delimiterString = delimiter * 2;
-    write(delimiterString);
-    writeInlines(strong.contents);
-    write(delimiterString);
-  }
-
-  void writeLink(Link link) {
-    if (link is InlineLink) {
-      write('[');
-      writeInlines(link.label);
-      write('](');
-      writeTarget(link.target);
-      write(')');
-      return;
-    }
-
-    if (link is ReferenceLink) {
-      _references[link.reference] = link.target;
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references);
-      builder.writeInlines(link.label);
-      String inlines = builder.toString();
-      write('[');
-      write(inlines);
-      write(']');
-      if (inlines.toUpperCase() != link.reference.toUpperCase()) {
-        write('[');
-        write(link.reference);
-        write(']');
-      }
-      return;
-    }
-
-    // Autolink
-    write('<');
-    if (link.label.length > 0 && link.label[0] is Str) {
-      write(link.label[0].contents);
-    } else {
-      write(link.target.link);
-    }
-    write('>');
-  }
-
-  void writeImage(Image image) {
-    // TODO reference images
-    write('![');
-    writeInlines(image.label);
-    write('](');
-    writeTarget(image.target);
-    write(')');
-  }
-
-  void writeTarget(Target target) {
-    String result;
-
-    if (target.link.contains(' ') && !target.link.contains(r'[<>]')) {
-      write('<' + target.link + '>');
-    } else {
-      write(escapeString(target.link));
-    }
-
-    if (target.title != null) {
-      write(' "${escapeString(target.title)}"');
-    }
+  void writeInlines(Iterable<Inline> inlines) {
+    _InlineRenderer renderer = new _InlineRenderer(_references);
+    renderer.writeInlines(inlines);
+    write(renderer);
   }
 
   void writeReferences() {
-    _references.forEach((String ref, Target target) {
-      write('[');
-      write(ref);
-      write(']: ');
-      writeTarget(target);
-      write('\n');
-    });
+    if (_references.length > 0) {
+      write("\n\n");
+
+      _references.forEach((String ref, Target target) {
+        write('[');
+        write(ref);
+        write(']: ');
+        _InlineRenderer renderer = new _InlineRenderer(_references);
+        renderer.writeTarget(target);
+        write(renderer);
+        write('\n');
+      });
+    }
   }
 }
 
