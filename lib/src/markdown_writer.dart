@@ -1,5 +1,6 @@
 library md_proc.markdown_writer;
 
+import 'dart:math';
 import 'definitions.dart';
 
 abstract class _InlinePart {
@@ -23,6 +24,20 @@ class _NotCheckedPart extends _InlinePart {
   String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
   _NotCheckedPart(String content) : super(content);
+
+  RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
+  RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
+  RegExp _headerRegExp = new RegExp(r" (#+ *)$");
+  String smartEscape(_InlinePart before, _InlinePart after, {bool isHeader: false}) {
+    if (!isHeader) {
+      content = content.replaceAllMapped(_notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
+      content = content.replaceAllMapped(_notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
+    } else {
+      content = content.replaceAllMapped(_headerRegExp, (Match m) => r" \" + m.group(1));
+    }
+
+    return content;
+  }
 
   String toString() {
     return escapeString(content);
@@ -68,7 +83,7 @@ class _InlineRenderer {
       if (inline is Str) {
         write(inline.contents, false);
       } else if (inline is Space) {
-        write(' ');
+        write(' ', false);
       } else if (inline is NonBreakableSpace) {
         write('&nbsp;');
       } else if (inline is LineBreak) {
@@ -183,10 +198,33 @@ class _InlineRenderer {
     }
   }
 
-  String toString() {
+  String toString({bool isHeader: false}) {
     StringBuffer buffer = new StringBuffer();
-    for (_InlinePart part in parts) {
-      buffer.write(part);
+    Iterator<_InlinePart> it = parts.iterator;
+    _InlinePart prev = null;
+    if (!it.moveNext()) {
+      return '';
+    }
+    _InlinePart current = it.current;
+    _InlinePart next = null;
+    if (it.moveNext()) {
+      next = it.current;
+    }
+
+    while(current != null) {
+      if (current is _NotCheckedPart) {
+        buffer.write(current.smartEscape(prev, next, isHeader: isHeader));
+      } else {
+        buffer.write(current);
+      }
+
+      prev = current;
+      current = next;
+      if (it.moveNext()) {
+        next = it.current;
+      } else {
+        next = null;
+      }
     }
 
     return buffer.toString();
@@ -276,8 +314,9 @@ class _MarkdownBuilder extends StringBuffer {
 
 
   void writeHeader(Header header) {
+    // TODO throw exception in case of multiline header ? Or replace with space
     if (header is SetextHeader && header.level <= 2) {
-      _MarkdownBuilder inner = new _MarkdownBuilder(_references);
+      _InlineRenderer inner = new _InlineRenderer(_references);
       inner.writeInlines(header.contents);
       String inlines = inner.toString();
       write(inlines);
@@ -286,7 +325,7 @@ class _MarkdownBuilder extends StringBuffer {
       return;
     }
     write("#" * header.level + " ");
-    writeInlines(header.contents);
+    writeInlines(header.contents, isHeader: true);
     write("\n");
   }
 
@@ -382,10 +421,10 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-  void writeInlines(Iterable<Inline> inlines) {
+  void writeInlines(Iterable<Inline> inlines, {bool isHeader: false}) {
     _InlineRenderer renderer = new _InlineRenderer(_references);
     renderer.writeInlines(inlines);
-    write(renderer);
+    write(renderer.toString(isHeader: isHeader));
   }
 
   void writeReferences() {

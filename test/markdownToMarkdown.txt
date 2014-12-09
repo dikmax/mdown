@@ -1,5 +1,241 @@
+Text
+====
+
 .
 Test!
 .
 Test!
+.
+
+
+Horizontal rules
+================
+
+.
+\*\*\*
+
+\-\-\-
+
+\_\_\_
+
+ \*\*\*
+
+ \-\-\-
+
+ \_\_\_
+
+  \*\*\*
+  \-\-\-
+  \_\_\_
+
+   \*\*\*
+   \-\-\-
+   \_\_\_
+
+    \*\*\*
+    \-\-\-
+    \_\_\_
+.
+\***
+
+\---
+
+\___
+
+ \***
+
+ \---
+
+ \___
+
+  \***
+  \---
+  \___
+
+   \***
+   \---
+   \___
+
+    \*\*\*
+    \-\-\-
+    \_\_\_
+.
+
+
+
+ATX headers
+===========
+
+.
+\### Not a header
+.
+\### Not a header
+.
+
+.
+    ### Not a header
+.
+    ### Not a header
+.
+
+.
+Paragraph
+\# Without a header
+.
+Paragraph
+\# Without a header
+.
+
+.
+# ## Header
+.
+# ## Header
+.
+
+.
+\###### Not a header
+.
+\###### Not a header
+.
+
+.
+####### Not a header
+.
+####### Not a header
+.
+
+.
+#Not a header
+.
+#Not a header
+.
+
+.
+# Header \#\#\#
+.
+# Header \###
+.
+
+.
+# Header \#
+.
+# Header \#
+.
+
+.
+# Header \#
+.
+# Header \#
+.
+
+.
+# Header \#\# Header #
+.
+# Header ## Header
+.
+
+
+SETEXT headers
+==============
+
+.
+Not a header
+\=\=\=\=\=\=
+.
+Not a header
+\======
+.
+
+.
+Not a header
+\=\=\=\=\=\= A \=\=\=\=\=\=
+.
+Not a header
+====== A ======
+.
+
+.
+Not a header
+\-\-\-\-\-\-
+.
+Not a header
+\------
+.
+
+.
+Not a header
+\-\-\-\-\-\- A \-\-\-\-\-\-
+.
+Not a header
+------ A ------
+.
+
+
+Indented code blocks
+====================
+
+.
+\    Not a code
+.
+\    Not a code
+.
+
+
+Fenced code blocks
+==================
+
+.
+\~\~\~
+Not a code
+\~\~\~
+.
+\~~~
+Not a code
+\~~~
+.
+
+.
+\`\`\`
+Not a code
+\`\`\`
+.
+\```
+Not a code
+\```
+.
+
+
+
+HTML
+====
+
+.
+\<td>
+.
+\<td>
+.
+
+.
+< td >
+.
+< td >
+.
+
+
+Link reference definitions
+==========================
+
+.
+\[foo]: /url "title"
+.
+\[foo]: /url "title"
+.
+
+
+TODO
+
+.
+*a
+.
+*a
 .

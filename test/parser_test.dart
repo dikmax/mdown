@@ -166,6 +166,6 @@ void main() {
   fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest);
 
   //t.filterTests("(md2md | markdown )");
-  //t.filterTests(r"^CommonMark html 233$");
+  //t.filterTests(r"^md2md 5$");
 }
 
