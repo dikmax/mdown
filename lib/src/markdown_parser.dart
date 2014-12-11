@@ -77,7 +77,6 @@ class CommonMarkParser {
 
     _inlinesInDocument(doc);
     return doc;
-
   }
 
   //
@@ -380,7 +379,7 @@ class CommonMarkParser {
   // whitespace
   //
 
-  static final Parser whitespace = (spaceChar < skipSpaces) ^ (_) => [new Space()];
+  static final Parser whitespace = spaceChar ^ (_) => [new Space()];
 
   // TODO better escaped chars support
   Parser escapedChar1 = (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~")) % "escaped char";

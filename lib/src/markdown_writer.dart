@@ -27,7 +27,8 @@ class _NotCheckedPart extends _InlinePart {
 
   RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
   RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
-  RegExp _headerRegExp = new RegExp(r" (#+ *)$");
+  RegExp _atxHeaderRegExp = new RegExp(r" (#+ *)$");
+  RegExp _setExtHeaderRegExp = new RegExp("^(.*\n {0,3})(=+|-+)( *(\$|\n))");
   RegExp _horizontalRuleRegExp = new RegExp(r'^( {0,3})((- *){3,}|(_ *){3,}|(\* *){3,})$', multiLine: true);
   String smartEscape(_InlinePart before, _InlinePart after, {bool isHeader: false}) {
     if (!isHeader) {
@@ -35,8 +36,9 @@ class _NotCheckedPart extends _InlinePart {
       content = content.replaceAllMapped(_notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
 
       content = content.replaceAllMapped(_horizontalRuleRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+      content = content.replaceAllMapped(_setExtHeaderRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
     } else {
-      content = content.replaceAllMapped(_headerRegExp, (Match m) => r" \" + m.group(1));
+      content = content.replaceAllMapped(_atxHeaderRegExp, (Match m) => r" \" + m.group(1));
     }
 
     return content;

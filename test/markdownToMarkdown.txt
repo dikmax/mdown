@@ -7,6 +7,14 @@ Test!
 Test!
 .
 
+.
+Paragraph
+        Paragraph
+.
+Paragraph
+        Paragraph
+.
+
 
 Horizontal rules
 ================
@@ -23,8 +31,8 @@ Horizontal rules
   \_\_\_
 .
 \***
-\---
-\___
+  \---
+  \___
 .
 
 .
