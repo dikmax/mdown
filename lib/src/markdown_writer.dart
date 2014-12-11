@@ -28,10 +28,13 @@ class _NotCheckedPart extends _InlinePart {
   RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
   RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
   RegExp _headerRegExp = new RegExp(r" (#+ *)$");
+  RegExp _horizontalRuleRegExp = new RegExp(r'^( {0,3})((- *){3,}|(_ *){3,}|(\* *){3,})$', multiLine: true);
   String smartEscape(_InlinePart before, _InlinePart after, {bool isHeader: false}) {
     if (!isHeader) {
       content = content.replaceAllMapped(_notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
       content = content.replaceAllMapped(_notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
+
+      content = content.replaceAllMapped(_horizontalRuleRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
     } else {
       content = content.replaceAllMapped(_headerRegExp, (Match m) => r" \" + m.group(1));
     }
