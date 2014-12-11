@@ -20,12 +20,15 @@ class _HtmlBuilder extends StringBuffer {
 
     bool first = true;
     while (it.moveNext()) {
+      Block block = it.current;
       if (first) {
         first = false;
+        if (tight && block is! Para) {
+          write("\n");
+        }
       } else {
         write("\n");
       }
-      Block block = it.current;
 
       if (block is Para) {
         if (tight) {
@@ -50,6 +53,10 @@ class _HtmlBuilder extends StringBuffer {
       } else {
         throw new UnimplementedError(block.toString());
       }
+    }
+
+    if (tight && blocks.length > 0 && blocks.last is! Para) {
+      write("\n");
     }
   }
 
@@ -81,10 +88,22 @@ class _HtmlBuilder extends StringBuffer {
   }
 
   void writeListItems(ListBlock list) {
-    for (ListItem item in list.items) {
-      write("<li>");
-      writeBlocks(item.contents, tight: list.tight);
-      write("</li>\n");
+    if (list.tight) {
+      for (ListItem item in list.items) {
+        write("<li>");
+        writeBlocks(item.contents, tight: true);
+        write("</li>\n");
+      }
+    } else {
+      for (ListItem item in list.items) {
+        if (item.contents.length == 0) {
+          write('<li></li>\n');
+        } else {
+          write("<li>\n");
+          writeBlocks(item.contents, tight: false);
+          write("\n</li>\n");
+        }
+      }
     }
   }
 

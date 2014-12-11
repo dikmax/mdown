@@ -17,13 +17,17 @@ Fenced code block in list
     ```
 .
 <ul>
-<li><ul>
-<li><pre><code>a
+<li>
+<ul>
+<li>
+<pre><code>a
 
 
 b
-</code></pre></li>
-</ul></li>
+</code></pre>
+</li>
+</ul>
+</li>
 </ul>
 .
 
@@ -37,14 +41,18 @@ b
     ```
 .
 <ul>
-<li><ul>
-<li><pre><code>a
+<li>
+<ul>
+<li>
+<pre><code>a
 
 
-</code></pre></li>
+</code></pre>
+</li>
 </ul>
 b
-<pre><code></code></pre></li>
+<pre><code></code></pre>
+</li>
 </ul>
 .
 
@@ -58,14 +66,18 @@ b
     ```
 .
 <ul>
-<li><ul>
+<li>
+<ul>
 <li>c</li>
-<li><pre><code>a
+<li>
+<pre><code>a
 
 
 b
-</code></pre></li>
-</ul></li>
+</code></pre>
+</li>
+</ul>
+</li>
 </ul>
 .
 
@@ -106,9 +118,13 @@ Links
 * c
 .
 <ul>
-<li><p>a</p></li>
+<li>
+<p>a</p>
+</li>
 <li></li>
-<li><p>c</p></li>
+<li>
+<p>c</p>
+</li>
 </ul>
 .
 
@@ -119,9 +135,13 @@ Links
 3. c
 .
 <ol>
-<li><p>a</p></li>
+<li>
+<p>a</p>
+</li>
 <li></li>
-<li><p>c</p></li>
+<li>
+<p>c</p>
+</li>
 </ol>
 .
 
@@ -133,11 +153,13 @@ Links
   baz
 .
 <ul>
-<li><p>foo</p>
+<li>
+<p>foo</p>
 <ul>
 <li>bar</li>
 </ul>
-<p>baz</p></li>
+<p>baz</p>
+</li>
 </ul>
 .
 
@@ -151,9 +173,12 @@ Links
 <ol>
 <li>a
 <ol>
-<li><p>b</p>
-<p>c</p></li>
-</ol></li>
+<li>
+<p>b</p>
+<p>c</p>
+</li>
+</ol>
+</li>
 <li>d</li>
 </ol>
 .
