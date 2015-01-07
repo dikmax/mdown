@@ -53,5 +53,15 @@ void main() {
 }
 ```
 
+High-level plan for development
+===============================
+
+1. Follow CommonMark specification changes.
+2. Better markdown writer. Current version is just escapes all special chars no matter of context. I want it to be more
+smart. (In progress)
+3. Add MarkDown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
+and accepted. (inline math, footnotes, etc.)
+4. AST-processing classes. Don't have much time to think about this. But this is definitely required.
 
 [CommonMark]: http://commonmark.org/
+[pandoc]: http://johnmacfarlane.net/pandoc/
