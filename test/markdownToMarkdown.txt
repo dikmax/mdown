@@ -201,7 +201,7 @@ Indented code blocks
 .
 \    Not a code
 .
-\    Not a code
+\\    Not a code
 .
 
 
