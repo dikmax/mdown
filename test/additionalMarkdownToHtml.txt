@@ -188,9 +188,3 @@ Links
 .
 <p><em><strong>a</strong></em></p>
 .
-
-.
-**__**foo**__**
-.
-<p><strong><strong><strong>foo</strong></strong></strong></p>
-.

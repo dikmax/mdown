@@ -77,6 +77,8 @@ class _NotCheckedPart extends _InlinePart {
   RegExp _blockquoteRegExp = new RegExp(r"^( {0,3})>( |$)", multiLine: true);
   RegExp _unorderedListRegExp = new RegExp(r"^( {0,3})([+\-*])( |$)", multiLine: true);
   RegExp _orderedListRegExp = new RegExp(r"^( {0,3}\d+)([.\)])( |$)", multiLine: true);
+  RegExp _fencedTildeCodeRegExp = new RegExp(r"^( {0,3})(~{3,})", multiLine: true);
+  RegExp _linkReferenceRegExp = new RegExp(r"^( {0,3})(\[.*\]:)", multiLine: true);
 
   RegExp _htmlRegExp = new RegExp(r"[<>]");
   RegExp _codeRegExp = new RegExp(r"`+");
@@ -85,7 +87,7 @@ class _NotCheckedPart extends _InlinePart {
   RegExp _linkRegExp = new RegExp(r"\[");
 
   String smartEscape(_InlinePart before, _InlinePart after) {
-    String replaceChars = r"\\"; // All backslashed should be escaped by default
+    String replaceChars = r"\\"; // All backslashes should be escaped by default
 
     if (context.escapeStar) {
       replaceChars += "*";
@@ -155,6 +157,8 @@ class _NotCheckedPart extends _InlinePart {
     content = content.replaceAllMapped(_blockquoteRegExp, (Match m) => m.group(1) + r"\>" + m.group(2));
     content = content.replaceAllMapped(_unorderedListRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
     content = content.replaceAllMapped(_orderedListRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
+    content = content.replaceAllMapped(_fencedTildeCodeRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+    content = content.replaceAllMapped(_linkReferenceRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
 
     return content;
   }

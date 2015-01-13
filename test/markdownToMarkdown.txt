@@ -236,7 +236,7 @@ HTML
 .
 \<td>
 .
-\<td>
+\<td\>
 .
 
 .
@@ -254,9 +254,6 @@ Link reference definitions
 .
 \[foo]: /url "title"
 .
-
-
-TODO
 
 .
 *a
