@@ -635,7 +635,7 @@ class CommonMarkParser {
   // link and image
   //
 
-  Parser linkWhitespace = (blankline > whitespace) | whitespace;
+  Parser linkWhitespace = (blankline > (spaceChar < skipSpaces)) | (spaceChar < skipSpaces);
   Parser get linkInline => (char('(') > (
       (
           (linkWhitespace.maybe > linkInlineDestination) + ((linkWhitespace > linkTitle).maybe < linkWhitespace.maybe)
