@@ -77,7 +77,6 @@ class CommonMarkParser {
 
     _inlinesInDocument(doc);
     return doc;
-
   }
 
   //
@@ -380,7 +379,7 @@ class CommonMarkParser {
   // whitespace
   //
 
-  static final Parser whitespace = (spaceChar < skipSpaces) ^ (_) => [new Space()];
+  static final Parser whitespace = spaceChar ^ (_) => [new Space()];
 
   // TODO better escaped chars support
   Parser escapedChar1 = (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~")) % "escaped char";
@@ -636,7 +635,7 @@ class CommonMarkParser {
   // link and image
   //
 
-  Parser linkWhitespace = (blankline > whitespace) | whitespace;
+  Parser linkWhitespace = (blankline > (spaceChar < skipSpaces)) | (spaceChar < skipSpaces);
   Parser get linkInline => (char('(') > (
       (
           (linkWhitespace.maybe > linkInlineDestination) + ((linkWhitespace > linkTitle).maybe < linkWhitespace.maybe)

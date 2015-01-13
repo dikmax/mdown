@@ -1,17 +1,427 @@
 library md_proc.markdown_writer;
 
 import 'definitions.dart';
+import 'markdown_parser.dart';
+
+abstract class _InlinePart {
+  String content;
+
+  _InlinePart(this.content);
+}
+
+
+class _CheckedPart extends _InlinePart {
+  _CheckedPart(String content) : super(content);
+
+  String toString() {
+    return content;
+  }
+}
+
+
+class _InlineTypes {
+  bool code = false;
+  bool emphOrString = false;
+  bool inlineLink = false;
+  bool referenceLink = false;
+  bool autoLink = false;
+  bool image = false;
+  bool rawHtml = false;
+}
+
+
+class _EscapeContext {
+  final bool escapeStar;
+  final bool escapeUnderscore;
+  final bool escapeParens;
+  final bool escapeQuot;
+  final bool isHeader;
+  final bool isLabel;
+
+  const _EscapeContext({this.escapeStar: false, this.escapeUnderscore: false,
+                       this.escapeParens: false, this.escapeQuot: false,
+                       this.isHeader: false, this.isLabel: false
+                        });
+
+  _EscapeContext copy({bool escapeStar, bool escapeUnderscore,
+                      bool escapeParens, bool escapeQuot,
+                      bool isHeader, bool isLabel}) {
+    return new _EscapeContext(
+      escapeStar: escapeStar != null ? escapeStar : this.escapeStar,
+      escapeUnderscore: escapeUnderscore != null ? escapeUnderscore : this.escapeUnderscore,
+      escapeParens: escapeParens != null ? escapeParens : this.escapeParens,
+      escapeQuot: escapeQuot != null ? escapeQuot : this.escapeQuot,
+      isHeader: isHeader != null ? isHeader : this.isHeader,
+      isLabel: isLabel != null ? isLabel : this.isLabel
+    );
+  }
+
+  static const _EscapeContext EMPTY = const _EscapeContext();
+}
+
+
+class _NotCheckedPart extends _InlinePart {
+  RegExp escapedChars = new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
+  String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
+
+  _EscapeContext context;
+
+  _NotCheckedPart(String content, [this.context = _EscapeContext.EMPTY]) : super(content);
+
+  RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
+  RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
+  RegExp _atxHeaderRegExp = new RegExp(r" (#+ *)$");
+  RegExp _setExtHeaderRegExp = new RegExp("^(.*\n {0,3})(=+|-+)( *(\$|\n))");
+  RegExp _horizontalRuleRegExp = new RegExp(r'^( {0,3})((- *){3,}|(_ *){3,}|(\* *){3,})$', multiLine: true);
+
+  RegExp _blockquoteRegExp = new RegExp(r"^( {0,3})>( |$)", multiLine: true);
+  RegExp _unorderedListRegExp = new RegExp(r"^( {0,3})([+\-*])( |$)", multiLine: true);
+  RegExp _orderedListRegExp = new RegExp(r"^( {0,3}\d+)([.\)])( |$)", multiLine: true);
+  RegExp _fencedTildeCodeRegExp = new RegExp(r"^( {0,3})(~{3,})", multiLine: true);
+  RegExp _linkReferenceRegExp = new RegExp(r"^( {0,3})(\[.*\]:)", multiLine: true);
+
+  RegExp _htmlRegExp = new RegExp(r"[<>]");
+  RegExp _codeRegExp = new RegExp(r"`+");
+  RegExp _emphOrStringRegExp = new RegExp(r"[_*]");
+  RegExp _imageRegExp = new RegExp(r"!\[");
+  RegExp _linkRegExp = new RegExp(r"\[");
+
+  String smartEscape(_InlinePart before, _InlinePart after) {
+    String replaceChars = r"\\"; // All backslashes should be escaped by default
+
+    if (context.escapeStar) {
+      replaceChars += "*";
+    }
+    if (context.escapeUnderscore) {
+      replaceChars += "_";
+    }
+    if (context.escapeParens) {
+      replaceChars += "()";
+    }
+    if (context.escapeQuot) {
+      replaceChars += '"';
+    }
+    if (context.isLabel) {
+      replaceChars += r"\[\]";
+    }
+
+    content = content.replaceAllMapped(new RegExp("[" + replaceChars + "]"), (Match m) => r"\" + m.group(0));
+
+    if (!context.isHeader) {
+      content = content.replaceAllMapped(_notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
+      content = content.replaceAllMapped(_notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
+
+      content = content.replaceAllMapped(_horizontalRuleRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+      content = content.replaceAllMapped(_setExtHeaderRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
+    } else {
+      content = content.replaceAllMapped(_atxHeaderRegExp, (Match m) => r" \" + m.group(1));
+    }
+
+    // Parsing inline code to detect what should be escaped
+
+    bool test = true;
+    while (test) {
+      test = false;
+
+      Inlines parsed = CommonMarkParser.DEFAULT.inlines.parse(content);
+      _InlineTypes types = new _InlineTypes();
+      detectInlines(parsed, types);
+
+      // TODO add tests for inner escaping
+      if (types.code) {
+        content = content.replaceAllMapped(_codeRegExp, (Match m) => r"\" + m.group(0));
+        test = true;
+      }
+      if (types.emphOrString) {
+        content = content.replaceAllMapped(_emphOrStringRegExp, (Match m) => r"\" + m.group(0));
+      }
+      if (types.image) {
+        content = content.replaceAllMapped(_imageRegExp, (Match m) => r"\" + m.group(0));
+      }
+      if (types.referenceLink || types.inlineLink) {
+        content = content.replaceAllMapped(_linkRegExp, (Match m) => r"\" + m.group(0));
+
+      }
+      if (types.rawHtml || types.autoLink) {
+        content = content.replaceAllMapped(_htmlRegExp, (Match m) => r"\" + m.group(0));
+        test = true;
+      }
+    }
+
+    // If ! followed by checked part starting with [, then ! should be escaped, or we'll get image instead of link
+    if (after is _CheckedPart && after.content.startsWith("[") && content.endsWith("!")) {
+      content = content.substring(0, content.length - 1) + r"\!";
+    }
+
+    // Some of these could be escaped by inlines, so put it here.
+    content = content.replaceAllMapped(_blockquoteRegExp, (Match m) => m.group(1) + r"\>" + m.group(2));
+    content = content.replaceAllMapped(_unorderedListRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
+    content = content.replaceAllMapped(_orderedListRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
+    content = content.replaceAllMapped(_fencedTildeCodeRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+    content = content.replaceAllMapped(_linkReferenceRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+
+    return content;
+  }
+
+
+  void detectInlines(Iterable<Inline> inlines, _InlineTypes types) {
+    inlines.forEach((Inline inline) {
+      if (inline is Code) {
+        types.code = true;
+      } else if (inline is Emph || inline is Strong) {
+        types.emphOrString = true;
+        detectInlines(inline.contents, types);
+      } else if (inline is InlineLink) {
+        types.inlineLink = true;
+        detectInlines(inline.label, types);
+      } else if (inline is ReferenceLink) {
+        types.referenceLink = true;
+        detectInlines(inline.label, types);
+      } else if (inline is Autolink) {
+        types.autoLink = true;
+      } else if (inline is InlineImage) {
+        types.image = true;
+        types.inlineLink = true;
+        detectInlines(inline.label, types);
+      } else if (inline is ReferenceImage) {
+        types.image = true;
+        types.referenceLink = true;
+        detectInlines(inline.label, types);
+      } else if (inline is HtmlRawInline) {
+        types.rawHtml = true;
+      }
+    });
+  }
+
+
+  String toString() {
+    return escapeString(content);
+  }
+}
+
+
+class _InlineRenderer {
+  List<_InlinePart> parts;
+  Map<String, Target> _references;
+
+
+  _InlineRenderer(this._references) : parts = <_InlinePart>[];
+
+
+  /**
+   * If context == null then token doesn't require escaping
+   */
+  void write(String str, [_EscapeContext context]) {
+    if (parts.length == 0) {
+      parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, context));
+      return;
+    }
+    if (context == null && parts.last is _CheckedPart || context != null && parts.last is _NotCheckedPart
+        && context == parts.last.context) {
+      parts.last.content += str;
+      return;
+    }
+    parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, context));
+  }
+
+
+  void writeInlines(Iterable<Inline> inlines, {String prevEmph, _EscapeContext context: _EscapeContext.EMPTY}) {
+    if (inlines.length == 1 && prevEmph != null) {
+      if (inlines.first is Emph) {
+        writeEmph(inlines.first, delimiter: prevEmph == "*" ? "_" : "*", context: context);
+        return;
+      }
+      if (inlines.first is Strong) {
+        writeStrong(inlines.first, delimiter: prevEmph == "*" ? "_" : "*", context: context);
+        return;
+      }
+    }
+
+    Iterator<Inline> it = inlines.iterator;
+    while(it.moveNext()) {
+      Inline inline = it.current;
+      if (inline is Str) {
+        var contents = inline.contents;
+        write(contents, context);
+      } else if (inline is Space) {
+        write(' ', context);
+      } else if (inline is NonBreakableSpace) {
+        write('&nbsp;');
+      } else if (inline is LineBreak) {
+        write('\\\n');
+      } else if (inline is Emph) {
+        writeEmph(inline, context: context);
+      } else if (inline is Strong) {
+        writeStrong(inline, context: context);
+      } else if (inline is Link) {
+        writeLink(inline);
+      } else if (inline is Image) {
+        writeImage(inline);
+      } else if (inline is Code) {
+        writeCodeInline(inline);
+      } else if (inline is RawInline) {
+        write(inline.contents);
+      } else {
+        throw new UnimplementedError(inline.toString());
+      }
+    }
+  }
+
+  void writeCodeInline(Code code) {
+    String fence = '`' * code.fenceSize;
+    String contents = code.contents;
+    if (contents == '') {
+      contents = ' ';
+    } else {
+      if (contents.startsWith('`')) {
+        contents = ' ' + contents;
+      }
+      if (contents.endsWith('`')) {
+        contents += ' ';
+      }
+    }
+    write(fence);
+    write(contents);
+    write(fence);
+  }
+
+  void writeEmph(Emph emph, {String delimiter: "*", _EscapeContext context: _EscapeContext.EMPTY}) {
+    if (delimiter == "*" && !context.escapeStar) {
+      context = context.copy(escapeStar: true);
+    } else if (delimiter == "_" && !context.escapeUnderscore) {
+      context = context.copy(escapeUnderscore: true);
+    }
+
+    write(delimiter);
+    writeInlines(emph.contents, prevEmph: delimiter, context: context);
+    write(delimiter);
+  }
+
+  void writeStrong(Strong strong, {String delimiter: "*", _EscapeContext context: _EscapeContext.EMPTY}) {
+    if (delimiter == "*" && !context.escapeStar) {
+      context = context.copy(escapeStar: true);
+    } else if (delimiter == "_" && !context.escapeUnderscore) {
+      context = context.copy(escapeUnderscore: true);
+    }
+
+    String delimiterString = delimiter * 2;
+    write(delimiterString);
+    writeInlines(strong.contents, context: context);
+    write(delimiterString);
+  }
+
+  void writeLink(Link link) {
+    if (link is InlineLink) {
+      write('[');
+      _InlineRenderer renderer = new _InlineRenderer(_references);
+      renderer.writeInlines(link.label, context: new _EscapeContext(isLabel: true));
+      write(renderer.toString());
+      write('](');
+      writeTarget(link.target);
+      write(')');
+      return;
+    }
+
+    if (link is ReferenceLink) {
+      _references[link.reference] = link.target;
+      _MarkdownBuilder builder = new _MarkdownBuilder(_references);
+
+      builder.writeInlines(link.label, context: new _EscapeContext(isLabel: true));
+      String inlines = builder.toString();
+      write('[');
+      write(inlines);
+      write(']');
+      if (inlines.toUpperCase() != link.reference.toUpperCase()) {
+        write('[');
+        write(link.reference);
+        write(']');
+      }
+      return;
+    }
+
+    // Autolink
+    write('<');
+    if (link.label.length > 0 && link.label[0] is Str) {
+      write(link.label[0].contents);
+    } else {
+      write(link.target.link);
+    }
+    write('>');
+  }
+
+  void writeImage(Image image) {
+    // TODO reference images
+    write('![');
+    writeInlines(image.label);
+    write('](');
+    writeTarget(image.target);
+    write(')');
+  }
+
+  RegExp htmlEntity = new RegExp(r"&[0-9a-zA-Z]+;");
+
+  void writeTarget(Target target, {bool isInline: false}) {
+    String result;
+
+    var link = target.link;
+    if (link.contains(htmlEntity)) {
+      link = link.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+      write('<' + link + '>');
+    } else if (link.contains(' ') && !link.contains(r'[<>]')) {
+      write('<' + link + '>');
+    } else {
+      write(link, new _EscapeContext(escapeParens: true));
+    }
+
+    if (target.title != null) {
+      write(' "');
+      write(target.title, new _EscapeContext(escapeQuot: true));
+      write('"');
+    }
+  }
+
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+    Iterator<_InlinePart> it = parts.iterator;
+    _InlinePart prev = null;
+    if (!it.moveNext()) {
+      return '';
+    }
+    _InlinePart current = it.current;
+    _InlinePart next = null;
+    if (it.moveNext()) {
+      next = it.current;
+    }
+
+    while(current != null) {
+      if (current is _NotCheckedPart) {
+        buffer.write(current.smartEscape(prev, next));
+      } else {
+        buffer.write(current);
+      }
+
+      prev = current;
+      current = next;
+      if (it.moveNext()) {
+        next = it.current;
+      } else {
+        next = null;
+      }
+    }
+
+    return buffer.toString();
+  }
+}
 
 class _MarkdownBuilder extends StringBuffer {
   Map<String, Target> _references;
 
 
-  _MarkdownBuilder([this._references]) : super();
+  _MarkdownBuilder(this._references) : super();
 
 
   void writeDocument(Document document) {
     writeBlocks(document.contents);
-    write("\n\n");
     writeReferences();
   }
 
@@ -86,8 +496,9 @@ class _MarkdownBuilder extends StringBuffer {
 
 
   void writeHeader(Header header) {
+    // TODO throw exception in case of multiline header ? Or replace with space
     if (header is SetextHeader && header.level <= 2) {
-      _MarkdownBuilder inner = new _MarkdownBuilder(_references);
+      _InlineRenderer inner = new _InlineRenderer(_references);
       inner.writeInlines(header.contents);
       String inlines = inner.toString();
       write(inlines);
@@ -96,7 +507,7 @@ class _MarkdownBuilder extends StringBuffer {
       return;
     }
     write("#" * header.level + " ");
-    writeInlines(header.contents);
+    writeInlines(header.contents, context: new _EscapeContext(isHeader: true));
     write("\n");
   }
 
@@ -192,150 +603,26 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-
-  // Inlines
-  void writeInlines(Iterable<Inline> inlines, {String prevEmph}) {
-    if (inlines.length == 1 && prevEmph != null) {
-      if (inlines.first is Emph) {
-        writeEmph(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
-        return;
-      }
-      if (inlines.first is Strong) {
-        writeStrong(inlines.first, delimiter: prevEmph == "*" ? "_" : "*");
-        return;
-      }
-    }
-
-    Iterator<Inline> it = inlines.iterator;
-    while(it.moveNext()) {
-      Inline inline = it.current;
-      if (inline is Str) {
-        write(escapeString(inline.contents));
-      } else if (inline is Space) {
-        write(' ');
-      } else if (inline is NonBreakableSpace) {
-        write('&nbsp;');
-      } else if (inline is LineBreak) {
-        write('\\\n');
-      } else if (inline is Emph) {
-        writeEmph(inline);
-      } else if (inline is Strong) {
-        writeStrong(inline);
-      } else if (inline is Link) {
-        writeLink(inline);
-      } else if (inline is Image) {
-        writeImage(inline);
-      } else if (inline is Code) {
-        writeCodeInline(inline);
-      } else if (inline is RawInline) {
-        write(inline.contents);
-      } else {
-        throw new UnimplementedError(inline.toString());
-      }
-    }
-  }
-
-  RegExp escapedChars = new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
-  String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
-
-  void writeCodeInline(Code code) {
-    String fence = '`' * code.fenceSize;
-    String contents = code.contents;
-    if (contents == '') {
-      contents = ' ';
-    } else {
-      if (contents.startsWith('`')) {
-        contents = ' ' + contents;
-      }
-      if (contents.endsWith('`')) {
-        contents += ' ';
-      }
-    }
-    write(fence);
-    write(contents);
-    write(fence);
-  }
-
-  void writeEmph(Emph emph, {String delimiter: "*"}) {
-    write(delimiter);
-    writeInlines(emph.contents, prevEmph: delimiter);
-    write(delimiter);
-  }
-
-  void writeStrong(Strong strong, {String delimiter: "*"}) {
-    String delimiterString = delimiter * 2;
-    write(delimiterString);
-    writeInlines(strong.contents);
-    write(delimiterString);
-  }
-
-  void writeLink(Link link) {
-    if (link is InlineLink) {
-      write('[');
-      writeInlines(link.label);
-      write('](');
-      writeTarget(link.target);
-      write(')');
-      return;
-    }
-
-    if (link is ReferenceLink) {
-      _references[link.reference] = link.target;
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references);
-      builder.writeInlines(link.label);
-      String inlines = builder.toString();
-      write('[');
-      write(inlines);
-      write(']');
-      if (inlines.toUpperCase() != link.reference.toUpperCase()) {
-        write('[');
-        write(link.reference);
-        write(']');
-      }
-      return;
-    }
-
-    // Autolink
-    write('<');
-    if (link.label.length > 0 && link.label[0] is Str) {
-      write(link.label[0].contents);
-    } else {
-      write(link.target.link);
-    }
-    write('>');
-  }
-
-  void writeImage(Image image) {
-    // TODO reference images
-    write('![');
-    writeInlines(image.label);
-    write('](');
-    writeTarget(image.target);
-    write(')');
-  }
-
-  void writeTarget(Target target) {
-    String result;
-
-    if (target.link.contains(' ') && !target.link.contains(r'[<>]')) {
-      write('<' + target.link + '>');
-    } else {
-      write(escapeString(target.link));
-    }
-
-    if (target.title != null) {
-      write(' "${escapeString(target.title)}"');
-    }
+  void writeInlines(Iterable<Inline> inlines, {_EscapeContext context: _EscapeContext.EMPTY}) {
+    _InlineRenderer renderer = new _InlineRenderer(_references);
+    renderer.writeInlines(inlines, context: context);
+    write(renderer.toString());
   }
 
   void writeReferences() {
-    _references.forEach((String ref, Target target) {
-      write('[');
-      write(ref);
-      write(']: ');
-      writeTarget(target);
-      write('\n');
-    });
+    if (_references.length > 0) {
+      write("\n\n");
+
+      _references.forEach((String ref, Target target) {
+        write('[');
+        write(ref);
+        write(']: ');
+        _InlineRenderer renderer = new _InlineRenderer(_references);
+        renderer.writeTarget(target);
+        write(renderer);
+        write('\n');
+      });
+    }
   }
 }
 
