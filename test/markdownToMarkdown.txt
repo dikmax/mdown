@@ -260,3 +260,33 @@ Link reference definitions
 .
 *a
 .
+
+Lists formatting
+================
+
+.
+- a
+
+-
+- b
+.
+- a
+
+-
+
+- b
+.
+
+
+.
+1. a
+2.
+
+3. b
+.
+1. a
+
+2.
+
+3. b
+.
