@@ -314,8 +314,7 @@ class CommonMarkParser {
     htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
   Parser get htmlBlockCloseTag => htmlBlockTag((string("</") > alphanum.many1));
   Parser get htmlInlineCloseTag => (((string("</") > ((letter + alphanum.many).list)) < spaceOrNL.many) < char('>')).record;
-
-  Parser _htmlCompleteComment = (string('<!--') > anyChar.manyUntil(string('--'))).record;
+  Parser _htmlCompleteComment = (string('<!--').notFollowedBy(char('>') | string('->')) > anyChar.manyUntil(string('--'))).record;
   Parser get htmlCompleteComment => new Parser((String s, Position pos) {
     ParseResult res = _htmlCompleteComment.run(s, pos);
     if (!res.isSuccess) {
