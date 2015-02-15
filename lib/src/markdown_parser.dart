@@ -482,8 +482,10 @@ class CommonMarkParser {
   // emphasis and strong
   //
 
-  static RegExp _isSpace = new RegExp(r'\s');
+  // TODO Recheck unicode classes after upgrading to Dart 1.9
+  static RegExp _isSpace = new RegExp(r'[\s ]'); // TODO full set of unicode whitespaces
   static RegExp _isAlphanum = new RegExp(r'[a-z0-9]', caseSensitive: false);
+  static RegExp _isPunctuation = new RegExp(r'[,.!?_*()"]'); // TODO full set of unicode punctuation.
   static Parser scanDelims = new Parser((String s, Position pos) {
     ParseResult testRes = oneOf("*_").lookAhead.run(s, pos);
     if (!testRes.isSuccess) {
@@ -499,11 +501,15 @@ class CommonMarkParser {
     int numDelims = res.value.length;
     String charBefore = pos.offset == 0 ? '\n' : s[pos.offset - 1];
     String charAfter = res.position.offset < s.length ? s[res.position.offset] : '\n';
-    bool canOpen = numDelims > 0 && !_isSpace.hasMatch(charAfter);
-    bool canClose = numDelims > 0 && !_isSpace.hasMatch(charBefore);
+    bool leftFlanking = !_isSpace.hasMatch(charAfter) &&
+        (!_isPunctuation.hasMatch(charAfter) || _isSpace.hasMatch(charBefore) || _isPunctuation.hasMatch(charBefore));
+    bool rightFlanking = !_isSpace.hasMatch(charBefore) &&
+        (!_isPunctuation.hasMatch(charBefore) || _isSpace.hasMatch(charAfter) || _isPunctuation.hasMatch(charAfter));
+    bool canOpen = numDelims > 0 && leftFlanking;
+    bool canClose = numDelims > 0 && rightFlanking;
     if (c == '_') {
-      canOpen = canOpen && !_isAlphanum.hasMatch(charBefore);
-      canClose = canClose && !_isAlphanum.hasMatch(charAfter);
+      canOpen = canOpen && !rightFlanking;
+      canClose = canClose && !leftFlanking;
     }
     return res.copy(value: [numDelims, canOpen, canClose, c]);
   });
