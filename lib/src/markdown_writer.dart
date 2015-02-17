@@ -550,20 +550,26 @@ class _MarkdownBuilder extends StringBuffer {
       _MarkdownBuilder builder = new _MarkdownBuilder(_references);
       builder.writeBlocks(listItem.contents, tight: list.tight, unorderedListChar: list.bulletType.char);
       String contents = builder.toString();
-      String marker = list.bulletType.char + " ";
+      String marker = list.bulletType.char;
       String pad;
 
       write(marker);
 
-      write(contents.splitMapJoin("\n", onNonMatch: (String str) {
-        if (pad == null) { // First
-          pad = " " * marker.length;
+      if (contents.length == 0) {
+        write("\n");
+      } else {
+        write(" ");
+
+        write(contents.splitMapJoin("\n", onNonMatch: (String str) {
+          if (pad == null) { // First
+            pad = " " * (marker.length + 1);
+            return str;
+          } else if (str != "") {
+            return pad + str;
+          }
           return str;
-        } else if (str != "") {
-          return pad + str;
-        }
-        return str;
-      }));
+        }));
+      }
     }
   }
 
@@ -587,18 +593,23 @@ class _MarkdownBuilder extends StringBuffer {
       _MarkdownBuilder builder = new _MarkdownBuilder(_references);
       builder.writeBlocks(listItem.contents, tight: list.tight);
       String contents = builder.toString();
-      String pad;
 
-      write(contents.splitMapJoin("\n", onNonMatch: (String str) {
-        if (pad == null) {
-          String marker = index.toString() + list.indexSeparator.char + " ";
-          pad = " " * marker.length;
-          return marker + str;
-        } else if (str != "") {
-          return pad + str;
-        }
-        return str;
-      }));
+      if (contents.length == 0) {
+        write(index.toString() + list.indexSeparator.char);
+        write("\n");
+      } else {
+        String pad;
+        write(contents.splitMapJoin("\n", onNonMatch: (String str) {
+          if (pad == null) {
+            String marker = index.toString() + list.indexSeparator.char + " ";
+            pad = " " * marker.length;
+            return marker + str;
+          } else if (str != "") {
+            return pad + str;
+          }
+          return str;
+        }));
+      }
       ++index;
     }
   }
