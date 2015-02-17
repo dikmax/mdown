@@ -1224,7 +1224,7 @@ class CommonMarkParser {
       List<Block> innerBlocks;
       if (s == "\n" && blocks.length == 0) {
         // Test for empty items
-        blocks = [new Para(new _UnparsedInlines(""))];
+        blocks = [];
         buffer = [];
         return;
       }
