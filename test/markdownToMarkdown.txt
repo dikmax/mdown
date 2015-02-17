@@ -15,6 +15,11 @@ Paragraph
         Paragraph
 .
 
+.
+\*&nbsp;a&nbsp;*
+.
+\*&nbsp;a&nbsp;*
+.
 
 Horizontal rules
 ================

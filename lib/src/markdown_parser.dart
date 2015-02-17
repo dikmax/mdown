@@ -481,10 +481,11 @@ class CommonMarkParser {
   // emphasis and strong
   //
 
-  // TODO Recheck unicode classes after upgrading to Dart 1.9
-  static RegExp _isSpace = new RegExp(r'[\s ]'); // TODO full set of unicode whitespaces
+  // TODO Replace with r'^\s' after upgrading to Dart 1.9
+  static RegExp _isSpace = new RegExp('^[\\s\u{a0}]');
+
   static RegExp _isAlphanum = new RegExp(r'[a-z0-9]', caseSensitive: false);
-  static RegExp _isPunctuation = new RegExp(r'[,.!?_*()"]'); // TODO full set of unicode punctuation.
+  static RegExp _isPunctuation = new RegExp("^[\u{2000}-\u{206F}\u{2E00}-\u{2E7F}\\\\'!\"#\\\$%&\\(\\)\\*\\+,\\-\\.\\/:;<=>\\?@\\[\\]\\^_`\\{\\|\\}~]");
   static Parser scanDelims = new Parser((String s, Position pos) {
     ParseResult testRes = oneOf("*_").lookAhead.run(s, pos);
     if (!testRes.isSuccess) {
