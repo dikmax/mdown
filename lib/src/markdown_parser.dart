@@ -815,7 +815,7 @@ class CommonMarkParser {
     return result;
   }
 
-  static final String _strSpecialChars = " *_`![]<\\";
+  static final String _strSpecialChars = " *_`![]&<\\";
   static final Parser str = (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => _transformString(chars.join())) |
     (oneOf(_strSpecialChars) ^ (chars) => _transformString(chars)) |
     (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
