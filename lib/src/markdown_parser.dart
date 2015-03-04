@@ -381,10 +381,11 @@ class CommonMarkParser {
   ) ^ (i) => i.join();
 
 
+  Parser get oneNewLine => newline.notFollowedBy(blankline);
   Parser get linkTitle => (
-      ((char("'") > (noneOf("'&\\\n") | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char("'")) |
-      ((char('"') > (noneOf('"&\\\n') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char('"')) |
-      ((char('(') > (noneOf(')&\\\n') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char(')'))
+      ((char("'") > (noneOf("'&\\\n") | oneNewLine | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char("'")) |
+      ((char('"') > (noneOf('"&\\\n') | oneNewLine | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char('"')) |
+      ((char('(') > (noneOf(')&\\\n') | oneNewLine | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char(')'))
   ) ^ (i) => i.join();
 
 
