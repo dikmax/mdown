@@ -1044,53 +1044,6 @@ class CommonMarkParser {
   });
 
 
-  Parser listCodeBlockFenced(int listIndentValue) => new Parser((String s, Position pos) {
-    assert(listIndentValue > 0);
-    Parser listIndent = string(" " * listIndentValue);
-    ParseResult openFenceRes = (listIndent.maybe > openFence).run(s, pos);
-    if (!openFenceRes.isSuccess) {
-      return openFenceRes;
-    }
-    int indent = openFenceRes.value[0];
-    String fenceChar = openFenceRes.value[1];
-    int fenceSize = openFenceRes.value[2];
-    String infoString = openFenceRes.value[3];
-
-    FenceType fenceType = FenceType.BacktickFence;
-    if (fenceChar == '~') {
-      fenceType = FenceType.TildeFence;
-    }
-
-    Parser endFenceParser = ((((listIndent > skipSpaces) > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
-    Parser lineParser;
-    if (indent > 0) {
-      lineParser = (listIndent > atMostSpaces(indent)) > anyLine;
-    } else {
-      lineParser = listIndent > anyLine;
-    }
-
-    Position position = openFenceRes.position;
-    List<String> res = [];
-    while (true) {
-      ParseResult endParserRes = (endFenceParser | eof).run(s, position);
-      if (endParserRes.isSuccess) {
-        position = endParserRes.position;
-        break;
-      }
-
-      ParseResult lineParserRes = (lineParser | (blankline ^ (_) => "")).run(s, position);
-      if (!lineParserRes.isSuccess) {
-        break;
-      }
-
-      res.add(lineParserRes.value + "\n");
-      position = lineParserRes.position;
-    }
-
-    return success([new FencedCodeBlock(res.join(), fenceType, fenceSize, new InfoString(infoString))]).run(s, position);
-  });
-
-
   //
   // Raw html block
   //
