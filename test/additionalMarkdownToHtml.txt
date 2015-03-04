@@ -6,6 +6,16 @@ Simple test
 <p>Simple test</p>
 .
 
+Lists
+
+.
+*
+.
+<ul>
+<li></li>
+</ul>
+.
+
 Fenced code block in list
 
 .
