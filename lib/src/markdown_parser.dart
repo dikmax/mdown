@@ -18,6 +18,7 @@ class _UnparsedInlines extends Inlines {
     raw == obj.raw;
 }
 
+
 String _normalizeReference(String s) {
   return s.trim()
     .replaceAll(new RegExp(r'\s+'),' ')
@@ -56,13 +57,17 @@ class _EmphasisStackItem {
   _EmphasisStackItem(this.char, this.numDelims, this.inlines);
 }
 
+
 // CommonMark parser
 class CommonMarkParser {
   static const int TAB_STOP = 4;
 
+
   CommonMarkParser();
 
+
   Map<String, Target> _references;
+
 
   Document parse(String s) {
     // TODO separate preprocess option
@@ -78,6 +83,7 @@ class CommonMarkParser {
     _inlinesInDocument(doc);
     return doc;
   }
+
 
   //
   // Preprocess
@@ -118,6 +124,7 @@ class CommonMarkParser {
     return sb.toString();
   }
 
+
   //
   // Inlines search
   //
@@ -125,6 +132,7 @@ class CommonMarkParser {
   void _inlinesInDocument(Document doc) {
     doc.contents.forEach(_inlinesInBlock);
   }
+
 
   Block _inlinesInBlock(Block block) {
     if ((block is Header || block is Para) && block.contents is _UnparsedInlines) {
@@ -140,9 +148,11 @@ class CommonMarkParser {
     return block;
   }
 
+
   Inlines _parseInlines(String raw) {
     return inlines.parse(raw);
   }
+
 
   //
   // Aux methods
@@ -219,6 +229,7 @@ class CommonMarkParser {
     return new ParseResult(s, new Expectations.empty(newPos), newPos, true, false, result);
   });
 
+
   static Parser spaceChar = oneOf(" \t") % 'space';
   static Parser nonSpaceChar = noneOf("\t\n \r");
   static Parser skipSpaces = spaceChar.skipMany;
@@ -227,6 +238,7 @@ class CommonMarkParser {
   Parser get indentSpaces => count(TAB_STOP, char(' ')) | char('\t') % "indentation";
   static Parser get skipNonindentSpaces => atMostSpaces(TAB_STOP - 1).notFollowedBy(char(' '));
   static Parser spnl = (skipSpaces > newline);
+
 
   static Parser atMostSpaces(n) {
     if (n <= 0) {
@@ -248,6 +260,7 @@ class CommonMarkParser {
     });
   }
 
+
   static Parser count(int l, Parser p) => new Parser((String s, Position pos) {
     var position = pos;
     var value = [];
@@ -264,6 +277,7 @@ class CommonMarkParser {
 
     return res.copy(value: value);
   });
+
 
   Parser many1Until(Parser parser, Parser end) => parser + parser.manyUntil(end) ^ (a, b) {
     List<Inline> res = [a];
@@ -350,18 +364,22 @@ class CommonMarkParser {
       choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, _linkLabelStr]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
+
   Parser get linkBalancedParenthesis => ((char("(") > (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\')).many1) <
     char(')')) ^ (i) => "(${i.join()})";
+
 
   Parser get linkInlineDestination => (
       ((char("<") > noneOf("<>\n").many) < char(">")) |
       (noneOf("&\\\n ()") | escapedChar1 | htmlEntity1 | linkBalancedParenthesis | oneOf('&\\')).many
   ) ^ (i) => i.join();
 
+
   Parser get linkBlockDestination => (
       ((char("<") > noneOf("<>\n").many1) < char(">")) |
       (noneOf("&\\\n ()") | escapedChar1 | htmlEntity1 | linkBalancedParenthesis | oneOf('&\\')).many1
   ) ^ (i) => i.join();
+
 
   Parser get linkTitle => (
       ((char("'") > (noneOf("'&\\\n") | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) < char("'")) |
@@ -380,9 +398,11 @@ class CommonMarkParser {
 
   static final Parser whitespace = spaceChar ^ (_) => [new Space()];
 
+
   // TODO better escaped chars support
   Parser escapedChar1 = (char('\\') > oneOf("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~")) % "escaped char";
   Parser get escapedChar => escapedChar1 ^ (char) => [new Str(char)];
+
 
   //
   // html entities
@@ -419,6 +439,7 @@ class CommonMarkParser {
     return '&$entity;';
   }) % "html entity";
   Parser get htmlEntity => htmlEntity1 ^ (str) => str == "\u{a0}" ? new NonBreakableSpace() : new Str(str);
+
 
   //
   // inline code
@@ -513,6 +534,7 @@ class CommonMarkParser {
     }
     return res.copy(value: [numDelims, canOpen, canClose, c]);
   });
+
 
   Parser get emphasis => new Parser((String s, Position pos) {
     ParseResult res = scanDelims.run(s, pos);
@@ -637,6 +659,7 @@ class CommonMarkParser {
     return success(result).run(s, position);
   });
 
+
   //
   // link and image
   //
@@ -711,6 +734,7 @@ class CommonMarkParser {
     return fail.run(s, pos);
   });
 
+
   // TODO don't recreate objects. Move common part to separate parser
   Parser<List<Inline>> get image => (char('!') > link(true)) ^ (link) {
     // Transforming link to image
@@ -721,6 +745,7 @@ class CommonMarkParser {
     }
     return link;
   };
+
 
   List<String> allowedSchemes = <String>[
     "coap", "doi", "javascript", "aaa", "aaas", "about", "acap", "cap",
@@ -748,8 +773,10 @@ class CommonMarkParser {
     "wyciwyg", "xfire", "xri", "ymsgr"
   ];
 
+
   RegExp autolinkEmailRegExp = new RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
     r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
+
 
   Parser<List<Inline>> get autolink => new Parser((String s, Position pos) {
     ParseResult res = (char('<') >
@@ -787,11 +814,13 @@ class CommonMarkParser {
       htmlCompleteCDATA
   ]) ^ (result) => [new HtmlRawInline(result)];
 
+
   //
   // Line break
   //
 
   Parser lineBreak = (((string('  ') < spaceChar.many) < newline) | string("\\\n")) ^ (_) => [new LineBreak()];
+
 
   //
   // str
@@ -815,10 +844,12 @@ class CommonMarkParser {
     return result;
   }
 
+
   static final String _strSpecialChars = " *_`![]&<\\";
   static final Parser str = (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => _transformString(chars.join())) |
     (oneOf(_strSpecialChars) ^ (chars) => _transformString(chars)) |
     (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
+
 
   Parser<List<Inline>> get inline => choice([
       lineBreak,
@@ -834,7 +865,9 @@ class CommonMarkParser {
       str
   ]);
 
+
   Parser<Inlines> get inlines => inline.manyUntil(eof) ^ (res) => processParsedInlines(res);
+
 
   //
   // Blocks
@@ -854,6 +887,7 @@ class CommonMarkParser {
       para
   ]);
 
+
   Parser<List<Block>> get blockTight => choice([
       hrule,
       atxHeader,
@@ -865,6 +899,7 @@ class CommonMarkParser {
       blockquote,
       para
   ]);
+
 
   //
   // Horizontal rule
@@ -882,6 +917,7 @@ class CommonMarkParser {
     return ((((count(2, skipSpaces > char(start)) > (spaceChar | char(start)).skipMany) > newline) > blanklines.maybe) >
       success([new HorizontalRule()])).run(s, startRes.position);
   });
+
 
   //
   // ATX Header
@@ -914,6 +950,7 @@ class CommonMarkParser {
     return textRes.copy(value: [new AtxHeader(level, inlines)]);
   });
 
+
   //
   // Setext Header
   //
@@ -933,6 +970,7 @@ class CommonMarkParser {
     return res.copy(value: [new SetextHeader(level, inlines)]);
   });
 
+
   //
   // Indented code
   //
@@ -942,6 +980,7 @@ class CommonMarkParser {
   Parser get codeBlockIndented => (indentedLine +
     ((indentedLine | (blanklines + indentedLine) ^ (b, l) => b.join('') + l).many)) ^
       (f, c) => [new IndentedCodeBlock(stripTrailingNewlines(f + c.join('')) + '\n')];
+
 
   //
   // Fenced code
@@ -973,6 +1012,7 @@ class CommonMarkParser {
     return topFenceRes.copy(value: [indent, fenceChar, fenceSize, infoString]);
   });
 
+
   Parser get codeBlockFenced => new Parser((String s, Position pos) {
     ParseResult openFenceRes = openFence.run(s, pos);
     if (!openFenceRes.isSuccess) {
@@ -1001,6 +1041,7 @@ class CommonMarkParser {
 
     return restParser.run(s, openFenceRes.position);
   });
+
 
   Parser listCodeBlockFenced(int listIndentValue) => new Parser((String s, Position pos) {
     assert(listIndentValue > 0);
@@ -1048,6 +1089,7 @@ class CommonMarkParser {
     return success([new FencedCodeBlock(res.join(), fenceType, fenceSize, new InfoString(infoString))]).run(s, position);
   });
 
+
   //
   // Raw html block
   //
@@ -1081,6 +1123,7 @@ class CommonMarkParser {
     return contentRes.copy(value: [new HtmlRawBlock((" " * firstLineIndent) + content)]);
   });
 
+
   //
   // Link reference
   //
@@ -1090,6 +1133,7 @@ class CommonMarkParser {
     ((blankline.maybe > skipSpaces) > linkTitle).maybe) ^
       (String label, String link, Option<String> title) =>
         new _LinkReference(label, new Target(link, title.isDefined ? title.value : null))) < blankline;
+
 
   //
   // Paragraph
@@ -1114,6 +1158,7 @@ class CommonMarkParser {
     return res.copy(value: [new Para(inlines)]);
   });
 
+
   //
   // Blockquote
   //
@@ -1122,6 +1167,7 @@ class CommonMarkParser {
   static Parser blockquoteLazyLine = skipNonindentSpaces > anyLine;
   static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
     | (blockquoteLazyLine ^ (l) => [false, l]);
+
 
   bool acceptLazy(Iterable<Block> blocks, String s) {
     if (blocks.length > 0) {
@@ -1137,6 +1183,7 @@ class CommonMarkParser {
 
     return false;
   }
+
 
   Parser get blockquote => new Parser((String s, Position pos) {
     ParseResult firstLineRes = blockquoteStrictLine.run(s, pos);
@@ -1192,6 +1239,7 @@ class CommonMarkParser {
 
     return firstLineRes.copy(position: position, value: [new Blockquote(blocks)]);
   });
+
 
   //
   // Lists
@@ -1544,11 +1592,13 @@ class CommonMarkParser {
     }
   });
 
+
   //
   // Document
   //
 
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(processParsedBlocks(res))) % "document";
+
 
   static CommonMarkParser DEFAULT = new CommonMarkParser();
 }
