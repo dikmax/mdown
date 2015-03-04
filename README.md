@@ -57,9 +57,10 @@ High-level plan for development
 ===============================
 
 1. Follow CommonMark specification changes.
-2. Add MarkDown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
+2. Implement smart-punctuation which was introduced in official parsers in version 0.18.
+3. Add MarkDown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
 and accepted. (inline math, footnotes, etc.)
-3. AST-processing classes. Don't have much time to think about this. But this is definitely required.
+4. AST-processing classes. Don't have much time to think about this. But this is definitely required.
 
 [CommonMark]: http://commonmark.org/
 [pandoc]: http://johnmacfarlane.net/pandoc/
