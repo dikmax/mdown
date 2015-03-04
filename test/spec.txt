@@ -1,8 +1,8 @@
 ---
 title: CommonMark Spec
 author: John MacFarlane
-version: 0.17
-date: 2015-01-24
+version: 0.18
+date: 2015-03-03
 license: '[CC-BY-SA 4.0](http://creativecommons.org/licenses/by-sa/4.0/)'
 ...
 
@@ -192,8 +192,8 @@ an implementation without writing an abstract syntax tree renderer.
 
 This document is generated from a text file, `spec.txt`, written
 in Markdown with a small extension for the side-by-side tests.
-The script `spec2md.pl` can be used to turn `spec.txt` into pandoc
-Markdown, which can then be converted into other formats.
+The script `tools/makespec.py` can be used to convert `spec.txt` into
+HTML or CommonMark (which can then be converted into other formats).
 
 In the examples, the `→` character is used to represent tabs.
 
@@ -225,8 +225,8 @@ A line containing no characters, or a line containing only spaces
 The following definitions of character classes will be used in this spec:
 
 A [whitespace character](@whitespace-character) is a space
-(`U+0020`), tab (`U+0009`), carriage return (`U+000D`), or
-newline (`U+000A`).
+(`U+0020`), tab (`U+0009`), newline (`U+000A`), line tabulation (`U+000B`),
+form feed (`U+000C`), or carriage return (`U+000D`).
 
 [Whitespace](@whitespace) is a sequence of one or more [whitespace
 character]s.
@@ -1854,6 +1854,38 @@ them.
 <p><a href="my%20url" title="title">Foo bar</a></p>
 .
 
+The title may extend over multiple lines:
+
+.
+[foo]: /url '
+title
+line1
+line2
+'
+
+[foo]
+.
+<p><a href="/url" title="
+title
+line1
+line2
+">foo</a></p>
+.
+
+However, it may not contain a [blank line]:
+
+.
+[foo]: /url 'title
+
+with blank line'
+
+[foo]
+.
+<p>[foo]: /url 'title</p>
+<p>with blank line'</p>
+<p>[foo]</p>
+.
+
 The title may be omitted:
 
 .
@@ -1923,6 +1955,17 @@ It contributes nothing to the document.
 .
 [foo]: /url
 .
+.
+
+Here is another one:
+
+.
+[
+foo
+]: /url
+bar
+.
+<p>bar</p>
 .
 
 This is not a link reference definition, because there are
@@ -2705,6 +2748,18 @@ far enough past the blockquote marker:
 </blockquote>
 .
 
+Note that at least one space is needed between the list marker and
+any following content, so these are not list items:
+
+.
+-one
+
+2.two
+.
+<p>-one</p>
+<p>2.two</p>
+.
+
 A list item may not contain blocks that are separated by more than
 one blank line.  Thus, two blank lines will end a list, unless the
 two blanks are contained in a [fenced code block].
@@ -2943,8 +2998,42 @@ the above case:
 </ul>
 .
 
-3. **Empty list item.**  A [list marker] followed by a
-line containing only [whitespace] is a list item with no contents.
+3.  **Item starting with a blank line.**  If a sequence of lines *Ls*
+    starting with a single [blank line] constitute a (possibly empty)
+    sequence of blocks *Bs*, not separated from each other by more than
+    one blank line, and *M* is a list marker *M* of width *W*,
+    then the result of prepending *M* to the first line of *Ls*, and
+    indenting subsequent lines of *Ls* by *W + 1* spaces, is a list
+    item with *Bs* as its contents.
+    If a line is empty, then it need not be indented.  The type of the
+    list item (bullet or ordered) is determined by the type of its list
+    marker.  If the list item is ordered, then it is also assigned a
+    start number, based on the ordered list marker.
+
+Here are some list items that start with a blank line but are not empty:
+
+.
+-
+  foo
+-
+  ```
+  bar
+  ```
+-
+      baz
+.
+<ul>
+<li>foo</li>
+<li>
+<pre><code>bar
+</code></pre>
+</li>
+<li>
+<pre><code>baz
+</code></pre>
+</li>
+</ul>
+.
 
 Here is an empty bullet list item:
 
@@ -2997,6 +3086,7 @@ A list may start or end with an empty list item:
 <li></li>
 </ul>
 .
+
 
 4.  **Indentation.**  If a sequence of lines *Ls* constitutes a list item
     according to rule #1, #2, or #3, then the result of indenting each line
@@ -3501,7 +3591,7 @@ of an [ordered list] is determined by the list number of
 its initial list item.  The numbers of subsequent list items are
 disregarded.
 
-A list is [loose](@loose) if it any of its constituent
+A list is [loose](@loose) if any of its constituent
 list items are separated by blank lines, or if any of its constituent
 list items directly contain two block-level elements with a blank line
 between them.  Otherwise a list is [tight](@tight).
@@ -4491,12 +4581,14 @@ characters that is not preceded or followed by a `_` character.
 A [left-flanking delimiter run](@left-flanking-delimiter-run) is
 a [delimiter run] that is (a) not followed by [unicode whitespace],
 and (b) either not followed by a [punctuation character], or
-preceded by [unicode whitespace] or a [punctuation character].
+preceded by [unicode whitespace] or a [punctuation character] or
+the beginning of a line.
 
 A [right-flanking delimiter run](@right-flanking-delimiter-run) is
 a [delimiter run] that is (a) not preceded by [unicode whitespace],
 and (b) either not preceded by a [punctuation character], or
-followed by [unicode whitespace] or a [punctuation character].
+followed by [unicode whitespace] or a [punctuation character] or
+the end of a line.
 
 Here are some examples of delimiter runs.
 
@@ -4759,6 +4851,18 @@ whitespace:
 <p>*foo bar *</p>
 .
 
+A newline also counts as whitespace:
+
+.
+*foo bar
+*
+.
+<p>*foo bar</p>
+<ul>
+<li></li>
+</ul>
+.
+
 This is not emphasis, because the second `*` is
 preceded by punctuation and followed by an alphanumeric
 (hence it is not part of a [right-flanking delimiter run]:
@@ -4885,6 +4989,15 @@ followed by whitespace:
 __ foo bar__
 .
 <p>__ foo bar__</p>
+.
+
+A newline counts as whitespace:
+.
+__
+foo bar__
+.
+<p>__
+foo bar__</p>
 .
 
 This is not strong emphasis, because the opening `__` is preceded
@@ -5543,15 +5656,15 @@ _a `_`_
 .
 
 .
-**a<http://foo.bar?q=**>
+**a<http://foo.bar/?q=**>
 .
-<p>**a<a href="http://foo.bar?q=**">http://foo.bar?q=**</a></p>
+<p>**a<a href="http://foo.bar/?q=**">http://foo.bar/?q=**</a></p>
 .
 
 .
-__a<http://foo.bar?q=__>
+__a<http://foo.bar/?q=__>
 .
-<p>__a<a href="http://foo.bar?q=__">http://foo.bar?q=__</a></p>
+<p>__a<a href="http://foo.bar/?q=__">http://foo.bar/?q=__</a></p>
 .
 
 
@@ -5607,6 +5720,9 @@ A [link title](@link-title)  consists of either
 
 - a sequence of zero or more characters between matching parentheses
   (`(...)`), including a `)` character only if it is backslash-escaped.
+
+Although [link title]s may span multiple lines, they may not contain
+a [blank line].
 
 An [inline link](@inline-link) consists of a [link text] followed immediately
 by a left parenthesis `(`, optional [whitespace], an optional
@@ -5911,9 +6027,9 @@ and autolinks over link grouping:
 .
 
 .
-[foo<http://example.com?search=](uri)>
+[foo<http://example.com/?search=](uri)>
 .
-<p>[foo<a href="http://example.com?search=%5D(uri)">http://example.com?search=](uri)</a></p>
+<p>[foo<a href="http://example.com/?search=%5D(uri)">http://example.com/?search=](uri)</a></p>
 .
 
 There are three kinds of [reference link](@reference-link)s:
@@ -6051,11 +6167,11 @@ and autolinks over link grouping:
 .
 
 .
-[foo<http://example.com?search=][ref]>
+[foo<http://example.com/?search=][ref]>
 
 [ref]: /uri
 .
-<p>[foo<a href="http://example.com?search=%5D%5Bref%5D">http://example.com?search=][ref]</a></p>
+<p>[foo<a href="http://example.com/?search=%5D%5Bref%5D">http://example.com/?search=][ref]</a></p>
 .
 
 Matching is case-insensitive:
@@ -6251,6 +6367,14 @@ Thus, `[foo]` is equivalent to `[foo][]`.
 [*foo* bar]: /url "title"
 .
 <p>[<a href="/url" title="title"><em>foo</em> bar</a>]</p>
+.
+
+.
+[[bar [foo]
+
+[foo]: /url
+.
+<p>[[bar <a href="/url">foo</a></p>
 .
 
 The link labels are case-insensitive:
@@ -6598,9 +6722,9 @@ Here are some valid autolinks:
 .
 
 .
-<http://foo.bar.baz?q=hello&id=22&boolean>
+<http://foo.bar.baz/test?q=hello&id=22&boolean>
 .
-<p><a href="http://foo.bar.baz?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz?q=hello&amp;id=22&amp;boolean</a></p>
+<p><a href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>
 .
 
 .
@@ -6623,6 +6747,14 @@ Spaces are not allowed in autolinks:
 <http://foo.bar/baz bim>
 .
 <p>&lt;http://foo.bar/baz bim&gt;</p>
+.
+
+Backslash-escapes do not work inside autolinks:
+
+.
+<http://example.com/\[\>
+.
+<p><a href="http://example.com/%5C%5B%5C">http://example.com/\[\</a></p>
 .
 
 An [email autolink](@email-autolink)
@@ -6650,6 +6782,14 @@ Examples of email autolinks:
 <foo+special@Bar.baz-bar0.com>
 .
 <p><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>
+.
+
+Backslash-escapes do not work inside email autolinks:
+
+.
+<foo\+@bar.example.com>
+.
+<p>&lt;foo+@bar.example.com&gt;</p>
 .
 
 These are not autolinks:
