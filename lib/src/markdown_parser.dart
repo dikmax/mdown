@@ -1382,7 +1382,6 @@ class CommonMarkParser {
         BulletType bulletType = (type == _LIST_TYPE_UNORDERED ? BulletType.fromChar(markerRes.value[0][2]) : null);
 
         if (!nextLevel) {
-
           bool addSuccess = addListItem(type, indexSeparator: indexSeparator, bulletType: bulletType);
           if (!addSuccess) {
             if (stack.length == 1) {
@@ -1397,7 +1396,9 @@ class CommonMarkParser {
               subIndent += markerRes.value[0][2].length;
             }
             stack.last.subIndent = getIndent() + subIndent;
-            if (markerRes.value[1] != "\n" && markerRes.value[1].length <= 4) {
+            if (markerRes.value[1] == "\n") {
+              stack.last.subIndent += 1;
+            } else if (markerRes.value[1].length <= 4) {
               stack.last.subIndent += markerRes.value[1].length;
             }
 

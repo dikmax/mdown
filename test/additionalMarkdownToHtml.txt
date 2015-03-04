@@ -81,6 +81,62 @@ b
 </ul>
 .
 
+.
+-
+  foo
+-
+ ```
+ bar
+ ```
+-
+      baz
+.
+<ul>
+<li>foo</li>
+<li></li>
+</ul>
+<pre><code>bar
+</code></pre>
+<ul>
+<li>
+<pre><code>baz
+</code></pre>
+</li>
+</ul>
+.
+
+.
+-
+  foo
+-
+  ```
+  bar
+ ```
+-
+      baz
+.
+<ul>
+<li>foo</li>
+<li>
+<pre><code>bar
+</code></pre>
+</li>
+</ul>
+<pre><code>-
+     baz
+</code></pre>
+.
+
+Heading and code precedence
+
+.
+```
+-
+.
+<pre><code>-
+</code></pre>
+.
+
 Partial raw Html blocks tests
 
 .
