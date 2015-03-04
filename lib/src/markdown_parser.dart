@@ -1096,6 +1096,7 @@ class CommonMarkParser {
   Parser get para => new Parser((String s, Position pos) {
     Parser end = blankline
       | hrule
+      | listMarkerTest
       | atxHeader
       | openFence
       | rawHtml
