@@ -53,14 +53,31 @@ void main() {
 }
 ```
 
+Smart punctuation
+-----------------
+
+Smart punctuation is automatic replacement of `...`, `---`, `--`, `"` and `'` to `…`, `—`, `–` and curly versions of
+quote marks accordingly.
+
+By default smart punctuation is enabled. To disable it use STRICT version of parsers/writers.
+
+```dart
+import "package:md_proc/md_proc.dart";
+
+void main() {
+  Document doc = CommonMarkParser.STRICT.parse('...'); // STRICT here
+  String res = HtmlWriter.STRICT.write(doc);           // and here
+  print(res); // <h1>...</h1>
+}
+```
+
 High-level plan for development
 ===============================
 
 1. Follow CommonMark specification changes.
-2. Implement smart-punctuation which was introduced in official parsers in version 0.18.
-3. Add MarkDown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
+2. Add MarkDown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
 and accepted. (inline math, footnotes, etc.)
-4. AST-processing classes. Don't have much time to think about this. But this is definitely required.
+3. AST-processing classes. Don't have much time to think about this. But this is definitely required.
 
 [CommonMark]: http://commonmark.org/
 [pandoc]: http://johnmacfarlane.net/pandoc/
