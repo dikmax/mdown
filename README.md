@@ -2,6 +2,7 @@ md_proc
 =======
 
 [![Build Status](https://travis-ci.org/dikmax/md_proc.svg?branch=master)](https://travis-ci.org/dikmax/md_proc)
+[![Coverage Status](https://coveralls.io/repos/dikmax/md_proc/badge.svg?branch=master)](https://coveralls.io/r/dikmax/md_proc?branch=master)
 [![Pub](https://img.shields.io/pub/v/md_proc.svg)](https://pub.dartlang.org/packages/md_proc)
 
 [CommonMark]-compliant Markdown parser.
