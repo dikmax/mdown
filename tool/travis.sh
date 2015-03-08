@@ -12,10 +12,12 @@ dartanalyzer --fatal-warnings \
   lib/src/markdown_parser.dart \
   lib/src/markdown_writer.dart \
   lib/src/options.dart \
-  test/parser_test.dart
+  test/parser_test.dart \
+  test/service_test.dart \
+  test/all_tests.dart
 
 # Run the tests.
-dart --checked test/parser_test.dart
+dart --checked test/all_tests.dart
 
 # If the COVERALLS_TOKEN token is set on travis
 # Install dart_coveralls
@@ -26,5 +28,5 @@ if [ "$COVERALLS_TOKEN" ]; then
     --token $COVERALLS_TOKEN \
     --retry 2 \
     --exclude-test-files \
-    test/parser_test.dart
+    test/all_tests.dart
 fi
