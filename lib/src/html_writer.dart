@@ -18,6 +18,8 @@ class _HtmlBuilder extends StringBuffer {
 
   // Blocks
 
+  bool _firstInline = false;
+
   void writeBlocks(Iterable<Block> blocks, {bool tight: false}) {
     Iterator<Block> it = blocks.iterator;
 
@@ -33,6 +35,7 @@ class _HtmlBuilder extends StringBuffer {
         write("\n");
       }
 
+      _firstInline = true;
       if (block is Para) {
         if (tight) {
           writeInlines(block.contents);
@@ -197,6 +200,8 @@ class _HtmlBuilder extends StringBuffer {
       } else {
         throw new UnimplementedError(inline.toString());
       }
+
+      _firstInline = false;
     }
   }
 
@@ -241,8 +246,13 @@ class _HtmlBuilder extends StringBuffer {
       writeInlines(quote.contents, stripped: stripped);
       write(quote.single ? '\u{2019}' : '\u{201d}');
     } else {
-      // Single quote have no contents and always closing.
-      write(quote.single ? '\u{2019}' : '\u{201d}');
+      if (!quote.single && quote.open && _firstInline) {
+        // If double quote is first char in inline then it can be opening.
+        write('\u{201c}');
+      } else {
+        // Single quote have no contents and always closing.
+        write(quote.single ? '\u{2019}' : '\u{201d}');
+      }
     }
   }
 
