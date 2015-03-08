@@ -428,6 +428,75 @@ class LineBreak extends Inline {
 }
 
 
+abstract class SmartChar extends Inline {
+
+}
+
+
+class MDash extends SmartChar {
+  static final MDash _instance = new MDash._internal();
+  
+  factory MDash() {
+    return _instance;
+  }
+  
+  MDash._internal();
+  
+  String toString() => "MDash";
+  
+  bool operator== (obj) => obj is MDash;
+}
+
+
+class NDash extends SmartChar {
+  static final NDash _instance = new NDash._internal();
+  
+  factory NDash() {
+    return _instance;
+  }
+  
+  NDash._internal();
+  
+  String toString() => "NDash";
+  
+  bool operator== (obj) => obj is NDash;
+}
+
+
+class Ellipsis extends SmartChar {
+  static final Ellipsis _instance = new Ellipsis._internal();
+  
+  factory Ellipsis() {
+    return _instance;
+  }
+  
+  Ellipsis._internal();
+  
+  String toString() => "Ellipsis";
+  
+  bool operator== (obj) => obj is Ellipsis;
+}
+
+
+class SmartQuote extends Inline {
+  bool single;
+  bool open;
+  bool close;
+
+  Inlines contents;
+
+  SmartQuote(this.contents, {this.single, this.open: true, this.close: true});
+
+  String toString() => 'SmartQuote ' +
+    (single
+      ? "${open ? "'" : ""}$contents${close ? "'" : ""}"
+      : "${open ? '"' : ""}$contents${close ? '"' : ""}");
+
+  bool operator== (obj) => obj is Emph &&
+  _iterableEquality.equals(contents, obj.contents);
+}
+
+
 class Code extends Inline {
   String contents;
   int fenceSize;

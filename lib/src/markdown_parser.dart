@@ -63,13 +63,11 @@ class _EmphasisStackItem {
 class CommonMarkParser {
   static const int TAB_STOP = 4;
 
-  ParserOptions _options;
-
-  CommonMarkParser(this._options);
-
+  Options _options;
 
   Map<String, Target> _references;
 
+  CommonMarkParser(this._options, [this._references]);
 
   Document parse(String s) {
     // TODO separate preprocess option
@@ -353,7 +351,8 @@ class CommonMarkParser {
   //
 
   Parser get linkText => (char('[') >
-      choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, rec(() => linkText), str]).manyUntil(char(']')).record) ^
+      choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, rec(() => linkText), str])
+      .manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   static final String _linkLabelStrSpecialChars = " *_`!<\\";
@@ -510,8 +509,8 @@ class CommonMarkParser {
 
   static RegExp _isAlphanum = new RegExp(r'[a-z0-9]', caseSensitive: false);
   static RegExp _isPunctuation = new RegExp("^[\u{2000}-\u{206F}\u{2E00}-\u{2E7F}\\\\'!\"#\\\$%&\\(\\)\\*\\+,\\-\\.\\/:;<=>\\?@\\[\\]\\^_`\\{\\|\\}~]");
-  static Parser scanDelims = new Parser((String s, Position pos) {
-    ParseResult testRes = oneOf("*_").lookAhead.run(s, pos);
+  Parser get scanDelims => new Parser((String s, Position pos) {
+    ParseResult testRes = oneOf(_options.smartPunctuation ? "*_'\"" : "*_").lookAhead.run(s, pos);
     if (!testRes.isSuccess) {
       return testRes;
     }
@@ -559,7 +558,13 @@ class CommonMarkParser {
 
     void mergeWithPrevious() {
       Inlines inlines = new Inlines();
-      inlines.add(new Str(stack.last.char * stack.last.numDelims));
+      if (stack.last.char == "'" || stack.last.char == '"') {
+        for (var i = 0; i < stack.last.numDelims; ++i) {
+          inlines.add(new SmartQuote(new Inlines(), single: stack.last.char == "'", close: false));
+        }
+      } else {
+        inlines.add(new Str(stack.last.char * stack.last.numDelims));
+      }
       inlines.addAll(stack.last.inlines);
       stack.removeLast();
       if (stack.length > 0) {
@@ -596,17 +601,26 @@ class CommonMarkParser {
           var count = numDelims < stack.last.numDelims  ? numDelims : stack.last.numDelims;
           numDelims -= count;
           stack.last.numDelims -= count;
-          if (count & 1 == 1) {
-            inline = new Emph(inlines);
-            inlines = new Inlines();
-            inlines.add(inline);
-            count--;
-          }
-          while (count > 0) {
-            inline = new Strong(inlines);
-            inlines = new Inlines();
-            inlines.add(inline);
-            count -= 2;
+          if (char == "'" || char == '"') {
+            while (count > 0) {
+              inline = new SmartQuote(inlines, single: char == "'");
+              inlines = new Inlines();
+              inlines.add(inline);
+              count--;
+            }
+          } else {
+            if (count & 1 == 1) {
+              inline = new Emph(inlines);
+              inlines = new Inlines();
+              inlines.add(inline);
+              count--;
+            }
+            while (count > 0) {
+              inline = new Strong(inlines);
+              inlines = new Inlines();
+              inlines.add(inline);
+              count -= 2;
+            }
           }
 
           if (stack.last.numDelims == 0) {
@@ -627,7 +641,14 @@ class CommonMarkParser {
       }
 
       if (numDelims > 0) {
-        addToStack(new Str(char * numDelims));
+        // ending delimiters without open ones
+        if (char == "'" || char == '"') {
+          for (var i = 0; i < stack.last.numDelims; ++i) {
+            addToStack(new SmartQuote(new Inlines(), single: stack.last.char == "'", open: false));
+          }
+        } else {
+          addToStack(new Str(char * numDelims));
+        }
       }
 
       if (stack.length == 0) {
@@ -848,8 +869,13 @@ class CommonMarkParser {
   }
 
 
-  static final String _strSpecialChars = " *_`![]&<\\";
-  static final Parser str = (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => _transformString(chars.join())) |
+  static final Parser smartPunctuation = (string("...") ^ (_) => new Ellipsis()) |
+    (string("---") ^ (_) => new MDash()) |
+    (string("--") ^ (_) => new NDash());
+
+
+  String get _strSpecialChars => _options.smartPunctuation ? " *_`'\".-![]&<\\" : " *_`![]&<\\";
+  Parser get str => (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => _transformString(chars.join())) |
     (oneOf(_strSpecialChars) ^ (chars) => _transformString(chars)) |
     (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
 
@@ -865,6 +891,7 @@ class CommonMarkParser {
       image,
       autolink,
       rawInlineHtml,
+      _options.smartPunctuation ? smartPunctuation : fail,
       str
   ]);
 
@@ -1558,6 +1585,6 @@ class CommonMarkParser {
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(processParsedBlocks(res))) % "document";
 
 
-  static CommonMarkParser DEFAULT = new CommonMarkParser(ParserOptions.DEFAULT);
-  static CommonMarkParser STRICT = new CommonMarkParser(ParserOptions.STRICT);
+  static CommonMarkParser DEFAULT = new CommonMarkParser(Options.DEFAULT);
+  static CommonMarkParser STRICT = new CommonMarkParser(Options.STRICT);
 }

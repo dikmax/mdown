@@ -128,7 +128,11 @@ String tidy(String html) {
   return result.join('\n').trim();
 }
 
-TestFunc mdToHtmlTest(CommonMarkParser parser, HtmlWriter writer, MarkdownWriter mdWriter) => (int num, String mdOrig, String html) {
+TestFunc mdToHtmlTest(Options options) => (int num, String mdOrig, String html) {
+  CommonMarkParser parser = new CommonMarkParser(options);
+  HtmlWriter writer = new HtmlWriter(options);
+  MarkdownWriter mdWriter = new MarkdownWriter(options);
+
   String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
   html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
@@ -145,7 +149,9 @@ TestFunc mdToHtmlTest(CommonMarkParser parser, HtmlWriter writer, MarkdownWriter
   });
 };
 
-TestFunc mdToMdTest(CommonMarkParser parser, MarkdownWriter writer) => (int num, String md, String destMd) {
+TestFunc mdToMdTest(Options options) => (int num, String md, String destMd) {
+  CommonMarkParser parser = new CommonMarkParser(options);
+  MarkdownWriter writer = new MarkdownWriter(options);
   t.test(num.toString(), () {
     var generatedMarkdown = writer.write(parser.parse(md));
     t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
@@ -155,13 +161,13 @@ TestFunc mdToMdTest(CommonMarkParser parser, MarkdownWriter writer) => (int num,
 
 void main() {
   // CommonMark tests
-  fileTest("CommonMark", "spec.txt", mdToHtmlTest(CommonMarkParser.STRICT, HtmlWriter.DEFAULT, MarkdownWriter.DEFAULT));
+  fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT));
   // Additional tests
-  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(CommonMarkParser.STRICT, HtmlWriter.DEFAULT, MarkdownWriter.DEFAULT));
+  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT));
   // Additional tests
-  fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(CommonMarkParser.DEFAULT, HtmlWriter.DEFAULT, MarkdownWriter.DEFAULT));
+  fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(Options.DEFAULT));
   // Markdown to markdown tests
-  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest(CommonMarkParser.STRICT, MarkdownWriter.DEFAULT));
+  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest(Options.STRICT));
 
   //t.filterTests("(md2md | markdown )");
   //t.filterTests(r"^md2md 5$");

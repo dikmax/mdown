@@ -2,6 +2,7 @@ library md_proc.markdown_writer;
 
 import 'definitions.dart';
 import 'markdown_parser.dart';
+import 'options.dart';
 
 abstract class _InlinePart {
   String content;
@@ -65,8 +66,13 @@ class _NotCheckedPart extends _InlinePart {
   String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
   _EscapeContext context;
+  Options _options;
+  CommonMarkParser _parser;
 
-  _NotCheckedPart(String content, [this.context = _EscapeContext.EMPTY]) : super(content);
+  _NotCheckedPart(String content, this._options, [this.context = _EscapeContext.EMPTY]) : super(content) {
+    _parser = new CommonMarkParser(_options, {});
+  }
+
 
   RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
   RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
@@ -89,6 +95,7 @@ class _NotCheckedPart extends _InlinePart {
   String smartEscape(_InlinePart before, _InlinePart after) {
     String replaceChars = r"\\"; // All backslashes should be escaped by default
 
+
     if (context.escapeStar) {
       replaceChars += "*";
     }
@@ -98,7 +105,9 @@ class _NotCheckedPart extends _InlinePart {
     if (context.escapeParens) {
       replaceChars += "()";
     }
-    if (context.escapeQuot) {
+    if (_options.smartPunctuation) {
+      replaceChars += '"\'';
+    } else if (context.escapeQuot) {
       replaceChars += '"';
     }
     if (context.isLabel) {
@@ -106,6 +115,18 @@ class _NotCheckedPart extends _InlinePart {
     }
 
     content = content.replaceAllMapped(new RegExp("[" + replaceChars + "]"), (Match m) => r"\" + m.group(0));
+
+    if (_options.smartPunctuation) {
+      content = content.replaceAllMapped(new RegExp(r"(\.\.\.|-{2,3})"), (m) {
+        var val = m.group(0);
+        if (val == '...' || val == '--') {
+          return r"\" + val;
+        } else if (val == '---') {
+          return r"\-\-\-";
+        }
+        return val;
+      });
+    }
 
     if (!context.isHeader) {
       content = content.replaceAllMapped(_notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
@@ -123,7 +144,7 @@ class _NotCheckedPart extends _InlinePart {
     while (test) {
       test = false;
 
-      Inlines parsed = CommonMarkParser.STRICT.inlines.parse(content);
+      Inlines parsed = _parser.inlines.parse(content);
       _InlineTypes types = new _InlineTypes();
       detectInlines(parsed, types);
 
@@ -203,9 +224,10 @@ class _NotCheckedPart extends _InlinePart {
 class _InlineRenderer {
   List<_InlinePart> parts;
   Map<String, Target> _references;
+  Options _options;
 
 
-  _InlineRenderer(this._references) : parts = <_InlinePart>[];
+  _InlineRenderer(this._references, this._options) : parts = <_InlinePart>[];
 
 
   /**
@@ -213,7 +235,7 @@ class _InlineRenderer {
    */
   void write(String str, [_EscapeContext context]) {
     if (parts.length == 0) {
-      parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, context));
+      parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, _options, context));
       return;
     }
     if (context == null && parts.last is _CheckedPart || context != null && parts.last is _NotCheckedPart
@@ -221,7 +243,7 @@ class _InlineRenderer {
       parts.last.content += str;
       return;
     }
-    parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, context));
+    parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, _options, context));
   }
 
 
@@ -259,6 +281,18 @@ class _InlineRenderer {
         writeImage(inline);
       } else if (inline is Code) {
         writeCodeInline(inline);
+      } else if (inline is SmartChar) {
+        if (inline is Ellipsis) {
+          write('...');
+        } else if (inline is MDash) {
+          write('---');
+        } else if (inline is NDash) {
+          write('--');
+        } else {
+          throw new UnimplementedError(inline.toString());
+        }
+      } else if (inline is SmartQuote) {
+        writeSmartQuote(inline, context: context);
       } else if (inline is RawInline) {
         write(inline.contents);
       } else {
@@ -310,10 +344,22 @@ class _InlineRenderer {
     write(delimiterString);
   }
 
+
+  void writeSmartQuote(SmartQuote quote, {_EscapeContext context: _EscapeContext.EMPTY}) {
+    if (quote.open) {
+      write(quote.single ? "'" : '"');
+    }
+    writeInlines(quote.contents, context: context);
+    if (quote.close) {
+      write(quote.single ? "'" : '"');
+    }
+  }
+
+
   void writeLink(Link link) {
     if (link is InlineLink) {
       write('[');
-      _InlineRenderer renderer = new _InlineRenderer(_references);
+      _InlineRenderer renderer = new _InlineRenderer(_references, _options);
       renderer.writeInlines(link.label, context: new _EscapeContext(isLabel: true));
       write(renderer.toString());
       write('](');
@@ -324,7 +370,7 @@ class _InlineRenderer {
 
     if (link is ReferenceLink) {
       _references[link.reference] = link.target;
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references);
+      _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
 
       builder.writeInlines(link.label, context: new _EscapeContext(isLabel: true));
       String inlines = builder.toString();
@@ -416,8 +462,9 @@ class _InlineRenderer {
 class _MarkdownBuilder extends StringBuffer {
   Map<String, Target> _references;
 
+  Options _options;
 
-  _MarkdownBuilder(this._references) : super();
+  _MarkdownBuilder(this._references, this._options) : super();
 
 
   void writeDocument(Document document) {
@@ -485,7 +532,7 @@ class _MarkdownBuilder extends StringBuffer {
 
 
   void writeBlockquote(Blockquote blockquote) {
-    _MarkdownBuilder inner = new _MarkdownBuilder(_references);
+    _MarkdownBuilder inner = new _MarkdownBuilder(_references, _options);
     inner.writeBlocks(blockquote.contents);
     String contents = inner.toString();
     if (contents.endsWith('\n')) {
@@ -498,7 +545,7 @@ class _MarkdownBuilder extends StringBuffer {
   void writeHeader(Header header) {
     // TODO throw exception in case of multiline header ? Or replace with space
     if (header is SetextHeader && header.level <= 2) {
-      _InlineRenderer inner = new _InlineRenderer(_references);
+      _InlineRenderer inner = new _InlineRenderer(_references, _options);
       inner.writeInlines(header.contents);
       String inlines = inner.toString();
       write(inlines);
@@ -547,7 +594,7 @@ class _MarkdownBuilder extends StringBuffer {
       }
 
       ListItem listItem = it.current;
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references);
+      _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
       builder.writeBlocks(listItem.contents, tight: list.tight, unorderedListChar: list.bulletType.char);
       String contents = builder.toString();
       String marker = list.bulletType.char;
@@ -590,7 +637,7 @@ class _MarkdownBuilder extends StringBuffer {
       }
 
       ListItem listItem = it.current;
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references);
+      _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
       builder.writeBlocks(listItem.contents, tight: list.tight);
       String contents = builder.toString();
 
@@ -615,7 +662,7 @@ class _MarkdownBuilder extends StringBuffer {
   }
 
   void writeInlines(Iterable<Inline> inlines, {_EscapeContext context: _EscapeContext.EMPTY}) {
-    _InlineRenderer renderer = new _InlineRenderer(_references);
+    _InlineRenderer renderer = new _InlineRenderer(_references, _options);
     renderer.writeInlines(inlines, context: context);
     write(renderer.toString());
   }
@@ -628,7 +675,7 @@ class _MarkdownBuilder extends StringBuffer {
         write('[');
         write(ref);
         write(']: ');
-        _InlineRenderer renderer = new _InlineRenderer(_references);
+        _InlineRenderer renderer = new _InlineRenderer(_references, _options);
         renderer.writeTarget(target);
         write(renderer);
         write('\n');
@@ -639,12 +686,17 @@ class _MarkdownBuilder extends StringBuffer {
 
 
 class MarkdownWriter {
+  Options _options;
+
+  MarkdownWriter(this._options);
+
   String write(Document document) {
-    _MarkdownBuilder builder = new _MarkdownBuilder(<String, Target>{});
+    _MarkdownBuilder builder = new _MarkdownBuilder(<String, Target>{}, _options);
     builder.writeDocument(document);
 
     return builder.toString();
   }
 
-  static MarkdownWriter DEFAULT = new MarkdownWriter();
+  static MarkdownWriter STRICT = new MarkdownWriter(Options.STRICT);
+  static MarkdownWriter DEFAULT = new MarkdownWriter(Options.DEFAULT);
 }

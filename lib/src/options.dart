@@ -1,8 +1,8 @@
-class ParserOptions {
+class Options {
   bool smartPunctuation;
 
-  ParserOptions({this.smartPunctuation: false});
+  Options({this.smartPunctuation: false});
 
-  static ParserOptions DEFAULT = new ParserOptions(smartPunctuation: true);
-  static ParserOptions STRICT = new ParserOptions();
+  static Options DEFAULT = new Options(smartPunctuation: true);
+  static Options STRICT = new Options();
 }

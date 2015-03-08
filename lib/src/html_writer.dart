@@ -1,10 +1,13 @@
 library md_proc.html_writer;
 
 import 'definitions.dart';
+import 'options.dart';
 
 class _HtmlBuilder extends StringBuffer {
 
-  _HtmlBuilder() : super();
+  Options _options;
+
+  _HtmlBuilder(this._options) : super();
 
 
   void writeDocument(Document document) {
@@ -177,6 +180,18 @@ class _HtmlBuilder extends StringBuffer {
         writeImage(inline, stripped: stripped);
       } else if (inline is Code) {
         writeCodeInline(inline, stripped: stripped);
+      } else if (inline is SmartChar) {
+        if (inline is Ellipsis) {
+          write('\u{2026}');
+        } else if (inline is MDash) {
+          write('\u{2014}');
+        } else if (inline is NDash) {
+          write('\u{2013}');
+        } else {
+          throw new UnimplementedError(inline.toString());
+        }
+      } else if (inline is SmartQuote) {
+        writeSmartQuote(inline, stripped: stripped);
       } else if (inline is RawInline) {
         write(inline.contents);
       } else {
@@ -219,6 +234,19 @@ class _HtmlBuilder extends StringBuffer {
   }
 
 
+  void writeSmartQuote(SmartQuote quote, {bool stripped: false}) {
+    // TODO different quotation styles
+    if (quote.open && quote.close) {
+      write(quote.single ? '\u{2018}' : '\u{201c}');
+      writeInlines(quote.contents, stripped: stripped);
+      write(quote.single ? '\u{2019}' : '\u{201d}');
+    } else {
+      // Single quote have no contents and always closing.
+      write(quote.single ? '\u{2019}' : '\u{201d}');
+    }
+  }
+
+
   void writeLink(Link link, {bool stripped: false}) {
     if (!stripped) {
       write('<a href="');
@@ -243,7 +271,7 @@ class _HtmlBuilder extends StringBuffer {
       write('<img src="');
       write(urlEncode(image.target.link));
       write('" alt="');
-      _HtmlBuilder builder = new _HtmlBuilder();
+      _HtmlBuilder builder = new _HtmlBuilder(_options);
       builder.writeInlines(image.label, stripped: true);
       write(htmlEscape(builder.toString()));
       write('"');
@@ -285,12 +313,16 @@ class _HtmlBuilder extends StringBuffer {
 
 class HtmlWriter {
 
+  Options _options;
+
+  HtmlWriter(this._options);
+
   String write(Document document) {
-    _HtmlBuilder builder = new _HtmlBuilder();
+    _HtmlBuilder builder = new _HtmlBuilder(_options);
     builder.writeDocument(document);
     return builder.toString();
   }
 
-
-  static HtmlWriter DEFAULT = new HtmlWriter();
+  static HtmlWriter STRICT = new HtmlWriter(Options.STRICT);
+  static HtmlWriter DEFAULT = new HtmlWriter(Options.DEFAULT);
 }
