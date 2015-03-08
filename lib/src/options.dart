@@ -1,3 +1,5 @@
+library md_proc.options;
+
 class Options {
   bool smartPunctuation;
 

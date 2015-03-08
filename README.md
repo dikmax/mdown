@@ -52,8 +52,8 @@ import "package:md_proc/md_proc.dart";
 void main() {
   Document doc = CommonMarkParser.DEFAULT.parse('Hello world!\n===');
   String res = MarkdownWriter.DEFAULT.write(doc);
-  print(res); // Hello world\!
-              // =============
+  print(res); // Hello world!
+              // ============
 }
 ```
 
@@ -71,7 +71,7 @@ import "package:md_proc/md_proc.dart";
 void main() {
   Document doc = CommonMarkParser.STRICT.parse('...'); // STRICT here
   String res = HtmlWriter.STRICT.write(doc);           // and here
-  print(res); // <h1>...</h1>
+  print(res); // <p>...</p>
 }
 ```
 

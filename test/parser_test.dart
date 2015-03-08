@@ -1,3 +1,5 @@
+library parserTest;
+
 import 'dart:io';
 import 'package:unittest/unittest.dart' as t;
 import 'package:md_proc/md_proc.dart';
@@ -6,8 +8,6 @@ import 'package:md_proc/src/markdown_writer.dart';
 const int STATE_WAIT = 0;
 const int STATE_MARKDOWN = 1;
 const int STATE_HTML = 2;
-
-// TODO add own tests specially for fenced code block in list
 
 typedef void TestFunc(int num, String source, String destination);
 
@@ -160,19 +160,3 @@ TestFunc mdToMdTest(Options options) => (int num, String md, String destMd) {
     t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
   });
 };
-
-
-void main() {
-  // CommonMark tests
-  fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT));
-  // Additional tests
-  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT));
-  // Additional tests
-  fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(Options.DEFAULT));
-  // Markdown to markdown tests
-  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest(Options.STRICT));
-
-  //t.filterTests("(md2md | markdown )");
-  //t.filterTests(r"^md2md 5$");
-}
-
