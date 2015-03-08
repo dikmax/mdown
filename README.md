@@ -1,7 +1,8 @@
 md_proc
 =======
 
-[![](https://img.shields.io/pub/v/md_proc.svg)](https://pub.dartlang.org/packages/md_proc)
+[![Build Status](https://travis-ci.org/dikmax/md_proc.svg?branch=master)](https://travis-ci.org/dikmax/md_proc)
+[![Pub](https://img.shields.io/pub/v/md_proc.svg)](https://pub.dartlang.org/packages/md_proc)
 
 [CommonMark]-compliant Markdown parser.
 
