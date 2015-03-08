@@ -189,7 +189,10 @@ class _NotCheckedPart extends _InlinePart {
     inlines.forEach((Inline inline) {
       if (inline is Code) {
         types.code = true;
-      } else if (inline is Emph || inline is Strong) {
+      } else if (inline is Emph) {
+        types.emphOrString = true;
+        detectInlines(inline.contents, types);
+      } else if (inline is Strong) {
         types.emphOrString = true;
         detectInlines(inline.contents, types);
       } else if (inline is InlineLink) {
@@ -238,10 +241,15 @@ class _InlineRenderer {
       parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, _options, context));
       return;
     }
-    if (context == null && parts.last is _CheckedPart || context != null && parts.last is _NotCheckedPart
-        && context == parts.last.context) {
+    if (context == null && parts.last is _CheckedPart) {
       parts.last.content += str;
       return;
+    } else if (context != null && parts.last is _NotCheckedPart) {
+      var last = parts.last;
+      if (context == last.context) {
+        last.content += str;
+        return;
+      }
     }
     parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, _options, context));
   }
@@ -388,7 +396,8 @@ class _InlineRenderer {
     // Autolink
     write('<');
     if (link.label.length > 0 && link.label[0] is Str) {
-      write(link.label[0].contents);
+      var labelContents = link.label[0];
+      write(labelContents.contents);
     } else {
       write(link.target.link);
     }
@@ -441,7 +450,8 @@ class _InlineRenderer {
 
     while(current != null) {
       if (current is _NotCheckedPart) {
-        buffer.write(current.smartEscape(prev, next));
+        var c = current; // Workaround for dart-analyzer
+        buffer.write(c.smartEscape(prev, next));
       } else {
         buffer.write(current);
       }
@@ -564,7 +574,8 @@ class _MarkdownBuilder extends StringBuffer {
       String fence = (codeBlock.fenceType == FenceType.BacktickFence ? '`' : '~') * codeBlock.fenceSize;
       write(fence);
       if (codeBlock.attributes is InfoString) {
-        write(' ${codeBlock.attributes.language}');
+        var attributes = codeBlock.attributes;
+        write(' ${attributes.language}');
       }
       write("\n");
       write(codeBlock.contents);
