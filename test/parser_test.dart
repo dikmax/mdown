@@ -92,9 +92,6 @@ class Example2Description extends t.Matcher {
 }
 
 
-final commonMarkParser = CommonMarkParser.DEFAULT;
-final htmlWriter = HtmlWriter.DEFAULT;
-final markdownWriter = MarkdownWriter.DEFAULT;
 RegExp leadingSpacesRegExp = new RegExp(r'^ *');
 RegExp trailingSpacesRegExp = new RegExp(r' *$');
 RegExp consecutiveSpacesRegExp = new RegExp(r' +');
@@ -131,39 +128,40 @@ String tidy(String html) {
   return result.join('\n').trim();
 }
 
-void mdToHtmlTest(int num, String mdOrig, String html) {
+TestFunc mdToHtmlTest(CommonMarkParser parser, HtmlWriter writer, MarkdownWriter mdWriter) => (int num, String mdOrig, String html) {
   String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
   html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-
   t.test('html $num', () {
-    Document doc = commonMarkParser.parse(md);
-    String result = htmlWriter.write(doc);
-    t.expect(tidy(htmlWriter.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
+    Document doc = parser.parse(md);
+    String result = writer.write(doc);
+    t.expect(tidy(writer.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
   });
   t.test('markdown $num', () {
-    var generatedMarkdown = markdownWriter.write(commonMarkParser.parse(md));
-    Document doc = commonMarkParser.parse(generatedMarkdown);
-    String result = htmlWriter.write(doc);
-    t.expect(tidy(htmlWriter.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
+    var generatedMarkdown = mdWriter.write(parser.parse(md));
+    Document doc = parser.parse(generatedMarkdown);
+    String result = writer.write(doc);
+    t.expect(tidy(writer.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
   });
-}
+};
 
-void mdToMdTest(int num, String md, String destMd) {
+TestFunc mdToMdTest(CommonMarkParser parser, MarkdownWriter writer) => (int num, String md, String destMd) {
   t.test(num.toString(), () {
-    var generatedMarkdown = markdownWriter.write(commonMarkParser.parse(md));
+    var generatedMarkdown = writer.write(parser.parse(md));
     t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
   });
-}
+};
 
 
 void main() {
   // CommonMark tests
-  fileTest("CommonMark", "spec.txt", mdToHtmlTest);
+  fileTest("CommonMark", "spec.txt", mdToHtmlTest(CommonMarkParser.STRICT, HtmlWriter.DEFAULT, MarkdownWriter.DEFAULT));
   // Additional tests
-  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest);
+  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(CommonMarkParser.STRICT, HtmlWriter.DEFAULT, MarkdownWriter.DEFAULT));
+  // Additional tests
+  fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(CommonMarkParser.DEFAULT, HtmlWriter.DEFAULT, MarkdownWriter.DEFAULT));
   // Markdown to markdown tests
-  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest);
+  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest(CommonMarkParser.STRICT, MarkdownWriter.DEFAULT));
 
   //t.filterTests("(md2md | markdown )");
   //t.filterTests(r"^md2md 5$");

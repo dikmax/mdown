@@ -123,7 +123,7 @@ class _NotCheckedPart extends _InlinePart {
     while (test) {
       test = false;
 
-      Inlines parsed = CommonMarkParser.DEFAULT.inlines.parse(content);
+      Inlines parsed = CommonMarkParser.STRICT.inlines.parse(content);
       _InlineTypes types = new _InlineTypes();
       detectInlines(parsed, types);
 

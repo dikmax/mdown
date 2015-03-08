@@ -2,11 +2,13 @@ library md_proc;
 
 import 'src/html_writer.dart';
 import 'src/markdown_parser.dart';
+import 'src/options.dart';
 
 export 'src/definitions.dart';
 export 'src/markdown_parser.dart';
 export 'src/html_writer.dart';
 export 'src/markdown_writer.dart';
+export 'src/options.dart';
 
 /**
  * Converts markdown string to html string.

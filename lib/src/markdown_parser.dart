@@ -5,6 +5,7 @@ import 'package:persistent/persistent.dart';
 
 import 'definitions.dart';
 import 'entities.dart';
+import 'options.dart';
 
 
 class _UnparsedInlines extends Inlines {
@@ -62,8 +63,9 @@ class _EmphasisStackItem {
 class CommonMarkParser {
   static const int TAB_STOP = 4;
 
+  ParserOptions _options;
 
-  CommonMarkParser();
+  CommonMarkParser(this._options);
 
 
   Map<String, Target> _references;
@@ -1556,5 +1558,6 @@ class CommonMarkParser {
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(processParsedBlocks(res))) % "document";
 
 
-  static CommonMarkParser DEFAULT = new CommonMarkParser();
+  static CommonMarkParser DEFAULT = new CommonMarkParser(ParserOptions.DEFAULT);
+  static CommonMarkParser STRICT = new CommonMarkParser(ParserOptions.STRICT);
 }
