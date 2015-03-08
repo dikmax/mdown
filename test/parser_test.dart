@@ -19,12 +19,10 @@ Map<String, String> readFile(fileName) {
   List<String> destination = [];
   List<String> source = [];
   List<String> lines = file.readAsLinesSync();
-  int testNo = 0;
   for (String line in lines) {
     if (line == ".") {
       state++;
       if (state == 3) {
-        ++testNo;
         result[source.map((line) => line + "\n").join()] = destination.map((line) => line + "\n").join();
         state = STATE_WAIT;
         destination = [];
@@ -145,13 +143,11 @@ TestFunc mdToHtmlTest(Options options) => (int num, String mdOrig, String html) 
 
   t.test('html $num', () {
     Document doc = parser.parse(md);
-    String result = writer.write(doc);
     t.expect(tidy(writer.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
   });
   t.test('markdown $num', () {
     var generatedMarkdown = mdWriter.write(parser.parse(md));
     Document doc = parser.parse(generatedMarkdown);
-    String result = writer.write(doc);
     t.expect(tidy(writer.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
   });
 };

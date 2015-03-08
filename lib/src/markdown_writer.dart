@@ -416,8 +416,6 @@ class _InlineRenderer {
   RegExp htmlEntity = new RegExp(r"&[0-9a-zA-Z]+;");
 
   void writeTarget(Target target, {bool isInline: false}) {
-    String result;
-
     var link = target.link;
     if (link.contains(htmlEntity)) {
       link = link.replaceAll("<", "&lt;").replaceAll(">", "&gt;");

@@ -1023,10 +1023,6 @@ class CommonMarkParser {
     }
     int indent = fenceStartRes.value[0];
     String fenceChar = fenceStartRes.value[1][0];
-    FenceType fenceType = FenceType.BacktickFence;
-    if (fenceChar == '~') {
-      fenceType = FenceType.TildeFence;
-    }
 
     Parser infoStringParser = ((skipSpaces > (noneOf("&\n\\ " + fenceChar) | escapedChar1 | htmlEntity1 | oneOf('&\\')).many) <
       noneOf("\n" + fenceChar).many) < newline;

@@ -2,7 +2,6 @@ library md_proc;
 
 import 'src/html_writer.dart';
 import 'src/markdown_parser.dart';
-import 'src/options.dart';
 
 export 'src/definitions.dart';
 export 'src/markdown_parser.dart';
