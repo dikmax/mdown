@@ -42,7 +42,14 @@ Map<String, String> readFile(fileName) {
 
 void fileTest(name, fileName, TestFunc testFunc) {
   t.group(name, () {
-    Map<String, String> tests = readFile(fileName);
+    var path = new List.from(Platform.script.pathSegments);
+    var start = 1;
+    if (path[path.length - 2] == '__test_runner') {
+      start = 2;
+    }
+    path.replaceRange(path.length - start, path.length, [fileName]);
+    var filePath = Platform.script.replace(pathSegments: path).toFilePath();
+    Map<String, String> tests = readFile(filePath);
 
     int num = 0;
     tests.forEach((String source, String destination) {
