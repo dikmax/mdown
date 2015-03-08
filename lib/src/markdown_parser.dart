@@ -287,15 +287,6 @@ class CommonMarkParser {
   });
 
 
-  Parser many1Until(Parser parser, Parser end) => parser + parser.manyUntil(end) ^ (a, b) {
-    List<Inline> res = [a];
-    if (b.length > 0) {
-      res.addAll(b);
-    }
-    return res;
-  };
-
-
   //
   // HTML
   //
