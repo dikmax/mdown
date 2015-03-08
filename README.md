@@ -1,6 +1,8 @@
 md_proc
 =======
 
+[![](https://img.shields.io/pub/v/md_proc.svg)](https://pub.dartlang.org/packages/md_proc)
+
 [CommonMark]-compliant Markdown parser.
 
 Basic usage:
