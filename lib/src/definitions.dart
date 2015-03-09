@@ -63,6 +63,9 @@ class Target {
   Target(this.link, this.title);
 
   String toString() => 'Target "${link}" ${title == null ? "null" : "\"${title}\""}';
+
+  bool operator== (obj) => obj is Target &&
+    link == obj.link && title == obj.title;
 }
 
 
@@ -196,6 +199,7 @@ class Blockquote extends Block {
     _iterableEquality.equals(contents, obj.contents);
 }
 
+
 class ListItem {
   Iterable<Block> contents;
 
@@ -304,7 +308,7 @@ class UnorderedList extends ListBlock {
   bool operator== (obj) => obj is UnorderedList &&
     bulletType == obj.bulletType &&
     tight == obj.tight &&
-    _iterableEquality(items, obj.items);
+    _iterableEquality.equals(items, obj.items);
 }
 
 
@@ -320,7 +324,7 @@ class OrderedList extends ListBlock {
     indexSeparator == obj.indexSeparator &&
     tight == obj.tight &&
     startIndex == obj.startIndex &&
-    _iterableEquality(items, obj.items);
+    _iterableEquality.equals(items, obj.items);
 }
 
 
@@ -492,8 +496,11 @@ class SmartQuote extends Inline {
       ? "${open ? "'" : ""}$contents${close ? "'" : ""}"
       : "${open ? '"' : ""}$contents${close ? '"' : ""}");
 
-  bool operator== (obj) => obj is Emph &&
-  _iterableEquality.equals(contents, obj.contents);
+  bool operator== (obj) => obj is SmartQuote &&
+    single == obj.single &&
+    open == obj.open &&
+    close == obj.close &&
+    _iterableEquality.equals(contents, obj.contents);
 }
 
 
@@ -506,7 +513,8 @@ class Code extends Inline {
   String toString() => 'Code "$contents"';
 
   bool operator== (obj) => obj is Code &&
-    contents == obj.contents;
+    contents == obj.contents &&
+    fenceSize == obj.fenceSize;
 }
 
 
