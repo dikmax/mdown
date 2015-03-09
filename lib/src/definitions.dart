@@ -102,6 +102,12 @@ abstract class Header extends Block {
 
 class AtxHeader extends Header {
   AtxHeader(int level, Inlines contents) : super(level, contents);
+  AtxHeader.h1(Inlines contents) : super(1, contents);
+  AtxHeader.h2(Inlines contents) : super(2, contents);
+  AtxHeader.h3(Inlines contents) : super(3, contents);
+  AtxHeader.h4(Inlines contents) : super(4, contents);
+  AtxHeader.h5(Inlines contents) : super(5, contents);
+  AtxHeader.h6(Inlines contents) : super(6, contents);
 
   String toString() => "AtxHeader $level $contents";
 
@@ -113,6 +119,8 @@ class AtxHeader extends Header {
 
 class SetextHeader extends Header {
   SetextHeader(int level, Inlines contents) : super(level, contents);
+  SetextHeader.h1(Inlines contents) : super(1, contents);
+  SetextHeader.h2(Inlines contents) : super(2, contents);
 
   String toString() => "SetextHeader $level $contents";
 
@@ -159,7 +167,8 @@ class IndentedCodeBlock extends CodeBlock {
 class FencedCodeBlock extends CodeBlock {
   FenceType fenceType;
   int fenceSize;
-  FencedCodeBlock(String contents, this.fenceType, this.fenceSize, Attr attributes) : super(contents, attributes);
+  FencedCodeBlock(String contents, {this.fenceType: FenceType.BacktickFence, this.fenceSize: 3, Attr attributes})
+    : super(contents, attributes == null ? new EmptyAttr() : attributes);
 
   String toString() => "FencedCodeBlock $attributes $contents";
 
@@ -294,14 +303,15 @@ abstract class ListBlock extends Block {
   bool tight;
   Iterable<ListItem> items;
 
-  ListBlock(this.tight, this.items);
+  ListBlock(this.items, this.tight);
 }
 
 
 class UnorderedList extends ListBlock {
   BulletType bulletType;
 
-  UnorderedList(bool tight, Iterable<ListItem> items, this.bulletType) : super(tight, items);
+  UnorderedList(Iterable<ListItem> items, {this.bulletType: BulletType.MinusBullet, bool tight: false})
+    : super(items, tight);
 
   String toString() => "UnorderedList $bulletType $items";
 
@@ -316,7 +326,8 @@ class OrderedList extends ListBlock {
   IndexSeparator indexSeparator;
   int startIndex;
 
-  OrderedList(bool tight, Iterable<ListItem> items, this.indexSeparator, this.startIndex) : super(tight, items);
+  OrderedList(Iterable<ListItem> items, {bool tight: false,
+      this.indexSeparator: IndexSeparator.DotSeparator, this.startIndex: 1}) : super(items, tight);
 
   String toString() => "OrderedList start=$startIndex $indexSeparator $items";
 
@@ -508,7 +519,7 @@ class Code extends Inline {
   String contents;
   int fenceSize;
 
-  Code(this.contents, this.fenceSize);
+  Code(this.contents, {this.fenceSize: 1});
 
   String toString() => 'Code "$contents"';
 

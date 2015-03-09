@@ -462,7 +462,7 @@ class CommonMarkParser {
       return fail.run(s,pos);
     }
 
-    int fenceLength = openRes.value.length;
+    int fenceSize = openRes.value.length;
 
     StringBuffer str = new StringBuffer();
     Position position = openRes.position;
@@ -491,8 +491,8 @@ class CommonMarkParser {
       if (!res.isSuccess) {
         return res;
       }
-      if (res.value.length == fenceLength) {
-        return res.copy(value: [new Code(_processInlineCode(str.toString()), fenceLength)]);
+      if (res.value.length == fenceSize) {
+        return res.copy(value: [new Code(_processInlineCode(str.toString()), fenceSize: fenceSize)]);
       }
       str.write(res.value.join());
       position = res.position;
@@ -1058,9 +1058,11 @@ class CommonMarkParser {
     }
     Parser endFenceParser = (((skipNonindentSpaces > string(fenceChar * fenceSize)) > char(fenceChar).many) > skipSpaces) > newline;
     Parser restParser = (lineParser.manyUntil(endFenceParser) ^
-        (lines) => [new FencedCodeBlock(lines.map((i) => i + '\n').join(), fenceType, fenceSize, new InfoString(infoString))])
+        (lines) => [new FencedCodeBlock(lines.map((i) => i + '\n').join(),
+            fenceType: fenceType, fenceSize: fenceSize, attributes: new InfoString(infoString))])
       | (lineParser.manyUntil(eof) ^ (List lines) {
-        return [new FencedCodeBlock(lines.map((l) => l + '\n').join(), fenceType, fenceSize, new InfoString(infoString))];
+        return [new FencedCodeBlock(lines.map((l) => l + '\n').join(),
+            fenceType: fenceType, fenceSize: fenceSize, attributes: new InfoString(infoString))];
       });
 
     return restParser.run(s, openFenceRes.position);
@@ -1454,10 +1456,11 @@ class CommonMarkParser {
         ListBlock newListBlock;
         int subIndent = markerRes.value[0][1] + 1;
         if (type == _LIST_TYPE_ORDERED) {
-          newListBlock = new OrderedList(true, [new ListItem([])], indexSeparator, startIndex);
+          newListBlock = new OrderedList([new ListItem([])],
+              tight: true, indexSeparator: indexSeparator, startIndex: startIndex);
           subIndent += markerRes.value[0][2].length;
         } else {
-          newListBlock = new UnorderedList(true, [new ListItem([])], bulletType);
+          newListBlock = new UnorderedList([new ListItem([])], tight: true, bulletType: bulletType);
         }
 
         if (stack.length > 0) {
@@ -1548,7 +1551,8 @@ class CommonMarkParser {
             position = lineRes.position;
           }
 
-          blocks.add(new FencedCodeBlock(code.map((i) => i + '\n').join(), fenceType, fenceSize, new InfoString(infoString)));
+          blocks.add(new FencedCodeBlock(code.map((i) => i + '\n').join(),
+              fenceType: fenceType, fenceSize: fenceSize, attributes: new InfoString(infoString)));
           closeParagraph = false;
           continue;
         }

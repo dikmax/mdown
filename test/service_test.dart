@@ -112,6 +112,14 @@ void serviceTests() {
       t.test('toString', () {
         t.expect(header.toString(), t.equals('AtxHeader 2 [Str "Header"]'));
       });
+      t.test('Special constructors', () {
+        t.expect(new AtxHeader.h1(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(1, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h2(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h3(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(3, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h4(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(4, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h5(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(5, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h6(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(6, new Inlines.from([new Str('Header')]))));
+      });
       t.test('==', () {
         t.expect(header, t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
       });
@@ -126,6 +134,10 @@ void serviceTests() {
       var header = new SetextHeader(2, new Inlines.from([new Str('Header')]));
       t.test('toString', () {
         t.expect(header.toString(), t.equals('SetextHeader 2 [Str "Header"]'));
+      });
+      t.test('Special constructors', () {
+        t.expect(new SetextHeader.h1(new Inlines.from([new Str('Header')])), t.equals(new SetextHeader(1, new Inlines.from([new Str('Header')]))));
+        t.expect(new SetextHeader.h2(new Inlines.from([new Str('Header')])), t.equals(new SetextHeader(2, new Inlines.from([new Str('Header')]))));
       });
       t.test('==', () {
         t.expect(header, t.equals(new SetextHeader(2, new Inlines.from([new Str('Header')]))));
@@ -161,23 +173,24 @@ void serviceTests() {
       });
       t.test('!=', () {
         t.expect(code, t.isNot(t.equals(new IndentedCodeBlock("Code1"))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", FenceType.BacktickFence, 5, new EmptyAttr()))));
+        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code"))));
       });
     });
 
     t.group('FencedCodeBlock', () {
-      var code = new FencedCodeBlock("Code", FenceType.BacktickFence, 5, new EmptyAttr());
+      var code = new FencedCodeBlock("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('FencedCodeBlock EmptyAttr Code'));
       });
       t.test('==', () {
-        t.expect(code, t.equals(new FencedCodeBlock("Code", FenceType.BacktickFence, 5, new EmptyAttr())));
+        t.expect(code, t.equals(new FencedCodeBlock("Code",
+            fenceType: FenceType.BacktickFence, fenceSize: 3, attributes: new EmptyAttr())));
       });
       t.test('!=', () {
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code1", FenceType.BacktickFence, 5, new EmptyAttr()))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", FenceType.TildeFence, 5, new EmptyAttr()))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", FenceType.BacktickFence, 6, new EmptyAttr()))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", FenceType.BacktickFence, 5, new InfoString('dart')))));
+        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code1"))));
+        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceType: FenceType.TildeFence))));
+        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceSize: 5))));
+        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", attributes: new InfoString('dart')))));
         t.expect(code, t.isNot(t.equals(new IndentedCodeBlock("Code"))));
       });
     });
@@ -265,46 +278,37 @@ void serviceTests() {
     });
 
     t.group('UnorderedList', () {
-      var list = new UnorderedList(false, [new ListItem([new HorizontalRule()])], BulletType.MinusBullet);
+      var list = new UnorderedList([new ListItem([new HorizontalRule()])]);
       t.test('toString', () {
         t.expect(list.toString(), t.equals('UnorderedList MinusBullet [ListItem [HorizontalRule]]'));
       });
       t.test('==', () {
-        t.expect(list,
-            t.equals(new UnorderedList(false, [new ListItem([new HorizontalRule()])], BulletType.MinusBullet)));
+        t.expect(list, t.equals(new UnorderedList([new ListItem([new HorizontalRule()])],
+            tight: false, bulletType: BulletType.MinusBullet)));
       });
       t.test('!=', () {
-        t.expect(list,
-            t.isNot(new UnorderedList(true, [new ListItem([new HorizontalRule()])], BulletType.MinusBullet)));
-        t.expect(list,
-            t.isNot(new UnorderedList(false, [], BulletType.MinusBullet)));
-        t.expect(list,
-            t.isNot(new UnorderedList(false, [new ListItem([new HorizontalRule()])], BulletType.PlusBullet)));
-        t.expect(list,
-            t.isNot(new OrderedList(false, [new ListItem([new HorizontalRule()])], IndexSeparator.DotSeparator, 1)));
+        t.expect(list, t.isNot(new UnorderedList([])));
+        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])], tight: true)));
+        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])], bulletType: BulletType.PlusBullet)));
+        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])])));
       });
     });
 
     t.group('OrderedList', () {
-      var list = new OrderedList(false, [new ListItem([new HorizontalRule()])], IndexSeparator.DotSeparator, 1);
+      var list = new OrderedList([new ListItem([new HorizontalRule()])]);
       t.test('toString', () {
         t.expect(list.toString(), t.equals('OrderedList start=1 DotSeparator [ListItem [HorizontalRule]]'));
       });
       t.test('==', () {
-        t.expect(list,
-            t.equals(new OrderedList(false, [new ListItem([new HorizontalRule()])], IndexSeparator.DotSeparator, 1)));
+        t.expect(list, t.equals(new OrderedList([new ListItem([new HorizontalRule()])],
+            tight: false, indexSeparator: IndexSeparator.DotSeparator, startIndex: 1)));
       });
       t.test('!=', () {
-        t.expect(list,
-            t.isNot(new OrderedList(true, [new ListItem([new HorizontalRule()])], IndexSeparator.DotSeparator, 1)));
-        t.expect(list,
-            t.isNot(new OrderedList(false, [], IndexSeparator.DotSeparator, 1)));
-        t.expect(list,
-            t.isNot(new OrderedList(false, [new ListItem([new HorizontalRule()])], IndexSeparator.ParenthesisSeparator, 1)));
-        t.expect(list,
-            t.isNot(new OrderedList(false, [new ListItem([new HorizontalRule()])], IndexSeparator.DotSeparator, 0)));
-        t.expect(list,
-            t.isNot(new UnorderedList(false, [new ListItem([new HorizontalRule()])], BulletType.MinusBullet)));
+        t.expect(list, t.isNot(new OrderedList([])));
+        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], tight: true)));
+        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], indexSeparator: IndexSeparator.ParenthesisSeparator)));
+        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], startIndex: 0)));
+        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])])));
       });
     });
 
@@ -436,16 +440,16 @@ void serviceTests() {
     });
 
     t.group('Code', () {
-      var code = new Code("Code", 1);
+      var code = new Code("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('Code "Code"'));
       });
       t.test('==', () {
-        t.expect(code, t.equals(new Code("Code", 1)));
+        t.expect(code, t.equals(new Code("Code", fenceSize: 1)));
       });
       t.test('!=', () {
-        t.expect(code, t.isNot(t.equals(new Code("Code1", 1))));
-        t.expect(code, t.isNot(t.equals(new Code("Code", 2))));
+        t.expect(code, t.isNot(t.equals(new Code("Code1"))));
+        t.expect(code, t.isNot(t.equals(new Code("Code", fenceSize: 2))));
         t.expect(code, t.isNot(t.equals(null)));
       });
     });
