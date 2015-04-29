@@ -17,7 +17,7 @@ dartanalyzer --fatal-warnings \
   test/all_tests.dart
 
 # Run the tests.
-dart --checked test/all_tests.dart
+pub run test
 
 # If the COVERALLS_TOKEN token is set on travis
 # Install dart_coveralls
