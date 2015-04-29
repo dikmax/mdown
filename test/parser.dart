@@ -1,7 +1,7 @@
 library parserTest;
 
 import 'dart:io';
-import 'package:unittest/unittest.dart' as t;
+import 'package:test/test.dart' as t;
 import 'package:md_proc/md_proc.dart';
 import 'package:md_proc/src/markdown_writer.dart';
 
@@ -40,13 +40,8 @@ Map<String, String> readFile(fileName) {
 
 void fileTest(name, fileName, TestFunc testFunc) {
   t.group(name, () {
-    var path = new List.from(Platform.script.pathSegments);
-    var start = 1;
-    if (path[path.length - 2] == '__test_runner') {
-      start = 2;
-    }
-    path.replaceRange(path.length - start, path.length, [fileName]);
-    var filePath = Platform.script.replace(pathSegments: path).toFilePath();
+    Directory current = Directory.current;
+    var filePath = "${current.path}/test/$fileName";
     Map<String, String> tests = readFile(filePath);
 
     int num = 0;
@@ -160,3 +155,16 @@ TestFunc mdToMdTest(Options options) => (int num, String md, String destMd) {
     t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
   });
 };
+
+/*
+void preprocessTest() {
+  t.group('Markdown preprocess', () {
+    CommonMarkParser parser = new CommonMarkParser(options);
+    HtmlWriter writer = new HtmlWriter(options);
+
+    t.test('Line endings', () {
+
+    });
+  });
+}
+*/

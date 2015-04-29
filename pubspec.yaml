@@ -1,5 +1,5 @@
 name: md_proc
-version: 0.3.0
+version: 0.4.0
 description: CommonMark-compliant markdown parser
 author: Maxim Dikun <dikmax@gmail.com>
 homepage: https://github.com/dikmax/md_proc
@@ -8,5 +8,5 @@ dependencies:
   unicode_helper: '>=0.2.0 <0.3.0'
   parsers: '>=0.14.3 <0.15.0'
 dev_dependencies:
-  unittest: any
+  test: any
 

@@ -1,7 +1,7 @@
 import 'package:md_proc/src/options.dart';
 
-import 'parser_test.dart';
-import 'service_test.dart';
+import 'parser.dart';
+import 'service.dart';
 
 void main() {
   serviceTests();

@@ -529,8 +529,8 @@ class CommonMarkParser {
     bool canOpen = numDelims > 0 && leftFlanking;
     bool canClose = numDelims > 0 && rightFlanking;
     if (c == '_') {
-      canOpen = canOpen && !rightFlanking;
-      canClose = canClose && !leftFlanking;
+      canOpen = canOpen && (!rightFlanking || _isPunctuation.hasMatch(charBefore));
+      canClose = canClose && (!leftFlanking || _isPunctuation.hasMatch(charAfter));
     }
     return res.copy(value: [numDelims, canOpen, canClose, c]);
   });

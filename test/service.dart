@@ -1,6 +1,6 @@
 library serviceTest;
 
-import 'package:unittest/unittest.dart' as t;
+import 'package:test/test.dart' as t;
 
 import 'package:md_proc/md_proc.dart';
 
