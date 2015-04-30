@@ -12,9 +12,9 @@ dartanalyzer --fatal-warnings \
   lib/src/markdown_parser.dart \
   lib/src/markdown_writer.dart \
   lib/src/options.dart \
-  test/parser_test.dart \
-  test/service_test.dart \
-  test/all_tests.dart
+  test/parser.dart \
+  test/service.dart \
+  test/library_test.dart
 
 # Run the tests.
 pub run test
