@@ -113,7 +113,7 @@ class CommonMarkParser {
         int expandSize = (TAB_STOP - pos) % TAB_STOP;
         sb.write(" " * (expandSize + 1));
         pos += expandSize;
-      } else if (s[i] != "\u{0}") {
+      } else {
         sb.write(s[i]);
       }
 
