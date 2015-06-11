@@ -349,9 +349,11 @@ class CommonMarkParser {
   // Links aux parsers
   //
 
-  Parser get linkText => (char('[') >
-      choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, rec(() => linkText), str])
-      .manyUntil(char(']')).record) ^
+  Parser get _linkTextChoice =>
+    choice([whitespace, htmlEntity, inlineCode, autolink, rawInlineHtml, escapedChar, rec(() => linkText), str]);
+  Parser get linkText => (char('[') > (_linkTextChoice + _linkTextChoice.manyUntil(char(']'))).list.record) ^
+      (String label) => label.substring(0, label.length - 1);
+  Parser get imageText => (char('[') > _linkTextChoice.manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
   static final String _linkLabelStrSpecialChars = " *_`!<\\";
@@ -709,19 +711,22 @@ class CommonMarkParser {
     return false;
   });
 
-  Parser<List<Inline>> link([bool allowInnerLink = false]) => new Parser((String s, Position pos) {
+  Parser<List<Inline>> _linkOrImage(bool isLink) => new Parser((String s, Position pos) {
     ParseResult testRes = char('[').run(s, pos);
     if (!testRes.isSuccess) {
       return testRes;
     }
 
-    // Try inline link
-    ParseResult labelRes = linkText.run(s, pos);
+    // Try inline
+    ParseResult labelRes = (isLink ? linkText : imageText).run(s, pos);
     if (!labelRes.isSuccess) {
       return labelRes;
     }
+    if (isLink && labelRes.value.contains(new RegExp(r"^\s*$"))) {
+      return fail.run(s, pos);
+    }
     Inlines linkInlines = inlines.parse(labelRes.value);
-    if (!allowInnerLink && _isContainsLink(linkInlines)) {
+    if (isLink && _isContainsLink(linkInlines)) {
       List<Inline> resValue = [new Str('[')];
       resValue.addAll(linkInlines);
       resValue.add(new Str(']'));
@@ -730,7 +735,11 @@ class CommonMarkParser {
     ParseResult destRes = linkInline.run(s, labelRes.position);
     if (destRes.isSuccess) {
       // Links inside link content are not allowed
-      return destRes.copy(value: [new InlineLink(linkInlines, destRes.value)]);
+      if (isLink) {
+        return destRes.copy(value: [new InlineLink(linkInlines, destRes.value)]);
+      } else {
+        return destRes.copy(value: [new InlineImage(linkInlines, destRes.value)]);
+      }
     }
 
     // Try reference link
@@ -739,7 +748,11 @@ class CommonMarkParser {
       String reference = refRes.value == "" ? labelRes.value : refRes.value;
       String normalizedReference = _normalizeReference(reference);
       if (_references.containsKey(normalizedReference)) {
-        return refRes.copy(value: [new ReferenceLink(reference, linkInlines, _references[normalizedReference])]);
+        if (isLink) {
+          return refRes.copy(value: [new ReferenceLink(reference, linkInlines, _references[normalizedReference])]);
+        } else {
+          return refRes.copy(value: [new ReferenceImage(reference, linkInlines, _references[normalizedReference])]);
+        }
       }
     } else {
       // Try again from beginning because reference couldn't contain brackets
@@ -749,7 +762,11 @@ class CommonMarkParser {
       }
       String normalizedReference = _normalizeReference(labelRes.value);
       if (_references.containsKey(normalizedReference)) {
-        return labelRes.copy(value: [new ReferenceLink(labelRes.value, linkInlines, _references[normalizedReference])]);
+        if (isLink) {
+          return labelRes.copy(value: [new ReferenceLink(labelRes.value, linkInlines, _references[normalizedReference])]);
+        } else {
+          return labelRes.copy(value: [new ReferenceImage(labelRes.value, linkInlines, _references[normalizedReference])]);
+        }
       }
     }
 
@@ -757,16 +774,8 @@ class CommonMarkParser {
   });
 
 
-  // TODO don't recreate objects. Move common part to separate parser
-  Parser<List<Inline>> get image => (char('!') > link(true)) ^ (link) {
-    // Transforming link to image
-    if (link[0] is InlineLink) {
-      return [new InlineImage(link[0].label, link[0].target)];
-    } else if (link[0] is ReferenceLink) {
-      return [new ReferenceImage(link[0].reference, link[0].label, link[0].target)];
-    }
-    return link;
-  };
+  Parser<List<Inline>> get image => char('!') > _linkOrImage(false);
+  Parser<List<Inline>> get link => _linkOrImage(true);
 
 
   List<String> allowedSchemes = <String>[
@@ -885,7 +894,7 @@ class CommonMarkParser {
       htmlEntity,
       inlineCode,
       emphasis,
-      link(),
+      link,
       image,
       autolink,
       rawInlineHtml,
@@ -1107,12 +1116,21 @@ class CommonMarkParser {
   // Link reference
   //
 
-  Parser get linkReference => ((((skipNonindentSpaces > linkLabel) < char(':')) +
+  Parser get _linkReference => ((((skipNonindentSpaces > linkLabel) < char(':')) +
     ((blankline.maybe > skipSpaces) > linkBlockDestination) +
     ((blankline.maybe > skipSpaces) > linkTitle).maybe) ^
       (String label, String link, Option<String> title) =>
         new _LinkReference(label, new Target(link, title.isDefined ? title.value : null))) < blankline;
 
+  Parser get linkReference => new Parser((String s, Position pos) {
+    var res = _linkReference.run(s, pos);
+
+    // Reference couldn't be empty
+    if (res.isSuccess && res.value.reference.contains(new RegExp(r"^\s*$"))) {
+      return fail.run(s, pos);
+    }
+    return res;
+  });
 
   //
   // Paragraph
