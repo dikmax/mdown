@@ -433,7 +433,7 @@ class CommonMarkParser {
     }
 
     if (code != null) {
-      if (code > 1114111) {
+      if (code > 1114111 || code == 0) {
         code = 0xFFFD;
       }
       return new String.fromCharCode(code);
