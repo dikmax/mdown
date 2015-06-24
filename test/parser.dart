@@ -9,6 +9,12 @@ const int STATE_WAIT = 0;
 const int STATE_MARKDOWN = 1;
 const int STATE_HTML = 2;
 
+enum TestType {
+  HTML, MARKDOWN
+}
+
+typedef bool FilterFunc(TestType type, int num);
+bool emptyFilter(type, num) => true;
 typedef void TestFunc(int num, String source, String destination);
 
 Map<String, String> readFile(fileName) {
@@ -128,7 +134,7 @@ String tidy(String html) {
   return result.join('\n').trim();
 }
 
-TestFunc mdToHtmlTest(Options options) => (int num, String mdOrig, String html) {
+TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) => (int num, String mdOrig, String html) {
   CommonMarkParser parser = new CommonMarkParser(options);
   HtmlWriter writer = new HtmlWriter(options);
   MarkdownWriter mdWriter = new MarkdownWriter(options);
@@ -136,24 +142,31 @@ TestFunc mdToHtmlTest(Options options) => (int num, String mdOrig, String html) 
   String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
   html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-  t.test('html $num', () {
-    Document doc = parser.parse(md);
-    t.expect(tidy(writer.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
-  });
-  t.test('markdown $num', () {
-    var generatedMarkdown = mdWriter.write(parser.parse(md));
-    Document doc = parser.parse(generatedMarkdown);
-    t.expect(tidy(writer.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
-  });
+  if (filter(TestType.HTML, num)) {
+    t.test('html $num', () {
+      Document doc = parser.parse(md);
+      t.expect(tidy(writer.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
+    });
+  }
+  if (filter(TestType.MARKDOWN, num)) {
+    t.test('markdown $num', () {
+      var generatedMarkdown = mdWriter.write(parser.parse(md));
+      Document doc = parser.parse(generatedMarkdown);
+      t.expect(tidy(writer.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
+    });
+  }
 };
 
-TestFunc mdToMdTest(Options options) => (int num, String md, String destMd) {
+TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) => (int num, String md, String destMd) {
   CommonMarkParser parser = new CommonMarkParser(options);
   MarkdownWriter writer = new MarkdownWriter(options);
-  t.test(num.toString(), () {
-    var generatedMarkdown = writer.write(parser.parse(md));
-    t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
-  });
+
+  if (filter(TestType.MARKDOWN, num)) {
+    t.test(num.toString(), () {
+      var generatedMarkdown = writer.write(parser.parse(md));
+      t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
+    });
+  }
 };
 
 /*

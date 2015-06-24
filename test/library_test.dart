@@ -9,6 +9,7 @@ void main() {
   serviceTests();
 
   // CommonMark tests
+  //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && num == 229));
   fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT));
   // Additional tests
   fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT));
