@@ -245,6 +245,7 @@ class CommonMarkParser {
   static Parser blanklines = blankline.many1 % 'blanklines';
   Parser get indentSpaces => count(TAB_STOP, char(' ')) | char('\t') % "indentation";
   static Parser get skipNonindentSpaces => atMostSpaces(TAB_STOP - 1).notFollowedBy(char(' '));
+  static Parser skipListNonindentSpaces(int max) => atMostSpaces(max - 1).notFollowedBy(char(' '));
   static Parser spnl = (skipSpaces > newline);
 
 
@@ -925,7 +926,7 @@ class CommonMarkParser {
   ]);
 
 
-  Parser<List<Block>> get blockTight => choice([
+  Parser<List<Block>> get listTightBlock => choice([
       hrule,
       codeBlockIndented,
       codeBlockFenced,
@@ -1139,7 +1140,7 @@ class CommonMarkParser {
   Parser get para => new Parser((String s, Position pos) {
     Parser end = blankline
       | hrule
-      | listMarkerTest
+      | listMarkerTest(4)
       | atxHeader
       | openFence
       | rawHtml
@@ -1158,16 +1159,13 @@ class CommonMarkParser {
 
 
   //
-  // Blockquote
+  // Lazy line aux function
   //
 
-  static Parser blockquoteStrictLine = ((skipNonindentSpaces > char('>')) > char(' ').maybe) > anyLine;
-  static Parser blockquoteLazyLine = skipNonindentSpaces > anyLine;
-  static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
-    | (blockquoteLazyLine ^ (l) => [false, l]);
-
-
-  bool acceptLazy(Iterable<Block> blocks, String s) {
+  /// Trying to add current line as lazy to nested list blocks.
+  ///
+  /// Returns `true` when line was accepted.
+  bool _acceptLazy(Iterable<Block> blocks, String s) {
     if (blocks.length > 0) {
       if (blocks.last is Para) {
         var last = blocks.last;
@@ -1175,15 +1173,25 @@ class CommonMarkParser {
         return true;
       } else if (blocks.last is Blockquote) {
         var last = blocks.last;
-        return acceptLazy(last.contents, s);
+        return _acceptLazy(last.contents, s);
       } else if (blocks.last is ListBlock) {
         var last = blocks.last;
-        return acceptLazy(last.items.last.contents, s);
+        return _acceptLazy(last.items.last.contents, s);
       }
     }
 
     return false;
   }
+
+
+  //
+  // Blockquote
+  //
+
+  static Parser blockquoteStrictLine = ((skipNonindentSpaces > char('>')) > char(' ').maybe) > anyLine;
+  static Parser blockquoteLazyLine = skipNonindentSpaces > anyLine;
+  static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
+    | (blockquoteLazyLine ^ (l) => [false, l]);
 
 
   Parser get blockquote => new Parser((String s, Position pos) {
@@ -1201,7 +1209,7 @@ class CommonMarkParser {
       List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
       if (!closeParagraph && innerRes.length > 0 && innerRes.first is Para) {
         var first = innerRes.first;
-        if (acceptLazy(blocks, first.contents.raw)) {
+        if (_acceptLazy(blocks, first.contents.raw)) {
           innerRes.removeAt(0);
         }
       }
@@ -1229,7 +1237,7 @@ class CommonMarkParser {
           // TODO fix condition
           if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para) {
             var block = lineBlock[0] as Para;
-            if (!acceptLazy(blocks, block.contents.raw)) {
+            if (!_acceptLazy(blocks, block.contents.raw)) {
               break;
             }
           } else {
@@ -1254,10 +1262,10 @@ class CommonMarkParser {
 
   static const _LIST_TYPE_ORDERED = 0;
   static const _LIST_TYPE_UNORDERED = 1;
-  static ParserAccumulator3 get orderedListMarkerTest => skipNonindentSpaces + digit.many1 + oneOf('.)');
-  static ParserAccumulator2 get unorderedListMarkerTest => skipNonindentSpaces.notFollowedBy(hrule) + oneOf('-+*');
-  static Parser get listMarkerTest => (((orderedListMarkerTest ^ (sp, d, c) => [_LIST_TYPE_ORDERED, sp, d, c])
-    | (unorderedListMarkerTest ^ (sp, c) => [_LIST_TYPE_UNORDERED, sp, c])) + (char("\n") | char(' ').many1)).list;
+  static ParserAccumulator3 orderedListMarkerTest(int indent) => skipListNonindentSpaces(indent) + digit.many1 + oneOf('.)');
+  static ParserAccumulator2 unorderedListMarkerTest(int indent) => skipListNonindentSpaces(indent).notFollowedBy(hrule) + oneOf('-+*');
+  static Parser listMarkerTest(int indent) => (((orderedListMarkerTest(indent) ^ (sp, d, c) => [_LIST_TYPE_ORDERED, sp, d, c])
+    | (unorderedListMarkerTest(indent) ^ (sp, c) => [_LIST_TYPE_UNORDERED, sp, c])) + (char("\n") | char(' ').many1)).list;
 
   Parser get list => new Parser((String s, Position pos) {
     // TODO quick test
@@ -1272,7 +1280,8 @@ class CommonMarkParser {
       }
     }
 
-    bool closeParagraph = false;
+    /// Is previous parsed line was empty?
+    bool afterEmptyLine = false;
     List<Block> blocks = [];
     List<String> buffer = [];
     void buildBuffer() {
@@ -1285,7 +1294,7 @@ class CommonMarkParser {
         return;
       }
       if (getTight()) {
-        ParseResult innerRes = (blockTight.manyUntil(eof) ^ (res) => processParsedBlocks(res)).run(s);
+        ParseResult innerRes = (listTightBlock.manyUntil(eof) ^ (res) => processParsedBlocks(res)).run(s);
         if (innerRes.isSuccess) {
           innerBlocks = innerRes.value;
         } else {
@@ -1296,8 +1305,8 @@ class CommonMarkParser {
       if (!getTight()) {
         innerBlocks = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s);
       }
-      if (!closeParagraph && innerBlocks.length > 0 && innerBlocks.first is Para &&
-          acceptLazy(blocks, ((innerBlocks.first as Para).contents as _UnparsedInlines).raw)) {
+      if (!afterEmptyLine && innerBlocks.length > 0 && innerBlocks.first is Para &&
+          _acceptLazy(blocks, ((innerBlocks.first as Para).contents as _UnparsedInlines).raw)) {
         innerBlocks.removeAt(0);
       }
       if (innerBlocks.length > 0) {
@@ -1329,9 +1338,9 @@ class CommonMarkParser {
         success = true;
       }
       if (success) {
-        if (closeParagraph) {
+        if (afterEmptyLine) {
           setTight(false);
-          closeParagraph = false;
+          afterEmptyLine = false;
         }
         buildBuffer();
         addToListItem(block.items.last, blocks);
@@ -1356,8 +1365,10 @@ class CommonMarkParser {
       }
     }
 
-    Position position = pos;
+    /// Current parsing position
+    Position position = pos; // Current parsing position
 
+    /// Will list item nested inside current?
     bool nextLevel = true;
 
     // TODO Split loop to smaller parts
@@ -1369,19 +1380,21 @@ class CommonMarkParser {
         break;
       }
 
-      // Test for inner elements
+      // If we at the line start and there's only spaces left than applying new line rules
       if (position.character == 1) {
         ParseResult blanklineRes = blankline.run(s, position);
         if (blanklineRes.isSuccess) {
-          if (closeParagraph) {
+          if (afterEmptyLine) {
+            // It's second new line. Closing all lists.
             break;
           }
-          closeParagraph = true;
+          afterEmptyLine = true;
           position = blanklineRes.position;
           continue;
         }
       }
 
+      // Parsing from line start
       if (position.character == 1 && getSubIndent() > 0) {
         // Waiting for indent
         ParseResult indentRes = string(" " * getSubIndent()).run(s, position);
@@ -1389,8 +1402,8 @@ class CommonMarkParser {
           position = indentRes.position;
           nextLevel = true;
         } else {
-          // Lazy line
-          if (!closeParagraph) {
+          // Trying lazy line
+          if (!afterEmptyLine) { // Lazy line couldn't appear after empty line
             if (buffer.length > 0) {
               buildBuffer();
             }
@@ -1399,8 +1412,11 @@ class CommonMarkParser {
             ParseResult lineRes = anyLine.run(s, position);
             assert(lineRes.isSuccess);
             List<Block> lineBlock = block.parse(lineRes.value.trimLeft() + "\n");
-            if (lineBlock.length == 1 && lineBlock[0] is Para &&
-            acceptLazy(blocks, ((lineBlock[0] as Para).contents as _UnparsedInlines).raw)) {
+            if (
+              lineBlock.length == 1 &&
+              lineBlock[0] is Para &&
+              _acceptLazy(blocks, ((lineBlock[0] as Para).contents as _UnparsedInlines).raw)
+            ) {
               position = lineRes.position;
               continue;
             }
@@ -1412,8 +1428,9 @@ class CommonMarkParser {
             blocks = [];
           }
 
+          // Closing all nested lists until we found one with enough indent to accept current line
           nextLevel = false;
-          while (getIndent() > 0) {
+          while (stack.length > 1) {
             ParseResult indentRes = string(" " * getIndent()).run(s, position);
             if (indentRes.isSuccess) {
               position = indentRes.position;
@@ -1426,14 +1443,15 @@ class CommonMarkParser {
         }
       }
 
-      // Test marker start
-      ParseResult markerRes = listMarkerTest.run(s, position);
+      // Trying to find new list item
+      ParseResult markerRes = listMarkerTest(getIndent() + TAB_STOP).run(s, position);
       if (markerRes.isSuccess) {
         int type = markerRes.value[0][0];
         IndexSeparator indexSeparator = (type == _LIST_TYPE_ORDERED ? IndexSeparator.fromChar(markerRes.value[0][3]) : null);
         int startIndex = type == _LIST_TYPE_ORDERED ? int.parse(markerRes.value[0][2].join(), onError: (_) => 1) : 1;
         BulletType bulletType = (type == _LIST_TYPE_UNORDERED ? BulletType.fromChar(markerRes.value[0][2]) : null);
 
+        // It's a new list item on same level
         if (!nextLevel) {
           bool addSuccess = addListItem(type, indexSeparator: indexSeparator, bulletType: bulletType);
           if (!addSuccess) {
@@ -1441,13 +1459,14 @@ class CommonMarkParser {
               // It's a new list on top level. Stopping here
               break;
             }
-            // New list on same level
+            // New list on same level, so we a closing previous one.
             stack.removeLast();
           } else {
             int subIndent = markerRes.value[0][1] + 1;
             if (type == _LIST_TYPE_ORDERED) {
               subIndent += markerRes.value[0][2].length;
             }
+            stack.last.indent = position.character + markerRes.value[0][1] - 1;
             stack.last.subIndent = getIndent() + subIndent;
             if (markerRes.value[1] == "\n") {
               stack.last.subIndent += 1;
@@ -1462,15 +1481,16 @@ class CommonMarkParser {
 
         // Flush buffer
         if (stack.length > 0 && (buffer.length > 0 || blocks.length > 0)) {
-          if (closeParagraph) {
+          if (afterEmptyLine) {
             setTight(false);
-            closeParagraph = false;
+            afterEmptyLine = false;
           }
           buildBuffer();
           addToListItem(stack.last.block.items.last, blocks);
           blocks = [];
         }
 
+        // Ok, it's a new list on new level.
         ListBlock newListBlock;
         int subIndent = markerRes.value[0][1] + 1;
         if (type == _LIST_TYPE_ORDERED) {
@@ -1495,7 +1515,7 @@ class CommonMarkParser {
         nextLevel = true;
         continue;
       } else if (stack.length == 0) {
-        // That was first marker test and it's failed
+        // That was first marker test and it's failed. Return with fail.
         return markerRes;
       }
 
@@ -1509,7 +1529,7 @@ class CommonMarkParser {
       }
 
       if (position.character > 1) {
-        // Fenced code block
+        // Fenced code block requires special treatment.
         ParseResult openFenceRes = openFence.run(s, position);
         if (openFenceRes.isSuccess) {
           if (buffer.length > 0) {
@@ -1571,16 +1591,16 @@ class CommonMarkParser {
 
           blocks.add(new FencedCodeBlock(code.map((i) => i + '\n').join(),
               fenceType: fenceType, fenceSize: fenceSize, attributes: new InfoString(infoString)));
-          closeParagraph = false;
+          afterEmptyLine = false;
           continue;
         }
 
         // Strict line
         ParseResult lineRes = anyLine.run(s, position);
         assert(lineRes.isSuccess);
-        if (closeParagraph) {
+        if (afterEmptyLine) {
           buffer.add("");
-          closeParagraph = false;
+          afterEmptyLine = false;
         }
         buffer.add(lineRes.value);
         position = lineRes.position;
