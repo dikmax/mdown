@@ -295,3 +295,28 @@ Lists formatting
 
 3. b
 .
+
+Links
+=====
+
+.
+[reference][reference]
+
+[reference]: reference
+.
+[reference]
+
+
+[reference]: reference
+.
+
+.
+[reference][reference][reference]
+
+[reference]: reference
+.
+[reference][reference]
+
+
+[reference]: reference
+.

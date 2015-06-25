@@ -14,6 +14,7 @@ dartanalyzer --fatal-warnings \
   lib/src/options.dart \
   test/parser.dart \
   test/service.dart \
+  test/reference_resolver.dart \
   test/library_test.dart
 
 # Run the tests.

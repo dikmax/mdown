@@ -2,7 +2,7 @@ import 'package:md_proc/src/options.dart';
 
 import 'parser.dart';
 import 'service.dart';
-
+import 'reference_resolver.dart';
 
 void main() {
   serviceTests();
@@ -16,4 +16,6 @@ void main() {
   fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(Options.DEFAULT));
   // Markdown to markdown tests
   fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest(Options.STRICT));
+  // Custom resolver
+  referenceResolverTests();
 }

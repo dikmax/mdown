@@ -747,11 +747,15 @@ class CommonMarkParser {
     if (refRes.isSuccess) {
       String reference = refRes.value == "" ? labelRes.value : refRes.value;
       String normalizedReference = _normalizeReference(reference);
-      if (_references.containsKey(normalizedReference)) {
+      Target target = _references[normalizedReference];
+      if (target == null) {
+        target = _options.linkResolver(normalizedReference, reference);
+      }
+      if (target != null) {
         if (isLink) {
-          return refRes.copy(value: [new ReferenceLink(reference, linkInlines, _references[normalizedReference])]);
+          return refRes.copy(value: [new ReferenceLink(reference, linkInlines, target)]);
         } else {
-          return refRes.copy(value: [new ReferenceImage(reference, linkInlines, _references[normalizedReference])]);
+          return refRes.copy(value: [new ReferenceImage(reference, linkInlines, target)]);
         }
       }
     } else {
@@ -761,11 +765,15 @@ class CommonMarkParser {
         return labelRes;
       }
       String normalizedReference = _normalizeReference(labelRes.value);
-      if (_references.containsKey(normalizedReference)) {
+      Target target = _references[normalizedReference];
+      if (target == null) {
+        target = _options.linkResolver(normalizedReference, labelRes.value);
+      }
+      if (target != null) {
         if (isLink) {
-          return labelRes.copy(value: [new ReferenceLink(labelRes.value, linkInlines, _references[normalizedReference])]);
+          return labelRes.copy(value: [new ReferenceLink(labelRes.value, linkInlines, target)]);
         } else {
-          return labelRes.copy(value: [new ReferenceImage(labelRes.value, linkInlines, _references[normalizedReference])]);
+          return labelRes.copy(value: [new ReferenceImage(labelRes.value, linkInlines, target)]);
         }
       }
     }
