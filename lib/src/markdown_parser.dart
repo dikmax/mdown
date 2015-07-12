@@ -885,8 +885,39 @@ class CommonMarkParser {
 
 
   static final Parser smartPunctuation = (string("...") ^ (_) => new Ellipsis()) |
-    (string("---") ^ (_) => new MDash()) |
-    (string("--") ^ (_) => new NDash());
+    (char("-") > char("-").many1) ^ (res) {
+      /*
+        From spec.
+
+        A sequence of more than three hyphens is
+        parsed as a sequence of em and/or en dashes,
+        with no hyphens. If possible, a homogeneous
+        sequence of dashes is used (so, 10 hyphens
+        = 5 en dashes, and 9 hyphens = 3 em dashes).
+        When a heterogeneous sequence must be used,
+        the em dashes come first, followed by the en
+        dashes, and as few en dashes as possible are
+        used (so, 7 hyphens = 2 em dashes an 1 en
+        dash).
+       */
+      int len = res.length + 1;
+      if (len % 3 == 0) {
+        return new List.filled(len ~/ 3, new MDash());
+      }
+      if (len % 2 == 0) {
+        return new List.filled(len ~/ 2, new NDash());
+      }
+      List result = [];
+      if (len % 3 == 2) {
+        result.addAll(new List.filled(len ~/ 3, new MDash()));
+        result.add(new NDash());
+      } else {
+        result.addAll(new List.filled(len ~/ 3 - 1, new MDash()));
+        result.addAll([new NDash(), new NDash()]);
+      }
+
+      return result;
+    };
 
 
   String get _strSpecialChars => _options.smartPunctuation ? " *_`'\".-![]&<\\" : " *_`![]&<\\";
