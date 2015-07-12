@@ -179,6 +179,8 @@ class _HtmlBuilder extends StringBuffer {
         writeEmph(inline, stripped: stripped);
       } else if (inline is Strong) {
         writeStrong(inline, stripped: stripped);
+      } else if (inline is Strikeout) {
+        writeStrikeout(inline, stripped: stripped);
       } else if (inline is Link) {
         writeLink(inline, stripped: stripped);
       } else if (inline is Image) {
@@ -237,6 +239,17 @@ class _HtmlBuilder extends StringBuffer {
     writeInlines(strong.contents, stripped: stripped);
     if (!stripped) {
       write('</strong>');
+    }
+  }
+
+
+  void writeStrikeout(Strikeout strikeout, {bool stripped: false}) {
+    if (!stripped) {
+      write('<del>');
+    }
+    writeInlines(strikeout.contents, stripped: stripped);
+    if (!stripped) {
+      write('</del>');
     }
   }
 
@@ -335,6 +348,7 @@ class HtmlWriter {
     return builder.toString();
   }
 
+  static HtmlWriter commonmark = new HtmlWriter(Options.commonmark);
   static HtmlWriter strict = new HtmlWriter(Options.strict);
   static HtmlWriter defaults = new HtmlWriter(Options.defaults);
 }

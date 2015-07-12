@@ -568,6 +568,18 @@ class Strong extends Inline {
 }
 
 
+class Strikeout extends Inline {
+  Inlines contents;
+
+  Strikeout(this.contents);
+
+  String toString() => 'Strikeout $contents';
+
+  bool operator== (obj) => obj is Strikeout &&
+    _iterableEquality.equals(contents, obj.contents);
+}
+
+
 abstract class Link extends Inline {
   Inlines label;
   Target target;

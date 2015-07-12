@@ -22,6 +22,7 @@ void main() {
   tests("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict));
   // Additional tests
   tests("SmartPunct", smartPunctuation, mdToHtmlTest(Options.defaults));
+  tests("Strikeout", strikeout, mdToHtmlTest(Options.defaults));
   // Markdown to markdown tests
   tests("md2md", markdownToMarkdown, mdToMdTest(Options.strict));
   // Custom resolver

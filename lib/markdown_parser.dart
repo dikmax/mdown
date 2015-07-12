@@ -68,7 +68,21 @@ class CommonMarkParser {
 
   Map<String, Target> _references;
 
-  CommonMarkParser(this._options, [this._references]);
+  String _inlineDelimiters;
+  String _strSpecialChars;
+
+  CommonMarkParser(this._options, [this._references]) {
+    _inlineDelimiters = "_*";
+    _strSpecialChars = " *_`![]&<\\";
+    if (_options.smartPunctuation) {
+      _inlineDelimiters += "'\"";
+      _strSpecialChars += "'\".-";
+    }
+    if (_options.strikeout) {
+      _inlineDelimiters += "~";
+      _strSpecialChars += "~";
+    }
+  }
 
   Document parse(String s) {
     // TODO separate preprocess option
@@ -519,8 +533,9 @@ class CommonMarkParser {
   static RegExp _isSpace = new RegExp(r'^\s');
 
   static RegExp _isPunctuation = new RegExp("^[\u{2000}-\u{206F}\u{2E00}-\u{2E7F}\\\\'!\"#\\\$%&\\(\\)\\*\\+,\\-\\.\\/:;<=>\\?@\\[\\]\\^_`\\{\\|\\}~]");
+
   Parser get scanDelims => new Parser((String s, Position pos) {
-    ParseResult testRes = oneOf(_options.smartPunctuation ? "*_'\"" : "*_").lookAhead.run(s, pos);
+    ParseResult testRes = oneOf(_inlineDelimiters).lookAhead.run(s, pos);
     if (!testRes.isSuccess) {
       return testRes;
     }
@@ -543,6 +558,10 @@ class CommonMarkParser {
     if (c == '_') {
       canOpen = canOpen && (!rightFlanking || _isPunctuation.hasMatch(charBefore));
       canClose = canClose && (!leftFlanking || _isPunctuation.hasMatch(charAfter));
+    }
+    if (c == '~' && numDelims < 2) {
+      canOpen = false;
+      canClose = false;
     }
     return res.copy(value: [numDelims, canOpen, canClose, c]);
   });
@@ -617,6 +636,17 @@ class CommonMarkParser {
               inlines = new Inlines();
               inlines.add(inline);
               count--;
+            }
+          } else if (char == "~") {
+            if (count & 1 == 1) {
+              inlines.add(new Str("~"));
+              count--;
+            }
+            while (count > 0) {
+              inline = new Strikeout(inlines);
+              inlines = new Inlines();
+              inlines.add(inline);
+              count -= 2;
             }
           } else {
             if (count & 1 == 1) {
@@ -930,7 +960,6 @@ class CommonMarkParser {
     };
 
 
-  String get _strSpecialChars => _options.smartPunctuation ? " *_`'\".-![]&<\\" : " *_`![]&<\\";
   Parser get str => (noneOf(_strSpecialChars + "\n").many1 ^ (chars) => _transformString(chars.join())) |
     (oneOf(_strSpecialChars) ^ (chars) => _transformString(chars)) |
     (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
@@ -1793,6 +1822,7 @@ class CommonMarkParser {
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(processParsedBlocks(res))) % "document";
 
 
+  static CommonMarkParser commonmark = new CommonMarkParser(Options.commonmark);
   static CommonMarkParser defaults = new CommonMarkParser(Options.defaults);
   static CommonMarkParser strict = new CommonMarkParser(Options.strict);
 }

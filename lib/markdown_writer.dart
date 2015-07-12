@@ -128,6 +128,10 @@ class _NotCheckedPart extends _InlinePart {
       });
     }
 
+    if (_options.strikeout) {
+      content = content.replaceAll(new RegExp("~~"), r"\~~");
+    }
+
     if (!context.isHeader) {
       content = content.replaceAllMapped(_notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
       content = content.replaceAllMapped(_notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
@@ -301,6 +305,8 @@ class _InlineRenderer {
         }
       } else if (inline is SmartQuote) {
         writeSmartQuote(inline, context: context);
+      } else if (inline is Strikeout) {
+        writeStrikeout(inline, context: context);
       } else if (inline is RawInline) {
         write(inline.contents);
       } else {
@@ -361,6 +367,13 @@ class _InlineRenderer {
     if (quote.close) {
       write(quote.single ? "'" : '"');
     }
+  }
+
+
+  void writeStrikeout(Strikeout strikeout, {_EscapeContext context: _EscapeContext.empty}) {
+    write("~~");
+    writeInlines(strikeout.contents, context: context);
+    write("~~");
   }
 
 
@@ -708,6 +721,7 @@ class MarkdownWriter {
     return builder.toString();
   }
 
+  static const MarkdownWriter commonmark = const MarkdownWriter(Options.commonmark);
   static const MarkdownWriter strict = const MarkdownWriter(Options.strict);
   static const MarkdownWriter defaults = const MarkdownWriter(Options.defaults);
 }

@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-10T12:56:10.881Z
+// 2015-08-10T14:52:17.270Z
 
 part of md_proc.test.data.test_data;
 
@@ -4143,5 +4143,31 @@ bar
 </ul>
 </li>
 </ul>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> strikeout
+// **************************************************************************
+
+final Map<String, String> _$strikeoutTests = {
+  r'''~~Strikeout text~~
+''': r'''<p><del>Strikeout text</del></p>
+''',
+  r'''~~__Strikeout text__~~
+''': r'''<p><del><strong>Strikeout text</strong></del></p>
+''',
+  r'''Ins~~e~~ide w~~a~~ord
+''': r'''<p>Ins<del>e</del>ide w<del>a</del>ord</p>
+''',
+  r'''~\~No strikeout~~
+''': r'''<p>~~No strikeout~~</p>
+''',
+  r'''\~~No strikeout~~
+''': r'''<p>~~No strikeout~~</p>
+''',
+  r'''~No strikeout~
+''': r'''<p>~No strikeout~</p>
 ''',
 };

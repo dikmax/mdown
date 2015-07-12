@@ -495,6 +495,20 @@ void serviceTests() {
       });
     });
 
+    t.group('Strikeout', () {
+      var strikeout = new Strikeout(new Inlines.from([new Str('Strikeout')]));
+      t.test('toString', () {
+        t.expect(strikeout.toString(), t.equals('Strikeout [Str "Strikeout"]'));
+      });
+      t.test('==', () {
+        t.expect(strikeout, t.equals(new Strikeout(new Inlines.from([new Str('Strikeout')]))));
+      });
+      t.test('!=', () {
+        t.expect(strikeout, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
+        t.expect(strikeout, t.isNot(t.equals(null)));
+      });
+    });
+
     t.group('InlineLink', () {
       var link = new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null));
       t.test('toString', () {

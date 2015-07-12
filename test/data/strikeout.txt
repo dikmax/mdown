@@ -1,0 +1,37 @@
+## Strikeout tests
+
+.
+~~Strikeout text~~
+.
+<p><del>Strikeout text</del></p>
+.
+
+.
+~~__Strikeout text__~~
+.
+<p><del><strong>Strikeout text</strong></del></p>
+.
+
+.
+Ins~~e~~ide w~~a~~ord
+.
+<p>Ins<del>e</del>ide w<del>a</del>ord</p>
+.
+
+.
+~\~No strikeout~~
+.
+<p>~~No strikeout~~</p>
+.
+
+.
+\~~No strikeout~~
+.
+<p>~~No strikeout~~</p>
+.
+
+.
+~No strikeout~
+.
+<p>~No strikeout~</p>
+.
