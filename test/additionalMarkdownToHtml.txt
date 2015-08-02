@@ -264,3 +264,68 @@ Links
 .
 <p><em><strong>a</strong></em></p>
 .
+
+
+TODO fix result
+
+.
+ *     * ````
+
+       *
+.
+<ul>
+<li>
+<p>foo</p>
+<ul>
+<li>bar</li>
+</ul>
+<p>baz</p>
+</li>
+</ul>
+
+.
+
+Tabs
+
+.
+  -→foo
+
+→bar
+.
+<ul>
+<li>
+<p>foo</p>
+<p>bar</p>
+</li>
+</ul>
+.
+
+.
+  -→→foo
+
+→→bar
+.
+<ul>
+<li>
+<p>foo</p>
+<p>bar</p>
+</li>
+</ul>
+.
+
+.
+-
+  -
+        asdf
+.
+<ul>
+<li>
+<ul>
+<li>
+<pre><code>asdf
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+.

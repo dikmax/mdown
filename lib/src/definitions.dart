@@ -413,6 +413,21 @@ class Space extends Inline {
 }
 
 
+class Tab extends Inline {
+  static final Tab _instance = new Tab._internal();
+
+  factory Tab() {
+    return _instance;
+  }
+
+  Tab._internal();
+
+  String toString() => "Tab";
+
+  bool operator== (obj) => obj is Tab;
+}
+
+
 class NonBreakableSpace extends Inline {
   static final NonBreakableSpace _instance = new NonBreakableSpace._internal();
 

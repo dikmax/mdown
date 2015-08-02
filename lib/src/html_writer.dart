@@ -167,6 +167,8 @@ class _HtmlBuilder extends StringBuffer {
         write(' ');
       } else if (inline is NonBreakableSpace) {
         write('\u{a0}');
+      } else if (inline is Tab) {
+        write('\t');
       } else if (inline is LineBreak) {
         if (stripped) {
           write(' ');

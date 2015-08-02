@@ -368,6 +368,19 @@ void serviceTests() {
       });
     });
 
+    t.group('Tab', () {
+      var tab = new Tab();
+      t.test('toString', () {
+        t.expect(tab.toString(), t.equals('Tab'));
+      });
+      t.test('==', () {
+        t.expect(tab, t.equals(new Tab()));
+      });
+      t.test('!=', () {
+        t.expect(tab, t.isNot(t.equals(new EmptyAttr())));
+      });
+    });
+
     t.group('LineBreak', () {
       var lineBreak = new LineBreak();
       t.test('toString', () {
