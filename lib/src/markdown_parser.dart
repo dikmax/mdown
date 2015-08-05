@@ -60,9 +60,6 @@ class _EmphasisStackItem {
   _EmphasisStackItem(this.char, this.numDelims, this.inlines);
 }
 
-Position tabStopPositionCreator(int offset, int line, int character) =>
-    new TabStopPosition(offset, line, character, tabStop: TAB_STOP);
-
 // TODO make const parsers 'final'
 
 // CommonMark parser
@@ -84,7 +81,7 @@ class CommonMarkParser {
     if (!s.endsWith("\n")) {
       s += "\n";
     }
-    var doc = document.parse(s, tabStopPositionCreator);
+    var doc = document.parse(s, tabStop: TAB_STOP);
 
     _inlinesInDocument(doc);
     return doc;
@@ -156,7 +153,7 @@ class CommonMarkParser {
 
 
   Inlines _parseInlines(String raw) {
-    return inlines.parse(raw, tabStopPositionCreator);
+    return inlines.parse(raw, tabStop: TAB_STOP);
   }
 
 
@@ -228,9 +225,9 @@ class CommonMarkParser {
     }
     var newPos;
     if (offset < len && s[offset] == '\n') {
-      newPos = new TabStopPosition(offset + 1, pos.line + 1, 1, tabStop: TAB_STOP);
+      newPos = new Position(offset + 1, pos.line + 1, 1, tabStop: TAB_STOP);
     } else {
-      newPos = new TabStopPosition(offset, pos.line, pos.character + result.length, tabStop: TAB_STOP);
+      newPos = new Position(offset, pos.line, pos.character + result.length, tabStop: TAB_STOP);
     }
     return new ParseResult(s, new Expectations.empty(newPos), newPos, true, false, result);
   });
@@ -318,11 +315,18 @@ class CommonMarkParser {
   static final String _alpha = "$_lower$_upper";
   static final String _digit = "1234567890";
   static final String _alphanum = "$_alpha$_digit";
-  static final Set<String> _allowedTags = new Set.from(["article", "header", "aside", "hgroup", "blockquote", "hr", "iframe",
-    "body", "li", "map", "button", "object", "canvas", "ol", "caption", "output", "col", "p", "colgroup", "pre", "dd",
-    "progress", "div", "section", "dl", "table", "td", "dt", "tbody", "embed", "textarea", "fieldset", "tfoot",
-    "figcaption", "th", "figure", "thead", "footer", "footer", "tr", "form", "ul", "h1", "h2", "h3", "h4", "h5", "h6",
-    "video", "script", "style"]);
+  static final Set<String> _allowedTags = new Set.from(
+      ["address", "article", "aside", "base", "basefont", "blockquote", "body",
+      "caption", "center", "col", "colgroup", "dd", "details", "dialog", "dir",
+      "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form",
+      "frame", "frameset", "h1", "head", "header", "hr", "html", "legend", "li",
+      "link", "main", "menu", "menuitem", "meta", "nav", "noframes", "ol",
+      "optgroup", "option", "p", "param", "pre", "section", "source", "title",
+      "summary", "table", "tbody", "td", "tfoot", "th", "thead", "title", "tr",
+      "track", "ul"]
+  );
+
+  /*
   static Parser spaceOrNL = oneOf(" \t\n");
 
   static Parser htmlAttributeName = (oneOf(_alpha + "_:") > oneOf(_alphanum + "_.:-").many).record;
@@ -365,7 +369,7 @@ class CommonMarkParser {
   Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
   Parser get htmlDeclaration => (string('<!') + upper.many1 + spaceOrNL.many1 + anyChar.manyUntil(char('>'))).list.record;
   Parser get htmlCompleteCDATA => (string('<![CDATA[') > anyChar.manyUntil(string(']]>'))).record;
-
+  */
 
   //
   // Links aux parsers
@@ -748,7 +752,7 @@ class CommonMarkParser {
     if (isLink && labelRes.value.contains(new RegExp(r"^\s*$"))) {
       return fail.run(s, pos);
     }
-    Inlines linkInlines = inlines.parse(labelRes.value, tabStopPositionCreator);
+    Inlines linkInlines = inlines.parse(labelRes.value, tabStop: TAB_STOP);
     if (isLink && _isContainsLink(linkInlines)) {
       List<Inline> resValue = [new Str('[')];
       resValue.addAll(linkInlines);
@@ -868,12 +872,12 @@ class CommonMarkParser {
   //
 
   Parser get rawInlineHtml => choice([
-      htmlInlineOpenTag,
+      /*htmlInlineOpenTag,
       htmlInlineCloseTag,
       htmlCompleteComment,
       htmlCompletePI,
       htmlDeclaration,
-      htmlCompleteCDATA
+      htmlCompleteCDATA*/
   ]) ^ (result) => [new HtmlRawInline(result)];
 
 
@@ -1145,13 +1149,84 @@ class CommonMarkParser {
   // Raw html block
   //
 
+  static final List<Map<String, Pattern>> rawHtmlTests = [
+    { // <script>, <pre> or <style>
+      "start": new RegExp(r'^(script|pre|style)( |>|$)', caseSensitive: false), // TODO \t
+      "end": new RegExp(r'</(script|pre|style)>', caseSensitive: false)
+    },
+    { // <!-- ... -->
+      "start": new RegExp(r'^!--'),
+      "end": "-->"
+    },
+    { // <? ... ?>
+      "start": new RegExp(r'^\?'),
+      "end": "?>"
+    },
+    { // <!... >
+      "start": new RegExp(r'^![A-Z]'),
+      "end": ">"
+    },
+    { // <![CDATA[
+      "start": new RegExp(r'^!\[CDATA\['),
+      "end": "]]>"
+    }
+  ];
+  static final Pattern rawHtmlTest67 = new RegExp(r'^/?([a-zA-Z]+)( |>|$)');  // TODO \t
   Parser get rawHtml => new Parser((String s, Position pos) {
     // Simple test
-    ParseResult testRes = (skipNonindentChars < char('<')).run(s, pos);
+    ParseResult testRes = (skipNonindentChars < char('<')).record.run(s, pos);
     if (!testRes.isSuccess) {
       return testRes;
     }
 
+    var content = testRes.value;
+
+    ParseResult lineRes = anyLine.run(s, testRes.position);
+    assert(lineRes.isSuccess);
+    Map<String, Pattern> passedTest = rawHtmlTests.firstWhere((element) {
+      return lineRes.value.contains(element['start']);
+    }, orElse: () => null);
+    if (passedTest != null) {
+      // Got it
+      content += lineRes.value + '\n';
+      var position = lineRes.position;
+      while(!lineRes.value.contains(passedTest['end'])) {
+        lineRes = anyLine.run(s, position);
+        if (!lineRes.isSuccess) {
+          // eof
+          return success(new HtmlRawBlock(content)).run(s, position);
+        }
+        content += lineRes.value + '\n';
+        position = lineRes.position;
+      }
+      return lineRes.copy(value: new HtmlRawBlock(content));
+    }
+
+    Match match = rawHtmlTest67.matchAsPrefix(lineRes.value);
+    if (match != null /* && _allowedTags.contains(match.group(1).toLowerCase())*/) {
+      content += lineRes.value + '\n';
+      var position = lineRes.position;
+      do {
+        var blanklineRes = blankline.run(s, position);
+        if (blanklineRes.isSuccess) {
+          return success(new HtmlRawBlock(content)).run(s, blanklineRes.position);
+        }
+        lineRes = anyLine.run(s, position);
+        if (!lineRes.isSuccess) {
+          // eof
+          return success(new HtmlRawBlock(content)).run(s, position);
+        }
+        content += lineRes.value + '\n';
+        position = lineRes.position;
+      } while(true);
+
+    }
+
+    return fail.run(s, pos);
+
+
+
+    /*
     int firstLineIndent = testRes.value;
 
     Parser contentParser = anyLine.manyUntil(blankline | eof);
@@ -1172,6 +1247,7 @@ class CommonMarkParser {
     }
 
     return contentRes.copy(value: [new HtmlRawBlock((" " * firstLineIndent) + content)]); // TODO check tab
+    */
   });
 
 
@@ -1287,7 +1363,7 @@ class CommonMarkParser {
 
     void buildBuffer() {
       String s = buffer.map((l) => l + "\n").join();
-      List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStopPositionCreator);
+      List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStop: TAB_STOP);
       if (!closeParagraph && innerRes.length > 0 && innerRes.first is Para) {
         var first = innerRes.first;
         if (_acceptLazy(blocks, first.contents.raw)) {
@@ -1314,7 +1390,7 @@ class CommonMarkParser {
       } else {
         if (buffer.length > 0) {
           buildBuffer();
-          List<Block> lineBlock = block.parse(line + "\n", tabStopPositionCreator);
+          List<Block> lineBlock = block.parse(line + "\n", tabStop: TAB_STOP);
           // TODO fix condition
           if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para) {
             var block = lineBlock[0] as Para;
@@ -1401,7 +1477,7 @@ class CommonMarkParser {
       }
 
       if (!getTight()) {
-        innerBlocks = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStopPositionCreator);
+        innerBlocks = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStop: TAB_STOP);
       }
       if (!afterEmptyLine && innerBlocks.length > 0 && innerBlocks.first is Para &&
           _acceptLazy(blocks, ((innerBlocks.first as Para).contents as _UnparsedInlines).raw)) {
@@ -1459,7 +1535,7 @@ class CommonMarkParser {
         return res.position;
       } else {
         int diff = res.value[1].length - 1;
-        return new TabStopPosition(res.position.offset - diff, res.position.line, res.position.character - diff,
+        return new Position(res.position.offset - diff, res.position.line, res.position.character - diff,
             tabStop: TAB_STOP);
       }
     }
@@ -1510,7 +1586,7 @@ class CommonMarkParser {
             // TODO Speedup by checking impossible starts
             ParseResult lineRes = anyLine.run(s, position);
             assert(lineRes.isSuccess);
-            List<Block> lineBlock = block.parse(lineRes.value.trimLeft() + "\n", tabStopPositionCreator);
+            List<Block> lineBlock = block.parse(lineRes.value.trimLeft() + "\n", tabStop: TAB_STOP);
             if (
               lineBlock.length == 1 &&
               lineBlock[0] is Para &&

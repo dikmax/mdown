@@ -8,7 +8,7 @@ environment:
 dependencies:
   collection: '>=1.0.0 <2.0.0'
   unicode_helper: '>=0.2.0 <0.3.0'
-  parsers: '>=0.14.3 <0.15.0'
+  parsers: '>=0.14.4 <0.15.0'
 dev_dependencies:
   test: any
 
