@@ -1164,7 +1164,6 @@ class CommonMarkParser {
       return testRes;
     }
 
-    var content = testRes.value;
     ParseResult lineRes = anyLine.run(s, testRes.position);
     assert(lineRes.isSuccess);
     Map<String, Pattern> passedTest = rawHtmlTests.firstWhere((element) {
