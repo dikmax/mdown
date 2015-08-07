@@ -328,6 +328,7 @@ class CommonMarkParser {
 
   static Parser spaceOrNL = oneOf(" \t\n");
 
+  static Parser htmlTagName = (letter > oneOf(_alphanum + "-").many).record;
   static Parser htmlAttributeName = (oneOf(_alpha + "_:") > oneOf(_alphanum + "_.:-").many).record;
   static Parser htmlAttributeValue = (spaceOrNL.many + char('=') + spaceOrNL.many +
       (htmlUnquotedAttributeValue | htmlSingleQuotedAttributeValue | htmlDoubleQuotedAttributeValue)).list.record;
@@ -335,9 +336,9 @@ class CommonMarkParser {
   static Parser htmlSingleQuotedAttributeValue = (char("'") > noneOf("'").many) < char("'");
   static Parser htmlDoubleQuotedAttributeValue = (char('"') > noneOf('"').many) < char('"');
   static Parser get htmlAttribute => (spaceOrNL.many1 + htmlAttributeName + htmlAttributeValue.maybe).list.record;
-  Parser get htmlOpenTag => (((((char("<") > ((letter + alphanum.many).list)) <
-      htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
-  Parser get htmlCloseTag => (((string("</") > ((letter + alphanum.many).list)) < spaceOrNL.many) < char('>')).record;
+  Parser get htmlOpenTag => (((((char("<") > htmlTagName) < htmlAttribute.many) <
+      spaceOrNL.many) < char('/').maybe) < char('>')).record;
+  Parser get htmlCloseTag => (((string("</") > htmlTagName) < spaceOrNL.many) < char('>')).record;
   Parser _htmlCompleteComment = (string('<!--').notFollowedBy(char('>') | string('->')) > anyChar.manyUntil(string('--'))).record;
   Parser get htmlCompleteComment => new Parser((String s, Position pos) {
     ParseResult res = _htmlCompleteComment.run(s, pos);
@@ -1217,9 +1218,11 @@ class CommonMarkParser {
       // Trying rule 7
 
       var rule7Res = ((skipNonindentChars < (htmlOpenTag | htmlCloseTag)) < blankline).record.run(s, pos);
-      if (!rule7Res.isSuccess) {
+      if (!rule7Res.isSuccess || rule7Res.value.indexOf('\n') != rule7Res.value.length - 1) {
+        // There could be only one \n, and it's in the end.
         return fail.run(s, pos);
       }
+
 
       content = rule7Res.value;
       position = rule7Res.position;
