@@ -326,33 +326,18 @@ class CommonMarkParser {
       "track", "ul"]
   );
 
-  /*
   static Parser spaceOrNL = oneOf(" \t\n");
 
   static Parser htmlAttributeName = (oneOf(_alpha + "_:") > oneOf(_alphanum + "_.:-").many).record;
-  static Parser htmlAttiributeValue = (spaceOrNL.many + char('=') + spaceOrNL.many +
-    (htmlUnquotedAttributeValue | htmlSingleQuotedAttributeValue | htmlDoubleQuotedAttributeValue)).list.record;
+  static Parser htmlAttributeValue = (spaceOrNL.many + char('=') + spaceOrNL.many +
+      (htmlUnquotedAttributeValue | htmlSingleQuotedAttributeValue | htmlDoubleQuotedAttributeValue)).list.record;
   static Parser htmlUnquotedAttributeValue = noneOf(" \t\n\"'=<>`").many1;
   static Parser htmlSingleQuotedAttributeValue = (char("'") > noneOf("'").many) < char("'");
   static Parser htmlDoubleQuotedAttributeValue = (char('"') > noneOf('"').many) < char('"');
-
-  static Parser get htmlAttribute => (spaceOrNL.many1 + htmlAttributeName + htmlAttiributeValue.maybe).list.record;
-  static Parser htmlBlockTag(Parser p) => new Parser((String s, Position pos) {
-    ParseResult res = p.run(s, pos);
-    if (!res.isSuccess) {
-      return res;
-    }
-
-    if (_allowedTags.contains(res.value.join().toLowerCase())) {
-      return res.copy(value: s.substring(pos.offset, res.position.offset));
-    }
-    return fail.run(s, pos);
-  });
-  Parser get htmlBlockOpenTag => htmlBlockTag((char("<") > alphanum.many1));
-  Parser get htmlInlineOpenTag => (((((char("<") > ((letter + alphanum.many).list)) <
-    htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
-  Parser get htmlBlockCloseTag => htmlBlockTag((string("</") > alphanum.many1));
-  Parser get htmlInlineCloseTag => (((string("</") > ((letter + alphanum.many).list)) < spaceOrNL.many) < char('>')).record;
+  static Parser get htmlAttribute => (spaceOrNL.many1 + htmlAttributeName + htmlAttributeValue.maybe).list.record;
+  Parser get htmlOpenTag => (((((char("<") > ((letter + alphanum.many).list)) <
+      htmlAttribute.many) < spaceOrNL.many) < char('/').maybe) < char('>')).record;
+  Parser get htmlCloseTag => (((string("</") > ((letter + alphanum.many).list)) < spaceOrNL.many) < char('>')).record;
   Parser _htmlCompleteComment = (string('<!--').notFollowedBy(char('>') | string('->')) > anyChar.manyUntil(string('--'))).record;
   Parser get htmlCompleteComment => new Parser((String s, Position pos) {
     ParseResult res = _htmlCompleteComment.run(s, pos);
@@ -369,7 +354,6 @@ class CommonMarkParser {
   Parser get htmlCompletePI => (string('<?') > anyChar.manyUntil(string('?>'))).record;
   Parser get htmlDeclaration => (string('<!') + upper.many1 + spaceOrNL.many1 + anyChar.manyUntil(char('>'))).list.record;
   Parser get htmlCompleteCDATA => (string('<![CDATA[') > anyChar.manyUntil(string(']]>'))).record;
-  */
 
   //
   // Links aux parsers
@@ -872,12 +856,12 @@ class CommonMarkParser {
   //
 
   Parser get rawInlineHtml => choice([
-      /*htmlInlineOpenTag,
-      htmlInlineCloseTag,
+      htmlOpenTag,
+      htmlCloseTag,
       htmlCompleteComment,
       htmlCompletePI,
       htmlDeclaration,
-      htmlCompleteCDATA*/
+      htmlCompleteCDATA
   ]) ^ (result) => [new HtmlRawInline(result)];
 
 
@@ -1171,7 +1155,7 @@ class CommonMarkParser {
       "end": "]]>"
     }
   ];
-  static final Pattern rawHtmlTest67 = new RegExp(r'^/?([a-zA-Z]+)( |>|$)');  // TODO \t
+  static final Pattern rawHtmlTest6 = new RegExp(r'^/?([a-zA-Z]+)( |>|$)');  // TODO \t
   Parser get rawHtmlParagraphStopTest => new Parser((String s, Position pos) {
     // Simple test
     ParseResult testRes = (skipNonindentChars < char('<')).record.run(s, pos);
@@ -1189,7 +1173,7 @@ class CommonMarkParser {
       return success(true).run(s, pos);
     }
 
-    Match match = rawHtmlTest67.matchAsPrefix(lineRes.value);
+    Match match = rawHtmlTest6.matchAsPrefix(lineRes.value);
     if (match != null && _allowedTags.contains(match.group(1).toLowerCase())) {
       return success(true).run(s, pos);
     }
@@ -1227,27 +1211,36 @@ class CommonMarkParser {
       return lineRes.copy(value: new HtmlRawBlock(content));
     }
 
-    Match match = rawHtmlTest67.matchAsPrefix(lineRes.value);
-    if (match != null) {
-      content += lineRes.value + '\n';
-      var position = lineRes.position;
-      do {
-        var blanklineRes = blankline.run(s, position);
-        if (blanklineRes.isSuccess) {
-          return success(new HtmlRawBlock(content)).run(s, blanklineRes.position);
-        }
-        lineRes = anyLine.run(s, position);
-        if (!lineRes.isSuccess) {
-          // eof
-          return success(new HtmlRawBlock(content)).run(s, position);
-        }
-        content += lineRes.value + '\n';
-        position = lineRes.position;
-      } while(true);
+    Match match = rawHtmlTest6.matchAsPrefix(lineRes.value);
+    var position;
+    if (match == null || !_allowedTags.contains(match.group(1).toLowerCase())) {
+      // Trying rule 7
 
+      var rule7Res = ((skipNonindentChars < htmlOpenTag) < blankline).record.run(s, pos);
+      if (!rule7Res.isSuccess) {
+        return fail.run(s, pos);
+      }
+
+      content = rule7Res.value;
+      position = rule7Res.position;
+    } else {
+      content += lineRes.value + '\n';
+      position = lineRes.position;
     }
 
-    return fail.run(s, pos);
+    do {
+      var blanklineRes = blankline.run(s, position);
+      if (blanklineRes.isSuccess) {
+        return success(new HtmlRawBlock(content)).run(s, blanklineRes.position);
+      }
+      lineRes = anyLine.run(s, position);
+      if (!lineRes.isSuccess) {
+        // eof
+        return success(new HtmlRawBlock(content)).run(s, position);
+      }
+      content += lineRes.value + '\n';
+      position = lineRes.position;
+    } while(true);
   });
 
 
