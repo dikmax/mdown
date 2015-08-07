@@ -1216,7 +1216,7 @@ class CommonMarkParser {
     if (match == null || !_allowedTags.contains(match.group(1).toLowerCase())) {
       // Trying rule 7
 
-      var rule7Res = ((skipNonindentChars < htmlOpenTag) < blankline).record.run(s, pos);
+      var rule7Res = ((skipNonindentChars < (htmlOpenTag | htmlCloseTag)) < blankline).record.run(s, pos);
       if (!rule7Res.isSuccess) {
         return fail.run(s, pos);
       }
