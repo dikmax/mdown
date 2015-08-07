@@ -321,7 +321,7 @@ class CommonMarkParser {
       "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form",
       "frame", "frameset", "h1", "head", "header", "hr", "html", "legend", "li",
       "link", "main", "menu", "menuitem", "meta", "nav", "noframes", "ol",
-      "optgroup", "option", "p", "param", "pre", "section", "source", "title",
+      "optgroup", "option", "p", "param", "section", "source", "title",
       "summary", "table", "tbody", "td", "tfoot", "th", "thead", "title", "tr",
       "track", "ul"]
   );
@@ -1172,6 +1172,31 @@ class CommonMarkParser {
     }
   ];
   static final Pattern rawHtmlTest67 = new RegExp(r'^/?([a-zA-Z]+)( |>|$)');  // TODO \t
+  Parser get rawHtmlParagraphStopTest => new Parser((String s, Position pos) {
+    // Simple test
+    ParseResult testRes = (skipNonindentChars < char('<')).record.run(s, pos);
+    if (!testRes.isSuccess) {
+      return testRes;
+    }
+
+    var content = testRes.value;
+    ParseResult lineRes = anyLine.run(s, testRes.position);
+    assert(lineRes.isSuccess);
+    Map<String, Pattern> passedTest = rawHtmlTests.firstWhere((element) {
+      return lineRes.value.contains(element['start']);
+    }, orElse: () => null);
+    if (passedTest != null) {
+      return success(true).run(s, pos);
+    }
+
+    Match match = rawHtmlTest67.matchAsPrefix(lineRes.value);
+    if (match != null && _allowedTags.contains(match.group(1).toLowerCase())) {
+      return success(true).run(s, pos);
+    }
+
+    return fail.run(s, pos);
+  });
+
   Parser get rawHtml => new Parser((String s, Position pos) {
     // Simple test
     ParseResult testRes = (skipNonindentChars < char('<')).record.run(s, pos);
@@ -1203,7 +1228,7 @@ class CommonMarkParser {
     }
 
     Match match = rawHtmlTest67.matchAsPrefix(lineRes.value);
-    if (match != null /* && _allowedTags.contains(match.group(1).toLowerCase())*/) {
+    if (match != null) {
       content += lineRes.value + '\n';
       var position = lineRes.position;
       do {
@@ -1223,31 +1248,6 @@ class CommonMarkParser {
     }
 
     return fail.run(s, pos);
-
-
-
-    /*
-    int firstLineIndent = testRes.value;
-
-    Parser contentParser = anyLine.manyUntil(blankline | eof);
-    ParseResult contentRes = contentParser.run(s, testRes.position);
-    if (!contentRes.isSuccess) {
-      return contentRes;
-    }
-    if (contentRes.value.length == 0) {
-      return fail.run(s, pos);
-    }
-    String content = "<" + contentRes.value.join('\n');
-
-    ParseResult tagRes = (htmlBlockOpenTag
-      | htmlBlockCloseTag).run(content);
-    if (!tagRes.isSuccess) {
-      if ("<!".matchAsPrefix(content) == null && "<?".matchAsPrefix(content) == null)
-      return fail.run(s, pos);
-    }
-
-    return contentRes.copy(value: [new HtmlRawBlock((" " * firstLineIndent) + content)]); // TODO check tab
-    */
   });
 
 
@@ -1300,7 +1300,7 @@ class CommonMarkParser {
       | listMarkerTest(4)
       | atxHeader
       | openFence
-      | rawHtml
+      | rawHtmlParagraphStopTest
       | (skipNonindentChars > (
         char('>')
         | (oneOf('+-*') > whitespaceChar)
