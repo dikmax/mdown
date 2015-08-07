@@ -12,12 +12,12 @@ void main() {
   individualParsersTests();
 
   // CommonMark tests
-  //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num == 224)));
-  //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num < 116 || num >= 144)));
+  //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num == 129)));
+  //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num >= 103 && num < 144)));
   //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML));
   fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT));
   // Additional tests
-  //fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && num >= 4 && num <= 4));
+  //fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && num == 19));
   fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT));
   // Additional tests
   fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(Options.DEFAULT));

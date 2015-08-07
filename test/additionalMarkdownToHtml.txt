@@ -166,7 +166,7 @@ Partial raw Html blocks tests
 .
 <!--
 
-<p><em>a</em></p>
+*a*
 .
 
 .
@@ -176,7 +176,7 @@ Partial raw Html blocks tests
 .
 <?php
 
-<p><em>a</em></p>
+*a*
 .
 
 Links
@@ -275,14 +275,12 @@ TODO fix result
 .
 <ul>
 <li>
-<p>foo</p>
-<ul>
-<li>bar</li>
-</ul>
-<p>baz</p>
+<pre><code>* ````
+
+*
+</code></pre>
 </li>
 </ul>
-
 .
 
 Tabs
@@ -307,8 +305,10 @@ Tabs
 .
 <ul>
 <li>
-<p>foo</p>
-<p>bar</p>
+<pre><code>foo
+
+bar
+</code></pre>
 </li>
 </ul>
 .

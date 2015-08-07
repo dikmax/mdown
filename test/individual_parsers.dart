@@ -42,7 +42,7 @@ isFailure(rest) => new FailureMatcher(rest);
 isSuccess(res, rest) => new SuccessMatcher(res, rest);
 
 
-var tabStopPosition = const TabStopPosition(0, 1, 1, tabStop: 4);
+var tabStopPosition = const Position(0, 1, 1, tabStop: 4);
 
 void individualParsersTests() {
   group('atMostIndent', () {

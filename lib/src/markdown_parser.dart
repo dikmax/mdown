@@ -246,7 +246,7 @@ class CommonMarkParser {
   static final Parser skipNonindentChars = atMostIndent(TAB_STOP - 1).notFollowedBy(whitespaceChar);
   static final Parser skipNonindentCharsFromAnyPosition =
     atMostIndent(TAB_STOP - 1, fromLineStart: false).notFollowedBy(whitespaceChar);
-  static Parser skipListIndentChars(int max) => (atMostIndent(max - 1) | atMostIndent(TAB_STOP, fromLineStart: false)).notFollowedBy(whitespaceChar);
+  static Parser skipListIndentChars(int max) => (atMostIndent(max - 1) | atMostIndent(TAB_STOP - 1, fromLineStart: false)).notFollowedBy(whitespaceChar);
   static Parser spnl = (skipSpaces > newline);
   static Parser get indent => waitForIndent(TAB_STOP) % "indentation";
 
@@ -1433,9 +1433,9 @@ class CommonMarkParser {
       (
           char("\n") |
           countBetween(1, 4, char(' ')).notFollowedBy(char(' ')) |
-          char(' ')
+          oneOf(' \t')
       )
-  ).list; // TODO check tab
+  ).list;
 
   Parser get list => new Parser((String s, Position pos) {
     // TODO quick test
@@ -1616,7 +1616,6 @@ class CommonMarkParser {
 
       // Trying to find new list item
 
-      // TODO check '+     +'
       ParseResult markerRes = listMarkerTest(getIndent() + TAB_STOP).run(s, position);
       if (markerRes.isSuccess) {
         int type = markerRes.value[0][0];
