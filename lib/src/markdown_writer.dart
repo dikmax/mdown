@@ -277,6 +277,8 @@ class _InlineRenderer {
         write(' ', context);
       } else if (inline is NonBreakableSpace) {
         write('&nbsp;');
+      } else if (inline is Tab) {
+        write('\t');
       } else if (inline is LineBreak) {
         write('\\\n');
       } else if (inline is Emph) {
@@ -512,7 +514,9 @@ class _MarkdownBuilder extends StringBuffer {
         writeBlockquote(block);
       } else if (block is RawBlock) {
         write(block.contents);
-        write("\n");
+        if (!tight) {
+          write("\n");
+        }
       } else if (block is UnorderedList) {
         writeUnorderedList(block, prevBlock: _b);
       } else if (block is OrderedList) {
