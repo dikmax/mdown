@@ -6,15 +6,6 @@ set -e
 # Verify that the libraries are error free.
 dartanalyzer --fatal-warnings \
   lib/md_proc.dart \
-  lib/src/definitions.dart \
-  lib/src/entities.dart \
-  lib/src/html_writer.dart \
-  lib/src/markdown_parser.dart \
-  lib/src/markdown_writer.dart \
-  lib/src/options.dart \
-  test/parser.dart \
-  test/service.dart \
-  test/reference_resolver.dart \
   test/library_test.dart
 
 # Run the tests.
