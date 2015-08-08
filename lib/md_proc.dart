@@ -1,17 +1,15 @@
 library md_proc;
 
-import 'src/html_writer.dart';
-import 'src/markdown_parser.dart';
+import 'html_writer.dart';
+import 'markdown_parser.dart';
 
-export 'src/definitions.dart';
-export 'src/html_writer.dart';
-export 'src/markdown_parser.dart';
-export 'src/markdown_writer.dart';
-export 'src/options.dart';
+export 'definitions.dart';
+export 'html_writer.dart';
+export 'markdown_parser.dart';
+export 'markdown_writer.dart';
+export 'options.dart';
 
-/**
- * Converts markdown string to html string.
- */
+/// Converts markdown string to html string.
 String markdownToHtml(String markdown) {
-  return HtmlWriter.DEFAULT.write(CommonMarkParser.DEFAULT.parse(markdown));
+  return HtmlWriter.defaults.write(CommonMarkParser.defaults.parse(markdown));
 }

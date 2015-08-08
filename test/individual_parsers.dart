@@ -1,4 +1,4 @@
-library individualParsersTest;
+library md_proc.test.individual_parsers;
 
 import 'package:test/test.dart';
 import 'package:parsers/parsers.dart';

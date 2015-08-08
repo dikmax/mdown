@@ -25,7 +25,7 @@ Parsing
 import "package:md_proc/md_proc.dart";
 
 void main() {
-  Document doc = CommonMarkParser.DEFAULT.parse('Hello world!\n===');
+  Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
   print(doc); // Document [SetextHeader 1 [Str "Hello", Space, Str "world", Str "!"]]
 }
 ```
@@ -37,8 +37,8 @@ Writing html
 import "package:md_proc/md_proc.dart";
 
 void main() {
-  Document doc = CommonMarkParser.DEFAULT.parse('Hello world!\n===');
-  String res = HtmlWriter.DEFAULT.write(doc);
+  Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
+  String res = HtmlWriter.defaults.write(doc);
   print(res); // <h1>Hello world!</h1>
 }
 ```
@@ -50,8 +50,8 @@ Writing markdown
 import "package:md_proc/md_proc.dart";
 
 void main() {
-  Document doc = CommonMarkParser.DEFAULT.parse('Hello world!\n===');
-  String res = MarkdownWriter.DEFAULT.write(doc);
+  Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
+  String res = MarkdownWriter.defaults.write(doc);
   print(res); // Hello world!
               // ============
 }
@@ -69,8 +69,8 @@ By default smart punctuation is enabled. To disable it use STRICT version of par
 import "package:md_proc/md_proc.dart";
 
 void main() {
-  Document doc = CommonMarkParser.STRICT.parse('...'); // STRICT here
-  String res = HtmlWriter.STRICT.write(doc);           // and here
+  Document doc = CommonMarkParser.strict.parse('...'); // STRICT here
+  String res = HtmlWriter.strict.write(doc);           // and here
   print(res); // <p>...</p>
 }
 ```
@@ -104,7 +104,7 @@ Target linkResolver(String normalizedReference, String reference) {
 
 CommonMarkParser parser = new CommonMarkParser(new Options(linkResolver: linkResolver));
 Document doc = parser.parse('Hello world!\n===');
-String res = HtmlWriter.DEFAULT.write(doc);
+String res = HtmlWriter.defaults.write(doc);
 ```
 
 High-level plan for development

@@ -1,4 +1,4 @@
-library referenceResolverTest;
+library md_proc.test.reference_resolver;
 
 import 'package:test/test.dart' as t;
 
@@ -45,7 +45,7 @@ This is a [link].
 
 void referenceResolverTests() {
   CommonMarkParser parser = new CommonMarkParser(new Options(linkResolver: linkResolver));
-  CommonMarkParser defaultParser = CommonMarkParser.DEFAULT;
+  CommonMarkParser defaultParser = CommonMarkParser.defaults;
 
   t.group("Custom reference resolver test", () {
     t.test("Should leave defined links as is", () {

@@ -8,8 +8,6 @@ import 'entities.dart';
 import 'options.dart';
 
 
-const TAB_STOP = 4;
-
 class _UnparsedInlines extends Inlines {
   String raw;
 
@@ -64,7 +62,7 @@ class _EmphasisStackItem {
 
 // CommonMark parser
 class CommonMarkParser {
-  static const int TAB_STOP = 4;
+  static const int tabStop = 4;
 
   Options _options;
 
@@ -81,7 +79,7 @@ class CommonMarkParser {
     if (!s.endsWith("\n")) {
       s += "\n";
     }
-    var doc = document.parse(s, tabStop: TAB_STOP);
+    var doc = document.parse(s, tabStop: tabStop);
 
     _inlinesInDocument(doc);
     return doc;
@@ -153,7 +151,7 @@ class CommonMarkParser {
 
 
   Inlines _parseInlines(String raw) {
-    return inlines.parse(raw, tabStop: TAB_STOP);
+    return inlines.parse(raw, tabStop: tabStop);
   }
 
 
@@ -225,9 +223,9 @@ class CommonMarkParser {
     }
     var newPos;
     if (offset < len && s[offset] == '\n') {
-      newPos = new Position(offset + 1, pos.line + 1, 1, tabStop: TAB_STOP);
+      newPos = new Position(offset + 1, pos.line + 1, 1, tabStop: tabStop);
     } else {
-      newPos = new Position(offset, pos.line, pos.character + result.length, tabStop: TAB_STOP);
+      newPos = new Position(offset, pos.line, pos.character + result.length, tabStop: tabStop);
     }
     return new ParseResult(s, new Expectations.empty(newPos), newPos, true, false, result);
   });
@@ -243,12 +241,12 @@ class CommonMarkParser {
   // that were actually skipped.
   // TODO test all parsers that use skipNonindentSpaces, skipListNonindentSpaces, indentSpaces, atMostSpaces
   // TODO rename indentSpaces => indent, atMostSpaces => atMostIndent
-  static final Parser skipNonindentChars = atMostIndent(TAB_STOP - 1).notFollowedBy(whitespaceChar);
+  static final Parser skipNonindentChars = atMostIndent(tabStop - 1).notFollowedBy(whitespaceChar);
   static final Parser skipNonindentCharsFromAnyPosition =
-    atMostIndent(TAB_STOP - 1, fromLineStart: false).notFollowedBy(whitespaceChar);
-  static Parser skipListIndentChars(int max) => (atMostIndent(max - 1) | atMostIndent(TAB_STOP - 1, fromLineStart: false)).notFollowedBy(whitespaceChar);
+    atMostIndent(tabStop - 1, fromLineStart: false).notFollowedBy(whitespaceChar);
+  static Parser skipListIndentChars(int max) => (atMostIndent(max - 1) | atMostIndent(tabStop - 1, fromLineStart: false)).notFollowedBy(whitespaceChar);
   static Parser spnl = (skipSpaces > newline);
-  static Parser get indent => waitForIndent(TAB_STOP) % "indentation";
+  static Parser get indent => waitForIndent(tabStop) % "indentation";
 
   static Parser atMostIndent(int indent, {bool fromLineStart: true}) => new Parser((String s, Position pos) {
     if (fromLineStart && pos.character != 1) {
@@ -737,7 +735,7 @@ class CommonMarkParser {
     if (isLink && labelRes.value.contains(new RegExp(r"^\s*$"))) {
       return fail.run(s, pos);
     }
-    Inlines linkInlines = inlines.parse(labelRes.value, tabStop: TAB_STOP);
+    Inlines linkInlines = inlines.parse(labelRes.value, tabStop: tabStop);
     if (isLink && _isContainsLink(linkInlines)) {
       List<Inline> resValue = [new Str('[')];
       resValue.addAll(linkInlines);
@@ -1108,9 +1106,9 @@ class CommonMarkParser {
     int fenceSize = openFenceRes.value[2];
     String infoString = openFenceRes.value[3];
 
-    FenceType fenceType = FenceType.BacktickFence;
+    FenceType fenceType = FenceType.backtick;
     if (fenceChar == '~') {
-      fenceType = FenceType.TildeFence;
+      fenceType = FenceType.tilde;
     }
 
     Parser lineParser = anyLine;
@@ -1358,7 +1356,7 @@ class CommonMarkParser {
 
     void buildBuffer() {
       String s = buffer.map((l) => l + "\n").join();
-      List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStop: TAB_STOP);
+      List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStop: tabStop);
       if (!closeParagraph && innerRes.length > 0 && innerRes.first is Para) {
         var first = innerRes.first;
         if (_acceptLazy(blocks, first.contents.raw)) {
@@ -1385,7 +1383,7 @@ class CommonMarkParser {
       } else {
         if (buffer.length > 0) {
           buildBuffer();
-          List<Block> lineBlock = block.parse(line + "\n", tabStop: TAB_STOP);
+          List<Block> lineBlock = block.parse(line + "\n", tabStop: tabStop);
           // TODO fix condition
           if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para) {
             var block = lineBlock[0] as Para;
@@ -1412,11 +1410,8 @@ class CommonMarkParser {
   // Lists
   //
 
-  // TODO tabs after marker
-  // 1.\tSomething
-  // -\t\tCode
-  static const _LIST_TYPE_ORDERED = 0;
-  static const _LIST_TYPE_UNORDERED = 1;
+  static const _listTypeOrdered = 0;
+  static const _listTypeUnordered = 1;
   static ParserAccumulator3 orderedListMarkerTest(int indent) =>
       skipListIndentChars(indent) +
           countBetween(1, 9, digit) + // 1-9 digits
@@ -1426,8 +1421,8 @@ class CommonMarkParser {
           oneOf('-+*');
   static Parser listMarkerTest(int indent) => (
       (
-          (orderedListMarkerTest(indent) ^ (sp, d, c) => [_LIST_TYPE_ORDERED, sp, d, c]) |
-          (unorderedListMarkerTest(indent) ^ (sp, c) => [_LIST_TYPE_UNORDERED, sp, c])
+          (orderedListMarkerTest(indent) ^ (sp, d, c) => [_listTypeOrdered, sp, d, c]) |
+          (unorderedListMarkerTest(indent) ^ (sp, c) => [_listTypeUnordered, sp, c])
       ) +
       (
           char("\n") |
@@ -1472,7 +1467,7 @@ class CommonMarkParser {
       }
 
       if (!getTight()) {
-        innerBlocks = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStop: TAB_STOP);
+        innerBlocks = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStop: tabStop);
       }
       if (!afterEmptyLine && innerBlocks.length > 0 && innerBlocks.first is Para &&
           _acceptLazy(blocks, ((innerBlocks.first as Para).contents as _UnparsedInlines).raw)) {
@@ -1500,10 +1495,10 @@ class CommonMarkParser {
         return false;
       }
       ListBlock block = stack.last.block;
-      if (type == _LIST_TYPE_ORDERED && block is OrderedList && block.indexSeparator == indexSeparator) {
+      if (type == _listTypeOrdered && block is OrderedList && block.indexSeparator == indexSeparator) {
         success = true;
       }
-      if (type == _LIST_TYPE_UNORDERED && block is UnorderedList && block.bulletType == bulletType) {
+      if (type == _listTypeUnordered && block is UnorderedList && block.bulletType == bulletType) {
         success = true;
       }
       if (success) {
@@ -1531,7 +1526,7 @@ class CommonMarkParser {
       } else {
         int diff = res.value[1].length - 1;
         return new Position(res.position.offset - diff, res.position.line, res.position.character - diff,
-            tabStop: TAB_STOP);
+            tabStop: tabStop);
       }
     }
 
@@ -1581,7 +1576,7 @@ class CommonMarkParser {
             // TODO Speedup by checking impossible starts
             ParseResult lineRes = anyLine.run(s, position);
             assert(lineRes.isSuccess);
-            List<Block> lineBlock = block.parse(lineRes.value.trimLeft() + "\n", tabStop: TAB_STOP);
+            List<Block> lineBlock = block.parse(lineRes.value.trimLeft() + "\n", tabStop: tabStop);
             if (
               lineBlock.length == 1 &&
               lineBlock[0] is Para &&
@@ -1615,12 +1610,12 @@ class CommonMarkParser {
 
       // Trying to find new list item
 
-      ParseResult markerRes = listMarkerTest(getIndent() + TAB_STOP).run(s, position);
+      ParseResult markerRes = listMarkerTest(getIndent() + tabStop).run(s, position);
       if (markerRes.isSuccess) {
         int type = markerRes.value[0][0];
-        IndexSeparator indexSeparator = (type == _LIST_TYPE_ORDERED ? IndexSeparator.fromChar(markerRes.value[0][3]) : null);
-        int startIndex = type == _LIST_TYPE_ORDERED ? int.parse(markerRes.value[0][2].join(), onError: (_) => 1) : 1;
-        BulletType bulletType = (type == _LIST_TYPE_UNORDERED ? BulletType.fromChar(markerRes.value[0][2]) : null);
+        IndexSeparator indexSeparator = (type == _listTypeOrdered ? IndexSeparator.fromChar(markerRes.value[0][3]) : null);
+        int startIndex = type == _listTypeOrdered ? int.parse(markerRes.value[0][2].join(), onError: (_) => 1) : 1;
+        BulletType bulletType = (type == _listTypeUnordered ? BulletType.fromChar(markerRes.value[0][2]) : null);
 
         // It's a new list item on same level
         if (!nextLevel) {
@@ -1636,7 +1631,7 @@ class CommonMarkParser {
             int subIndent = markerRes.position.character - 1;
             if (markerRes.value[1] == "\n") {
               subIndent = position.character + markerRes.value[0][1] + 1; // marker + space after marker - char
-              if (type == _LIST_TYPE_ORDERED) {
+              if (type == _listTypeOrdered) {
                 subIndent += markerRes.value[0][2].length;
               }
             }
@@ -1664,11 +1659,11 @@ class CommonMarkParser {
         int subIndent = markerRes.position.character - 1;
         if (markerRes.value[1] == "\n") {
           subIndent = position.character + markerRes.value[0][1] + 1; // marker + space after marker - char
-          if (type == _LIST_TYPE_ORDERED) {
+          if (type == _listTypeOrdered) {
             subIndent += markerRes.value[0][2].length;
           }
         }
-        if (type == _LIST_TYPE_ORDERED) {
+        if (type == _listTypeOrdered) {
           newListBlock = new OrderedList([new ListItem([])],
               tight: true, indexSeparator: indexSeparator, startIndex: startIndex);
           //subIndent += markerRes.value[0][2].length;
@@ -1712,9 +1707,9 @@ class CommonMarkParser {
           int fenceSize = openFenceRes.value[2];
           String infoString = openFenceRes.value[3];
 
-          FenceType fenceType = FenceType.BacktickFence;
+          FenceType fenceType = FenceType.backtick;
           if (fenceChar == '~') {
-            fenceType = FenceType.TildeFence;
+            fenceType = FenceType.tilde;
           }
 
           position = openFenceRes.position;
@@ -1798,6 +1793,6 @@ class CommonMarkParser {
   Parser get document => (block.manyUntil(eof) ^ (res) => new Document(processParsedBlocks(res))) % "document";
 
 
-  static CommonMarkParser DEFAULT = new CommonMarkParser(Options.DEFAULT);
-  static CommonMarkParser STRICT = new CommonMarkParser(Options.STRICT);
+  static CommonMarkParser defaults = new CommonMarkParser(Options.defaults);
+  static CommonMarkParser strict = new CommonMarkParser(Options.strict);
 }

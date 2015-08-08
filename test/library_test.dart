@@ -1,4 +1,4 @@
-import 'package:md_proc/src/options.dart';
+import 'package:md_proc/options.dart';
 
 import 'individual_parsers.dart';
 import 'parser.dart';
@@ -15,14 +15,14 @@ void main() {
   //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num == 129)));
   //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num >= 103 && num < 144)));
   //fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML));
-  fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.STRICT));
+  fileTest("CommonMark", "spec.txt", mdToHtmlTest(Options.strict));
   // Additional tests
   //fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && num == 19));
-  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.STRICT));
+  fileTest("Additional", "additionalMarkdownToHtml.txt", mdToHtmlTest(Options.strict));
   // Additional tests
-  fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(Options.DEFAULT));
+  fileTest("SmartPunct", "smart_punct.txt", mdToHtmlTest(Options.defaults));
   // Markdown to markdown tests
-  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest(Options.STRICT));
+  fileTest("md2md", "markdownToMarkdown.txt", mdToMdTest(Options.strict));
   // Custom resolver
   referenceResolverTests();
 }

@@ -1,4 +1,4 @@
-library serviceTest;
+library md_proc.test.service;
 
 import 'package:test/test.dart' as t;
 
@@ -11,25 +11,25 @@ void serviceTests() {
     });
 
     t.test('Parsing', () {
-      t.expect(CommonMarkParser.DEFAULT.parse('Hello world!\n===').toString(),
+      t.expect(CommonMarkParser.defaults.parse('Hello world!\n===').toString(),
         t.equals('Document [SetextHeader 1 [Str "Hello", Space, Str "world", Str "!"]]'));
     });
 
     t.test('Writing html', () {
-      Document doc = CommonMarkParser.DEFAULT.parse('Hello world!\n===');
-      String res = HtmlWriter.DEFAULT.write(doc);
+      Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
+      String res = HtmlWriter.defaults.write(doc);
       t.expect(res, t.equals('<h1>Hello world!</h1>\n'));
     });
 
     t.test('Writing markdown', () {
-      Document doc = CommonMarkParser.DEFAULT.parse('Hello world!\n===');
-      String res = MarkdownWriter.DEFAULT.write(doc);
+      Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
+      String res = MarkdownWriter.defaults.write(doc);
       t.expect(res, t.equals('Hello world!\n============\n'));
     });
 
     t.test('Smart punctuation', () {
-      Document doc = CommonMarkParser.STRICT.parse('...');
-      String res = HtmlWriter.STRICT.write(doc);
+      Document doc = CommonMarkParser.strict.parse('...');
+      String res = HtmlWriter.strict.write(doc);
       t.expect(res, t.equals('<p>...</p>\n'));
     });
   });
@@ -151,15 +151,15 @@ void serviceTests() {
 
     t.group('FenceType', () {
       t.test('toString', () {
-        t.expect(FenceType.BacktickFence.toString(), t.equals('BacktickFence'));
-        t.expect(FenceType.TildeFence.toString(), t.equals('TildeFence'));
+        t.expect(FenceType.backtick.toString(), t.equals('backtick'));
+        t.expect(FenceType.tilde.toString(), t.equals('tilde'));
       });
       t.test('==', () {
-        t.expect(FenceType.BacktickFence, t.equals(FenceType.BacktickFence));
-        t.expect(FenceType.TildeFence, t.equals(FenceType.TildeFence));
+        t.expect(FenceType.backtick, t.equals(FenceType.backtick));
+        t.expect(FenceType.tilde, t.equals(FenceType.tilde));
       });
       t.test('!=', () {
-        t.expect(FenceType.BacktickFence, t.isNot(t.equals(FenceType.TildeFence)));
+        t.expect(FenceType.backtick, t.isNot(t.equals(FenceType.tilde)));
       });
     });
 
@@ -184,11 +184,11 @@ void serviceTests() {
       });
       t.test('==', () {
         t.expect(code, t.equals(new FencedCodeBlock("Code",
-            fenceType: FenceType.BacktickFence, fenceSize: 3, attributes: new EmptyAttr())));
+            fenceType: FenceType.backtick, fenceSize: 3, attributes: new EmptyAttr())));
       });
       t.test('!=', () {
         t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code1"))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceType: FenceType.TildeFence))));
+        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceType: FenceType.tilde))));
         t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceSize: 5))));
         t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", attributes: new InfoString('dart')))));
         t.expect(code, t.isNot(t.equals(new IndentedCodeBlock("Code"))));
@@ -239,57 +239,57 @@ void serviceTests() {
 
     t.group('BulletType', () {
       t.test('toString', () {
-        t.expect(BulletType.MinusBullet.toString(), t.equals('MinusBullet'));
-        t.expect(BulletType.PlusBullet.toString(), t.equals('PlusBullet'));
-        t.expect(BulletType.StarBullet.toString(), t.equals('StarBullet'));
+        t.expect(BulletType.minus.toString(), t.equals('minus'));
+        t.expect(BulletType.plus.toString(), t.equals('plus'));
+        t.expect(BulletType.star.toString(), t.equals('star'));
       });
       t.test('fromChar', () {
-        t.expect(BulletType.fromChar('-'), t.equals(BulletType.MinusBullet));
-        t.expect(BulletType.fromChar('+'), t.equals(BulletType.PlusBullet));
-        t.expect(BulletType.fromChar('*'), t.equals(BulletType.StarBullet));
+        t.expect(BulletType.fromChar('-'), t.equals(BulletType.minus));
+        t.expect(BulletType.fromChar('+'), t.equals(BulletType.plus));
+        t.expect(BulletType.fromChar('*'), t.equals(BulletType.star));
       });
       t.test('==', () {
-        t.expect(BulletType.MinusBullet, t.equals(BulletType.MinusBullet));
-        t.expect(BulletType.PlusBullet, t.equals(BulletType.PlusBullet));
-        t.expect(BulletType.StarBullet, t.equals(BulletType.StarBullet));
+        t.expect(BulletType.minus, t.equals(BulletType.minus));
+        t.expect(BulletType.plus, t.equals(BulletType.plus));
+        t.expect(BulletType.star, t.equals(BulletType.star));
       });
       t.test('!=', () {
-        t.expect(BulletType.MinusBullet, t.isNot(t.equals(BulletType.PlusBullet)));
-        t.expect(BulletType.MinusBullet, t.isNot(t.equals(BulletType.StarBullet)));
+        t.expect(BulletType.minus, t.isNot(t.equals(BulletType.plus)));
+        t.expect(BulletType.minus, t.isNot(t.equals(BulletType.star)));
       });
     });
 
     t.group('IndexSeparator', () {
       t.test('toString', () {
-        t.expect(IndexSeparator.DotSeparator.toString(), t.equals('DotSeparator'));
-        t.expect(IndexSeparator.ParenthesisSeparator.toString(), t.equals('ParenthesisSeparator'));
+        t.expect(IndexSeparator.dot.toString(), t.equals('dot'));
+        t.expect(IndexSeparator.parenthesis.toString(), t.equals('parenthesis'));
       });
       t.test('fromChar', () {
-        t.expect(IndexSeparator.fromChar('.').toString(), t.equals('DotSeparator'));
-        t.expect(IndexSeparator.fromChar(')').toString(), t.equals('ParenthesisSeparator'));
+        t.expect(IndexSeparator.fromChar('.').toString(), t.equals('dot'));
+        t.expect(IndexSeparator.fromChar(')').toString(), t.equals('parenthesis'));
       });
       t.test('==', () {
-        t.expect(IndexSeparator.DotSeparator, t.equals(IndexSeparator.DotSeparator));
-        t.expect(IndexSeparator.ParenthesisSeparator, t.equals(IndexSeparator.ParenthesisSeparator));
+        t.expect(IndexSeparator.dot, t.equals(IndexSeparator.dot));
+        t.expect(IndexSeparator.parenthesis, t.equals(IndexSeparator.parenthesis));
       });
       t.test('!=', () {
-        t.expect(IndexSeparator.ParenthesisSeparator, t.isNot(t.equals(IndexSeparator.DotSeparator)));
+        t.expect(IndexSeparator.parenthesis, t.isNot(t.equals(IndexSeparator.dot)));
       });
     });
 
     t.group('UnorderedList', () {
       var list = new UnorderedList([new ListItem([new HorizontalRule()])]);
       t.test('toString', () {
-        t.expect(list.toString(), t.equals('UnorderedList MinusBullet [ListItem [HorizontalRule]]'));
+        t.expect(list.toString(), t.equals('UnorderedList minus [ListItem [HorizontalRule]]'));
       });
       t.test('==', () {
         t.expect(list, t.equals(new UnorderedList([new ListItem([new HorizontalRule()])],
-            tight: false, bulletType: BulletType.MinusBullet)));
+            tight: false, bulletType: BulletType.minus)));
       });
       t.test('!=', () {
         t.expect(list, t.isNot(new UnorderedList([])));
         t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])], tight: true)));
-        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])], bulletType: BulletType.PlusBullet)));
+        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])], bulletType: BulletType.plus)));
         t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])])));
       });
     });
@@ -297,16 +297,16 @@ void serviceTests() {
     t.group('OrderedList', () {
       var list = new OrderedList([new ListItem([new HorizontalRule()])]);
       t.test('toString', () {
-        t.expect(list.toString(), t.equals('OrderedList start=1 DotSeparator [ListItem [HorizontalRule]]'));
+        t.expect(list.toString(), t.equals('OrderedList start=1 dot [ListItem [HorizontalRule]]'));
       });
       t.test('==', () {
         t.expect(list, t.equals(new OrderedList([new ListItem([new HorizontalRule()])],
-            tight: false, indexSeparator: IndexSeparator.DotSeparator, startIndex: 1)));
+            tight: false, indexSeparator: IndexSeparator.dot, startIndex: 1)));
       });
       t.test('!=', () {
         t.expect(list, t.isNot(new OrderedList([])));
         t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], tight: true)));
-        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], indexSeparator: IndexSeparator.ParenthesisSeparator)));
+        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], indexSeparator: IndexSeparator.parenthesis)));
         t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], startIndex: 0)));
         t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])])));
       });

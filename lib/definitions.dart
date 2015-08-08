@@ -62,7 +62,7 @@ class Target {
 
   Target(this.link, this.title);
 
-  String toString() => 'Target "${link}" ${title == null ? "null" : "\"${title}\""}';
+  String toString() => 'Target "$link" ${title == null ? "null" : "\"$title\""}';
 
   bool operator== (obj) => obj is Target &&
     link == obj.link && title == obj.title;
@@ -131,8 +131,8 @@ class SetextHeader extends Header {
 
 
 class FenceType {
-  static const FenceType BacktickFence = const FenceType._(0, "BacktickFence");
-  static const FenceType TildeFence = const FenceType._(1, "TildeFence");
+  static const FenceType backtick = const FenceType._(0, "backtick");
+  static const FenceType tilde = const FenceType._(1, "tilde");
 
   final int value;
   final String name;
@@ -167,7 +167,7 @@ class IndentedCodeBlock extends CodeBlock {
 class FencedCodeBlock extends CodeBlock {
   FenceType fenceType;
   int fenceSize;
-  FencedCodeBlock(String contents, {this.fenceType: FenceType.BacktickFence, this.fenceSize: 3, Attr attributes})
+  FencedCodeBlock(String contents, {this.fenceType: FenceType.backtick, this.fenceSize: 3, Attr attributes})
     : super(contents, attributes == null ? new EmptyAttr() : attributes);
 
   String toString() => "FencedCodeBlock $attributes $contents";
@@ -222,9 +222,9 @@ class ListItem {
 
 
 class BulletType {
-  static const BulletType MinusBullet = const BulletType._(0, "MinusBullet", "-");
-  static const BulletType PlusBullet = const BulletType._(1, "PlusBullet", "+");
-  static const BulletType StarBullet = const BulletType._(2, "StarBullet", "*");
+  static const BulletType minus = const BulletType._(0, "minus", "-");
+  static const BulletType plus = const BulletType._(1, "plus", "+");
+  static const BulletType star = const BulletType._(2, "star", "*");
 
   final int value;
   final String name;
@@ -236,20 +236,20 @@ class BulletType {
     BulletType type;
     switch(markerChar) {
       case '+':
-        type = BulletType.PlusBullet;
+        type = BulletType.plus;
         break;
 
       case '-':
-        type = BulletType.MinusBullet;
+        type = BulletType.minus;
         break;
 
       case '*':
-        type = BulletType.StarBullet;
+        type = BulletType.star;
         break;
 
       default:
         assert(false);
-        type = BulletType.PlusBullet;
+        type = BulletType.plus;
     }
 
     return type;
@@ -263,8 +263,8 @@ class BulletType {
 
 
 class IndexSeparator {
-  static const IndexSeparator DotSeparator = const IndexSeparator._(0, "DotSeparator", ".");
-  static const IndexSeparator ParenthesisSeparator = const IndexSeparator._(1, "ParenthesisSeparator", ")");
+  static const IndexSeparator dot = const IndexSeparator._(0, "dot", ".");
+  static const IndexSeparator parenthesis = const IndexSeparator._(1, "parenthesis", ")");
 
   final int value;
   final String name;
@@ -276,16 +276,16 @@ class IndexSeparator {
     IndexSeparator separator;
     switch(indexSeparator) {
       case '.':
-        separator = IndexSeparator.DotSeparator;
+        separator = IndexSeparator.dot;
         break;
 
       case ')':
-        separator = IndexSeparator.ParenthesisSeparator;
+        separator = IndexSeparator.parenthesis;
         break;
 
       default:
         assert(false);
-        separator = IndexSeparator.DotSeparator;
+        separator = IndexSeparator.dot;
     }
 
     return separator;
@@ -310,7 +310,7 @@ abstract class ListBlock extends Block {
 class UnorderedList extends ListBlock {
   BulletType bulletType;
 
-  UnorderedList(Iterable<ListItem> items, {this.bulletType: BulletType.MinusBullet, bool tight: false})
+  UnorderedList(Iterable<ListItem> items, {this.bulletType: BulletType.minus, bool tight: false})
     : super(items, tight);
 
   String toString() => "UnorderedList $bulletType $items";
@@ -327,7 +327,7 @@ class OrderedList extends ListBlock {
   int startIndex;
 
   OrderedList(Iterable<ListItem> items, {bool tight: false,
-      this.indexSeparator: IndexSeparator.DotSeparator, this.startIndex: 1}) : super(items, tight);
+      this.indexSeparator: IndexSeparator.dot, this.startIndex: 1}) : super(items, tight);
 
   String toString() => "OrderedList start=$startIndex $indexSeparator $items";
 

@@ -335,6 +335,6 @@ class HtmlWriter {
     return builder.toString();
   }
 
-  static HtmlWriter STRICT = new HtmlWriter(Options.STRICT);
-  static HtmlWriter DEFAULT = new HtmlWriter(Options.DEFAULT);
+  static HtmlWriter strict = new HtmlWriter(Options.strict);
+  static HtmlWriter defaults = new HtmlWriter(Options.defaults);
 }

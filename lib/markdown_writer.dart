@@ -57,7 +57,7 @@ class _EscapeContext {
     );
   }
 
-  static const _EscapeContext EMPTY = const _EscapeContext();
+  static const _EscapeContext empty = const _EscapeContext();
 }
 
 
@@ -69,7 +69,7 @@ class _NotCheckedPart extends _InlinePart {
   Options _options;
   CommonMarkParser _parser;
 
-  _NotCheckedPart(String content, this._options, [this.context = _EscapeContext.EMPTY]) : super(content) {
+  _NotCheckedPart(String content, this._options, [this.context = _EscapeContext.empty]) : super(content) {
     _parser = new CommonMarkParser(_options, {});
   }
 
@@ -233,9 +233,7 @@ class _InlineRenderer {
   _InlineRenderer(this._references, this._options) : parts = <_InlinePart>[];
 
 
-  /**
-   * If context == null then token doesn't require escaping
-   */
+  /// If context == null then token doesn't require escaping
   void write(String str, [_EscapeContext context]) {
     if (parts.length == 0) {
       parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, _options, context));
@@ -255,7 +253,7 @@ class _InlineRenderer {
   }
 
 
-  void writeInlines(Iterable<Inline> inlines, {String prevEmph, _EscapeContext context: _EscapeContext.EMPTY}) {
+  void writeInlines(Iterable<Inline> inlines, {String prevEmph, _EscapeContext context: _EscapeContext.empty}) {
     if (inlines.length == 1 && prevEmph != null) {
       if (inlines.first is Emph) {
         writeEmph(inlines.first, delimiter: prevEmph == "*" ? "_" : "*", context: context);
@@ -329,7 +327,7 @@ class _InlineRenderer {
     write(fence);
   }
 
-  void writeEmph(Emph emph, {String delimiter: "*", _EscapeContext context: _EscapeContext.EMPTY}) {
+  void writeEmph(Emph emph, {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
     if (delimiter == "*" && !context.escapeStar) {
       context = context.copy(escapeStar: true);
     } else if (delimiter == "_" && !context.escapeUnderscore) {
@@ -341,7 +339,7 @@ class _InlineRenderer {
     write(delimiter);
   }
 
-  void writeStrong(Strong strong, {String delimiter: "*", _EscapeContext context: _EscapeContext.EMPTY}) {
+  void writeStrong(Strong strong, {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
     if (delimiter == "*" && !context.escapeStar) {
       context = context.copy(escapeStar: true);
     } else if (delimiter == "_" && !context.escapeUnderscore) {
@@ -355,7 +353,7 @@ class _InlineRenderer {
   }
 
 
-  void writeSmartQuote(SmartQuote quote, {_EscapeContext context: _EscapeContext.EMPTY}) {
+  void writeSmartQuote(SmartQuote quote, {_EscapeContext context: _EscapeContext.empty}) {
     if (quote.open) {
       write(quote.single ? "'" : '"');
     }
@@ -573,7 +571,7 @@ class _MarkdownBuilder extends StringBuffer {
 
   void writeCodeBlock(CodeBlock codeBlock) {
     if (codeBlock is FencedCodeBlock) {
-      String fence = (codeBlock.fenceType == FenceType.BacktickFence ? '`' : '~') * codeBlock.fenceSize;
+      String fence = (codeBlock.fenceType == FenceType.backtick ? '`' : '~') * codeBlock.fenceSize;
       write(fence);
       if (codeBlock.attributes is InfoString) {
         var attributes = codeBlock.attributes;
@@ -674,7 +672,7 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-  void writeInlines(Iterable<Inline> inlines, {_EscapeContext context: _EscapeContext.EMPTY}) {
+  void writeInlines(Iterable<Inline> inlines, {_EscapeContext context: _EscapeContext.empty}) {
     _InlineRenderer renderer = new _InlineRenderer(_references, _options);
     renderer.writeInlines(inlines, context: context);
     write(renderer.toString());
@@ -699,9 +697,9 @@ class _MarkdownBuilder extends StringBuffer {
 
 
 class MarkdownWriter {
-  Options _options;
+  final Options _options;
 
-  MarkdownWriter(this._options);
+  const MarkdownWriter(this._options);
 
   String write(Document document) {
     _MarkdownBuilder builder = new _MarkdownBuilder(<String, Target>{}, _options);
@@ -710,6 +708,6 @@ class MarkdownWriter {
     return builder.toString();
   }
 
-  static MarkdownWriter STRICT = new MarkdownWriter(Options.STRICT);
-  static MarkdownWriter DEFAULT = new MarkdownWriter(Options.DEFAULT);
+  static const MarkdownWriter strict = const MarkdownWriter(Options.strict);
+  static const MarkdownWriter defaults = const MarkdownWriter(Options.defaults);
 }

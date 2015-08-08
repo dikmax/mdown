@@ -1,16 +1,16 @@
-library parserTest;
+library md_proc.test.parser;
 
 import 'dart:io';
 import 'package:test/test.dart' as t;
 import 'package:md_proc/md_proc.dart';
-import 'package:md_proc/src/markdown_writer.dart';
+import 'package:md_proc/markdown_writer.dart';
 
-const int STATE_WAIT = 0;
-const int STATE_MARKDOWN = 1;
-const int STATE_HTML = 2;
+const int stateWait = 0;
+const int stateMarkdown = 1;
+const int stateHtml = 2;
 
 enum TestType {
-  HTML, MARKDOWN
+  html, markdown
 }
 
 typedef bool FilterFunc(TestType type, int num);
@@ -21,7 +21,7 @@ Map<String, String> readFile(fileName) {
   Map<String, String> result = <String, String>{};
 
   File file = new File(fileName);
-  int state = STATE_WAIT;
+  int state = stateWait;
   List<String> destination = [];
   List<String> source = [];
   List<String> lines = file.readAsLinesSync();
@@ -30,13 +30,13 @@ Map<String, String> readFile(fileName) {
       state++;
       if (state == 3) {
         result[source.map((line) => line + "\n").join()] = destination.map((line) => line + "\n").join();
-        state = STATE_WAIT;
+        state = stateWait;
         destination = [];
         source = [];
       }
-    } else if (state == STATE_MARKDOWN) {
+    } else if (state == stateMarkdown) {
       source.add(line);
-    } else if (state == STATE_HTML) {
+    } else if (state == stateHtml) {
       destination.add(line);
     }
   }
@@ -142,13 +142,13 @@ TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) => (in
   String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
   html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-  if (filter(TestType.HTML, num)) {
+  if (filter(TestType.html, num)) {
     t.test('html $num', () {
       Document doc = parser.parse(md);
       t.expect(tidy(writer.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
     });
   }
-  if (filter(TestType.MARKDOWN, num)) {
+  if (filter(TestType.markdown, num)) {
     t.test('markdown $num', () {
       var generatedMarkdown = mdWriter.write(parser.parse(md));
       Document doc = parser.parse(generatedMarkdown);
@@ -161,7 +161,7 @@ TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) => (int 
   CommonMarkParser parser = new CommonMarkParser(options);
   MarkdownWriter writer = new MarkdownWriter(options);
 
-  if (filter(TestType.MARKDOWN, num)) {
+  if (filter(TestType.markdown, num)) {
     t.test(num.toString(), () {
       var generatedMarkdown = writer.write(parser.parse(md));
       t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));

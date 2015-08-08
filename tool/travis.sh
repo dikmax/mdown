@@ -8,6 +8,10 @@ dartanalyzer --fatal-warnings \
   lib/md_proc.dart \
   test/library_test.dart
 
+# Linter
+pub run linter lib
+pub run linter test
+
 # Run the tests.
 pub run test
 
@@ -15,8 +19,7 @@ pub run test
 # Install dart_coveralls
 # Rerun tests with coverage and send to coveralls
 if [ "$COVERALLS_TOKEN" ]; then
-  pub global activate dart_coveralls
-  pub global run dart_coveralls report \
+  pub run dart_coveralls report \
     --token $COVERALLS_TOKEN \
     --retry 2 \
     --exclude-test-files \
