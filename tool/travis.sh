@@ -10,9 +10,12 @@ dartanalyzer --fatal-warnings \
 
 # Linter
 pub run linter lib
-pub run linter test
+pub run linter test/*.dart
+
+# TODO Use .analysis_config when Dart 1.12 is released
 
 # Run the tests.
+# TODO pub run test "vm,phantomjs"
 pub run test
 
 # If the COVERALLS_TOKEN token is set on travis
