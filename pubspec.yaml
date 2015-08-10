@@ -13,4 +13,4 @@ dev_dependencies:
   test: any
   linter: any
   dart_coveralls: any
-
+  source_gen: '>=0.4.2 <0.5.0'

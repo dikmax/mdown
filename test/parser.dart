@@ -1,6 +1,5 @@
 library md_proc.test.parser;
 
-import 'dart:io';
 import 'package:test/test.dart' as t;
 import 'package:md_proc/md_proc.dart';
 import 'package:md_proc/markdown_writer.dart';
@@ -17,39 +16,8 @@ typedef bool FilterFunc(TestType type, int num);
 bool emptyFilter(type, num) => true;
 typedef void TestFunc(int num, String source, String destination);
 
-Map<String, String> readFile(fileName) {
-  Map<String, String> result = <String, String>{};
-
-  File file = new File(fileName);
-  int state = stateWait;
-  List<String> destination = [];
-  List<String> source = [];
-  List<String> lines = file.readAsLinesSync();
-  for (String line in lines) {
-    if (line == ".") {
-      state++;
-      if (state == 3) {
-        result[source.map((line) => line + "\n").join()] = destination.map((line) => line + "\n").join();
-        state = stateWait;
-        destination = [];
-        source = [];
-      }
-    } else if (state == stateMarkdown) {
-      source.add(line);
-    } else if (state == stateHtml) {
-      destination.add(line);
-    }
-  }
-
-  return result;
-}
-
-void fileTest(name, fileName, TestFunc testFunc) {
+void tests(String name, Map<String, String> tests, TestFunc testFunc) {
   t.group(name, () {
-    Directory current = Directory.current;
-    var filePath = "${current.path}/test/$fileName";
-    Map<String, String> tests = readFile(filePath);
-
     int num = 0;
     tests.forEach((String source, String destination) {
       ++num;
