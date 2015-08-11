@@ -15,8 +15,7 @@ pub run linter test/*.dart
 # TODO Use .analysis_config when Dart 1.12 is released
 
 # Run the tests.
-# TODO pub run test "vm,phantomjs"
-pub run test
+pub run test -p "vm,phantomjs"
 
 # If the COVERALLS_TOKEN token is set on travis
 # Install dart_coveralls
