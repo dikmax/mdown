@@ -6,11 +6,11 @@ set -e
 # Verify that the libraries are error free.
 dartanalyzer --fatal-warnings \
   lib/md_proc.dart \
-  test/library_test.dart
+  test/library_test.dart \
+  tool/build.dart
 
 # Linter
-pub run linter lib
-pub run linter test/*.dart
+pub run linter `find lib test tool -type f \( -iname "*.dart" ! -iname "*.g.dart" \)`
 
 # TODO Use .analysis_config when Dart 1.12 is released
 

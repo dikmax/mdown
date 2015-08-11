@@ -1,4 +1,4 @@
-library md_proc.build_file;
+library md_proc.tool.build_file;
 
 import 'package:source_gen/source_gen.dart';
 import 'package:md_proc/generators/embed_tests_generator.dart';
