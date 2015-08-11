@@ -395,7 +395,7 @@ class Inlines extends ListBase<Inline> {
 
   Inlines();
 
-  Inlines.from(Iterable<Inlines> inlines) : _inlines = new List<Inline>.from(inlines);
+  Inlines.from(Iterable<Inline> inlines) : _inlines = new List<Inline>.from(inlines);
 
   int get length => _inlines.length;
 
