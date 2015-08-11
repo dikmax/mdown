@@ -482,7 +482,7 @@ class CommonMarkParser {
   static Parser _inlineCode1 = char('`').many1;
   static Parser _inlineCode2 = noneOf('\n`').many;
 
-  Parser<List<Inline>> get inlineCode => new Parser((String s, Position pos) {
+  Parser<List<Inline>> get inlineCode => new Parser<List<Inline>>((String s, Position pos) {
     ParseResult openRes = _inlineCode1.run(s, pos);
     if (!openRes.isSuccess) {
       return openRes;
@@ -753,7 +753,7 @@ class CommonMarkParser {
     return false;
   });
 
-  Parser<List<Inline>> _linkOrImage(bool isLink) => new Parser((String s, Position pos) {
+  Parser<List<Inline>> _linkOrImage(bool isLink) => new Parser<List<Inline>>((String s, Position pos) {
     ParseResult testRes = char('[').run(s, pos);
     if (!testRes.isSuccess) {
       return testRes;
@@ -859,7 +859,7 @@ class CommonMarkParser {
     r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
 
 
-  Parser<List<Inline>> get autolink => new Parser((String s, Position pos) {
+  Parser<List<Inline>> get autolink => new Parser<List<Inline>>((String s, Position pos) {
     ParseResult res = (char('<') >
       pred((String char) => char.codeUnitAt(0) > 0x20 && char != "<" && char != ">").manyUntil(char('>'))).run(s, pos);
     if (!res.isSuccess) {
@@ -1349,14 +1349,14 @@ class CommonMarkParser {
   bool _acceptLazy(Iterable<Block> blocks, String s) {
     if (blocks.length > 0) {
       if (blocks.last is Para) {
-        var last = blocks.last;
-        last.contents.raw += "\n" + s;
+        Para last = blocks.last;
+        (last.contents as _UnparsedInlines).raw += "\n" + s;
         return true;
       } else if (blocks.last is Blockquote) {
-        var last = blocks.last;
+        Blockquote last = blocks.last;
         return _acceptLazy(last.contents, s);
       } else if (blocks.last is ListBlock) {
-        var last = blocks.last;
+        ListBlock last = blocks.last;
         return _acceptLazy(last.items.last.contents, s);
       }
     }
@@ -1389,8 +1389,8 @@ class CommonMarkParser {
       String s = buffer.map((l) => l + "\n").join();
       List<Block> innerRes = (block.manyUntil(eof) ^ (res) => processParsedBlocks(res)).parse(s, tabStop: tabStop);
       if (!closeParagraph && innerRes.length > 0 && innerRes.first is Para) {
-        var first = innerRes.first;
-        if (_acceptLazy(blocks, first.contents.raw)) {
+        Para first = innerRes.first;
+        if (_acceptLazy(blocks, (first.contents as _UnparsedInlines).raw)) {
           innerRes.removeAt(0);
         }
       }
@@ -1417,8 +1417,8 @@ class CommonMarkParser {
           List<Block> lineBlock = block.parse(line + "\n", tabStop: tabStop);
           // TODO fix condition
           if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para) {
-            var block = lineBlock[0] as Para;
-            if (!_acceptLazy(blocks, block.contents.raw)) {
+            Para block = lineBlock[0];
+            if (!_acceptLazy(blocks, (block.contents as _UnparsedInlines).raw)) {
               break;
             }
           } else {

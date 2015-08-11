@@ -247,7 +247,7 @@ class _InlineRenderer {
       parts.last.content += str;
       return;
     } else if (context != null && parts.last is _NotCheckedPart) {
-      var last = parts.last;
+      _NotCheckedPart last = parts.last;
       if (context == last.context) {
         last.content += str;
         return;
@@ -409,7 +409,7 @@ class _InlineRenderer {
     // Autolink
     write('<');
     if (link.label.length > 0 && link.label[0] is Str) {
-      var labelContents = link.label[0];
+      Str labelContents = link.label[0];
       write(labelContents.contents);
     } else {
       write(link.target.link);
@@ -587,7 +587,7 @@ class _MarkdownBuilder extends StringBuffer {
       String fence = (codeBlock.fenceType == FenceType.backtick ? '`' : '~') * codeBlock.fenceSize;
       write(fence);
       if (codeBlock.attributes is InfoString) {
-        var attributes = codeBlock.attributes;
+        InfoString attributes = codeBlock.attributes;
         write(' ${attributes.language}');
       }
       write("\n");
