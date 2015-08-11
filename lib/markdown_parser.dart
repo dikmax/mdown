@@ -17,6 +17,8 @@ class _UnparsedInlines extends Inlines {
 
   bool operator==(obj) => obj is _UnparsedInlines &&
     raw == obj.raw;
+
+  int get hashCode => raw.hashCode;
 }
 
 

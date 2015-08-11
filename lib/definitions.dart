@@ -2,6 +2,7 @@ library md_proc.definitions;
 
 import 'dart:collection';
 import 'package:collection/collection.dart';
+import 'package:quiver/core.dart';
 
 // Class system is inspired by Pandoc
 
@@ -19,6 +20,8 @@ class Document {
 
   bool operator== (obj) => obj is Document &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -39,6 +42,8 @@ class EmptyAttr extends Attr {
   String toString() => "EmptyAttr";
 
   bool operator== (obj) => obj is EmptyAttr;
+
+  int get hashCode => 0;
 }
 
 
@@ -51,6 +56,8 @@ class InfoString extends Attr {
 
   bool operator== (obj) => obj is InfoString &&
     language == obj.language;
+
+  int get hashCode => language.hashCode;
 }
 
 
@@ -66,6 +73,8 @@ class Target {
 
   bool operator== (obj) => obj is Target &&
     link == obj.link && title == obj.title;
+
+  int get hashCode => hash2(link, title);
 }
 
 
@@ -89,6 +98,8 @@ class HorizontalRule extends Block {
   String toString() => "HorizontalRule";
 
   bool operator== (obj) => obj is HorizontalRule;
+
+  int get hashCode => 0;
 }
 
 
@@ -114,6 +125,8 @@ class AtxHeader extends Header {
   bool operator== (obj) => obj is AtxHeader &&
     level == obj.level &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => hash2(level, contents);
 }
 
 
@@ -127,6 +140,8 @@ class SetextHeader extends Header {
   bool operator== (obj) => obj is SetextHeader &&
     level == obj.level &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => hash2(level, contents);
 }
 
 
@@ -143,6 +158,8 @@ class FenceType {
 
   bool operator== (obj) => obj is FenceType &&
     value == obj.value;
+
+  int get hashCode => value.hashCode;
 }
 
 
@@ -161,6 +178,8 @@ class IndentedCodeBlock extends CodeBlock {
 
   bool operator== (obj) => obj is IndentedCodeBlock &&
     contents == obj.contents;
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -177,6 +196,8 @@ class FencedCodeBlock extends CodeBlock {
     attributes == obj.attributes &&
     fenceType == obj.fenceType &&
     fenceSize == obj.fenceSize;
+
+  int get hashCode => hash4(contents, attributes, fenceType, fenceSize);
 }
 
 
@@ -194,6 +215,8 @@ class HtmlRawBlock extends RawBlock {
 
   bool operator== (obj) => obj is HtmlRawBlock &&
     contents == obj.contents;
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -206,6 +229,8 @@ class Blockquote extends Block {
 
   bool operator== (obj) => obj is Blockquote &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -218,6 +243,8 @@ class ListItem {
 
   bool operator== (obj) => obj is ListItem &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -259,6 +286,8 @@ class BulletType {
 
   bool operator== (obj) => obj is BulletType &&
     value == obj.value;
+
+  int get hashCode => value.hashCode;
 }
 
 
@@ -295,6 +324,8 @@ class IndexSeparator {
 
   bool operator== (obj) => obj is IndexSeparator &&
     value == obj.value;
+
+  int get hashCode => value.hashCode;
 }
 
 
@@ -319,6 +350,8 @@ class UnorderedList extends ListBlock {
     bulletType == obj.bulletType &&
     tight == obj.tight &&
     _iterableEquality.equals(items, obj.items);
+
+  int get hashCode => hash3(bulletType, tight, items);
 }
 
 
@@ -336,6 +369,8 @@ class OrderedList extends ListBlock {
     tight == obj.tight &&
     startIndex == obj.startIndex &&
     _iterableEquality.equals(items, obj.items);
+
+  int get hashCode => hash4(indexSeparator, tight, startIndex, items);
 }
 
 
@@ -348,6 +383,8 @@ class Para extends Block {
 
   bool operator== (obj) => obj is Para &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -395,6 +432,8 @@ class Str extends Inline {
 
   bool operator== (obj) => obj is Str &&
     contents == obj.contents;
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -410,6 +449,8 @@ class Space extends Inline {
   String toString() => "Space";
 
   bool operator== (obj) => obj is Space;
+
+  int get hashCode => 0;
 }
 
 
@@ -425,6 +466,8 @@ class Tab extends Inline {
   String toString() => "Tab";
 
   bool operator== (obj) => obj is Tab;
+
+  int get hashCode => 0;
 }
 
 
@@ -440,6 +483,8 @@ class NonBreakableSpace extends Inline {
   String toString() => "NonBreakableSpace";
 
   bool operator== (obj) => obj is NonBreakableSpace;
+
+  int get hashCode => 0;
 }
 
 
@@ -455,6 +500,8 @@ class LineBreak extends Inline {
   String toString() => "LineBreak";
 
   bool operator== (obj) => obj is LineBreak;
+
+  int get hashCode => 0;
 }
 
 
@@ -475,6 +522,8 @@ class MDash extends SmartChar {
   String toString() => "MDash";
   
   bool operator== (obj) => obj is MDash;
+
+  int get hashCode => 0;
 }
 
 
@@ -490,6 +539,8 @@ class NDash extends SmartChar {
   String toString() => "NDash";
   
   bool operator== (obj) => obj is NDash;
+
+  int get hashCode => 0;
 }
 
 
@@ -505,6 +556,8 @@ class Ellipsis extends SmartChar {
   String toString() => "Ellipsis";
   
   bool operator== (obj) => obj is Ellipsis;
+
+  int get hashCode => 0;
 }
 
 
@@ -527,6 +580,8 @@ class SmartQuote extends Inline {
     open == obj.open &&
     close == obj.close &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => hash4(single, open, close, contents);
 }
 
 
@@ -541,6 +596,8 @@ class Code extends Inline {
   bool operator== (obj) => obj is Code &&
     contents == obj.contents &&
     fenceSize == obj.fenceSize;
+
+  int get hashCode => hash2(contents, fenceSize);
 }
 
 
@@ -553,6 +610,8 @@ class Emph extends Inline {
 
   bool operator== (obj) => obj is Emph &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -565,6 +624,8 @@ class Strong extends Inline {
 
   bool operator== (obj) => obj is Strong &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -577,6 +638,8 @@ class Strikeout extends Inline {
 
   bool operator== (obj) => obj is Strikeout &&
     _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
 }
 
 
@@ -596,6 +659,8 @@ class InlineLink extends Link {
   bool operator== (obj) => obj is InlineLink &&
     target == obj.target &&
     _iterableEquality.equals(label, obj.label);
+
+  int get hashCode => hash2(target, label);
 }
 
 
@@ -610,6 +675,8 @@ class ReferenceLink extends Link {
     reference == obj.reference &&
     target == obj.target &&
     _iterableEquality.equals(label, obj.label);
+
+  int get hashCode => hash3(reference, target, label);
 }
 
 
@@ -621,6 +688,8 @@ class Autolink extends Link {
 
   bool operator== (obj) => obj is Autolink &&
     target == obj.target;
+
+  int get hashCode => target.hashCode;
 }
 
 
@@ -640,6 +709,8 @@ class InlineImage extends Image {
   bool operator== (obj) => obj is InlineImage &&
     target == obj.target &&
     _iterableEquality.equals(label, obj.label);
+
+  int get hashCode => hash2(target, label);
 }
 
 
@@ -654,6 +725,8 @@ class ReferenceImage extends Image {
     reference == obj.reference &&
     target == obj.target &&
     _iterableEquality.equals(label, obj.label);
+
+  int get hashCode => hash3(reference, target, label);
 }
 
 
@@ -671,4 +744,6 @@ class HtmlRawInline extends RawInline {
 
   bool operator== (obj) => obj is HtmlRawInline &&
     contents == obj.contents;
+
+  int get hashCode => contents.hashCode;
 }
