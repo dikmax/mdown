@@ -4,10 +4,9 @@ description: CommonMark-compliant markdown parser
 author: Maxim Dikun <dikmax@gmail.com>
 homepage: https://github.com/dikmax/md_proc
 environment:
-  sdk: ">=1.11.3"
+  sdk: ">=1.9.0 <2.0.0"
 dependencies:
   collection: '>=1.0.0 <2.0.0'
-  unicode_helper: '>=0.2.0 <0.3.0'
   parsers: '>=0.14.4 <0.15.0'
   quiver: "^0.21.4"
 dev_dependencies:
