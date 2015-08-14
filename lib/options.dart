@@ -10,7 +10,7 @@ import 'definitions.dart';
 /// written in document.
 typedef Target LinkResolver(String normalizedReference, String reference);
 
-/// Default resolver doesn't return any link, so be default parser parses only explicitly written references.
+/// Default resolver doesn't return any link, so parser parses only explicitly written references.
 Target defaultLinkResolver(String normalizedReference, String reference) => null;
 
 class Options {
