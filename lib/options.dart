@@ -16,16 +16,27 @@ Target defaultLinkResolver(String normalizedReference, String reference) => null
 class Options {
   final bool smartPunctuation;
   final bool strikeout;
+  final bool subscript;
+  final bool superscript;
   final LinkResolver linkResolver;
 
   const Options({
           this.smartPunctuation: false,
           this.strikeout: false,
+          this.subscript: false,
+          this.superscript: false,
           this.linkResolver: defaultLinkResolver
           });
 
-  static const Options commonmark = const Options(smartPunctuation: true);
-  static const Options defaults = const Options(smartPunctuation: true,
-      strikeout: true);
+  static const Options commonmark = const Options(
+      smartPunctuation: true
+  );
+
+  static const Options defaults = const Options(
+      smartPunctuation: true,
+      strikeout: true,
+      subscript: true,
+      superscript: true);
+
   static const Options strict = const Options();
 }

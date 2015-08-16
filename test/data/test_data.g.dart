@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-11T19:25:54.991Z
+// 2015-08-16T20:35:48.282Z
 
 part of md_proc.test.data.test_data;
 
@@ -4169,5 +4169,33 @@ final Map<String, String> _$strikeoutTests = {
 ''',
   r'''~No strikeout~
 ''': r'''<p>~No strikeout~</p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> subscript
+// **************************************************************************
+
+final Map<String, String> _$subscriptTests = {
+  r'''H~2~O
+''': r'''<p>H<sub>2</sub>O</p>
+''',
+  r'''H~2 0~O
+''': r'''<p>H~2 0~O</p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> superscript
+// **************************************************************************
+
+final Map<String, String> _$superscriptTests = {
+  r'''2^2^=4
+''': r'''<p>2<sup>2</sup>=4</p>
+''',
+  r'''2^2 0^=4
+''': r'''<p>2^2 0^=4</p>
 ''',
 };

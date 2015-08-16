@@ -18,3 +18,9 @@ final Map<String, String> additionalMarkdownToHtml = _$additionalMarkdownToHtmlT
 
 @EmbedTests('strikeout.txt')
 final Map<String, String> strikeout = _$strikeoutTests;
+
+@EmbedTests('subscript.txt')
+final Map<String, String> subscript = _$subscriptTests;
+
+@EmbedTests('superscript.txt')
+final Map<String, String> superscript = _$superscriptTests;

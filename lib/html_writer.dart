@@ -181,6 +181,10 @@ class _HtmlBuilder extends StringBuffer {
         writeStrong(inline, stripped: stripped);
       } else if (inline is Strikeout) {
         writeStrikeout(inline, stripped: stripped);
+      } else if (inline is Subscript) {
+        writeSubscript(inline, stripped: stripped);
+      } else if (inline is Superscript) {
+        writeSuperscript(inline, stripped: stripped);
       } else if (inline is Link) {
         writeLink(inline, stripped: stripped);
       } else if (inline is Image) {
@@ -250,6 +254,28 @@ class _HtmlBuilder extends StringBuffer {
     writeInlines(strikeout.contents, stripped: stripped);
     if (!stripped) {
       write('</del>');
+    }
+  }
+
+
+  void writeSubscript(Subscript subscript, {bool stripped: false}) {
+    if (!stripped) {
+      write('<sub>');
+    }
+    writeInlines(subscript.contents, stripped: stripped);
+    if (!stripped) {
+      write('</sub>');
+    }
+  }
+
+
+  void writeSuperscript(Superscript superscript, {bool stripped: false}) {
+    if (!stripped) {
+      write('<sup>');
+    }
+    writeInlines(superscript.contents, stripped: stripped);
+    if (!stripped) {
+      write('</sup>');
     }
   }
 

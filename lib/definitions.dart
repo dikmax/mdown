@@ -643,6 +643,34 @@ class Strikeout extends Inline {
 }
 
 
+class Subscript extends Inline {
+  Inlines contents;
+
+  Subscript(this.contents);
+
+  String toString() => 'Subscript $contents';
+
+  bool operator== (obj) => obj is Subscript &&
+    _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
+}
+
+
+class Superscript extends Inline {
+  Inlines contents;
+
+  Superscript(this.contents);
+
+  String toString() => 'Superscript $contents';
+
+  bool operator== (obj) => obj is Superscript &&
+    _iterableEquality.equals(contents, obj.contents);
+
+  int get hashCode => contents.hashCode;
+}
+
+
 abstract class Link extends Inline {
   Inlines label;
   Target target;

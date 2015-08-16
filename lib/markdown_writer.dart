@@ -307,6 +307,10 @@ class _InlineRenderer {
         writeSmartQuote(inline, context: context);
       } else if (inline is Strikeout) {
         writeStrikeout(inline, context: context);
+      } else if (inline is Subscript) {
+        writeSubscript(inline, context: context);
+      } else if (inline is Superscript) {
+        writeSuperscript(inline, context: context);
       } else if (inline is RawInline) {
         write(inline.contents);
       } else {
@@ -374,6 +378,20 @@ class _InlineRenderer {
     write("~~");
     writeInlines(strikeout.contents, context: context);
     write("~~");
+  }
+
+
+  void writeSubscript(Subscript subscript, {_EscapeContext context: _EscapeContext.empty}) {
+    write("~");
+    writeInlines(subscript.contents, context: context);
+    write("~");
+  }
+
+
+  void writeSuperscript(Superscript superscript, {_EscapeContext context: _EscapeContext.empty}) {
+    write("^");
+    writeInlines(superscript.contents, context: context);
+    write("^");
   }
 
 

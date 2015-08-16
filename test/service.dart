@@ -509,6 +509,34 @@ void serviceTests() {
       });
     });
 
+    t.group('Subscript', () {
+      var subscript = new Subscript(new Inlines.from([new Str('Subscript')]));
+      t.test('toString', () {
+        t.expect(subscript.toString(), t.equals('Subscript [Str "Subscript"]'));
+      });
+      t.test('==', () {
+        t.expect(subscript, t.equals(new Subscript(new Inlines.from([new Str('Subscript')]))));
+      });
+      t.test('!=', () {
+        t.expect(subscript, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
+        t.expect(subscript, t.isNot(t.equals(null)));
+      });
+    });
+
+    t.group('Superscript', () {
+      var superscript = new Superscript(new Inlines.from([new Str('Superscript')]));
+      t.test('toString', () {
+        t.expect(superscript.toString(), t.equals('Superscript [Str "Superscript"]'));
+      });
+      t.test('==', () {
+        t.expect(superscript, t.equals(new Superscript(new Inlines.from([new Str('Superscript')]))));
+      });
+      t.test('!=', () {
+        t.expect(superscript, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
+        t.expect(superscript, t.isNot(t.equals(null)));
+      });
+    });
+
     t.group('InlineLink', () {
       var link = new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null));
       t.test('toString', () {

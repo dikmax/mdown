@@ -26,7 +26,13 @@ void main() {
   tests("SmartPunct [commonmark]", smartPunctuation, mdToHtmlTest(Options.commonmark));
 
   // Strikeout
-  tests("Strikeout [defaults]", strikeout, mdToHtmlTest(Options.defaults));
+  tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
+
+  // Subscript
+  tests("Subscript [defaults]", subscript, mdToHtmlTest(new Options(subscript: true)));
+
+  // Superscript
+  tests("Superscript [defaults]", superscript, mdToHtmlTest(new Options(superscript: true)));
 
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));

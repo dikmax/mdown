@@ -80,9 +80,13 @@ class CommonMarkParser {
       _inlineDelimiters += "'\"";
       _strSpecialChars += "'\".-";
     }
-    if (_options.strikeout) {
+    if (_options.strikeout || _options.subscript) {
       _inlineDelimiters += "~";
       _strSpecialChars += "~";
+    }
+    if (_options.superscript) {
+      _inlineDelimiters += '^';
+      _strSpecialChars += '^';
     }
   }
 
@@ -561,7 +565,7 @@ class CommonMarkParser {
       canOpen = canOpen && (!rightFlanking || _isPunctuation.hasMatch(charBefore));
       canClose = canClose && (!leftFlanking || _isPunctuation.hasMatch(charAfter));
     }
-    if (c == '~' && numDelims < 2) {
+    if (c == '~' && !_options.subscript && numDelims < 2) {
       canOpen = false;
       canClose = false;
     }
@@ -633,6 +637,8 @@ class CommonMarkParser {
           numDelims -= count;
           stack.last.numDelims -= count;
           if (char == "'" || char == '"') {
+            // Smart quotes
+
             while (count > 0) {
               inline = new SmartQuote(inlines, single: char == "'");
               inlines = new Inlines();
@@ -640,17 +646,54 @@ class CommonMarkParser {
               count--;
             }
           } else if (char == "~") {
-            if (count & 1 == 1) {
-              inlines.add(new Str("~"));
-              count--;
+            // Strikeouts and subscripts
+
+            if (_options.strikeout && _options.subscript) {
+              if (count & 1 == 1) {
+                inline = new Subscript(inlines);
+                inlines = new Inlines();
+                inlines.add(inline);
+                count--;
+              }
+              while (count > 0) {
+                inline = new Strikeout(inlines);
+                inlines = new Inlines();
+                inlines.add(inline);
+                count -= 2;
+              }
+            } else if (_options.subscript) {
+              // Subscript only
+              while (count > 0) {
+                inline = new Subscript(inlines);
+                inlines = new Inlines();
+                inlines.add(inline);
+                count--;
+              }
+            } else {
+              // Strikeout only
+              if (count & 1 == 1) {
+                inlines.add(new Str("~"));
+                count--;
+              }
+              while (count > 0) {
+                inline = new Strikeout(inlines);
+                inlines = new Inlines();
+                inlines.add(inline);
+                count -= 2;
+              }
             }
+          } else if (char == "^") {
+            // Superscript
+
             while (count > 0) {
-              inline = new Strikeout(inlines);
+              inline = new Superscript(inlines);
               inlines = new Inlines();
               inlines.add(inline);
-              count -= 2;
+              count--;
             }
           } else {
+            // Strongs and emphasises
+
             if (count & 1 == 1) {
               inline = new Emph(inlines);
               inlines = new Inlines();
