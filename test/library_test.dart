@@ -29,10 +29,13 @@ void main() {
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
 
   // Subscript
-  tests("Subscript [defaults]", subscript, mdToHtmlTest(new Options(subscript: true)));
+  tests("Subscript", subscript, mdToHtmlTest(new Options(subscript: true)));
 
   // Superscript
-  tests("Superscript [defaults]", superscript, mdToHtmlTest(new Options(superscript: true)));
+  tests("Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
+
+  // Strikeout
+  tests("Strikeout and subscript", strikeout, mdToHtmlTest(new Options(strikeout: true, subscript: true)));
 
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));

@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-16T20:35:48.282Z
+// 2015-08-16T22:52:40.356Z
 
 part of md_proc.test.data.test_data;
 
@@ -4174,6 +4174,38 @@ final Map<String, String> _$strikeoutTests = {
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
+// Target: final Map<String, String> strikeoutAndSubscript
+// **************************************************************************
+
+final Map<String, String> _$strikeoutAndSubscriptTests = {
+  r'''~~Strikeout text~~
+''': r'''<p><del>Strikeout text</del></p>
+''',
+  r'''~~__Strikeout text__~~
+''': r'''<p><del><strong>Strikeout text</strong></del></p>
+''',
+  r'''Ins~~e~~ide w~~a~~ord
+''': r'''<p>Ins<del>e</del>ide w<del>a</del>ord</p>
+''',
+  r'''~\~No strikeout~~
+''': r'''<p>~~No strikeout~~</p>
+''',
+  r'''\~~No strikeout~~
+''': r'''<p>~~No strikeout~~</p>
+''',
+  r'''~No strikeout~
+''': r'''<p>~No strikeout~</p>
+''',
+  r'''~~~No\ strikeout~~~
+''': r'''<del><sub>No\ strikeout</sub></del>
+''',
+  r'''~~~No strikeout~~~
+''': r'''<del>~No strikeout~</del>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
 // Target: final Map<String, String> subscript
 // **************************************************************************
 
@@ -4183,6 +4215,12 @@ final Map<String, String> _$subscriptTests = {
 ''',
   r'''H~2 0~O
 ''': r'''<p>H~2 0~O</p>
+''',
+  r'''H~2\ 0~O
+''': r'''<p>H<sub>2 0</sub>O</p>
+''',
+  r'''H~*2\ 0*~O
+''': r'''<p>H<sub><em>2 0</em></sub>O</p>
 ''',
 };
 
@@ -4197,5 +4235,11 @@ final Map<String, String> _$superscriptTests = {
 ''',
   r'''2^2 0^=4
 ''': r'''<p>2^2 0^=4</p>
+''',
+  r'''2^2\ 0^=4
+''': r'''<p>2<sup>2 0</sup>=4</p>
+''',
+  r'''2^*2\ 0*^=4
+''': r'''<p>2<sup><em>2 0</em></sup>=4</p>
 ''',
 };
