@@ -57,22 +57,76 @@ void main() {
 }
 ```
 
+Extensions
+==========
+
+md_proc supports some language extensions. You can specify enabled extensions using options parameter in parser and 
+renderer.
+
+```dart
+Options options = new Options(superscript: true);
+CommonMarkParser parser = new CommonMarkParser(options);
+Document doc = parser.parse('Hello world!\n===');
+HtmlWriter writer = new HtmlWriter(options);
+String res = writer.write(doc);
+```
+
+There three predefined versions of parsers/writers:
+
+- `strict`: all extensions are disabled
+- `commonmark`: enabled only `smartPunctuation` extension.
+- `defaults`: all extensions (`smartPunctuation`, `strikeout`, `subscript`, `superscript`) are enabled.
+
+To get correspondent parser/writer instance use static getter on class:
+
+```dart
+CommonMarkParser defaultParser = CommonMarkParser.defaults;
+HtmlWriter strictWriter = HtmlWriter.strict;
+```
+
 Smart punctuation
 -----------------
 
 Smart punctuation is automatic replacement of `...`, `---`, `--`, `"` and `'` to `…`, `—`, `–` and curly versions of
-quote marks accordingly.
+quote marks accordingly. It's only official extension to date.
 
-By default smart punctuation is enabled. To disable it use STRICT version of parsers/writers.
+Strikeout
+---------
 
-```dart
-import "package:md_proc/md_proc.dart";
+Strikeouts text (~~like this~~). Just wrap text with double tildes (`~~`).
 
-void main() {
-  Document doc = CommonMarkParser.strict.parse('...'); // STRICT here
-  String res = HtmlWriter.strict.write(doc);           // and here
-  print(res); // <p>...</p>
-}
+```md
+Strikeouts text (~~like this~~).
+```
+
+Subscript
+---------
+
+Support for subscript (H<sub>2</sup>O). Wrap text with tildes (`~`).
+
+```md
+H~2~O
+```
+
+Subscript couldn't contain spaces. If you need to insert space into subscript, escape space (`\ `).
+
+```md
+subscript~with\ spaces~
+```
+
+Superscript
+-----------
+
+Support for superscript (2<sup>2</sup>=4). Wrap text with caret (`^`).
+
+```md
+2^2^=4
+```
+
+Superscript couldn't contain spaces. If you need to insert space into superscript, escape space (`\ `).
+
+```md
+superscript^with\ spaces^
 ```
 
 Custom reference resolver
