@@ -1,49 +1,78 @@
 ## Strikeout tests
 
+Test #1
 .
 ~~Strikeout text~~
 .
 <p><del>Strikeout text</del></p>
 .
 
+Test #2
 .
 ~~__Strikeout text__~~
 .
 <p><del><strong>Strikeout text</strong></del></p>
 .
 
+Test #3
 .
 Ins~~e~~ide w~~a~~ord
 .
 <p>Ins<del>e</del>ide w<del>a</del>ord</p>
 .
 
+Test #4
 .
 ~\~No strikeout~~
 .
 <p>~~No strikeout~~</p>
 .
 
+Test #5
 .
 \~~No strikeout~~
 .
 <p>~~No strikeout~~</p>
 .
 
+Test #6
+.
+~\~No\ strikeout~~
+.
+<p><sub>~No strikeout</sub>~</p>
+.
+
+Test #7
+.
+\~~No\ strikeout~~
+.
+<p>~<sub>No strikeout</sub>~</p>
+.
+
+Test #8 (non-breaking space)
+.
+~~No\ strikeout~~
+.
+<p><del>No strikeout</del></p>
+.
+
+Test #9
 .
 ~No strikeout~
 .
 <p>~No strikeout~</p>
 .
 
+Test #10
 .
 ~~~No\ strikeout~~~
 .
-<del><sub>No\ strikeout</sub></del>
+<p><del><sub>No strikeout</sub></del></p>
 .
 
+Test #11
 .
 ~~~No strikeout~~~
 .
-<del>~No strikeout~</del>
+<p><del>~No strikeout~</del></p>
 .

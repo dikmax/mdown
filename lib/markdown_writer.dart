@@ -36,22 +36,35 @@ class _EscapeContext {
   final bool escapeUnderscore;
   final bool escapeParens;
   final bool escapeQuot;
+  final bool escapeSpace;
   final bool isHeader;
   final bool isLabel;
 
-  const _EscapeContext({this.escapeStar: false, this.escapeUnderscore: false,
-                       this.escapeParens: false, this.escapeQuot: false,
-                       this.isHeader: false, this.isLabel: false
-                        });
+  const _EscapeContext({
+                       this.escapeStar: false,
+                       this.escapeUnderscore: false,
+                       this.escapeParens: false,
+                       this.escapeQuot: false,
+                       this.escapeSpace: false,
+                       this.isHeader: false,
+                       this.isLabel: false
+                       });
 
-  _EscapeContext copy({bool escapeStar, bool escapeUnderscore,
-                      bool escapeParens, bool escapeQuot,
-                      bool isHeader, bool isLabel}) {
+  _EscapeContext copy({
+                      bool escapeStar,
+                      bool escapeUnderscore,
+                      bool escapeParens,
+                      bool escapeQuot,
+                      bool escapeSpace,
+                      bool isHeader,
+                      bool isLabel
+                      }) {
     return new _EscapeContext(
       escapeStar: escapeStar != null ? escapeStar : this.escapeStar,
       escapeUnderscore: escapeUnderscore != null ? escapeUnderscore : this.escapeUnderscore,
       escapeParens: escapeParens != null ? escapeParens : this.escapeParens,
       escapeQuot: escapeQuot != null ? escapeQuot : this.escapeQuot,
+      escapeSpace: escapeSpace != null ? escapeSpace : this.escapeSpace,
       isHeader: isHeader != null ? isHeader : this.isHeader,
       isLabel: isLabel != null ? isLabel : this.isLabel
     );
@@ -113,6 +126,15 @@ class _NotCheckedPart extends _InlinePart {
     if (context.isLabel) {
       replaceChars += r"\[\]";
     }
+    if (context.escapeSpace) {
+      replaceChars += " ";
+    }
+    if (_options.subscript) {
+      replaceChars += '~';
+    }
+    if (_options.superscript) {
+      replaceChars += '^';
+    }
 
     content = content.replaceAllMapped(new RegExp("[" + replaceChars + "]"), (Match m) => r"\" + m.group(0));
 
@@ -129,7 +151,7 @@ class _NotCheckedPart extends _InlinePart {
     }
 
     if (_options.strikeout) {
-      content = content.replaceAll(new RegExp("~~"), r"\~~");
+      content = content.replaceAll("~~", r"\~~");
     }
 
     if (!context.isHeader) {
@@ -383,14 +405,14 @@ class _InlineRenderer {
 
   void writeSubscript(Subscript subscript, {_EscapeContext context: _EscapeContext.empty}) {
     write("~");
-    writeInlines(subscript.contents, context: context);
+    writeInlines(subscript.contents, context: context.copy(escapeSpace: true));
     write("~");
   }
 
 
   void writeSuperscript(Superscript superscript, {_EscapeContext context: _EscapeContext.empty}) {
     write("^");
-    writeInlines(superscript.contents, context: context);
+    writeInlines(superscript.contents, context: context.copy(escapeSpace: true));
     write("^");
   }
 

@@ -9,7 +9,8 @@ void main(List<String> args) {
     const EmbedTestsGenerator(),
     const EntitiesGenerator()
   ], librarySearchPaths: [
-    'lib', 'test'
+    //'lib',
+    'test'
   ]).then((msg) {
     print(msg);
   });

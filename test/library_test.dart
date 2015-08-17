@@ -13,13 +13,13 @@ void main() {
   individualParsersTests();
 
   // CommonMark tests
-  //fileTest("CommonMark", specification, mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num == 129)));
-  //fileTest("CommonMark", specification, mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && (num >= 103 && num < 144)));
-  //fileTest("CommonMark", specification, mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML));
+  //fileTest("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num == 129)));
+  //fileTest("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num >= 103 && num < 144)));
+  //fileTest("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html));
   tests("CommonMark [strict]", specification, mdToHtmlTest(Options.strict));
 
   // Additional tests
-  //fileTest("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.STRICT, (t, num) => t == TestType.HTML && num == 19));
+  //fileTest("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
   tests("Additional [strict]", additionalMarkdownToHtml, mdToHtmlTest(Options.strict));
 
   // SmartPunct
@@ -35,7 +35,7 @@ void main() {
   tests("Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
 
   // Strikeout
-  tests("Strikeout and subscript", strikeout, mdToHtmlTest(new Options(strikeout: true, subscript: true)));
+  tests("Strikeout and subscript", strikeoutAndSubscript, mdToHtmlTest(new Options(strikeout: true, subscript: true)));
 
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));

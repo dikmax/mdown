@@ -21,3 +21,9 @@ H~*2\ 0*~O
 .
 <p>H<sub><em>2 0</em></sub>O</p>
 .
+
+.
+H*~2\ 0~*O
+.
+<p>H<em><sub>2 0</sub></em>O</p>
+.

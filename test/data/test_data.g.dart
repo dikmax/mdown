@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-16T22:52:40.356Z
+// 2015-08-17T11:21:40.422Z
 
 part of md_proc.test.data.test_data;
 
@@ -4193,14 +4193,23 @@ final Map<String, String> _$strikeoutAndSubscriptTests = {
   r'''\~~No strikeout~~
 ''': r'''<p>~~No strikeout~~</p>
 ''',
+  r'''~\~No\ strikeout~~
+''': r'''<p><sub>~No strikeout</sub>~</p>
+''',
+  r'''\~~No\ strikeout~~
+''': r'''<p>~<sub>No strikeout</sub>~</p>
+''',
+  r'''~~No\ strikeout~~
+''': r'''<p><del>No strikeout</del></p>
+''',
   r'''~No strikeout~
 ''': r'''<p>~No strikeout~</p>
 ''',
   r'''~~~No\ strikeout~~~
-''': r'''<del><sub>No\ strikeout</sub></del>
+''': r'''<p><del><sub>No strikeout</sub></del></p>
 ''',
   r'''~~~No strikeout~~~
-''': r'''<del>~No strikeout~</del>
+''': r'''<p><del>~No strikeout~</del></p>
 ''',
 };
 
@@ -4222,6 +4231,9 @@ final Map<String, String> _$subscriptTests = {
   r'''H~*2\ 0*~O
 ''': r'''<p>H<sub><em>2 0</em></sub>O</p>
 ''',
+  r'''H*~2\ 0~*O
+''': r'''<p>H<em><sub>2 0</sub></em>O</p>
+''',
 };
 
 // **************************************************************************
@@ -4241,5 +4253,8 @@ final Map<String, String> _$superscriptTests = {
 ''',
   r'''2^*2\ 0*^=4
 ''': r'''<p>2<sup><em>2 0</em></sup>=4</p>
+''',
+  r'''H*^2\ 0^*O
+''': r'''<p>H<em><sup>2 0</sup></em>O</p>
 ''',
 };

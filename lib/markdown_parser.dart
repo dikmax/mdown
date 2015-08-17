@@ -39,6 +39,24 @@ class _LinkReference extends Block {
   }
 }
 
+
+class _EscapedSpace extends Inline {
+  static final _EscapedSpace _instance = new _EscapedSpace._internal();
+
+  factory _EscapedSpace() {
+    return _instance;
+  }
+
+  _EscapedSpace._internal();
+
+  String toString() => "_EscapedSpace";
+
+  bool operator== (obj) => obj is _EscapedSpace;
+
+  int get hashCode => 0;
+}
+
+
 // TODO make aux parsers private
 
 // TODO extract constant parsers from parsers methods
@@ -56,8 +74,9 @@ class _EmphasisStackItem {
   String char;
   int numDelims;
   Inlines inlines;
+  bool cantCloseAnyway;
 
-  _EmphasisStackItem(this.char, this.numDelims, this.inlines);
+  _EmphasisStackItem(this.char, this.numDelims, this.inlines, {this.cantCloseAnyway: false});
 }
 
 // TODO make const parsers 'final'
@@ -72,10 +91,12 @@ class CommonMarkParser {
 
   String _inlineDelimiters;
   String _strSpecialChars;
+  String _intrawordDelimiters;
 
   CommonMarkParser(this._options, [this._references]) {
     _inlineDelimiters = "_*";
     _strSpecialChars = " *_`![]&<\\";
+    _intrawordDelimiters = "*";
     if (_options.smartPunctuation) {
       _inlineDelimiters += "'\"";
       _strSpecialChars += "'\".-";
@@ -83,10 +104,12 @@ class CommonMarkParser {
     if (_options.strikeout || _options.subscript) {
       _inlineDelimiters += "~";
       _strSpecialChars += "~";
+      _intrawordDelimiters += "~";
     }
     if (_options.superscript) {
       _inlineDelimiters += '^';
       _strSpecialChars += '^';
+      _intrawordDelimiters += '^';
     }
   }
 
@@ -472,7 +495,7 @@ class CommonMarkParser {
 
     return '&$entity;';
   }) % "html entity";
-  Parser get htmlEntity => htmlEntity1 ^ (str) => str == "\u{a0}" ? new NonBreakableSpace() : new Str(str);
+  Parser get htmlEntity => htmlEntity1 ^ (str) => str == "\u{a0}" ? [new NonBreakableSpace()] : [new Str(str)];
 
 
   //
@@ -553,8 +576,18 @@ class CommonMarkParser {
     }
 
     int numDelims = res.value.length;
-    String charBefore = pos.offset == 0 ? '\n' : s[pos.offset - 1];
-    String charAfter = res.position.offset < s.length ? s[res.position.offset] : '\n';
+
+    var i = 1;
+    while (pos.offset - i >= 0 && _intrawordDelimiters.contains(s[pos.offset - i])) {
+      ++i;
+    }
+    String charBefore = pos.offset - i < 0 ? '\n' : s[pos.offset - i];
+
+    i = 0;
+    while (res.position.offset + i < s.length && _intrawordDelimiters.contains(s[res.position.offset + i])) {
+      ++i;
+    }
+    String charAfter = res.position.offset + i < s.length ? s[res.position.offset + i] : '\n';
     bool leftFlanking = !_isSpace.hasMatch(charAfter) &&
         (!_isPunctuation.hasMatch(charAfter) || _isSpace.hasMatch(charBefore) || _isPunctuation.hasMatch(charBefore));
     bool rightFlanking = !_isSpace.hasMatch(charBefore) &&
@@ -616,11 +649,57 @@ class CommonMarkParser {
       }
     }
     void addAllToStack(List<Inline> inlines) {
-      if (stack.length > 0) {
-        stack.last.inlines.addAll(inlines);
-      } else {
-        result.addAll(inlines);
-      }
+      stack.last.inlines.addAll(inlines);
+    }
+
+    Inlines transformEscapedSpace(Inlines inlines, Inline replacement) {
+      return new Inlines.from(inlines.map((Inline el) {
+        if (el is _EscapedSpace) {
+          return replacement;
+        }
+        if (el is Subscript) {
+          el.contents = transformEscapedSpace(el.contents, replacement);
+        } else if (el is Superscript) {
+          el.contents = transformEscapedSpace(el.contents, replacement);
+        } else if (el is Strikeout) {
+          el.contents = transformEscapedSpace(el.contents, replacement);
+        } else if (el is Emph) {
+          el.contents = transformEscapedSpace(el.contents, replacement);
+        } else if (el is Strong) {
+          el.contents = transformEscapedSpace(el.contents, replacement);
+        }
+        return el;
+      }));
+    }
+
+    /// Add all inlines to stack. If there's Space marks all subscript and superscript delimiters as invalid
+    /// and return false, otherwise return true;
+    bool processSpacesAndAddAllToStack(List<Inline> inlines) {
+      bool res = true;
+      inlines.forEach((Inline el) {
+        if (el is Space) {
+          stack.forEach((_EmphasisStackItem item) {
+            bool convert = false;
+            if (_options.subscript && item.char == '~' || _options.superscript && item.char == '^') {
+              item.cantCloseAnyway = true;
+              convert = true;
+            }
+            if (convert) {
+              item.inlines = transformEscapedSpace(item.inlines, new NonBreakableSpace());
+            }
+          });
+          res = false;
+        }
+        stack.last.inlines.add(el);
+      });
+
+      return res;
+    }
+
+    void wrapStackInlines(String str) {
+      stack.last.inlines
+        ..insert(0, new Str(str))
+        ..add(new Str(str));
     }
 
     mainloop: while (true) {
@@ -646,31 +725,41 @@ class CommonMarkParser {
               count--;
             }
           } else if (char == "~") {
-            // Strikeouts and subscripts
-
             if (_options.strikeout && _options.subscript) {
+              // Strikeouts and subscripts
+
               if (count & 1 == 1) {
-                inline = new Subscript(inlines);
-                inlines = new Inlines();
-                inlines.add(inline);
+                if (stack.last.cantCloseAnyway) {
+                  wrapStackInlines("~");
+                } else {
+                  inline = new Subscript(transformEscapedSpace(inlines, new Space()));
+                  inlines = new Inlines();
+                  inlines.add(inline);
+                }
                 count--;
               }
               while (count > 0) {
-                inline = new Strikeout(inlines);
+                inline = new Strikeout(transformEscapedSpace(inlines, new NonBreakableSpace()));
                 inlines = new Inlines();
                 inlines.add(inline);
                 count -= 2;
               }
             } else if (_options.subscript) {
               // Subscript only
-              while (count > 0) {
-                inline = new Subscript(inlines);
-                inlines = new Inlines();
-                inlines.add(inline);
-                count--;
+
+              if (stack.last.cantCloseAnyway) {
+                wrapStackInlines("~" * count);
+              } else {
+                while (count > 0) {
+                  inline = new Subscript(transformEscapedSpace(inlines, new Space()));
+                  inlines = new Inlines();
+                  inlines.add(inline);
+                  count--;
+                }
               }
             } else {
               // Strikeout only
+
               if (count & 1 == 1) {
                 inlines.add(new Str("~"));
                 count--;
@@ -685,11 +774,15 @@ class CommonMarkParser {
           } else if (char == "^") {
             // Superscript
 
-            while (count > 0) {
-              inline = new Superscript(inlines);
-              inlines = new Inlines();
-              inlines.add(inline);
-              count--;
+            if (stack.last.cantCloseAnyway) {
+              wrapStackInlines("^" * count);
+            } else {
+              while (count > 0) {
+                inline = new Superscript(transformEscapedSpace(inlines, new Space()));
+                inlines = new Inlines();
+                inlines.add(inline);
+                count--;
+              }
             }
           } else {
             // Strongs and emphasises
@@ -708,12 +801,16 @@ class CommonMarkParser {
             }
           }
 
-          if (stack.last.numDelims == 0) {
-            stack.removeLast();
+          if (inline != null) {
+            if (stack.last.numDelims == 0) {
+              stack.removeLast();
+            } else {
+              stack.last.inlines = new Inlines();
+            }
+            addToStack(inline);
           } else {
-            stack.last.inlines = new Inlines();
+            mergeWithPrevious();
           }
-          addToStack(inline);
           if (numDelims > 0) {
             openFound = stack.any((item) => item.char == char);
           }
@@ -740,6 +837,10 @@ class CommonMarkParser {
         break;
       }
 
+      bool excludeSpaces = (_options.subscript || _options.superscript) &&
+        stack.firstWhere((_EmphasisStackItem el) {
+          return _options.subscript && el.char == '~' || _options.superscript && el.char == '^';
+        }, orElse: () => null) != null;
       while (true) {
         ParseResult res = scanDelims.run(s, position);
         if (res.isSuccess) {
@@ -751,12 +852,22 @@ class CommonMarkParser {
           break;
         }
 
-        res = inline.run(s, position);
-        if (!res.isSuccess) {
-          break mainloop;
+        if (excludeSpaces) {
+          res = spaceEscapedInline.run(s, position);
+          if (!res.isSuccess) {
+            break mainloop;
+          }
+
+          excludeSpaces = processSpacesAndAddAllToStack(res.value);
+        } else {
+          res = inline.run(s, position);
+          if (!res.isSuccess) {
+            break mainloop;
+          }
+
+          addAllToStack(res.value);
         }
 
-        addAllToStack(res.value);
         position = res.position;
       }
     }
@@ -1024,6 +1135,10 @@ class CommonMarkParser {
       _options.smartPunctuation ? smartPunctuation : fail,
       str
   ]);
+
+  Parser<List<Inline>> get spaceEscapedInline =>
+    (string(r'\ ') ^ (_) => [new _EscapedSpace()]) |
+    inline;
 
 
   Parser<Inlines> get inlines => inline.manyUntil(eof) ^ (res) => processParsedInlines(res);
