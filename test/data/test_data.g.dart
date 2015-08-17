@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-17T11:21:40.422Z
+// 2015-08-17T15:05:46.830Z
 
 part of md_proc.test.data.test_data;
 
@@ -4170,6 +4170,9 @@ final Map<String, String> _$strikeoutTests = {
   r'''~No strikeout~
 ''': r'''<p>~No strikeout~</p>
 ''',
+  r'''~~ this ~~ is not one neither is ~this~
+''': r'''<p>~~ this ~~ is not one neither is ~this~</p>
+''',
 };
 
 // **************************************************************************
@@ -4210,6 +4213,9 @@ final Map<String, String> _$strikeoutAndSubscriptTests = {
 ''',
   r'''~~~No strikeout~~~
 ''': r'''<p><del>~No strikeout~</del></p>
+''',
+  r'''~~ this ~~ is not one neither is ~this~
+''': r'''<p>~~ this ~~ is not one neither is <sub>this</sub></p>
 ''',
 };
 

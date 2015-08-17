@@ -35,3 +35,9 @@ Ins~~e~~ide w~~a~~ord
 .
 <p>~No strikeout~</p>
 .
+
+.
+~~ this ~~ is not one neither is ~this~
+.
+<p>~~ this ~~ is not one neither is ~this~</p>
+.

@@ -76,3 +76,10 @@ Test #11
 .
 <p><del>~No strikeout~</del></p>
 .
+
+Test #12
+.
+~~ this ~~ is not one neither is ~this~
+.
+<p>~~ this ~~ is not one neither is <sub>this</sub></p>
+.
