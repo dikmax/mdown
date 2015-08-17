@@ -102,7 +102,7 @@ Strikeouts text (~~like this~~).
 Subscript
 ---------
 
-Support for subscript (H<sub>2</sup>O). Wrap text with tildes (`~`).
+Support for subscript (H<sub>2</sub>O). Wrap text with tildes (`~`).
 
 ```md
 H~2~O
