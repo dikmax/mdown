@@ -360,11 +360,10 @@ class CommonMarkParser {
       ["address", "article", "aside", "base", "basefont", "blockquote", "body",
       "caption", "center", "col", "colgroup", "dd", "details", "dialog", "dir",
       "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form",
-      "frame", "frameset", "h1", "head", "header", "hr", "html", "legend", "li",
-      "link", "main", "menu", "menuitem", "meta", "nav", "noframes", "ol",
-      "optgroup", "option", "p", "param", "section", "source", "title",
-      "summary", "table", "tbody", "td", "tfoot", "th", "thead", "title", "tr",
-      "track", "ul"]
+      "frame", "frameset", "h1", "head", "header", "hr", "html", "iframe", "legend",
+      "li", "link", "main", "menu", "menuitem", "meta", "nav", "noframes", "ol",
+      "optgroup", "option", "p", "param", "section", "source", "summary", "table",
+      "tbody", "td", "tfoot", "th", "thead", "title", "tr", "track", "ul"]
   );
 
   static Parser spaceOrNL = oneOf(" \t\n");
@@ -1162,6 +1161,19 @@ class CommonMarkParser {
       para
   ]);
 
+  Parser<List<Block>> get lazyLineBlock => choice([
+      blanklines ^ (_) => [],
+      hrule,
+      list,
+      codeBlockFenced,
+      atxHeader,
+      setextHeader,
+      rawHtml,
+      linkReference,
+      blockquote,
+      para
+  ]);
+
 
   Parser<List<Block>> get listTightBlock => choice([
       hrule,
@@ -1528,7 +1540,7 @@ class CommonMarkParser {
   //
 
   static Parser blockquoteStrictLine = ((skipNonindentChars > char('>')) > whitespaceChar.maybe) > anyLine; // TODO check tab
-  static Parser blockquoteLazyLine = skipNonindentChars > anyLine;
+  static Parser blockquoteLazyLine = anyLine; // TODO inline
   static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
     | (blockquoteLazyLine ^ (l) => [false, l]);
 
@@ -1572,7 +1584,7 @@ class CommonMarkParser {
       } else {
         if (buffer.length > 0) {
           buildBuffer();
-          List<Block> lineBlock = block.parse(line + "\n", tabStop: tabStop);
+          List<Block> lineBlock = lazyLineBlock.parse(line + "\n", tabStop: tabStop);
           // TODO fix condition
           if (!closeParagraph && lineBlock.length == 1 && lineBlock[0] is Para) {
             Para block = lineBlock[0];
@@ -1635,6 +1647,7 @@ class CommonMarkParser {
 
     /// Is previous parsed line was empty?
     bool afterEmptyLine = false;
+    bool markerOnSaparateLine = false;
     List<Block> blocks = [];
     List<String> buffer = [];
     void buildBuffer() {
@@ -1801,6 +1814,7 @@ class CommonMarkParser {
 
       ParseResult markerRes = listMarkerTest(getIndent() + tabStop).run(s, position);
       if (markerRes.isSuccess) {
+        markerOnSaparateLine = false;
         int type = markerRes.value[0][0];
         IndexSeparator indexSeparator = (type == _listTypeOrdered ? IndexSeparator.fromChar(markerRes.value[0][3]) : null);
         int startIndex = type == _listTypeOrdered ? int.parse(markerRes.value[0][2].join(), onError: (_) => 1) : 1;
@@ -1819,6 +1833,7 @@ class CommonMarkParser {
           } else {
             int subIndent = markerRes.position.character - 1;
             if (markerRes.value[1] == "\n") {
+              markerOnSaparateLine = true;
               subIndent = position.character + markerRes.value[0][1] + 1; // marker + space after marker - char
               if (type == _listTypeOrdered) {
                 subIndent += markerRes.value[0][2].length;
@@ -1847,6 +1862,7 @@ class CommonMarkParser {
         ListBlock newListBlock;
         int subIndent = markerRes.position.character - 1;
         if (markerRes.value[1] == "\n") {
+          markerOnSaparateLine = true;
           subIndent = position.character + markerRes.value[0][1] + 1; // marker + space after marker - char
           if (type == _listTypeOrdered) {
             subIndent += markerRes.value[0][2].length;
@@ -1945,6 +1961,11 @@ class CommonMarkParser {
               fenceType: fenceType, fenceSize: fenceSize, attributes: new InfoString(infoString)));
           afterEmptyLine = false;
           continue;
+        }
+
+        if (markerOnSaparateLine && afterEmptyLine) {
+          // A list item can begin with at most one blank line.
+          break;
         }
 
         // Strict line

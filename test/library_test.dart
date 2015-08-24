@@ -13,13 +13,13 @@ void main() {
   individualParsersTests();
 
   // CommonMark tests
-  //fileTest("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num == 129)));
-  //fileTest("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num >= 103 && num < 144)));
-  //fileTest("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html));
+  //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num == 129)));
+  //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num >= 103 && num < 144)));
+  //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html));
   tests("CommonMark [strict]", specification, mdToHtmlTest(Options.strict));
 
   // Additional tests
-  //fileTest("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
+  //tests("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
   tests("Additional [strict]", additionalMarkdownToHtml, mdToHtmlTest(Options.strict));
 
   // SmartPunct

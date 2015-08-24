@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-17T15:05:46.830Z
+// 2015-08-24T20:43:04.144Z
 
 part of md_proc.test.data.test_data;
 
@@ -37,6 +37,12 @@ final Map<String, String> _$specificationTests = {
 ''': r'''<blockquote>
 <p>foo→bar</p>
 </blockquote>
+''',
+  r'''    foo
+→bar
+''': r'''<pre><code>foo
+bar
+</code></pre>
 ''',
   r'''- `one
 - two`
@@ -824,6 +830,11 @@ int x = 33;
 *bar*
 </i>
 ''',
+  r'''</ins>
+*bar*
+''': r'''</ins>
+*bar*
+''',
   r'''<del>
 *foo*
 </del>
@@ -1368,6 +1379,13 @@ foo
 <p>foo</p>
 <pre><code></code></pre>
 ''',
+  r'''> foo
+    - bar
+''': r'''<blockquote>
+<p>foo
+- bar</p>
+</blockquote>
+''',
   r'''>
 ''': r'''<blockquote>
 </blockquote>
@@ -1791,6 +1809,14 @@ bar
 </code></pre>
 </li>
 </ul>
+''',
+  r'''-
+
+  foo
+''': r'''<ul>
+<li></li>
+</ul>
+<p>foo</p>
 ''',
   r'''- foo
 -
