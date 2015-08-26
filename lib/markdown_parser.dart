@@ -703,132 +703,137 @@ class CommonMarkParser {
 
     mainloop: while (true) {
       // Trying to close
-      if (canClose) {
-        bool openFound = stack.any((item) => item.char == char);
-        while (openFound && numDelims > 0 && stack.length > 0) {
-          while (stack.length > 0 && stack.last.char != char) {
-            mergeWithPrevious();
-          }
-          Inlines inlines = stack.last.inlines;
-          Inline inline;
-          var count = numDelims < stack.last.numDelims  ? numDelims : stack.last.numDelims;
-          numDelims -= count;
-          stack.last.numDelims -= count;
-          if (char == "'" || char == '"') {
-            // Smart quotes
-
-            while (count > 0) {
-              inline = new SmartQuote(inlines, single: char == "'");
-              inlines = new Inlines();
-              inlines.add(inline);
-              count--;
+      if (canOpen && canClose && char == "'" && numDelims == 1) {
+        // Special case for smart quote, apostrophe
+        addToStack(new SmartQuote(new Inlines(), single: true, open: false));
+      } else {
+        if (canClose) {
+          bool openFound = stack.any((item) => item.char == char);
+          while (openFound && numDelims > 0 && stack.length > 0) {
+            while (stack.length > 0 && stack.last.char != char) {
+              mergeWithPrevious();
             }
-          } else if (char == "~") {
-            if (_options.strikeout && _options.subscript) {
-              // Strikeouts and subscripts
+            Inlines inlines = stack.last.inlines;
+            Inline inline;
+            var count = numDelims < stack.last.numDelims  ? numDelims : stack.last.numDelims;
+            numDelims -= count;
+            stack.last.numDelims -= count;
+            if (char == "'" || char == '"') {
+              // Smart quotes
 
-              if (count & 1 == 1) {
-                if (stack.last.cantCloseAnyway) {
-                  wrapStackInlines("~");
-                } else {
-                  inline = new Subscript(transformEscapedSpace(inlines, new Space()));
-                  inlines = new Inlines();
-                  inlines.add(inline);
-                }
-                count--;
-              }
               while (count > 0) {
-                inline = new Strikeout(transformEscapedSpace(inlines, new NonBreakableSpace()));
+                inline = new SmartQuote(inlines, single: char == "'");
                 inlines = new Inlines();
                 inlines.add(inline);
-                count -= 2;
+                count--;
               }
-            } else if (_options.subscript) {
-              // Subscript only
+            } else if (char == "~") {
+              if (_options.strikeout && _options.subscript) {
+                // Strikeouts and subscripts
+
+                if (count & 1 == 1) {
+                  if (stack.last.cantCloseAnyway) {
+                    wrapStackInlines("~");
+                  } else {
+                    inline = new Subscript(transformEscapedSpace(inlines, new Space()));
+                    inlines = new Inlines();
+                    inlines.add(inline);
+                  }
+                  count--;
+                }
+                while (count > 0) {
+                  inline = new Strikeout(transformEscapedSpace(inlines, new NonBreakableSpace()));
+                  inlines = new Inlines();
+                  inlines.add(inline);
+                  count -= 2;
+                }
+              } else if (_options.subscript) {
+                // Subscript only
+
+                if (stack.last.cantCloseAnyway) {
+                  wrapStackInlines("~" * count);
+                } else {
+                  while (count > 0) {
+                    inline = new Subscript(transformEscapedSpace(inlines, new Space()));
+                    inlines = new Inlines();
+                    inlines.add(inline);
+                    count--;
+                  }
+                }
+              } else {
+                // Strikeout only
+
+                if (count & 1 == 1) {
+                  inlines.add(new Str("~"));
+                  count--;
+                }
+                while (count > 0) {
+                  inline = new Strikeout(inlines);
+                  inlines = new Inlines();
+                  inlines.add(inline);
+                  count -= 2;
+                }
+              }
+            } else if (char == "^") {
+              // Superscript
 
               if (stack.last.cantCloseAnyway) {
-                wrapStackInlines("~" * count);
+                wrapStackInlines("^" * count);
               } else {
                 while (count > 0) {
-                  inline = new Subscript(transformEscapedSpace(inlines, new Space()));
+                  inline = new Superscript(transformEscapedSpace(inlines, new Space()));
                   inlines = new Inlines();
                   inlines.add(inline);
                   count--;
                 }
               }
             } else {
-              // Strikeout only
+              // Strongs and emphasises
 
               if (count & 1 == 1) {
-                inlines.add(new Str("~"));
+                inline = new Emph(inlines);
+                inlines = new Inlines();
+                inlines.add(inline);
                 count--;
               }
               while (count > 0) {
-                inline = new Strikeout(inlines);
+                inline = new Strong(inlines);
                 inlines = new Inlines();
                 inlines.add(inline);
                 count -= 2;
               }
             }
-          } else if (char == "^") {
-            // Superscript
 
-            if (stack.last.cantCloseAnyway) {
-              wrapStackInlines("^" * count);
-            } else {
-              while (count > 0) {
-                inline = new Superscript(transformEscapedSpace(inlines, new Space()));
-                inlines = new Inlines();
-                inlines.add(inline);
-                count--;
+            if (inline != null) {
+              if (stack.last.numDelims == 0) {
+                stack.removeLast();
+              } else {
+                stack.last.inlines = new Inlines();
               }
-            }
-          } else {
-            // Strongs and emphasises
-
-            if (count & 1 == 1) {
-              inline = new Emph(inlines);
-              inlines = new Inlines();
-              inlines.add(inline);
-              count--;
-            }
-            while (count > 0) {
-              inline = new Strong(inlines);
-              inlines = new Inlines();
-              inlines.add(inline);
-              count -= 2;
-            }
-          }
-
-          if (inline != null) {
-            if (stack.last.numDelims == 0) {
-              stack.removeLast();
+              addToStack(inline);
             } else {
-              stack.last.inlines = new Inlines();
+              mergeWithPrevious();
             }
-            addToStack(inline);
-          } else {
-            mergeWithPrevious();
-          }
-          if (numDelims > 0) {
-            openFound = stack.any((item) => item.char == char);
+            if (numDelims > 0) {
+              openFound = stack.any((item) => item.char == char);
+            }
           }
         }
-      }
-      // Trying to open
-      if (canOpen && numDelims > 0) {
-        stack.add(new _EmphasisStackItem(char, numDelims, new Inlines()));
-        numDelims = 0;
-      }
+        // Trying to open
+        if (canOpen && numDelims > 0) {
+          stack.add(new _EmphasisStackItem(char, numDelims, new Inlines()));
+          numDelims = 0;
+        }
 
-      if (numDelims > 0) {
-        // ending delimiters without open ones
-        if (char == "'" || char == '"') {
-          for (var i = 0; i < stack.last.numDelims; ++i) {
-            addToStack(new SmartQuote(new Inlines(), single: stack.last.char == "'", open: false));
+        if (numDelims > 0 ) {
+          // ending delimiters without open ones
+          if (char == "'" || char == '"') {
+            for (var i = 0; i < stack.last.numDelims; ++i) {
+              addToStack(new SmartQuote(new Inlines(), single: stack.last.char == "'", open: false));
+            }
+          } else {
+            addToStack(new Str(char * numDelims));
           }
-        } else {
-          addToStack(new Str(char * numDelims));
         }
       }
 
@@ -1540,9 +1545,8 @@ class CommonMarkParser {
   //
 
   static Parser blockquoteStrictLine = ((skipNonindentChars > char('>')) > whitespaceChar.maybe) > anyLine; // TODO check tab
-  static Parser blockquoteLazyLine = anyLine; // TODO inline
   static Parser blockquoteLine = (blockquoteStrictLine ^ (l) => [true, l])
-    | (blockquoteLazyLine ^ (l) => [false, l]);
+    | (anyLine ^ (l) => [false, l]);
 
 
   Parser get blockquote => new Parser((String s, Position pos) {

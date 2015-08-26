@@ -91,6 +91,8 @@ Smart punctuation
 Smart punctuation is automatic replacement of `...`, `---`, `--`, `"` and `'` to `…`, `—`, `–` and curly versions of
 quote marks accordingly. It's only official extension to date.
 
+**NOTE** This extension uses Unicode chars. Make sure that your code support it.
+
 Strikeout
 ---------
 

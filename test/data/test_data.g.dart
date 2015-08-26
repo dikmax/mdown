@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-24T20:43:04.144Z
+// 2015-08-25T12:27:49.121Z
 
 part of md_proc.test.data.test_data;
 
@@ -3663,6 +3663,9 @@ So is ‘pine.’</p>
 ''',
   r''''tis the season to be 'jolly'
 ''': r'''<p>’tis the season to be ‘jolly’</p>
+''',
+  r''''We'll use Jane's boat and John's truck,' Jenna said.
+''': r'''<p>‘We’ll use Jane’s boat and John’s truck,’ Jenna said.</p>
 ''',
   r'''"A paragraph with no closing quote.
 
