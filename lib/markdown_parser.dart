@@ -1084,7 +1084,7 @@ class CommonMarkParser {
   }
 
 
-  static final Parser smartPunctuation = (string("...") ^ (_) => new Ellipsis()) |
+  static final Parser smartPunctuation = (string("...") ^ (_) => [new Ellipsis()]) |
     (char("-") > char("-").many1) ^ (res) {
       /*
         From spec.
