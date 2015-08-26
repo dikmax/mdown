@@ -13,8 +13,7 @@ class FailureMatcher extends Matcher {
   FailureMatcher(this.rest);
 
   bool matches(ParseResult parseResult, Map matchState) {
-    return !parseResult.isSuccess
-        && _rest(parseResult) == rest;
+    return !parseResult.isSuccess && _rest(parseResult) == rest;
   }
 
   Description describe(Description description) =>
@@ -28,9 +27,9 @@ class SuccessMatcher extends Matcher {
   SuccessMatcher(this.res, this.rest);
 
   bool matches(ParseResult parseResult, Map matchState) {
-    return parseResult.isSuccess
-        && equals(parseResult.value).matches(res, matchState)
-        && parseResult.text.substring(parseResult.position.offset) == rest;
+    return parseResult.isSuccess &&
+        equals(parseResult.value).matches(res, matchState) &&
+        parseResult.text.substring(parseResult.position.offset) == rest;
   }
 
   Description describe(Description description) =>
@@ -40,7 +39,6 @@ class SuccessMatcher extends Matcher {
 isFailure(rest) => new FailureMatcher(rest);
 
 isSuccess(res, rest) => new SuccessMatcher(res, rest);
-
 
 var tabStopPosition = const Position(0, 1, 1, tabStop: 4);
 
@@ -53,11 +51,14 @@ void individualParsersTests() {
     test('should succeed with max consumed spaces.', () {
       expect(atMostIndent.run(" asdf", tabStopPosition), isSuccess(1, 'asdf'));
       expect(atMostIndent.run("  asdf", tabStopPosition), isSuccess(2, 'asdf'));
-      expect(atMostIndent.run("   asdf", tabStopPosition), isSuccess(3, 'asdf'));
+      expect(
+          atMostIndent.run("   asdf", tabStopPosition), isSuccess(3, 'asdf'));
     });
     test('should not take more than allowed.', () {
-      expect(atMostIndent.run("    asdf", tabStopPosition), isSuccess(3, ' asdf'));
-      expect(atMostIndent.run("\tasdf", tabStopPosition), isSuccess(0, '\tasdf'));
+      expect(
+          atMostIndent.run("    asdf", tabStopPosition), isSuccess(3, ' asdf'));
+      expect(
+          atMostIndent.run("\tasdf", tabStopPosition), isSuccess(0, '\tasdf'));
     });
   });
 
@@ -70,7 +71,8 @@ void individualParsersTests() {
       expect(count.run('55.', tabStopPosition), isFailure('55.'));
     });
     test('shouldn\'t take exceeded', () {
-      expect(count.run('55555', tabStopPosition), isSuccess(["5", "5", "5"], '55'));
+      expect(count.run('55555', tabStopPosition),
+          isSuccess(["5", "5", "5"], '55'));
     });
   });
 
@@ -78,17 +80,21 @@ void individualParsersTests() {
     var countBeetween1 = CommonMarkParser.countBetween(2, 3, digit);
     var countBeetween2 = CommonMarkParser.countBetween(0, 3, digit);
     test('should take defined count', () {
-      expect(countBeetween1.run('55', tabStopPosition), isSuccess(["5", "5"], ''));
-      expect(countBeetween1.run('555', tabStopPosition), isSuccess(["5", "5", "5"], ''));
+      expect(
+          countBeetween1.run('55', tabStopPosition), isSuccess(["5", "5"], ''));
+      expect(countBeetween1.run('555', tabStopPosition),
+          isSuccess(["5", "5", "5"], ''));
     });
     test('should fail if less', () {
       expect(countBeetween1.run('5.', tabStopPosition), isFailure('5.'));
     });
     test('should take maximum if there\'s more', () {
-      expect(countBeetween1.run('55555', tabStopPosition), isSuccess(["5", "5", "5"], '55'));
+      expect(countBeetween1.run('55555', tabStopPosition),
+          isSuccess(["5", "5", "5"], '55'));
     });
     test('should succeed empty if 0 allowed', () {
-      expect(countBeetween2.run('asdf', tabStopPosition), isSuccess([], 'asdf'));
+      expect(
+          countBeetween2.run('asdf', tabStopPosition), isSuccess([], 'asdf'));
     });
   });
 }

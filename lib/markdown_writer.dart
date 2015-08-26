@@ -10,7 +10,6 @@ abstract class _InlinePart {
   _InlinePart(this.content);
 }
 
-
 class _CheckedPart extends _InlinePart {
   _CheckedPart(String content) : super(content);
 
@@ -18,7 +17,6 @@ class _CheckedPart extends _InlinePart {
     return content;
   }
 }
-
 
 class _InlineTypes {
   bool code = false;
@@ -30,7 +28,6 @@ class _InlineTypes {
   bool rawHtml = false;
 }
 
-
 class _EscapeContext {
   final bool escapeStar;
   final bool escapeUnderscore;
@@ -40,64 +37,70 @@ class _EscapeContext {
   final bool isHeader;
   final bool isLabel;
 
-  const _EscapeContext({
-                       this.escapeStar: false,
-                       this.escapeUnderscore: false,
-                       this.escapeParens: false,
-                       this.escapeQuot: false,
-                       this.escapeSpace: false,
-                       this.isHeader: false,
-                       this.isLabel: false
-                       });
+  const _EscapeContext(
+      {this.escapeStar: false,
+      this.escapeUnderscore: false,
+      this.escapeParens: false,
+      this.escapeQuot: false,
+      this.escapeSpace: false,
+      this.isHeader: false,
+      this.isLabel: false});
 
-  _EscapeContext copy({
-                      bool escapeStar,
-                      bool escapeUnderscore,
-                      bool escapeParens,
-                      bool escapeQuot,
-                      bool escapeSpace,
-                      bool isHeader,
-                      bool isLabel
-                      }) {
+  _EscapeContext copy(
+      {bool escapeStar,
+      bool escapeUnderscore,
+      bool escapeParens,
+      bool escapeQuot,
+      bool escapeSpace,
+      bool isHeader,
+      bool isLabel}) {
     return new _EscapeContext(
-      escapeStar: escapeStar != null ? escapeStar : this.escapeStar,
-      escapeUnderscore: escapeUnderscore != null ? escapeUnderscore : this.escapeUnderscore,
-      escapeParens: escapeParens != null ? escapeParens : this.escapeParens,
-      escapeQuot: escapeQuot != null ? escapeQuot : this.escapeQuot,
-      escapeSpace: escapeSpace != null ? escapeSpace : this.escapeSpace,
-      isHeader: isHeader != null ? isHeader : this.isHeader,
-      isLabel: isLabel != null ? isLabel : this.isLabel
-    );
+        escapeStar: escapeStar != null ? escapeStar : this.escapeStar,
+        escapeUnderscore:
+            escapeUnderscore != null ? escapeUnderscore : this.escapeUnderscore,
+        escapeParens: escapeParens != null ? escapeParens : this.escapeParens,
+        escapeQuot: escapeQuot != null ? escapeQuot : this.escapeQuot,
+        escapeSpace: escapeSpace != null ? escapeSpace : this.escapeSpace,
+        isHeader: isHeader != null ? isHeader : this.isHeader,
+        isLabel: isLabel != null ? isLabel : this.isLabel);
   }
 
   static const _EscapeContext empty = const _EscapeContext();
 }
 
-
 class _NotCheckedPart extends _InlinePart {
-  RegExp escapedChars = new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
-  String escapeString(String str) => str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
+  RegExp escapedChars =
+      new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
+  String escapeString(String str) =>
+      str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
   _EscapeContext context;
   Options _options;
   CommonMarkParser _parser;
 
-  _NotCheckedPart(String content, this._options, [this.context = _EscapeContext.empty]) : super(content) {
+  _NotCheckedPart(String content, this._options,
+      [this.context = _EscapeContext.empty])
+      : super(content) {
     _parser = new CommonMarkParser(_options, {});
   }
-
 
   RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
   RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
   RegExp _atxHeaderRegExp = new RegExp(r" (#+ *)$");
   RegExp _setExtHeaderRegExp = new RegExp("^(.*\n {0,3})(=+|-+)( *(\$|\n))");
-  RegExp _horizontalRuleRegExp = new RegExp(r'^( {0,3})((- *){3,}|(_ *){3,}|(\* *){3,})$', multiLine: true);
+  RegExp _horizontalRuleRegExp = new RegExp(
+      r'^( {0,3})((- *){3,}|(_ *){3,}|(\* *){3,})$',
+      multiLine: true);
 
   RegExp _blockquoteRegExp = new RegExp(r"^( {0,3})>( |$)", multiLine: true);
-  RegExp _unorderedListRegExp = new RegExp(r"^( {0,3})([+\-*])( |$)", multiLine: true);
-  RegExp _orderedListRegExp = new RegExp(r"^( {0,3}\d+)([.\)])( |$)", multiLine: true);
-  RegExp _fencedTildeCodeRegExp = new RegExp(r"^( {0,3})(~{3,})", multiLine: true);
-  RegExp _linkReferenceRegExp = new RegExp(r"^( {0,3})(\[.*\]:)", multiLine: true);
+  RegExp _unorderedListRegExp =
+      new RegExp(r"^( {0,3})([+\-*])( |$)", multiLine: true);
+  RegExp _orderedListRegExp =
+      new RegExp(r"^( {0,3}\d+)([.\)])( |$)", multiLine: true);
+  RegExp _fencedTildeCodeRegExp =
+      new RegExp(r"^( {0,3})(~{3,})", multiLine: true);
+  RegExp _linkReferenceRegExp =
+      new RegExp(r"^( {0,3})(\[.*\]:)", multiLine: true);
 
   RegExp _htmlRegExp = new RegExp(r"[<>]");
   RegExp _codeRegExp = new RegExp(r"`+");
@@ -107,7 +110,6 @@ class _NotCheckedPart extends _InlinePart {
 
   String smartEscape(_InlinePart before, _InlinePart after) {
     String replaceChars = r"\\"; // All backslashes should be escaped by default
-
 
     if (context.escapeStar) {
       replaceChars += "*";
@@ -136,7 +138,8 @@ class _NotCheckedPart extends _InlinePart {
       replaceChars += '^';
     }
 
-    content = content.replaceAllMapped(new RegExp("[" + replaceChars + "]"), (Match m) => r"\" + m.group(0));
+    content = content.replaceAllMapped(
+        new RegExp("[" + replaceChars + "]"), (Match m) => r"\" + m.group(0));
 
     if (_options.smartPunctuation) {
       content = content.replaceAllMapped(new RegExp(r"(\.\.\.|-{2,3})"), (m) {
@@ -155,13 +158,18 @@ class _NotCheckedPart extends _InlinePart {
     }
 
     if (!context.isHeader) {
-      content = content.replaceAllMapped(_notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
-      content = content.replaceAllMapped(_notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
+      content = content.replaceAllMapped(
+          _notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
+      content = content.replaceAllMapped(
+          _notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
 
-      content = content.replaceAllMapped(_horizontalRuleRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
-      content = content.replaceAllMapped(_setExtHeaderRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
+      content = content.replaceAllMapped(
+          _horizontalRuleRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+      content = content.replaceAllMapped(_setExtHeaderRegExp,
+          (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
     } else {
-      content = content.replaceAllMapped(_atxHeaderRegExp, (Match m) => r" \" + m.group(1));
+      content = content.replaceAllMapped(
+          _atxHeaderRegExp, (Match m) => r" \" + m.group(1));
     }
 
     // Parsing inline code to detect what should be escaped
@@ -176,40 +184,50 @@ class _NotCheckedPart extends _InlinePart {
 
       // TODO add tests for inner escaping
       if (types.code) {
-        content = content.replaceAllMapped(_codeRegExp, (Match m) => r"\" + m.group(0));
+        content = content.replaceAllMapped(
+            _codeRegExp, (Match m) => r"\" + m.group(0));
         test = true;
       }
       if (types.emphOrString) {
-        content = content.replaceAllMapped(_emphOrStringRegExp, (Match m) => r"\" + m.group(0));
+        content = content.replaceAllMapped(
+            _emphOrStringRegExp, (Match m) => r"\" + m.group(0));
       }
       if (types.image) {
-        content = content.replaceAllMapped(_imageRegExp, (Match m) => r"\" + m.group(0));
+        content = content.replaceAllMapped(
+            _imageRegExp, (Match m) => r"\" + m.group(0));
       }
       if (types.referenceLink || types.inlineLink) {
-        content = content.replaceAllMapped(_linkRegExp, (Match m) => r"\" + m.group(0));
-
+        content = content.replaceAllMapped(
+            _linkRegExp, (Match m) => r"\" + m.group(0));
       }
       if (types.rawHtml || types.autoLink) {
-        content = content.replaceAllMapped(_htmlRegExp, (Match m) => r"\" + m.group(0));
+        content = content.replaceAllMapped(
+            _htmlRegExp, (Match m) => r"\" + m.group(0));
         test = true;
       }
     }
 
     // If ! followed by checked part starting with [, then ! should be escaped, or we'll get image instead of link
-    if (after is _CheckedPart && after.content.startsWith("[") && content.endsWith("!")) {
+    if (after is _CheckedPart &&
+        after.content.startsWith("[") &&
+        content.endsWith("!")) {
       content = content.substring(0, content.length - 1) + r"\!";
     }
 
     // Some of these could be escaped by inlines, so put it here.
-    content = content.replaceAllMapped(_blockquoteRegExp, (Match m) => m.group(1) + r"\>" + m.group(2));
-    content = content.replaceAllMapped(_unorderedListRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
-    content = content.replaceAllMapped(_orderedListRegExp, (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
-    content = content.replaceAllMapped(_fencedTildeCodeRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
-    content = content.replaceAllMapped(_linkReferenceRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+    content = content.replaceAllMapped(
+        _blockquoteRegExp, (Match m) => m.group(1) + r"\>" + m.group(2));
+    content = content.replaceAllMapped(_unorderedListRegExp,
+        (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
+    content = content.replaceAllMapped(_orderedListRegExp,
+        (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
+    content = content.replaceAllMapped(
+        _fencedTildeCodeRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
+    content = content.replaceAllMapped(
+        _linkReferenceRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
 
     return content;
   }
-
 
   void detectInlines(Iterable<Inline> inlines, _InlineTypes types) {
     inlines.forEach((Inline inline) {
@@ -243,26 +261,24 @@ class _NotCheckedPart extends _InlinePart {
     });
   }
 
-
   String toString() {
     return escapeString(content);
   }
 }
-
 
 class _InlineRenderer {
   List<_InlinePart> parts;
   Map<String, Target> _references;
   Options _options;
 
-
   _InlineRenderer(this._references, this._options) : parts = <_InlinePart>[];
-
 
   /// If context == null then token doesn't require escaping
   void write(String str, [_EscapeContext context]) {
     if (parts.length == 0) {
-      parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, _options, context));
+      parts.add(context == null
+          ? new _CheckedPart(str)
+          : new _NotCheckedPart(str, _options, context));
       return;
     }
     if (context == null && parts.last is _CheckedPart) {
@@ -275,24 +291,28 @@ class _InlineRenderer {
         return;
       }
     }
-    parts.add(context == null ? new _CheckedPart(str) : new _NotCheckedPart(str, _options, context));
+    parts.add(context == null
+        ? new _CheckedPart(str)
+        : new _NotCheckedPart(str, _options, context));
   }
 
-
-  void writeInlines(Iterable<Inline> inlines, {String prevEmph, _EscapeContext context: _EscapeContext.empty}) {
+  void writeInlines(Iterable<Inline> inlines,
+      {String prevEmph, _EscapeContext context: _EscapeContext.empty}) {
     if (inlines.length == 1 && prevEmph != null) {
       if (inlines.first is Emph) {
-        writeEmph(inlines.first, delimiter: prevEmph == "*" ? "_" : "*", context: context);
+        writeEmph(inlines.first,
+            delimiter: prevEmph == "*" ? "_" : "*", context: context);
         return;
       }
       if (inlines.first is Strong) {
-        writeStrong(inlines.first, delimiter: prevEmph == "*" ? "_" : "*", context: context);
+        writeStrong(inlines.first,
+            delimiter: prevEmph == "*" ? "_" : "*", context: context);
         return;
       }
     }
 
     Iterator<Inline> it = inlines.iterator;
-    while(it.moveNext()) {
+    while (it.moveNext()) {
       Inline inline = it.current;
       if (inline is Str) {
         var contents = inline.contents;
@@ -359,7 +379,8 @@ class _InlineRenderer {
     write(fence);
   }
 
-  void writeEmph(Emph emph, {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
+  void writeEmph(Emph emph,
+      {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
     if (delimiter == "*" && !context.escapeStar) {
       context = context.copy(escapeStar: true);
     } else if (delimiter == "_" && !context.escapeUnderscore) {
@@ -371,7 +392,8 @@ class _InlineRenderer {
     write(delimiter);
   }
 
-  void writeStrong(Strong strong, {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
+  void writeStrong(Strong strong,
+      {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
     if (delimiter == "*" && !context.escapeStar) {
       context = context.copy(escapeStar: true);
     } else if (delimiter == "_" && !context.escapeUnderscore) {
@@ -384,8 +406,8 @@ class _InlineRenderer {
     write(delimiterString);
   }
 
-
-  void writeSmartQuote(SmartQuote quote, {_EscapeContext context: _EscapeContext.empty}) {
+  void writeSmartQuote(SmartQuote quote,
+      {_EscapeContext context: _EscapeContext.empty}) {
     if (quote.open) {
       write(quote.single ? "'" : '"');
     }
@@ -395,33 +417,34 @@ class _InlineRenderer {
     }
   }
 
-
-  void writeStrikeout(Strikeout strikeout, {_EscapeContext context: _EscapeContext.empty}) {
+  void writeStrikeout(Strikeout strikeout,
+      {_EscapeContext context: _EscapeContext.empty}) {
     write("~~");
     writeInlines(strikeout.contents, context: context);
     write("~~");
   }
 
-
-  void writeSubscript(Subscript subscript, {_EscapeContext context: _EscapeContext.empty}) {
+  void writeSubscript(Subscript subscript,
+      {_EscapeContext context: _EscapeContext.empty}) {
     write("~");
     writeInlines(subscript.contents, context: context.copy(escapeSpace: true));
     write("~");
   }
 
-
-  void writeSuperscript(Superscript superscript, {_EscapeContext context: _EscapeContext.empty}) {
+  void writeSuperscript(Superscript superscript,
+      {_EscapeContext context: _EscapeContext.empty}) {
     write("^");
-    writeInlines(superscript.contents, context: context.copy(escapeSpace: true));
+    writeInlines(superscript.contents,
+        context: context.copy(escapeSpace: true));
     write("^");
   }
-
 
   void writeLink(Link link) {
     if (link is InlineLink) {
       write('[');
       _InlineRenderer renderer = new _InlineRenderer(_references, _options);
-      renderer.writeInlines(link.label, context: new _EscapeContext(isLabel: true));
+      renderer.writeInlines(link.label,
+          context: new _EscapeContext(isLabel: true));
       write(renderer.toString());
       write('](');
       writeTarget(link.target);
@@ -433,7 +456,8 @@ class _InlineRenderer {
       _references[link.reference] = link.target;
       _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
 
-      builder.writeInlines(link.label, context: new _EscapeContext(isLabel: true));
+      builder.writeInlines(link.label,
+          context: new _EscapeContext(isLabel: true));
       String inlines = builder.toString();
       write('[');
       write(inlines);
@@ -499,7 +523,7 @@ class _InlineRenderer {
       next = it.current;
     }
 
-    while(current != null) {
+    while (current != null) {
       if (current is _NotCheckedPart) {
         var c = current; // Workaround for dart-analyzer
         buffer.write(c.smartEscape(prev, next));
@@ -527,15 +551,13 @@ class _MarkdownBuilder extends StringBuffer {
 
   _MarkdownBuilder(this._references, this._options) : super();
 
-
   void writeDocument(Document document) {
     writeBlocks(document.contents);
     writeReferences();
   }
 
-
   void writeBlocks(Iterable<Block> blocks,
-                     {bool tight: false, String unorderedListChar: "*"}) {
+      {bool tight: false, String unorderedListChar: "*"}) {
     Block prevBlock = null;
     Iterator<Block> it = blocks.iterator;
     bool first = true;
@@ -578,8 +600,8 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-
-  void writeHorizontalRule(HorizontalRule hRule, [String unorderedListChar = "*"]) {
+  void writeHorizontalRule(HorizontalRule hRule,
+      [String unorderedListChar = "*"]) {
     if (unorderedListChar == "-") {
       write('*' * 10);
     } else {
@@ -587,12 +609,10 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-
   void writePara(Para para) {
     writeInlines(para.contents);
     write("\n");
   }
-
 
   void writeBlockquote(Blockquote blockquote) {
     _MarkdownBuilder inner = new _MarkdownBuilder(_references, _options);
@@ -601,9 +621,9 @@ class _MarkdownBuilder extends StringBuffer {
     if (contents.endsWith('\n')) {
       contents = contents.substring(0, contents.length - 1);
     }
-    write(contents.splitMapJoin("\n", onNonMatch: (String str) => "> $str") + "\n");
+    write(contents.splitMapJoin("\n", onNonMatch: (String str) => "> $str") +
+        "\n");
   }
-
 
   void writeHeader(Header header) {
     // TODO throw exception in case of multiline header ? Or replace with space
@@ -621,10 +641,10 @@ class _MarkdownBuilder extends StringBuffer {
     write("\n");
   }
 
-
   void writeCodeBlock(CodeBlock codeBlock) {
     if (codeBlock is FencedCodeBlock) {
-      String fence = (codeBlock.fenceType == FenceType.backtick ? '`' : '~') * codeBlock.fenceSize;
+      String fence = (codeBlock.fenceType == FenceType.backtick ? '`' : '~') *
+          codeBlock.fenceSize;
       write(fence);
       if (codeBlock.attributes is InfoString) {
         InfoString attributes = codeBlock.attributes;
@@ -638,9 +658,9 @@ class _MarkdownBuilder extends StringBuffer {
     }
 
     // Indented code block
-    write(codeBlock.contents.splitMapJoin("\n", onNonMatch: (str) => str == "" ? str : "    " + str));
+    write(codeBlock.contents.splitMapJoin("\n",
+        onNonMatch: (str) => str == "" ? str : "    " + str));
   }
-
 
   void writeUnorderedList(UnorderedList list, {Block prevBlock: null}) {
     if (prevBlock is UnorderedList && prevBlock.bulletType == list.bulletType) {
@@ -659,7 +679,8 @@ class _MarkdownBuilder extends StringBuffer {
 
       ListItem listItem = it.current;
       _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
-      builder.writeBlocks(listItem.contents, tight: list.tight, unorderedListChar: list.bulletType.char);
+      builder.writeBlocks(listItem.contents,
+          tight: list.tight, unorderedListChar: list.bulletType.char);
       String contents = builder.toString();
       String marker = list.bulletType.char;
       String pad;
@@ -672,7 +693,8 @@ class _MarkdownBuilder extends StringBuffer {
         write(" ");
 
         write(contents.splitMapJoin("\n", onNonMatch: (String str) {
-          if (pad == null) { // First
+          if (pad == null) {
+            // First
             pad = " " * (marker.length + 1);
             return str;
           } else if (str != "") {
@@ -684,9 +706,9 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-
   void writeOrderedList(OrderedList list, {Block prevBlock: null}) {
-    if (prevBlock is OrderedList && prevBlock.indexSeparator == list.indexSeparator) {
+    if (prevBlock is OrderedList &&
+        prevBlock.indexSeparator == list.indexSeparator) {
       write("\n");
     }
     int index = list.startIndex;
@@ -725,7 +747,8 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-  void writeInlines(Iterable<Inline> inlines, {_EscapeContext context: _EscapeContext.empty}) {
+  void writeInlines(Iterable<Inline> inlines,
+      {_EscapeContext context: _EscapeContext.empty}) {
     _InlineRenderer renderer = new _InlineRenderer(_references, _options);
     renderer.writeInlines(inlines, context: context);
     write(renderer.toString());
@@ -748,20 +771,21 @@ class _MarkdownBuilder extends StringBuffer {
   }
 }
 
-
 class MarkdownWriter {
   final Options _options;
 
   const MarkdownWriter(this._options);
 
   String write(Document document) {
-    _MarkdownBuilder builder = new _MarkdownBuilder(<String, Target>{}, _options);
+    _MarkdownBuilder builder =
+        new _MarkdownBuilder(<String, Target>{}, _options);
     builder.writeDocument(document);
 
     return builder.toString();
   }
 
-  static const MarkdownWriter commonmark = const MarkdownWriter(Options.commonmark);
+  static const MarkdownWriter commonmark =
+      const MarkdownWriter(Options.commonmark);
   static const MarkdownWriter strict = const MarkdownWriter(Options.strict);
   static const MarkdownWriter defaults = const MarkdownWriter(Options.defaults);
 }

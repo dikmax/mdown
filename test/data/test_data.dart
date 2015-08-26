@@ -14,7 +14,8 @@ final Map<String, String> smartPunctuation = _$smartPunctuationTests;
 final Map<String, String> markdownToMarkdown = _$markdownToMarkdownTests;
 
 @EmbedTests('additionalMarkdownToHtml.txt')
-final Map<String, String> additionalMarkdownToHtml = _$additionalMarkdownToHtmlTests;
+final Map<String, String> additionalMarkdownToHtml =
+    _$additionalMarkdownToHtmlTests;
 
 @EmbedTests('strikeout.txt')
 final Map<String, String> strikeout = _$strikeoutTests;

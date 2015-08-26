@@ -6,7 +6,6 @@ import 'reference_resolver.dart';
 import 'service.dart';
 import 'data/test_data.dart';
 
-
 void main() {
   serviceTests();
 
@@ -20,10 +19,12 @@ void main() {
 
   // Additional tests
   //tests("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
-  tests("Additional [strict]", additionalMarkdownToHtml, mdToHtmlTest(Options.strict));
+  tests("Additional [strict]", additionalMarkdownToHtml,
+      mdToHtmlTest(Options.strict));
 
   // SmartPunct
-  tests("SmartPunct [commonmark]", smartPunctuation, mdToHtmlTest(Options.commonmark));
+  tests("SmartPunct [commonmark]", smartPunctuation,
+      mdToHtmlTest(Options.commonmark));
 
   // Strikeout
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
@@ -32,10 +33,12 @@ void main() {
   tests("Subscript", subscript, mdToHtmlTest(new Options(subscript: true)));
 
   // Superscript
-  tests("Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
+  tests(
+      "Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
 
   // Strikeout
-  tests("Strikeout and subscript", strikeoutAndSubscript, mdToHtmlTest(new Options(strikeout: true, subscript: true)));
+  tests("Strikeout and subscript", strikeoutAndSubscript,
+      mdToHtmlTest(new Options(strikeout: true, subscript: true)));
 
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));

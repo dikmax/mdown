@@ -10,7 +10,6 @@ const _iterableEquality = const IterableEquality();
 const _mapEquality = const MapEquality();
 const _deepEquality = const DeepCollectionEquality();
 
-
 class Document {
   Iterable<Block> contents;
 
@@ -18,17 +17,13 @@ class Document {
 
   String toString() => "Document $contents";
 
-  bool operator== (obj) => obj is Document &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Document && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
 
-
-abstract class Attr {
-
-}
-
+abstract class Attr {}
 
 class EmptyAttr extends Attr {
   static final EmptyAttr _instance = new EmptyAttr._internal();
@@ -41,11 +36,10 @@ class EmptyAttr extends Attr {
 
   String toString() => "EmptyAttr";
 
-  bool operator== (obj) => obj is EmptyAttr;
+  bool operator ==(obj) => obj is EmptyAttr;
 
   int get hashCode => 0;
 }
-
 
 class InfoString extends Attr {
   String language;
@@ -54,12 +48,10 @@ class InfoString extends Attr {
 
   String toString() => "InfoString($language)";
 
-  bool operator== (obj) => obj is InfoString &&
-    language == obj.language;
+  bool operator ==(obj) => obj is InfoString && language == obj.language;
 
   int get hashCode => language.hashCode;
 }
-
 
 // TODO link type: with or without <>
 // TODO title delimiters ", ' or ()
@@ -69,21 +61,18 @@ class Target {
 
   Target(this.link, this.title);
 
-  String toString() => 'Target "$link" ${title == null ? "null" : "\"$title\""}';
+  String toString() =>
+      'Target "$link" ${title == null ? "null" : "\"$title\""}';
 
-  bool operator== (obj) => obj is Target &&
-    link == obj.link && title == obj.title;
+  bool operator ==(obj) =>
+      obj is Target && link == obj.link && title == obj.title;
 
   int get hashCode => hash2(link, title);
 }
 
-
 // Blocks
 
-abstract class Block {
-
-}
-
+abstract class Block {}
 
 // TODO char type, distace between chars, chars count
 class HorizontalRule extends Block {
@@ -97,11 +86,10 @@ class HorizontalRule extends Block {
 
   String toString() => "HorizontalRule";
 
-  bool operator== (obj) => obj is HorizontalRule;
+  bool operator ==(obj) => obj is HorizontalRule;
 
   int get hashCode => 0;
 }
-
 
 abstract class Header extends Block {
   int level;
@@ -109,7 +97,6 @@ abstract class Header extends Block {
 
   Header(this.level, this.contents);
 }
-
 
 class AtxHeader extends Header {
   AtxHeader(int level, Inlines contents) : super(level, contents);
@@ -122,13 +109,12 @@ class AtxHeader extends Header {
 
   String toString() => "AtxHeader $level $contents";
 
-  bool operator== (obj) => obj is AtxHeader &&
-    level == obj.level &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) => obj is AtxHeader &&
+      level == obj.level &&
+      _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => hash2(level, contents);
 }
-
 
 class SetextHeader extends Header {
   SetextHeader(int level, Inlines contents) : super(level, contents);
@@ -137,13 +123,12 @@ class SetextHeader extends Header {
 
   String toString() => "SetextHeader $level $contents";
 
-  bool operator== (obj) => obj is SetextHeader &&
-    level == obj.level &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) => obj is SetextHeader &&
+      level == obj.level &&
+      _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => hash2(level, contents);
 }
-
 
 class FenceType {
   static const FenceType backtick = const FenceType._(0, "backtick");
@@ -156,12 +141,10 @@ class FenceType {
 
   String toString() => name;
 
-  bool operator== (obj) => obj is FenceType &&
-    value == obj.value;
+  bool operator ==(obj) => obj is FenceType && value == obj.value;
 
   int get hashCode => value.hashCode;
 }
-
 
 abstract class CodeBlock extends Block {
   String contents;
@@ -170,36 +153,33 @@ abstract class CodeBlock extends Block {
   CodeBlock(this.contents, this.attributes);
 }
 
-
 class IndentedCodeBlock extends CodeBlock {
   IndentedCodeBlock(String contents) : super(contents, new EmptyAttr());
 
   String toString() => "IndentedCodeBlock $contents";
 
-  bool operator== (obj) => obj is IndentedCodeBlock &&
-    contents == obj.contents;
+  bool operator ==(obj) => obj is IndentedCodeBlock && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
 
-
 class FencedCodeBlock extends CodeBlock {
   FenceType fenceType;
   int fenceSize;
-  FencedCodeBlock(String contents, {this.fenceType: FenceType.backtick, this.fenceSize: 3, Attr attributes})
-    : super(contents, attributes == null ? new EmptyAttr() : attributes);
+  FencedCodeBlock(String contents,
+      {this.fenceType: FenceType.backtick, this.fenceSize: 3, Attr attributes})
+      : super(contents, attributes == null ? new EmptyAttr() : attributes);
 
   String toString() => "FencedCodeBlock $attributes $contents";
 
-  bool operator== (obj) => obj is FencedCodeBlock &&
-    contents == obj.contents &&
-    attributes == obj.attributes &&
-    fenceType == obj.fenceType &&
-    fenceSize == obj.fenceSize;
+  bool operator ==(obj) => obj is FencedCodeBlock &&
+      contents == obj.contents &&
+      attributes == obj.attributes &&
+      fenceType == obj.fenceType &&
+      fenceSize == obj.fenceSize;
 
   int get hashCode => hash4(contents, attributes, fenceType, fenceSize);
 }
-
 
 abstract class RawBlock extends Block {
   String contents;
@@ -207,18 +187,15 @@ abstract class RawBlock extends Block {
   RawBlock(this.contents);
 }
 
-
 class HtmlRawBlock extends RawBlock {
   HtmlRawBlock(String contents) : super(contents);
 
   String toString() => "HtmlRawBlock $contents";
 
-  bool operator== (obj) => obj is HtmlRawBlock &&
-    contents == obj.contents;
+  bool operator ==(obj) => obj is HtmlRawBlock && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
-
 
 class Blockquote extends Block {
   Iterable<Block> contents;
@@ -227,12 +204,11 @@ class Blockquote extends Block {
 
   String toString() => "Blockquote $contents";
 
-  bool operator== (obj) => obj is Blockquote &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Blockquote && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 class ListItem {
   Iterable<Block> contents;
@@ -241,12 +217,11 @@ class ListItem {
 
   String toString() => "ListItem $contents";
 
-  bool operator== (obj) => obj is ListItem &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is ListItem && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 class BulletType {
   static const BulletType minus = const BulletType._(0, "minus", "-");
@@ -261,7 +236,7 @@ class BulletType {
 
   static BulletType fromChar(markerChar) {
     BulletType type;
-    switch(markerChar) {
+    switch (markerChar) {
       case '+':
         type = BulletType.plus;
         break;
@@ -284,16 +259,15 @@ class BulletType {
 
   String toString() => name;
 
-  bool operator== (obj) => obj is BulletType &&
-    value == obj.value;
+  bool operator ==(obj) => obj is BulletType && value == obj.value;
 
   int get hashCode => value.hashCode;
 }
 
-
 class IndexSeparator {
   static const IndexSeparator dot = const IndexSeparator._(0, "dot", ".");
-  static const IndexSeparator parenthesis = const IndexSeparator._(1, "parenthesis", ")");
+  static const IndexSeparator parenthesis =
+      const IndexSeparator._(1, "parenthesis", ")");
 
   final int value;
   final String name;
@@ -303,7 +277,7 @@ class IndexSeparator {
 
   static IndexSeparator fromChar(String indexSeparator) {
     IndexSeparator separator;
-    switch(indexSeparator) {
+    switch (indexSeparator) {
       case '.':
         separator = IndexSeparator.dot;
         break;
@@ -322,12 +296,10 @@ class IndexSeparator {
 
   String toString() => name;
 
-  bool operator== (obj) => obj is IndexSeparator &&
-    value == obj.value;
+  bool operator ==(obj) => obj is IndexSeparator && value == obj.value;
 
   int get hashCode => value.hashCode;
 }
-
 
 // List class name is already taken by dart
 abstract class ListBlock extends Block {
@@ -337,42 +309,43 @@ abstract class ListBlock extends Block {
   ListBlock(this.items, this.tight);
 }
 
-
 class UnorderedList extends ListBlock {
   BulletType bulletType;
 
-  UnorderedList(Iterable<ListItem> items, {this.bulletType: BulletType.minus, bool tight: false})
-    : super(items, tight);
+  UnorderedList(Iterable<ListItem> items,
+      {this.bulletType: BulletType.minus, bool tight: false})
+      : super(items, tight);
 
   String toString() => "UnorderedList $bulletType $items";
 
-  bool operator== (obj) => obj is UnorderedList &&
-    bulletType == obj.bulletType &&
-    tight == obj.tight &&
-    _iterableEquality.equals(items, obj.items);
+  bool operator ==(obj) => obj is UnorderedList &&
+      bulletType == obj.bulletType &&
+      tight == obj.tight &&
+      _iterableEquality.equals(items, obj.items);
 
   int get hashCode => hash3(bulletType, tight, items);
 }
-
 
 class OrderedList extends ListBlock {
   IndexSeparator indexSeparator;
   int startIndex;
 
-  OrderedList(Iterable<ListItem> items, {bool tight: false,
-      this.indexSeparator: IndexSeparator.dot, this.startIndex: 1}) : super(items, tight);
+  OrderedList(Iterable<ListItem> items,
+      {bool tight: false,
+      this.indexSeparator: IndexSeparator.dot,
+      this.startIndex: 1})
+      : super(items, tight);
 
   String toString() => "OrderedList start=$startIndex $indexSeparator $items";
 
-  bool operator== (obj) => obj is OrderedList &&
-    indexSeparator == obj.indexSeparator &&
-    tight == obj.tight &&
-    startIndex == obj.startIndex &&
-    _iterableEquality.equals(items, obj.items);
+  bool operator ==(obj) => obj is OrderedList &&
+      indexSeparator == obj.indexSeparator &&
+      tight == obj.tight &&
+      startIndex == obj.startIndex &&
+      _iterableEquality.equals(items, obj.items);
 
   int get hashCode => hash4(indexSeparator, tight, startIndex, items);
 }
-
 
 class Para extends Block {
   Inlines contents;
@@ -381,12 +354,11 @@ class Para extends Block {
 
   String toString() => "Para $contents";
 
-  bool operator== (obj) => obj is Para &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Para && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 // Inlines
 
@@ -395,7 +367,8 @@ class Inlines extends ListBase<Inline> {
 
   Inlines();
 
-  Inlines.from(Iterable<Inline> inlines) : _inlines = new List<Inline>.from(inlines);
+  Inlines.from(Iterable<Inline> inlines)
+      : _inlines = new List<Inline>.from(inlines);
 
   int get length => _inlines.length;
 
@@ -403,7 +376,7 @@ class Inlines extends ListBase<Inline> {
     _inlines.length = length;
   }
 
-  void operator[]=(int index, Inline value) {
+  void operator []=(int index, Inline value) {
     _inlines[index] = value;
   }
 
@@ -417,11 +390,7 @@ class Inlines extends ListBase<Inline> {
   void addAll(Iterable<Inline> all) => _inlines.addAll(all);
 }
 
-
-abstract class Inline {
-
-}
-
+abstract class Inline {}
 
 class Str extends Inline {
   String contents;
@@ -430,12 +399,10 @@ class Str extends Inline {
 
   String toString() => 'Str "$contents"';
 
-  bool operator== (obj) => obj is Str &&
-    contents == obj.contents;
+  bool operator ==(obj) => obj is Str && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
-
 
 class Space extends Inline {
   static final Space _instance = new Space._internal();
@@ -448,11 +415,10 @@ class Space extends Inline {
 
   String toString() => "Space";
 
-  bool operator== (obj) => obj is Space;
+  bool operator ==(obj) => obj is Space;
 
   int get hashCode => 0;
 }
-
 
 class Tab extends Inline {
   static final Tab _instance = new Tab._internal();
@@ -465,11 +431,10 @@ class Tab extends Inline {
 
   String toString() => "Tab";
 
-  bool operator== (obj) => obj is Tab;
+  bool operator ==(obj) => obj is Tab;
 
   int get hashCode => 0;
 }
-
 
 class NonBreakableSpace extends Inline {
   static final NonBreakableSpace _instance = new NonBreakableSpace._internal();
@@ -482,11 +447,10 @@ class NonBreakableSpace extends Inline {
 
   String toString() => "NonBreakableSpace";
 
-  bool operator== (obj) => obj is NonBreakableSpace;
+  bool operator ==(obj) => obj is NonBreakableSpace;
 
   int get hashCode => 0;
 }
-
 
 class LineBreak extends Inline {
   static final LineBreak _instance = new LineBreak._internal();
@@ -499,67 +463,60 @@ class LineBreak extends Inline {
 
   String toString() => "LineBreak";
 
-  bool operator== (obj) => obj is LineBreak;
+  bool operator ==(obj) => obj is LineBreak;
 
   int get hashCode => 0;
 }
 
-
-abstract class SmartChar extends Inline {
-
-}
-
+abstract class SmartChar extends Inline {}
 
 class MDash extends SmartChar {
   static final MDash _instance = new MDash._internal();
-  
+
   factory MDash() {
     return _instance;
   }
-  
+
   MDash._internal();
-  
+
   String toString() => "MDash";
-  
-  bool operator== (obj) => obj is MDash;
+
+  bool operator ==(obj) => obj is MDash;
 
   int get hashCode => 0;
 }
-
 
 class NDash extends SmartChar {
   static final NDash _instance = new NDash._internal();
-  
+
   factory NDash() {
     return _instance;
   }
-  
+
   NDash._internal();
-  
+
   String toString() => "NDash";
-  
-  bool operator== (obj) => obj is NDash;
+
+  bool operator ==(obj) => obj is NDash;
 
   int get hashCode => 0;
 }
-
 
 class Ellipsis extends SmartChar {
   static final Ellipsis _instance = new Ellipsis._internal();
-  
+
   factory Ellipsis() {
     return _instance;
   }
-  
+
   Ellipsis._internal();
-  
+
   String toString() => "Ellipsis";
-  
-  bool operator== (obj) => obj is Ellipsis;
+
+  bool operator ==(obj) => obj is Ellipsis;
 
   int get hashCode => 0;
 }
-
 
 class SmartQuote extends Inline {
   bool single;
@@ -571,19 +528,18 @@ class SmartQuote extends Inline {
   SmartQuote(this.contents, {this.single, this.open: true, this.close: true});
 
   String toString() => 'SmartQuote ' +
-    (single
-      ? "${open ? "'" : ""}$contents${close ? "'" : ""}"
-      : "${open ? '"' : ""}$contents${close ? '"' : ""}");
+      (single
+          ? "${open ? "'" : ""}$contents${close ? "'" : ""}"
+          : "${open ? '"' : ""}$contents${close ? '"' : ""}");
 
-  bool operator== (obj) => obj is SmartQuote &&
-    single == obj.single &&
-    open == obj.open &&
-    close == obj.close &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) => obj is SmartQuote &&
+      single == obj.single &&
+      open == obj.open &&
+      close == obj.close &&
+      _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => hash4(single, open, close, contents);
 }
-
 
 class Code extends Inline {
   String contents;
@@ -593,13 +549,11 @@ class Code extends Inline {
 
   String toString() => 'Code "$contents"';
 
-  bool operator== (obj) => obj is Code &&
-    contents == obj.contents &&
-    fenceSize == obj.fenceSize;
+  bool operator ==(obj) =>
+      obj is Code && contents == obj.contents && fenceSize == obj.fenceSize;
 
   int get hashCode => hash2(contents, fenceSize);
 }
-
 
 class Emph extends Inline {
   Inlines contents;
@@ -608,12 +562,11 @@ class Emph extends Inline {
 
   String toString() => 'Emph $contents';
 
-  bool operator== (obj) => obj is Emph &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Emph && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 class Strong extends Inline {
   Inlines contents;
@@ -622,12 +575,11 @@ class Strong extends Inline {
 
   String toString() => 'Strong $contents';
 
-  bool operator== (obj) => obj is Strong &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Strong && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 class Strikeout extends Inline {
   Inlines contents;
@@ -636,12 +588,11 @@ class Strikeout extends Inline {
 
   String toString() => 'Strikeout $contents';
 
-  bool operator== (obj) => obj is Strikeout &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Strikeout && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 class Subscript extends Inline {
   Inlines contents;
@@ -650,12 +601,11 @@ class Subscript extends Inline {
 
   String toString() => 'Subscript $contents';
 
-  bool operator== (obj) => obj is Subscript &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Subscript && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 class Superscript extends Inline {
   Inlines contents;
@@ -664,12 +614,11 @@ class Superscript extends Inline {
 
   String toString() => 'Superscript $contents';
 
-  bool operator== (obj) => obj is Superscript &&
-    _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(obj) =>
+      obj is Superscript && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
 }
-
 
 abstract class Link extends Inline {
   Inlines label;
@@ -678,48 +627,47 @@ abstract class Link extends Inline {
   Link(this.label, this.target);
 }
 
-
 class InlineLink extends Link {
   InlineLink(Inlines label, Target target) : super(label, target);
 
   String toString() => 'InlineLink $label ($target)';
 
-  bool operator== (obj) => obj is InlineLink &&
-    target == obj.target &&
-    _iterableEquality.equals(label, obj.label);
+  bool operator ==(obj) => obj is InlineLink &&
+      target == obj.target &&
+      _iterableEquality.equals(label, obj.label);
 
   int get hashCode => hash2(target, label);
 }
 
-
 class ReferenceLink extends Link {
   String reference;
 
-  ReferenceLink(this.reference, Inlines label, Target target) : super(label, target);
+  ReferenceLink(this.reference, Inlines label, Target target)
+      : super(label, target);
 
   String toString() => 'ReferenceLink[$reference] $label ($target)';
 
-  bool operator== (obj) => obj is ReferenceLink &&
-    reference == obj.reference &&
-    target == obj.target &&
-    _iterableEquality.equals(label, obj.label);
+  bool operator ==(obj) => obj is ReferenceLink &&
+      reference == obj.reference &&
+      target == obj.target &&
+      _iterableEquality.equals(label, obj.label);
 
   int get hashCode => hash3(reference, target, label);
 }
 
-
 class Autolink extends Link {
-  Autolink(String link) : super(new Inlines.from([new Str(link)]), new Target(link, null));
-  Autolink.email(String email) : super(new Inlines.from([new Str(email)]), new Target("mailto:" + email, null));
+  Autolink(String link)
+      : super(new Inlines.from([new Str(link)]), new Target(link, null));
+  Autolink.email(String email)
+      : super(new Inlines.from([new Str(email)]),
+            new Target("mailto:" + email, null));
 
   String toString() => 'Autolink (${target.link})';
 
-  bool operator== (obj) => obj is Autolink &&
-    target == obj.target;
+  bool operator ==(obj) => obj is Autolink && target == obj.target;
 
   int get hashCode => target.hashCode;
 }
-
 
 abstract class Image extends Inline {
   Inlines label;
@@ -728,35 +676,33 @@ abstract class Image extends Inline {
   Image(this.label, this.target);
 }
 
-
 class InlineImage extends Image {
   InlineImage(Inlines label, Target target) : super(label, target);
 
   String toString() => 'InlineImage $label ($target)';
 
-  bool operator== (obj) => obj is InlineImage &&
-    target == obj.target &&
-    _iterableEquality.equals(label, obj.label);
+  bool operator ==(obj) => obj is InlineImage &&
+      target == obj.target &&
+      _iterableEquality.equals(label, obj.label);
 
   int get hashCode => hash2(target, label);
 }
 
-
 class ReferenceImage extends Image {
   String reference;
 
-  ReferenceImage(this.reference, Inlines label, Target target) : super(label, target);
+  ReferenceImage(this.reference, Inlines label, Target target)
+      : super(label, target);
 
   String toString() => 'ReferenceImage[$reference] $label ($target)';
 
-  bool operator== (obj) => obj is ReferenceImage &&
-    reference == obj.reference &&
-    target == obj.target &&
-    _iterableEquality.equals(label, obj.label);
+  bool operator ==(obj) => obj is ReferenceImage &&
+      reference == obj.reference &&
+      target == obj.target &&
+      _iterableEquality.equals(label, obj.label);
 
   int get hashCode => hash3(reference, target, label);
 }
-
 
 abstract class RawInline extends Inline {
   String contents;
@@ -764,14 +710,12 @@ abstract class RawInline extends Inline {
   RawInline(this.contents);
 }
 
-
 class HtmlRawInline extends RawInline {
   HtmlRawInline(String contents) : super(contents);
 
   String toString() => "HtmlRawInline $contents";
 
-  bool operator== (obj) => obj is HtmlRawInline &&
-    contents == obj.contents;
+  bool operator ==(obj) => obj is HtmlRawInline && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }

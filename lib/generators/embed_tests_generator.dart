@@ -10,7 +10,6 @@ import 'package:source_gen/source_gen.dart';
 
 import 'embed_tests.dart';
 
-
 class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
   static const int stateWait = 0;
   static const int stateSource = 1;
@@ -37,7 +36,8 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
       if (line == ".") {
         state++;
         if (state == 3) {
-          result[source.map((line) => line + "\n").join()] = destination.map((line) => line + "\n").join();
+          result[source.map((line) => line + "\n").join()] =
+              destination.map((line) => line + "\n").join();
           state = stateWait;
           destination = [];
           source = [];
@@ -72,7 +72,8 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
 
     var content = readFile(filePath);
 
-    var result = 'final Map<String, String> _\$${element.displayName}Tests = {\n';
+    var result =
+        'final Map<String, String> _\$${element.displayName}Tests = {\n';
     content.forEach((k, v) {
       result += "r'''" + k + "''': r'''" + v + "''',\n";
     });

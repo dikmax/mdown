@@ -8,9 +8,7 @@ const int stateWait = 0;
 const int stateMarkdown = 1;
 const int stateHtml = 2;
 
-enum TestType {
-  html, markdown
-}
+enum TestType { html, markdown }
 
 typedef bool FilterFunc(TestType type, int num);
 bool emptyFilter(type, num) => true;
@@ -34,16 +32,17 @@ class ExampleDescription extends t.Matcher {
 
   bool matches(item, Map matchState) => inner.matches(item, matchState);
 
-  t.Description describe(t.Description description) => inner.describe(description);
+  t.Description describe(t.Description description) =>
+      inner.describe(description);
 
-  t.Description describeMismatch(item, t.Description mismatchDescription,
-                                 Map matchState, bool verbose) {
-    t.Description d = inner.describeMismatch(item, mismatchDescription, matchState, verbose);
+  t.Description describeMismatch(
+      item, t.Description mismatchDescription, Map matchState, bool verbose) {
+    t.Description d =
+        inner.describeMismatch(item, mismatchDescription, matchState, verbose);
     d.add("\n  Source: \n" + example);
     return d;
   }
 }
-
 
 class Example2Description extends t.Matcher {
   t.Matcher inner;
@@ -54,17 +53,18 @@ class Example2Description extends t.Matcher {
 
   bool matches(item, Map matchState) => inner.matches(item, matchState);
 
-  t.Description describe(t.Description description) => inner.describe(description);
+  t.Description describe(t.Description description) =>
+      inner.describe(description);
 
-  t.Description describeMismatch(item, t.Description mismatchDescription,
-                                 Map matchState, bool verbose) {
-    t.Description d = inner.describeMismatch(item, mismatchDescription, matchState, verbose);
+  t.Description describeMismatch(
+      item, t.Description mismatchDescription, Map matchState, bool verbose) {
+    t.Description d =
+        inner.describeMismatch(item, mismatchDescription, matchState, verbose);
     d.add("\n  Source: \n" + example);
     d.add("\n  Source 2: \n" + example2);
     return d;
   }
 }
-
 
 RegExp leadingSpacesRegExp = new RegExp(r'^ *');
 RegExp trailingSpacesRegExp = new RegExp(r' *$');
@@ -102,40 +102,47 @@ String tidy(String html) {
   return result.join('\n').trim();
 }
 
-TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) => (int num, String mdOrig, String html) {
-  CommonMarkParser parser = new CommonMarkParser(options);
-  HtmlWriter writer = new HtmlWriter(options);
-  MarkdownWriter mdWriter = new MarkdownWriter(options);
+TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) =>
+    (int num, String mdOrig, String html) {
+      CommonMarkParser parser = new CommonMarkParser(options);
+      HtmlWriter writer = new HtmlWriter(options);
+      MarkdownWriter mdWriter = new MarkdownWriter(options);
 
-  String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
-  html = html.replaceAll("→", "\t").replaceAll("␣", " ");
+      String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
+      html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-  if (filter(TestType.html, num)) {
-    t.test('html $num', () {
-      Document doc = parser.parse(md);
-      t.expect(tidy(writer.write(doc)), new ExampleDescription(t.equals(tidy(html)), mdOrig));
-    });
-  }
-  if (filter(TestType.markdown, num)) {
-    t.test('markdown $num', () {
-      var generatedMarkdown = mdWriter.write(parser.parse(md));
-      Document doc = parser.parse(generatedMarkdown);
-      t.expect(tidy(writer.write(doc)), new Example2Description(t.equals(tidy(html)), mdOrig, generatedMarkdown));
-    });
-  }
-};
+      if (filter(TestType.html, num)) {
+        t.test('html $num', () {
+          Document doc = parser.parse(md);
+          t.expect(tidy(writer.write(doc)),
+              new ExampleDescription(t.equals(tidy(html)), mdOrig));
+        });
+      }
+      if (filter(TestType.markdown, num)) {
+        t.test('markdown $num', () {
+          var generatedMarkdown = mdWriter.write(parser.parse(md));
+          Document doc = parser.parse(generatedMarkdown);
+          t.expect(
+              tidy(writer.write(doc)),
+              new Example2Description(
+                  t.equals(tidy(html)), mdOrig, generatedMarkdown));
+        });
+      }
+    };
 
-TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) => (int num, String md, String destMd) {
-  CommonMarkParser parser = new CommonMarkParser(options);
-  MarkdownWriter writer = new MarkdownWriter(options);
+TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) =>
+    (int num, String md, String destMd) {
+      CommonMarkParser parser = new CommonMarkParser(options);
+      MarkdownWriter writer = new MarkdownWriter(options);
 
-  if (filter(TestType.markdown, num)) {
-    t.test(num.toString(), () {
-      var generatedMarkdown = writer.write(parser.parse(md));
-      t.expect(generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
-    });
-  }
-};
+      if (filter(TestType.markdown, num)) {
+        t.test(num.toString(), () {
+          var generatedMarkdown = writer.write(parser.parse(md));
+          t.expect(
+              generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
+        });
+      }
+    };
 
 /*
 void preprocessTest() {
