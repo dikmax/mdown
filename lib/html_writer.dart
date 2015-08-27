@@ -4,17 +4,14 @@ import 'definitions.dart';
 import 'options.dart';
 
 class _HtmlBuilder extends StringBuffer {
-
   Options _options;
 
   _HtmlBuilder(this._options) : super();
-
 
   void writeDocument(Document document) {
     writeBlocks(document.contents);
     write("\n");
   }
-
 
   // Blocks
 
@@ -66,13 +63,11 @@ class _HtmlBuilder extends StringBuffer {
     }
   }
 
-
   void writeBlockquote(Blockquote blockquote) {
     write("<blockquote>\n");
     writeBlocks(blockquote.contents);
     write("\n</blockquote>");
   }
-
 
   void writeHeader(Header header) {
     write("<h");
@@ -83,7 +78,6 @@ class _HtmlBuilder extends StringBuffer {
     write(header.level);
     write(">");
   }
-
 
   void writeCodeBlock(CodeBlock codeBlock) {
     write("<pre><code");
@@ -119,7 +113,6 @@ class _HtmlBuilder extends StringBuffer {
     write("</ul>");
   }
 
-
   void writeOrderedList(OrderedList list) {
     write("<ol");
     if (list.startIndex != 1) {
@@ -138,7 +131,6 @@ class _HtmlBuilder extends StringBuffer {
     write("</p>");
   }
 
-
   // Attributes
 
   void writeAttributes(Attr attr) {
@@ -155,7 +147,6 @@ class _HtmlBuilder extends StringBuffer {
       throw new UnimplementedError(attr.toString());
     }
   }
-
 
   // Inlines
 
@@ -213,7 +204,6 @@ class _HtmlBuilder extends StringBuffer {
     }
   }
 
-
   void writeCodeInline(Code code, {bool stripped: false}) {
     if (!stripped) {
       write('<code>');
@@ -223,7 +213,6 @@ class _HtmlBuilder extends StringBuffer {
       write('</code>');
     }
   }
-
 
   void writeEmph(Emph emph, {bool stripped: false}) {
     if (!stripped) {
@@ -235,7 +224,6 @@ class _HtmlBuilder extends StringBuffer {
     }
   }
 
-
   void writeStrong(Strong strong, {bool stripped: false}) {
     if (!stripped) {
       write('<strong>');
@@ -245,7 +233,6 @@ class _HtmlBuilder extends StringBuffer {
       write('</strong>');
     }
   }
-
 
   void writeStrikeout(Strikeout strikeout, {bool stripped: false}) {
     if (!stripped) {
@@ -257,7 +244,6 @@ class _HtmlBuilder extends StringBuffer {
     }
   }
 
-
   void writeSubscript(Subscript subscript, {bool stripped: false}) {
     if (!stripped) {
       write('<sub>');
@@ -268,7 +254,6 @@ class _HtmlBuilder extends StringBuffer {
     }
   }
 
-
   void writeSuperscript(Superscript superscript, {bool stripped: false}) {
     if (!stripped) {
       write('<sup>');
@@ -278,7 +263,6 @@ class _HtmlBuilder extends StringBuffer {
       write('</sup>');
     }
   }
-
 
   void writeSmartQuote(SmartQuote quote, {bool stripped: false}) {
     // TODO different quotation styles
@@ -297,7 +281,6 @@ class _HtmlBuilder extends StringBuffer {
     }
   }
 
-
   void writeLink(Link link, {bool stripped: false}) {
     if (!stripped) {
       write('<a href="');
@@ -315,7 +298,6 @@ class _HtmlBuilder extends StringBuffer {
       write('</a>');
     }
   }
-
 
   void writeImage(Image image, {bool stripped: false}) {
     if (!stripped) {
@@ -337,33 +319,36 @@ class _HtmlBuilder extends StringBuffer {
     }
   }
 
-
   // Escaping
 
   RegExp _escapedChars = new RegExp(r'[<>&"]');
   Map<String, String> _escape = <String, String>{
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "&": "&amp;"
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "&": "&amp;"
   };
 
-  String htmlEscape(String str) => str.replaceAllMapped(_escapedChars, (Match match) => _escape[match.group(0)]);
-
+  String htmlEscape(String str) => str.replaceAllMapped(
+      _escapedChars, (Match match) => _escape[match.group(0)]);
 
   RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
-  RegExp _htmlEntity = new RegExp(r'&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});', caseSensitive: false);
+  RegExp _htmlEntity = new RegExp(
+      r'&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});',
+      caseSensitive: false);
 
   String urlEncode(String url) {
-    url = url.splitMapJoin(_urlEncode, onMatch: (Match m) => m.group(0), onNonMatch: (String s) => Uri.encodeFull(s));
-    url = url.splitMapJoin(_htmlEntity, onMatch: (Match m) => m.group(0), onNonMatch: (String s) => htmlEscape(s));
+    url = url.splitMapJoin(_urlEncode,
+        onMatch: (Match m) => m.group(0),
+        onNonMatch: (String s) => Uri.encodeFull(s));
+    url = url.splitMapJoin(_htmlEntity,
+        onMatch: (Match m) => m.group(0),
+        onNonMatch: (String s) => htmlEscape(s));
     return url;
   }
 }
 
-
 class HtmlWriter {
-
   Options _options;
 
   HtmlWriter(this._options);

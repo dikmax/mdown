@@ -12,7 +12,6 @@ Target linkResolver(String normalizedReference, String reference) {
   }
 }
 
-
 String md1Test = r'''
 This is a [reference].
 
@@ -44,7 +43,8 @@ This is a [link].
 ''';
 
 void referenceResolverTests() {
-  CommonMarkParser parser = new CommonMarkParser(new Options(linkResolver: linkResolver));
+  CommonMarkParser parser =
+      new CommonMarkParser(new Options(linkResolver: linkResolver));
   CommonMarkParser defaultParser = CommonMarkParser.defaults;
 
   t.group("Custom reference resolver test", () {

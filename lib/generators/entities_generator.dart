@@ -24,9 +24,11 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
       Element element, Entities annotation) async {
     var r = new RegExp(r"^&(.*);$");
     HttpClient client = new HttpClient();
-    HttpClientRequest request = await client.getUrl(Uri.parse('https://html.spec.whatwg.org/multipage/entities.json'));
+    HttpClientRequest request = await client.getUrl(
+        Uri.parse('https://html.spec.whatwg.org/multipage/entities.json'));
     HttpClientResponse response = await request.close();
-    var json = await response.transform(UTF8.decoder).transform(JSON.decoder).first;
+    var json =
+        await response.transform(UTF8.decoder).transform(JSON.decoder).first;
     var result = 'final Map<String, String> _\$${element.displayName} = {\n';
     json.forEach((String k, v) {
       Match match = r.firstMatch(k);
@@ -43,5 +45,4 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
 
     return result;
   }
-
 }

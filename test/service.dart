@@ -7,12 +7,15 @@ import 'package:md_proc/md_proc.dart';
 void serviceTests() {
   t.group('README examples test', () {
     t.test('Basic usage', () {
-      t.expect(markdownToHtml('# Hello world!'), t.equals("<h1>Hello world!</h1>\n"));
+      t.expect(markdownToHtml('# Hello world!'),
+          t.equals("<h1>Hello world!</h1>\n"));
     });
 
     t.test('Parsing', () {
-      t.expect(CommonMarkParser.defaults.parse('Hello world!\n===').toString(),
-        t.equals('Document [SetextHeader 1 [Str "Hello", Space, Str "world", Str "!"]]'));
+      t.expect(
+          CommonMarkParser.defaults.parse('Hello world!\n===').toString(),
+          t.equals(
+              'Document [SetextHeader 1 [Str "Hello", Space, Str "world", Str "!"]]'));
     });
 
     t.test('Writing html', () {
@@ -81,14 +84,18 @@ void serviceTests() {
     t.group('Target', () {
       var target = new Target('https://www.dartlang.org/', 'Dart');
       t.test('toString', () {
-        t.expect(target.toString(), t.equals('Target "https://www.dartlang.org/" "Dart"'));
+        t.expect(target.toString(),
+            t.equals('Target "https://www.dartlang.org/" "Dart"'));
       });
       t.test('==', () {
-        t.expect(target, t.equals(new Target('https://www.dartlang.org/', 'Dart')));
+        t.expect(
+            target, t.equals(new Target('https://www.dartlang.org/', 'Dart')));
       });
       t.test('!=', () {
-        t.expect(target, t.isNot(t.equals(new Target('https://www.dartlang.org/', null))));
-        t.expect(target, t.isNot(t.equals(new Target('http://www.dartlang.org/', 'Dart'))));
+        t.expect(target,
+            t.isNot(t.equals(new Target('https://www.dartlang.org/', null))));
+        t.expect(target,
+            t.isNot(t.equals(new Target('http://www.dartlang.org/', 'Dart'))));
         t.expect(target, t.isNot(t.equals(new EmptyAttr())));
       });
     });
@@ -113,20 +120,34 @@ void serviceTests() {
         t.expect(header.toString(), t.equals('AtxHeader 2 [Str "Header"]'));
       });
       t.test('Special constructors', () {
-        t.expect(new AtxHeader.h1(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(1, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h2(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h3(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(3, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h4(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(4, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h5(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(5, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h6(new Inlines.from([new Str('Header')])), t.equals(new AtxHeader(6, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h1(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeader(1, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h2(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h3(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeader(3, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h4(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeader(4, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h5(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeader(5, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeader.h6(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeader(6, new Inlines.from([new Str('Header')]))));
       });
       t.test('==', () {
-        t.expect(header, t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
+        t.expect(header,
+            t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
       });
       t.test('!=', () {
-        t.expect(header, t.isNot(t.equals(new AtxHeader(3, new Inlines.from([new Str('Header')])))));
-        t.expect(header, t.isNot(t.equals(new AtxHeader(2, new Inlines.from([])))));
-        t.expect(header, t.isNot(t.equals(new SetextHeader(2, new Inlines.from([new Str('Header')])))));
+        t.expect(
+            header,
+            t.isNot(t.equals(
+                new AtxHeader(3, new Inlines.from([new Str('Header')])))));
+        t.expect(
+            header, t.isNot(t.equals(new AtxHeader(2, new Inlines.from([])))));
+        t.expect(
+            header,
+            t.isNot(t.equals(
+                new SetextHeader(2, new Inlines.from([new Str('Header')])))));
       });
     });
 
@@ -136,16 +157,32 @@ void serviceTests() {
         t.expect(header.toString(), t.equals('SetextHeader 2 [Str "Header"]'));
       });
       t.test('Special constructors', () {
-        t.expect(new SetextHeader.h1(new Inlines.from([new Str('Header')])), t.equals(new SetextHeader(1, new Inlines.from([new Str('Header')]))));
-        t.expect(new SetextHeader.h2(new Inlines.from([new Str('Header')])), t.equals(new SetextHeader(2, new Inlines.from([new Str('Header')]))));
+        t.expect(
+            new SetextHeader.h1(new Inlines.from([new Str('Header')])),
+            t.equals(
+                new SetextHeader(1, new Inlines.from([new Str('Header')]))));
+        t.expect(
+            new SetextHeader.h2(new Inlines.from([new Str('Header')])),
+            t.equals(
+                new SetextHeader(2, new Inlines.from([new Str('Header')]))));
       });
       t.test('==', () {
-        t.expect(header, t.equals(new SetextHeader(2, new Inlines.from([new Str('Header')]))));
+        t.expect(
+            header,
+            t.equals(
+                new SetextHeader(2, new Inlines.from([new Str('Header')]))));
       });
       t.test('!=', () {
-        t.expect(header, t.isNot(t.equals(new SetextHeader(3, new Inlines.from([new Str('Header')])))));
-        t.expect(header, t.isNot(t.equals(new SetextHeader(2, new Inlines.from([])))));
-        t.expect(header, t.isNot(t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')])))));
+        t.expect(
+            header,
+            t.isNot(t.equals(
+                new SetextHeader(3, new Inlines.from([new Str('Header')])))));
+        t.expect(header,
+            t.isNot(t.equals(new SetextHeader(2, new Inlines.from([])))));
+        t.expect(
+            header,
+            t.isNot(t.equals(
+                new AtxHeader(2, new Inlines.from([new Str('Header')])))));
       });
     });
 
@@ -183,14 +220,25 @@ void serviceTests() {
         t.expect(code.toString(), t.equals('FencedCodeBlock EmptyAttr Code'));
       });
       t.test('==', () {
-        t.expect(code, t.equals(new FencedCodeBlock("Code",
-            fenceType: FenceType.backtick, fenceSize: 3, attributes: new EmptyAttr())));
+        t.expect(
+            code,
+            t.equals(new FencedCodeBlock("Code",
+                fenceType: FenceType.backtick,
+                fenceSize: 3,
+                attributes: new EmptyAttr())));
       });
       t.test('!=', () {
         t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code1"))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceType: FenceType.tilde))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceSize: 5))));
-        t.expect(code, t.isNot(t.equals(new FencedCodeBlock("Code", attributes: new InfoString('dart')))));
+        t.expect(
+            code,
+            t.isNot(t.equals(
+                new FencedCodeBlock("Code", fenceType: FenceType.tilde))));
+        t.expect(
+            code, t.isNot(t.equals(new FencedCodeBlock("Code", fenceSize: 5))));
+        t.expect(
+            code,
+            t.isNot(t.equals(new FencedCodeBlock("Code",
+                attributes: new InfoString('dart')))));
         t.expect(code, t.isNot(t.equals(new IndentedCodeBlock("Code"))));
       });
     });
@@ -212,7 +260,8 @@ void serviceTests() {
     t.group('Blockquote', () {
       var blockquote = new Blockquote([new HorizontalRule()]);
       t.test('toString', () {
-        t.expect(blockquote.toString(), t.equals('Blockquote [HorizontalRule]'));
+        t.expect(
+            blockquote.toString(), t.equals('Blockquote [HorizontalRule]'));
       });
       t.test('==', () {
         t.expect(blockquote, t.equals(new Blockquote([new HorizontalRule()])));
@@ -262,53 +311,100 @@ void serviceTests() {
     t.group('IndexSeparator', () {
       t.test('toString', () {
         t.expect(IndexSeparator.dot.toString(), t.equals('dot'));
-        t.expect(IndexSeparator.parenthesis.toString(), t.equals('parenthesis'));
+        t.expect(
+            IndexSeparator.parenthesis.toString(), t.equals('parenthesis'));
       });
       t.test('fromChar', () {
         t.expect(IndexSeparator.fromChar('.').toString(), t.equals('dot'));
-        t.expect(IndexSeparator.fromChar(')').toString(), t.equals('parenthesis'));
+        t.expect(
+            IndexSeparator.fromChar(')').toString(), t.equals('parenthesis'));
       });
       t.test('==', () {
         t.expect(IndexSeparator.dot, t.equals(IndexSeparator.dot));
-        t.expect(IndexSeparator.parenthesis, t.equals(IndexSeparator.parenthesis));
+        t.expect(
+            IndexSeparator.parenthesis, t.equals(IndexSeparator.parenthesis));
       });
       t.test('!=', () {
-        t.expect(IndexSeparator.parenthesis, t.isNot(t.equals(IndexSeparator.dot)));
+        t.expect(
+            IndexSeparator.parenthesis, t.isNot(t.equals(IndexSeparator.dot)));
       });
     });
 
     t.group('UnorderedList', () {
-      var list = new UnorderedList([new ListItem([new HorizontalRule()])]);
+      var list = new UnorderedList([
+        new ListItem([new HorizontalRule()])
+      ]);
       t.test('toString', () {
-        t.expect(list.toString(), t.equals('UnorderedList minus [ListItem [HorizontalRule]]'));
+        t.expect(list.toString(),
+            t.equals('UnorderedList minus [ListItem [HorizontalRule]]'));
       });
       t.test('==', () {
-        t.expect(list, t.equals(new UnorderedList([new ListItem([new HorizontalRule()])],
-            tight: false, bulletType: BulletType.minus)));
+        t.expect(
+            list,
+            t.equals(new UnorderedList([
+              new ListItem([new HorizontalRule()])
+            ], tight: false, bulletType: BulletType.minus)));
       });
       t.test('!=', () {
         t.expect(list, t.isNot(new UnorderedList([])));
-        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])], tight: true)));
-        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])], bulletType: BulletType.plus)));
-        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])])));
+        t.expect(
+            list,
+            t.isNot(new UnorderedList([
+              new ListItem([new HorizontalRule()])
+            ], tight: true)));
+        t.expect(
+            list,
+            t.isNot(new UnorderedList([
+              new ListItem([new HorizontalRule()])
+            ], bulletType: BulletType.plus)));
+        t.expect(
+            list,
+            t.isNot(new OrderedList([
+              new ListItem([new HorizontalRule()])
+            ])));
       });
     });
 
     t.group('OrderedList', () {
-      var list = new OrderedList([new ListItem([new HorizontalRule()])]);
+      var list = new OrderedList([
+        new ListItem([new HorizontalRule()])
+      ]);
       t.test('toString', () {
-        t.expect(list.toString(), t.equals('OrderedList start=1 dot [ListItem [HorizontalRule]]'));
+        t.expect(list.toString(),
+            t.equals('OrderedList start=1 dot [ListItem [HorizontalRule]]'));
       });
       t.test('==', () {
-        t.expect(list, t.equals(new OrderedList([new ListItem([new HorizontalRule()])],
-            tight: false, indexSeparator: IndexSeparator.dot, startIndex: 1)));
+        t.expect(
+            list,
+            t.equals(new OrderedList([
+              new ListItem([new HorizontalRule()])
+            ],
+                tight: false,
+                indexSeparator: IndexSeparator.dot,
+                startIndex: 1)));
       });
       t.test('!=', () {
         t.expect(list, t.isNot(new OrderedList([])));
-        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], tight: true)));
-        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], indexSeparator: IndexSeparator.parenthesis)));
-        t.expect(list, t.isNot(new OrderedList([new ListItem([new HorizontalRule()])], startIndex: 0)));
-        t.expect(list, t.isNot(new UnorderedList([new ListItem([new HorizontalRule()])])));
+        t.expect(
+            list,
+            t.isNot(new OrderedList([
+              new ListItem([new HorizontalRule()])
+            ], tight: true)));
+        t.expect(
+            list,
+            t.isNot(new OrderedList([
+              new ListItem([new HorizontalRule()])
+            ], indexSeparator: IndexSeparator.parenthesis)));
+        t.expect(
+            list,
+            t.isNot(new OrderedList([
+              new ListItem([new HorizontalRule()])
+            ], startIndex: 0)));
+        t.expect(
+            list,
+            t.isNot(new UnorderedList([
+              new ListItem([new HorizontalRule()])
+            ])));
       });
     });
 
@@ -318,7 +414,8 @@ void serviceTests() {
         t.expect(para.toString(), t.equals('Para [Str "Para."]'));
       });
       t.test('==', () {
-        t.expect(para, t.equals(new Para(new Inlines.from([new Str('Para.')]))));
+        t.expect(
+            para, t.equals(new Para(new Inlines.from([new Str('Para.')]))));
       });
       t.test('!=', () {
         t.expect(para, t.isNot(t.equals(new Para(new Inlines()))));
@@ -434,20 +531,37 @@ void serviceTests() {
     });
 
     t.group('SmartQuote', () {
-      var smartQuote = new SmartQuote(new Inlines.from([new Str('Quote')]), single: false);
+      var smartQuote =
+          new SmartQuote(new Inlines.from([new Str('Quote')]), single: false);
       t.test('toString', () {
         t.expect(smartQuote.toString(), t.equals('SmartQuote "[Str "Quote"]"'));
       });
       t.test('==', () {
-        t.expect(smartQuote, t.equals(new SmartQuote(new Inlines.from([new Str('Quote')]), single: false)));
+        t.expect(
+            smartQuote,
+            t.equals(new SmartQuote(new Inlines.from([new Str('Quote')]),
+                single: false)));
       });
       t.test('!=', () {
-        t.expect(smartQuote, t.isNot(t.equals(new SmartQuote(new Inlines(), single: false))));
-        t.expect(smartQuote, t.isNot(t.equals(new SmartQuote(new Inlines.from([new Str('Quote')]), single: true))));
         t.expect(smartQuote,
-            t.isNot(t.equals(new SmartQuote(new Inlines.from([new Str('Quote')]), single: false, open: false))));
-        t.expect(smartQuote,
-            t.isNot(t.equals(new SmartQuote(new Inlines.from([new Str('Quote')]), single: false, close: false))));
+            t.isNot(t.equals(new SmartQuote(new Inlines(), single: false))));
+        t.expect(
+            smartQuote,
+            t.isNot(t.equals(new SmartQuote(
+                new Inlines.from([new Str('Quote')]),
+                single: true))));
+        t.expect(
+            smartQuote,
+            t.isNot(t.equals(new SmartQuote(
+                new Inlines.from([new Str('Quote')]),
+                single: false,
+                open: false))));
+        t.expect(
+            smartQuote,
+            t.isNot(t.equals(new SmartQuote(
+                new Inlines.from([new Str('Quote')]),
+                single: false,
+                close: false))));
         t.expect(smartQuote, t.isNot(t.equals(null)));
       });
     });
@@ -487,10 +601,12 @@ void serviceTests() {
         t.expect(strong.toString(), t.equals('Strong [Str "Strong"]'));
       });
       t.test('==', () {
-        t.expect(strong, t.equals(new Strong(new Inlines.from([new Str('Strong')]))));
+        t.expect(strong,
+            t.equals(new Strong(new Inlines.from([new Str('Strong')]))));
       });
       t.test('!=', () {
-        t.expect(strong, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
+        t.expect(
+            strong, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
         t.expect(strong, t.isNot(t.equals(null)));
       });
     });
@@ -501,10 +617,12 @@ void serviceTests() {
         t.expect(strikeout.toString(), t.equals('Strikeout [Str "Strikeout"]'));
       });
       t.test('==', () {
-        t.expect(strikeout, t.equals(new Strikeout(new Inlines.from([new Str('Strikeout')]))));
+        t.expect(strikeout,
+            t.equals(new Strikeout(new Inlines.from([new Str('Strikeout')]))));
       });
       t.test('!=', () {
-        t.expect(strikeout, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
+        t.expect(
+            strikeout, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
         t.expect(strikeout, t.isNot(t.equals(null)));
       });
     });
@@ -515,56 +633,104 @@ void serviceTests() {
         t.expect(subscript.toString(), t.equals('Subscript [Str "Subscript"]'));
       });
       t.test('==', () {
-        t.expect(subscript, t.equals(new Subscript(new Inlines.from([new Str('Subscript')]))));
+        t.expect(subscript,
+            t.equals(new Subscript(new Inlines.from([new Str('Subscript')]))));
       });
       t.test('!=', () {
-        t.expect(subscript, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
+        t.expect(
+            subscript, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
         t.expect(subscript, t.isNot(t.equals(null)));
       });
     });
 
     t.group('Superscript', () {
-      var superscript = new Superscript(new Inlines.from([new Str('Superscript')]));
+      var superscript =
+          new Superscript(new Inlines.from([new Str('Superscript')]));
       t.test('toString', () {
-        t.expect(superscript.toString(), t.equals('Superscript [Str "Superscript"]'));
+        t.expect(superscript.toString(),
+            t.equals('Superscript [Str "Superscript"]'));
       });
       t.test('==', () {
-        t.expect(superscript, t.equals(new Superscript(new Inlines.from([new Str('Superscript')]))));
+        t.expect(
+            superscript,
+            t.equals(
+                new Superscript(new Inlines.from([new Str('Superscript')]))));
       });
       t.test('!=', () {
-        t.expect(superscript, t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
+        t.expect(superscript,
+            t.isNot(t.equals(new Inlines.from([new Str('Emph')]))));
         t.expect(superscript, t.isNot(t.equals(null)));
       });
     });
 
     t.group('InlineLink', () {
-      var link = new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null));
+      var link = new InlineLink(new Inlines.from([new Str('Dart')]),
+          new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
-        t.expect(link.toString(), t.equals('InlineLink [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+        t.expect(
+            link.toString(),
+            t.equals(
+                'InlineLink [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
       });
       t.test('==', () {
-        t.expect(link, t.equals(new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null))));
+        t.expect(
+            link,
+            t.equals(new InlineLink(new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null))));
       });
       t.test('!=', () {
-        t.expect(link, t.isNot(t.equals(new InlineLink(new Inlines(), new Target('https://www.dartlang.org/', null)))));
-        t.expect(link, t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', 'Dart')))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new InlineLink(new Inlines(),
+                new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', 'Dart')))));
         t.expect(link, t.isNot(t.equals(null)));
       });
     });
 
     t.group('ReferenceLink', () {
-      var link = new ReferenceLink('dart', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null));
+      var link = new ReferenceLink('dart', new Inlines.from([new Str('Dart')]),
+          new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
-        t.expect(link.toString(), t.equals('ReferenceLink[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+        t.expect(
+            link.toString(),
+            t.equals(
+                'ReferenceLink[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
       });
       t.test('==', () {
-        t.expect(link, t.equals(new ReferenceLink('dart', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null))));
+        t.expect(
+            link,
+            t.equals(new ReferenceLink(
+                'dart',
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null))));
       });
       t.test('!=', () {
-        t.expect(link, t.isNot(t.equals(new ReferenceLink('html', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null)))));
-        t.expect(link, t.isNot(t.equals(new ReferenceLink('dart', new Inlines.from([new Str('HTML')]), new Target('https://www.dartlang.org/', null)))));
-        t.expect(link, t.isNot(t.equals(new ReferenceLink('dart', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', 'Dart')))));
-        t.expect(link, t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new ReferenceLink(
+                'html',
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new ReferenceLink(
+                'dart',
+                new Inlines.from([new Str('HTML')]),
+                new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new ReferenceLink(
+                'dart',
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', 'Dart')))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null)))));
         t.expect(link, t.isNot(t.equals(null)));
       });
     });
@@ -572,14 +738,19 @@ void serviceTests() {
     t.group('Autolink', () {
       var link = new Autolink('https://www.dartlang.org/');
       t.test('toString', () {
-        t.expect(link.toString(), t.equals('Autolink (https://www.dartlang.org/)'));
+        t.expect(
+            link.toString(), t.equals('Autolink (https://www.dartlang.org/)'));
       });
       t.test('==', () {
         t.expect(link, t.equals(new Autolink('https://www.dartlang.org/')));
       });
       t.test('!=', () {
-        t.expect(link, t.isNot(t.equals(new Autolink('http://www.dartlang.org/'))));
-        t.expect(link, t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            link, t.isNot(t.equals(new Autolink('http://www.dartlang.org/'))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null)))));
       });
     });
 
@@ -593,40 +764,87 @@ void serviceTests() {
         t.expect(link, new Autolink('mailto:test@test.com'));
       });
       t.test('!=', () {
-        t.expect(link, t.isNot(t.equals(new Autolink('http://www.dartlang.org/'))));
-        t.expect(link, t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            link, t.isNot(t.equals(new Autolink('http://www.dartlang.org/'))));
+        t.expect(
+            link,
+            t.isNot(t.equals(new InlineLink(new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null)))));
       });
     });
 
-
     t.group('InlineImage', () {
-      var image = new InlineImage(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null));
+      var image = new InlineImage(new Inlines.from([new Str('Dart')]),
+          new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
-        t.expect(image.toString(), t.equals('InlineImage [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+        t.expect(
+            image.toString(),
+            t.equals(
+                'InlineImage [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
       });
       t.test('==', () {
-        t.expect(image, t.equals(new InlineImage(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null))));
+        t.expect(
+            image,
+            t.equals(new InlineImage(new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null))));
       });
       t.test('!=', () {
-        t.expect(image, t.isNot(t.equals(new InlineImage(new Inlines(), new Target('https://www.dartlang.org/', null)))));
-        t.expect(image, t.isNot(t.equals(new InlineImage(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', 'Dart')))));
+        t.expect(
+            image,
+            t.isNot(t.equals(new InlineImage(new Inlines(),
+                new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            image,
+            t.isNot(t.equals(new InlineImage(
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', 'Dart')))));
         t.expect(image, t.isNot(t.equals(null)));
       });
     });
 
     t.group('ReferenceImage', () {
-      var image = new ReferenceImage('dart', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null));
+      var image = new ReferenceImage(
+          'dart',
+          new Inlines.from([new Str('Dart')]),
+          new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
-        t.expect(image.toString(), t.equals('ReferenceImage[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+        t.expect(
+            image.toString(),
+            t.equals(
+                'ReferenceImage[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
       });
       t.test('==', () {
-        t.expect(image, t.equals(new ReferenceImage('dart', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null))));
+        t.expect(
+            image,
+            t.equals(new ReferenceImage(
+                'dart',
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null))));
       });
       t.test('!=', () {
-        t.expect(image, t.isNot(t.equals(new ReferenceImage('html', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null)))));
-        t.expect(image, t.isNot(t.equals(new ReferenceImage('dart', new Inlines.from([new Str('HTML')]), new Target('https://www.dartlang.org/', null)))));
-        t.expect(image, t.isNot(t.equals(new ReferenceImage('dart', new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', 'Dart')))));
-        t.expect(image, t.isNot(t.equals(new InlineImage(new Inlines.from([new Str('Dart')]), new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            image,
+            t.isNot(t.equals(new ReferenceImage(
+                'html',
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            image,
+            t.isNot(t.equals(new ReferenceImage(
+                'dart',
+                new Inlines.from([new Str('HTML')]),
+                new Target('https://www.dartlang.org/', null)))));
+        t.expect(
+            image,
+            t.isNot(t.equals(new ReferenceImage(
+                'dart',
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', 'Dart')))));
+        t.expect(
+            image,
+            t.isNot(t.equals(new InlineImage(
+                new Inlines.from([new Str('Dart')]),
+                new Target('https://www.dartlang.org/', null)))));
         t.expect(image, t.isNot(t.equals(null)));
       });
     });

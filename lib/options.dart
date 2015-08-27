@@ -11,11 +11,11 @@ import 'definitions.dart';
 typedef Target LinkResolver(String normalizedReference, String reference);
 
 /// Default resolver doesn't return any link, so parser parses only explicitly written references.
-Target defaultLinkResolver(String normalizedReference, String reference) => null;
+Target defaultLinkResolver(String normalizedReference, String reference) =>
+    null;
 
 /// Parser or writer options. Mostly contains list of enabled extensions.
 class Options {
-
   /// Enables smart punctuation extension. It's automatic replacement of `...`, `---`, `--`, `"` and `'` to `…`, `—`,
   /// `–` and curly versions of quote marks accordingly. It's only official extension to date.
   final bool smartPunctuation;
@@ -84,19 +84,16 @@ class Options {
   final LinkResolver linkResolver;
 
   /// Constant constructor with required options.
-  const Options({
-          this.smartPunctuation: false,
-          this.strikeout: false,
-          this.subscript: false,
-          this.superscript: false,
-          this.linkResolver: defaultLinkResolver
-          });
+  const Options(
+      {this.smartPunctuation: false,
+      this.strikeout: false,
+      this.subscript: false,
+      this.superscript: false,
+      this.linkResolver: defaultLinkResolver});
 
   /// Predefined version of Options. Alongside with strict also supports smart puctuation, which is declared separately
   /// in [CommonMark](http://commonmark.org).
-  static const Options commonmark = const Options(
-      smartPunctuation: true
-  );
+  static const Options commonmark = const Options(smartPunctuation: true);
 
   /// Predefined version of Options. Enables lot of useful extensions.
   static const Options defaults = const Options(
