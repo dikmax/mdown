@@ -45,5 +45,5 @@ main() async {
   String data = await response.transform(UTF8.decoder).join();
   print("File length: ${data.length}");
   MdProcBenchmark.main(data);
-  MarkdownBenchmark.main(data);
+  //MarkdownBenchmark.main(data);
 }
