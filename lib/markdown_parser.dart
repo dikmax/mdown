@@ -1323,12 +1323,13 @@ class CommonMarkParser {
       r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
       r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
 
+  static final Parser _autolinkParser = char('<') >
+      pred((String char) =>
+              char.codeUnitAt(0) > 0x20 && char != "<" && char != ">")
+          .manyUntil(char('>'));
   static final Parser<List<Inline>> autolink =
       new Parser<List<Inline>>((String s, Position pos) {
-    ParseResult res = (char('<') >
-        pred((String char) =>
-                char.codeUnitAt(0) > 0x20 && char != "<" && char != ">")
-            .manyUntil(char('>'))).run(s, pos);
+    ParseResult res = _autolinkParser.run(s, pos);
     if (!res.isSuccess) {
       return res;
     }
@@ -1462,17 +1463,32 @@ class CommonMarkParser {
     return _inlineCache;
   }
 
-  Parser<List<Inline>> get spaceEscapedInline =>
-      (string(r'\ ') ^ (_) => [new _EscapedSpace()]) | inline;
+  Parser<List<Inline>> _spaceEscapedInlineCache;
+  Parser<List<Inline>> get spaceEscapedInline {
+    if (_spaceEscapedInlineCache == null) {
+      _spaceEscapedInlineCache =
+          (string(r'\ ') ^ (_) => [new _EscapedSpace()]) | inline;
+    }
+    return _spaceEscapedInlineCache;
+  }
 
-  Parser<Inlines> get inlines =>
-      inline.manyUntil(eof) ^ (res) => processParsedInlines(res);
+  Parser<Inlines> _inlinesCache;
+  Parser<Inlines> get inlines {
+    if (_inlinesCache == null) {
+      _inlinesCache =
+          inline.manyUntil(eof) ^ (res) => processParsedInlines(res);
+    }
+    return _inlinesCache;
+  }
 
   //
   // Blocks
   //
 
-  Parser<List<Block>> get block => choice([
+  Parser<List<Block>> _blockCached;
+  Parser<List<Block>> get block {
+    if (_blockCached == null) {
+      _blockCached = choice([
         blanklines ^ (_) => [],
         hrule,
         list,
@@ -1485,8 +1501,14 @@ class CommonMarkParser {
         blockquote,
         para
       ]);
+    }
+    return _blockCached;
+  }
 
-  Parser<List<Block>> get lazyLineBlock => choice([
+  Parser<List<Block>> _lazyLineBlockCache;
+  Parser<List<Block>> get lazyLineBlock {
+    if (_lazyLineBlockCache == null) {
+      _lazyLineBlockCache = choice([
         blanklines ^ (_) => [],
         hrule,
         list,
@@ -1498,8 +1520,14 @@ class CommonMarkParser {
         blockquote,
         para
       ]);
+    }
+    return _lazyLineBlockCache;
+  }
 
-  Parser<List<Block>> get listTightBlock => choice([
+  Parser<List<Block>> _listTightBlockCache;
+  Parser<List<Block>> get listTightBlock {
+    if (_listTightBlockCache == null) {
+      _listTightBlockCache = choice([
         hrule,
         codeBlockIndented,
         codeBlockFenced,
@@ -1510,6 +1538,9 @@ class CommonMarkParser {
         blockquote,
         para
       ]);
+    }
+    return _listTightBlockCache;
+  }
 
   //
   // Horizontal rule
@@ -1822,45 +1853,44 @@ class CommonMarkParser {
   // Link reference
   //
 
-  Parser get linkReference => new Parser((String s, Position pos) {
-        var labelRes =
-            ((skipNonindentChars > linkLabel) < char(':')).run(s, pos);
-        if (!labelRes.isSuccess) {
-          return labelRes;
-        }
-        var destinationRes = ((blankline.maybe > skipSpaces) >
-            linkBlockDestination).run(s, labelRes.position);
-        if (!destinationRes.isSuccess) {
-          return destinationRes;
-        }
-        ParseResult<Option> blanklineRes =
-            blankline.maybe.run(s, destinationRes.position);
-        assert(blanklineRes.isSuccess);
-        var titleRes = ((skipSpaces > linkTitle) < blankline)
-            .run(s, blanklineRes.position);
+  static final Parser linkReference = new Parser((String s, Position pos) {
+    var labelRes = ((skipNonindentChars > linkLabel) < char(':')).run(s, pos);
+    if (!labelRes.isSuccess) {
+      return labelRes;
+    }
+    var destinationRes = ((blankline.maybe > skipSpaces) > linkBlockDestination)
+        .run(s, labelRes.position);
+    if (!destinationRes.isSuccess) {
+      return destinationRes;
+    }
+    ParseResult<Option> blanklineRes =
+        blankline.maybe.run(s, destinationRes.position);
+    assert(blanklineRes.isSuccess);
+    var titleRes =
+        ((skipSpaces > linkTitle) < blankline).run(s, blanklineRes.position);
 
-        var value;
-        ParseResult res;
-        if (!titleRes.isSuccess) {
-          if (blanklineRes.value.isDefined) {
-            value = new _LinkReference(
-                labelRes.value, new Target(destinationRes.value, null));
-            res = blanklineRes;
-          } else {
-            return fail.run(s, pos);
-          }
-        } else {
-          value = new _LinkReference(
-              labelRes.value, new Target(destinationRes.value, titleRes.value));
-          res = titleRes;
-        }
+    var value;
+    ParseResult res;
+    if (!titleRes.isSuccess) {
+      if (blanklineRes.value.isDefined) {
+        value = new _LinkReference(
+            labelRes.value, new Target(destinationRes.value, null));
+        res = blanklineRes;
+      } else {
+        return fail.run(s, pos);
+      }
+    } else {
+      value = new _LinkReference(
+          labelRes.value, new Target(destinationRes.value, titleRes.value));
+      res = titleRes;
+    }
 
-        // Reference couldn't be empty
-        if (value.reference.contains(new RegExp(r"^\s*$"))) {
-          return fail.run(s, pos);
-        }
-        return res.copy(value: value);
-      });
+    // Reference couldn't be empty
+    if (value.reference.contains(new RegExp(r"^\s*$"))) {
+      return fail.run(s, pos);
+    }
+    return res.copy(value: value);
+  });
 
   //
   // Paragraph
@@ -1895,7 +1925,7 @@ class CommonMarkParser {
   /// Trying to add current line as lazy to nested list blocks.
   ///
   /// Returns `true` when line was accepted.
-  bool _acceptLazy(Iterable<Block> blocks, String s) {
+  static bool _acceptLazy(Iterable<Block> blocks, String s) {
     if (blocks.length > 0) {
       if (blocks.last is Para) {
         Para last = blocks.last;
@@ -1923,7 +1953,10 @@ class CommonMarkParser {
   static final Parser blockquoteLine =
       (blockquoteStrictLine ^ (l) => [true, l]) | (anyLine ^ (l) => [false, l]);
 
-  Parser get blockquote => new Parser((String s, Position pos) {
+  Parser _blockquoteCache;
+  Parser get blockquote {
+    if (_blockquoteCache == null) {
+      _blockquoteCache = new Parser((String s, Position pos) {
         ParseResult firstLineRes = blockquoteStrictLine.run(s, pos);
         if (!firstLineRes.isSuccess) {
           return firstLineRes;
@@ -1991,6 +2024,10 @@ class CommonMarkParser {
         return firstLineRes.copy(
             position: position, value: [new Blockquote(blocks)]);
       });
+    }
+
+    return _blockquoteCache;
+  }
 
   //
   // Lists
@@ -2012,7 +2049,10 @@ class CommonMarkParser {
           countBetween(1, 4, char(' ')).notFollowedBy(char(' ')) |
           oneOf(' \t'))).list;
 
-  Parser get list => new Parser((String s, Position pos) {
+  Parser _listCache;
+  Parser get list {
+    if (_listCache == null) {
+      _listCache = new Parser((String s, Position pos) {
         // TODO quick test
         List<_ListStackItem> stack = [];
 
@@ -2414,6 +2454,10 @@ class CommonMarkParser {
           return fail.run(s, pos);
         }
       });
+    }
+
+    return _listCache;
+  }
 
   //
   // Document
