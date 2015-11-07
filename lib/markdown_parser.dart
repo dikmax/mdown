@@ -81,27 +81,28 @@ class CommonMarkParser {
 
   Map<String, Target> _references;
 
-  String _inlineDelimiters;
-  String _strSpecialChars;
-  String _intrawordDelimiters;
+  Set<String> _inlineDelimiters;
+  Set<String> _strSpecialChars;
+  Set<String> _intrawordDelimiters;
 
   CommonMarkParser(this._options, [this._references]) {
-    _inlineDelimiters = "_*";
-    _strSpecialChars = " *_`![]&<\\";
-    _intrawordDelimiters = "*";
+    _inlineDelimiters = new Set<String>.from(["_", "*"]);
+    _strSpecialChars = new Set<String>.from(
+        [" ", "*", "_", "`", "!", "[", "]", "&", "<", "\\"]);
+    _intrawordDelimiters = new Set<String>.from(["*"]);
     if (_options.smartPunctuation) {
-      _inlineDelimiters += "'\"";
-      _strSpecialChars += "'\".-";
+      _inlineDelimiters.addAll(["'", "\""]);
+      _strSpecialChars.addAll(["'", "\"", ".", "-"]);
     }
     if (_options.strikeout || _options.subscript) {
-      _inlineDelimiters += "~";
-      _strSpecialChars += "~";
-      _intrawordDelimiters += "~";
+      _inlineDelimiters.add("~");
+      _strSpecialChars.add("~");
+      _intrawordDelimiters.add("~");
     }
     if (_options.superscript) {
-      _inlineDelimiters += '^';
-      _strSpecialChars += '^';
-      _intrawordDelimiters += '^';
+      _inlineDelimiters.add('^');
+      _strSpecialChars.add('^');
+      _intrawordDelimiters.add('^');
     }
   }
 
@@ -463,7 +464,7 @@ class CommonMarkParser {
   // Links aux parsers
   //
 
-  // TODO static ?
+  // Can't be static because of str
   Parser get _linkTextChoice => choice([
         whitespace,
         htmlEntity,
@@ -492,7 +493,7 @@ class CommonMarkParser {
           (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
 
   // TODO static ?
-  Parser get linkLabel => (char('[') >
+  static final Parser linkLabel = (char('[') >
           choice([
             whitespace,
             htmlEntity,
@@ -504,13 +505,13 @@ class CommonMarkParser {
           ]).manyUntil(char(']')).record) ^
       (String label) => label.substring(0, label.length - 1);
 
-  Parser get linkBalancedParenthesis => ((char("(") >
+  static final Parser linkBalancedParenthesis = ((char("(") >
               (noneOf('&\\\n ()') | escapedChar1 | htmlEntity1 | oneOf('&\\'))
                   .many1) <
           char(')')) ^
       (i) => "(${i.join()})";
 
-  Parser get linkInlineDestination =>
+  static final Parser linkInlineDestination =
       (((char("<") > noneOf("<>\n").many) < char(">")) |
               (noneOf("&\\\n ()") |
                   escapedChar1 |
@@ -519,7 +520,7 @@ class CommonMarkParser {
                   oneOf('&\\')).many) ^
           (i) => i.join();
 
-  Parser get linkBlockDestination =>
+  static final Parser linkBlockDestination =
       (((char("<") > noneOf("<>\n").many1) < char(">")) |
               (noneOf("&\\\n ()") |
                   escapedChar1 |
@@ -528,8 +529,8 @@ class CommonMarkParser {
                   oneOf('&\\')).many1) ^
           (i) => i.join();
 
-  Parser get oneNewLine => newline.notFollowedBy(blankline);
-  Parser get linkTitle => (((char("'") >
+  static final Parser oneNewLine = newline.notFollowedBy(blankline);
+  static final Parser linkTitle = (((char("'") >
                   (noneOf("'&\\\n") |
                       oneNewLine |
                       escapedChar1 |
@@ -678,8 +679,13 @@ class CommonMarkParser {
   static final RegExp _isPunctuation = new RegExp(
       "^[\u{2000}-\u{206F}\u{2E00}-\u{2E7F}\\\\'!\"#\\\$%&\\(\\)\\*\\+,\\-\\.\\/:;<=>\\?@\\[\\]\\^_`\\{\\|\\}~]");
 
-  Parser get scanDelims => new Parser((String s, Position pos) {
-        ParseResult testRes = oneOf(_inlineDelimiters).lookAhead.run(s, pos);
+  // Can't be static
+  Parser _scanDelimsCache;
+  Parser get scanDelims {
+    if (_scanDelimsCache == null) {
+      Parser testParser = oneOf(_inlineDelimiters.join()).lookAhead;
+      _scanDelimsCache = new Parser((String s, Position pos) {
+        ParseResult testRes = testParser.run(s, pos);
         if (!testRes.isSuccess) {
           return testRes;
         }
@@ -729,8 +735,14 @@ class CommonMarkParser {
         }
         return res.copy(value: [numDelims, canOpen, canClose, c]);
       });
+    }
+    return _scanDelimsCache;
+  }
 
-  Parser get emphasis => new Parser((String s, Position pos) {
+  Parser _emphasisCache;
+  Parser get emphasis {
+    if (_emphasisCache == null) {
+      _emphasisCache = new Parser((String s, Position pos) {
         ParseResult res = scanDelims.run(s, pos);
         if (!res.isSuccess) {
           return res;
@@ -1020,14 +1032,19 @@ class CommonMarkParser {
 
         return success(result).run(s, position);
       });
+    }
+
+    return _emphasisCache;
+  }
 
   //
   // link and image
   //
 
-  Parser linkWhitespace = (blankline > (whitespaceChar < skipSpaces)) |
+  static final Parser linkWhitespace = (blankline >
+          (whitespaceChar < skipSpaces)) |
       (whitespaceChar < skipSpaces);
-  Parser get linkInline => (char('(') >
+  static final Parser linkInline = (char('(') >
           (((linkWhitespace.maybe > linkInlineDestination) +
                   ((linkWhitespace > linkTitle).maybe < linkWhitespace.maybe)) ^
               (a, Option b) => new Target(a, b.asNullable))) <
@@ -1049,88 +1066,93 @@ class CommonMarkParser {
         return false;
       });
 
-  Parser<List<Inline>> _linkOrImage(bool isLink) =>
-      new Parser<List<Inline>>((String s, Position pos) {
-        ParseResult testRes = char('[').run(s, pos);
-        if (!testRes.isSuccess) {
-          return testRes;
-        }
+  static final Parser _linkOrImageTestParser = char('[');
+  static final Parser _linkOrImageRefParser =
+      (blankline | whitespaceChar).maybe > linkLabel;
+  Parser<List<Inline>> _linkOrImage(bool isLink) {
+    Parser labelParser = isLink ? linkText : imageText;
+    return new Parser<List<Inline>>((String s, Position pos) {
+      ParseResult testRes = _linkOrImageTestParser.run(s, pos);
+      if (!testRes.isSuccess) {
+        return testRes;
+      }
 
-        // Try inline
-        ParseResult labelRes = (isLink ? linkText : imageText).run(s, pos);
+      // Try inline
+      ParseResult labelRes = labelParser.run(s, pos);
+      if (!labelRes.isSuccess) {
+        return labelRes;
+      }
+      if (isLink && labelRes.value.contains(new RegExp(r"^\s*$"))) {
+        return fail.run(s, pos);
+      }
+      Inlines linkInlines = inlines.parse(labelRes.value, tabStop: tabStop);
+      if (isLink && _isContainsLink(linkInlines)) {
+        List<Inline> resValue = [new Str('[')];
+        resValue.addAll(linkInlines);
+        resValue.add(new Str(']'));
+        return labelRes.copy(value: resValue);
+      }
+      ParseResult destRes = linkInline.run(s, labelRes.position);
+      if (destRes.isSuccess) {
+        // Links inside link content are not allowed
+        if (isLink) {
+          return destRes.copy(
+              value: [new InlineLink(linkInlines, destRes.value)]);
+        } else {
+          return destRes.copy(
+              value: [new InlineImage(linkInlines, destRes.value)]);
+        }
+      }
+
+      // Try reference link
+      ParseResult refRes = _linkOrImageRefParser.run(s, labelRes.position);
+      if (refRes.isSuccess) {
+        String reference = refRes.value == "" ? labelRes.value : refRes.value;
+        String normalizedReference = _normalizeReference(reference);
+        Target target = _references[normalizedReference];
+        if (target == null) {
+          target = _options.linkResolver(normalizedReference, reference);
+        }
+        if (target != null) {
+          if (isLink) {
+            return refRes.copy(
+                value: [new ReferenceLink(reference, linkInlines, target)]);
+          } else {
+            return refRes.copy(
+                value: [new ReferenceImage(reference, linkInlines, target)]);
+          }
+        }
+      } else {
+        // Try again from beginning because reference couldn't contain brackets
+        labelRes = linkLabel.run(s, pos);
         if (!labelRes.isSuccess) {
           return labelRes;
         }
-        if (isLink && labelRes.value.contains(new RegExp(r"^\s*$"))) {
-          return fail.run(s, pos);
+        String normalizedReference = _normalizeReference(labelRes.value);
+        Target target = _references[normalizedReference];
+        if (target == null) {
+          target = _options.linkResolver(normalizedReference, labelRes.value);
         }
-        Inlines linkInlines = inlines.parse(labelRes.value, tabStop: tabStop);
-        if (isLink && _isContainsLink(linkInlines)) {
-          List<Inline> resValue = [new Str('[')];
-          resValue.addAll(linkInlines);
-          resValue.add(new Str(']'));
-          return labelRes.copy(value: resValue);
-        }
-        ParseResult destRes = linkInline.run(s, labelRes.position);
-        if (destRes.isSuccess) {
-          // Links inside link content are not allowed
+        if (target != null) {
           if (isLink) {
-            return destRes.copy(
-                value: [new InlineLink(linkInlines, destRes.value)]);
+            return labelRes.copy(value:
+                [new ReferenceLink(labelRes.value, linkInlines, target)]);
           } else {
-            return destRes.copy(
-                value: [new InlineImage(linkInlines, destRes.value)]);
+            return labelRes.copy(value:
+                [new ReferenceImage(labelRes.value, linkInlines, target)]);
           }
         }
+      }
 
-        // Try reference link
-        ParseResult refRes = ((blankline | whitespaceChar).maybe > linkLabel)
-            .run(s, labelRes.position);
-        if (refRes.isSuccess) {
-          String reference = refRes.value == "" ? labelRes.value : refRes.value;
-          String normalizedReference = _normalizeReference(reference);
-          Target target = _references[normalizedReference];
-          if (target == null) {
-            target = _options.linkResolver(normalizedReference, reference);
-          }
-          if (target != null) {
-            if (isLink) {
-              return refRes.copy(
-                  value: [new ReferenceLink(reference, linkInlines, target)]);
-            } else {
-              return refRes.copy(
-                  value: [new ReferenceImage(reference, linkInlines, target)]);
-            }
-          }
-        } else {
-          // Try again from beginning because reference couldn't contain brackets
-          labelRes = linkLabel.run(s, pos);
-          if (!labelRes.isSuccess) {
-            return labelRes;
-          }
-          String normalizedReference = _normalizeReference(labelRes.value);
-          Target target = _references[normalizedReference];
-          if (target == null) {
-            target = _options.linkResolver(normalizedReference, labelRes.value);
-          }
-          if (target != null) {
-            if (isLink) {
-              return labelRes.copy(value:
-                  [new ReferenceLink(labelRes.value, linkInlines, target)]);
-            } else {
-              return labelRes.copy(value:
-                  [new ReferenceImage(labelRes.value, linkInlines, target)]);
-            }
-          }
-        }
-
-        return fail.run(s, pos);
-      });
+      return fail.run(s, pos);
+    });
+  }
 
   Parser<List<Inline>> get image => char('!') > _linkOrImage(false);
   Parser<List<Inline>> get link => _linkOrImage(true);
 
-  List<String> allowedSchemes = <String>[
+  // TODO test benchmark
+  static final Set<String> allowedSchemes = new Set<String>.from(<String>[
     "coap",
     "doi",
     "javascript",
@@ -1295,42 +1317,42 @@ class CommonMarkParser {
     "xfire",
     "xri",
     "ymsgr"
-  ];
+  ]);
 
-  RegExp autolinkEmailRegExp = new RegExp(
+  static final RegExp autolinkEmailRegExp = new RegExp(
       r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
       r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
 
-  Parser<List<Inline>> get autolink =>
+  static final Parser<List<Inline>> autolink =
       new Parser<List<Inline>>((String s, Position pos) {
-        ParseResult res = (char('<') >
-            pred((String char) =>
-                    char.codeUnitAt(0) > 0x20 && char != "<" && char != ">")
-                .manyUntil(char('>'))).run(s, pos);
-        if (!res.isSuccess) {
-          return res;
-        }
-        String contents = res.value.join();
-        int colon = contents.indexOf(":");
-        if (colon >= 1) {
-          String schema = contents.substring(0, colon).toLowerCase();
-          if (allowedSchemes.contains(schema)) {
-            return res.copy(value: [new Autolink(contents)]);
-          }
-        }
+    ParseResult res = (char('<') >
+        pred((String char) =>
+                char.codeUnitAt(0) > 0x20 && char != "<" && char != ">")
+            .manyUntil(char('>'))).run(s, pos);
+    if (!res.isSuccess) {
+      return res;
+    }
+    String contents = res.value.join();
+    int colon = contents.indexOf(":");
+    if (colon >= 1) {
+      String schema = contents.substring(0, colon).toLowerCase();
+      if (allowedSchemes.contains(schema)) {
+        return res.copy(value: [new Autolink(contents)]);
+      }
+    }
 
-        if (contents.contains(autolinkEmailRegExp)) {
-          return res.copy(value: [new Autolink.email(contents)]);
-        }
+    if (contents.contains(autolinkEmailRegExp)) {
+      return res.copy(value: [new Autolink.email(contents)]);
+    }
 
-        return fail.run(s, pos);
-      });
+    return fail.run(s, pos);
+  });
 
   //
   // raw html
   //
 
-  Parser get rawInlineHtml => choice([
+  static final Parser rawInlineHtml = choice([
         htmlOpenTag,
         htmlCloseTag,
         htmlCompleteComment,
@@ -1344,9 +1366,9 @@ class CommonMarkParser {
   // Line break
   //
 
-  Parser lineBreak = (((string('  ') < whitespaceChar.many) < newline) |
-          string("\\\n")) ^
-      (_) => [new LineBreak()];
+  static final Parser lineBreak =
+      (((string('  ') < whitespaceChar.many) < newline) | string("\\\n")) ^
+          (_) => [new LineBreak()];
 
   //
   // str
@@ -1407,12 +1429,22 @@ class CommonMarkParser {
                 return result;
               };
 
-  Parser get str => (noneOf(_strSpecialChars + "\n").many1 ^
-          (chars) => _transformString(chars.join())) |
-      (oneOf(_strSpecialChars) ^ (chars) => _transformString(chars)) |
-      (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
+  Parser _strCache;
+  Parser get str {
+    if (_strCache == null) {
+      _strCache = (noneOf(_strSpecialChars.join() + "\n").many1 ^
+              (chars) => _transformString(chars.join())) |
+          (oneOf(_strSpecialChars.join()) ^
+              (chars) => _transformString(chars)) |
+          (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
+    }
+    return _strCache;
+  }
 
-  Parser<List<Inline>> get inline => choice([
+  Parser<List<Inline>> _inlineCache;
+  Parser<List<Inline>> get inline {
+    if (_inlineCache == null) {
+      _inlineCache = choice([
         lineBreak,
         whitespace,
         escapedChar,
@@ -1426,6 +1458,9 @@ class CommonMarkParser {
         _options.smartPunctuation ? smartPunctuation : fail,
         str
       ]);
+    }
+    return _inlineCache;
+  }
 
   Parser<List<Inline>> get spaceEscapedInline =>
       (string(r'\ ') ^ (_) => [new _EscapedSpace()]) | inline;
