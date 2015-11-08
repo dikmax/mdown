@@ -19,8 +19,18 @@ class _UnparsedInlines extends Inlines {
   int get hashCode => raw.hashCode;
 }
 
-String _normalizeReference(String s) {
-  return s.trim().replaceAll(new RegExp(r'\s+'), ' ').toUpperCase();
+RegExp _trimAndReplaceSpacesRegExp = new RegExp(r'\s+');
+String _trimAndReplaceSpaces(String s) {
+  return s.trim().replaceAll(_trimAndReplaceSpacesRegExp, ' ');
+}
+
+String _normalizeReference(String s) => _trimAndReplaceSpaces(s).toUpperCase();
+
+ParseResult _success(value, String text, Position position,
+    [Expectations expectations, bool committed = false]) {
+  final exps =
+      (expectations != null) ? expectations : new Expectations.empty(position);
+  return new ParseResult(text, exps, position, true, committed, value);
 }
 
 class _LinkReference extends Block {
@@ -281,27 +291,44 @@ class CommonMarkParser {
   static final Parser spnl = (skipSpaces > newline);
   static final Parser indent = waitForIndent(tabStop);
 
-  static Parser atMostIndent(int indent, {bool fromLineStart: true}) =>
-      new Parser((String s, Position pos) {
-        if (fromLineStart && pos.character != 1) {
-          return fail.run(s, pos);
-        }
-        var startCharacter = pos.character;
-        var maxEndCharacter = indent + startCharacter;
-        Position position = pos;
-        while (position.character <= maxEndCharacter) {
-          var res = whitespaceChar.run(s, position);
-          if (!res.isSuccess || res.position.character > maxEndCharacter) {
-            return success(position.character - startCharacter)
-                .run(s, position);
-          }
-          position = res.position;
-        }
-        return success(position.character - startCharacter).run(s, position);
-      });
+  static Map<int, Parser> _atMostIndentCache = {};
+  static Map<int, Parser> _atMostIndentStartCache = {};
+  static Parser atMostIndent(int indent, {bool fromLineStart: true}) {
+    if (fromLineStart && _atMostIndentStartCache[indent] != null) {
+      return _atMostIndentStartCache[indent];
+    }
+    if (!fromLineStart && _atMostIndentCache[indent] != null) {
+      return _atMostIndentCache[indent];
+    }
 
-  static Parser waitForIndent(int length) =>
-      new Parser((String s, Position pos) {
+    var p = new Parser((String s, Position pos) {
+      if (fromLineStart && pos.character != 1) {
+        return fail.run(s, pos);
+      }
+      var startCharacter = pos.character;
+      var maxEndCharacter = indent + startCharacter;
+      Position position = pos;
+      while (position.character <= maxEndCharacter) {
+        var res = whitespaceChar.run(s, position);
+        if (!res.isSuccess || res.position.character > maxEndCharacter) {
+          return _success(position.character - startCharacter, s, position);
+        }
+        position = res.position;
+      }
+      return _success(position.character - startCharacter, s, position);
+    });
+    if (fromLineStart) {
+      _atMostIndentStartCache[indent] = p;
+    } else {
+      _atMostIndentCache[indent] = p;
+    }
+    return p;
+  }
+
+  static Map<int, Parser> _waitForIndentCache = {};
+  static Parser waitForIndent(int length) {
+    if (_waitForIndentCache[length] == null) {
+      _waitForIndentCache[length] = new Parser((String s, Position pos) {
         if (pos.character != 1) {
           return fail.run(s, pos);
         }
@@ -314,8 +341,12 @@ class CommonMarkParser {
           }
           position = res.position;
         }
-        return success(position.character - startCharacter).run(s, position);
+        return _success(position.character - startCharacter, s, position);
       });
+    }
+
+    return _waitForIndentCache[length];
+  }
 
   static Parser count(int l, Parser p) => countBetween(l, l, p);
 
@@ -332,7 +363,7 @@ class CommonMarkParser {
           } else if (i < min) {
             return fail.run(s, pos);
           } else {
-            return success(value).run(s, position);
+            return _success(value, s, position);
           }
         }
 
@@ -465,7 +496,10 @@ class CommonMarkParser {
   //
 
   // Can't be static because of str
-  Parser get _linkTextChoice => choice([
+  Parser _linkTextChoiceCache;
+  Parser get _linkTextChoice {
+    if (_linkTextChoiceCache == null) {
+      _linkTextChoiceCache = choice([
         whitespace,
         htmlEntity,
         inlineCode,
@@ -475,14 +509,31 @@ class CommonMarkParser {
         rec(() => linkText),
         str
       ]);
-  Parser get linkText => (char('[') >
-          (_linkTextChoice + _linkTextChoice.manyUntil(char(']')))
-              .list
-              .record) ^
-      (String label) => label.substring(0, label.length - 1);
-  Parser get imageText =>
-      (char('[') > _linkTextChoice.manyUntil(char(']')).record) ^
+    }
+    return _linkTextChoiceCache;
+  }
+
+  Parser _linkTextCache;
+  Parser get linkText {
+    if (_linkTextCache == null) {
+      _linkTextCache = (char('[') >
+              (_linkTextChoice + _linkTextChoice.manyUntil(char(']')))
+                  .list
+                  .record) ^
           (String label) => label.substring(0, label.length - 1);
+    }
+    return _linkTextCache;
+  }
+
+  Parser _imageTextCache;
+  Parser get imageText {
+    if (_imageTextCache == null) {
+      _imageTextCache = (char('[') >
+              _linkTextChoice.manyUntil(char(']')).record) ^
+          (String label) => label.substring(0, label.length - 1);
+    }
+    return _imageTextCache;
+  }
 
   static final String _linkLabelStrSpecialChars = " *_`!<\\";
   static final Parser _linkLabelStr =
@@ -492,7 +543,6 @@ class CommonMarkParser {
               (chars) => _transformString(chars)) |
           (char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]);
 
-  // TODO static ?
   static final Parser linkLabel = (char('[') >
           choice([
             whitespace,
@@ -613,10 +663,6 @@ class CommonMarkParser {
   // inline code
   //
 
-  static String _processInlineCode(String code) {
-    return code.trim().replaceAll(new RegExp(r'\s+'), ' ');
-  }
-
   static final Parser _inlineCode1 = char('`').many1;
   static final Parser _inlineCode2 = noneOf('\n`').many;
 
@@ -662,7 +708,7 @@ class CommonMarkParser {
       }
       if (res.value.length == fenceSize) {
         return res.copy(value: [
-          new Code(_processInlineCode(str.toString()), fenceSize: fenceSize)
+          new Code(_trimAndReplaceSpaces(str.toString()), fenceSize: fenceSize)
         ]);
       }
       str.write(res.value.join());
@@ -681,6 +727,7 @@ class CommonMarkParser {
 
   // Can't be static
   Parser _scanDelimsCache;
+  Map<String, Parser> _scanDelimsParserCache = {};
   Parser get scanDelims {
     if (_scanDelimsCache == null) {
       Parser testParser = oneOf(_inlineDelimiters.join()).lookAhead;
@@ -691,7 +738,12 @@ class CommonMarkParser {
         }
         String c = testRes.value;
 
-        ParseResult res = char(c).many1.run(s, pos);
+        Parser p = _scanDelimsParserCache[c];
+        if (p == null) {
+          p = char(c).many1;
+          _scanDelimsParserCache[c] = p;
+        }
+        ParseResult res = p.run(s, pos);
         if (!res.isSuccess) {
           return res;
         }
@@ -1030,7 +1082,7 @@ class CommonMarkParser {
           mergeWithPrevious();
         }
 
-        return success(result).run(s, position);
+        return _success(result, s, position);
       });
     }
 
@@ -1548,19 +1600,28 @@ class CommonMarkParser {
 
   static const String hruleChars = '*-_';
 
+  static Map<String, Parser> _hruleParserCache = {};
+  static Parser _hruleParser(String start) {
+    if (_hruleParserCache[start] == null) {
+      _hruleParserCache[start] = ((((count(2, skipSpaces > char(start)) >
+                      (whitespaceChar | char(start)).skipMany) >
+                  newline) >
+              blanklines.maybe) >
+          success([new HorizontalRule()]));
+    }
+    return _hruleParserCache[start];
+  }
+
+  static final _hruleStartParser =
+      (skipNonindentCharsFromAnyPosition > oneOf(hruleChars));
   static final Parser hrule = new Parser((String s, Position pos) {
-    ParseResult startRes =
-        (skipNonindentCharsFromAnyPosition > oneOf(hruleChars)).run(s, pos);
+    ParseResult startRes = _hruleStartParser.run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
     }
     var start = startRes.value;
 
-    return ((((count(2, skipSpaces > char(start)) >
-                    (whitespaceChar | char(start)).skipMany) >
-                newline) >
-            blanklines.maybe) >
-        success([new HorizontalRule()])).run(s, startRes.position);
+    return _hruleParser(start).run(s, startRes.position);
   });
 
   //
@@ -1771,12 +1832,12 @@ class CommonMarkParser {
       return lineRes.value.contains(element['start']);
     }, orElse: () => null);
     if (passedTest != null) {
-      return success(true).run(s, pos);
+      return _success(true, s, pos);
     }
 
     Match match = rawHtmlTest6.matchAsPrefix(lineRes.value);
     if (match != null && _allowedTags.contains(match.group(1).toLowerCase())) {
-      return success(true).run(s, pos);
+      return _success(true, s, pos);
     }
 
     return fail.run(s, pos);
@@ -1807,7 +1868,7 @@ class CommonMarkParser {
         lineRes = anyLine.run(s, position);
         if (!lineRes.isSuccess) {
           // eof
-          return success(new HtmlRawBlock(content)).run(s, position);
+          return _success(new HtmlRawBlock(content), s, position);
         }
         content += lineRes.value + '\n';
         position = lineRes.position;
@@ -1837,12 +1898,12 @@ class CommonMarkParser {
     do {
       var blanklineRes = blankline.run(s, position);
       if (blanklineRes.isSuccess) {
-        return success(new HtmlRawBlock(content)).run(s, blanklineRes.position);
+        return _success(new HtmlRawBlock(content), s, blanklineRes.position);
       }
       lineRes = anyLine.run(s, position);
       if (!lineRes.isSuccess) {
         // eof
-        return success(new HtmlRawBlock(content)).run(s, position);
+        return _success(new HtmlRawBlock(content), s, position);
       }
       content += lineRes.value + '\n';
       position = lineRes.position;
@@ -2449,7 +2510,7 @@ class CommonMarkParser {
             addToListItem(stack.last.block.items.last, blocks);
           }
 
-          return success([stack.first.block]).run(s, position);
+          return _success([stack.first.block], s, position);
         } else {
           return fail.run(s, pos);
         }
