@@ -6,9 +6,9 @@ import 'package:quiver/core.dart';
 
 // Class system is inspired by Pandoc
 
-const _iterableEquality = const IterableEquality();
-const _mapEquality = const MapEquality();
-const _deepEquality = const DeepCollectionEquality();
+const IterableEquality _iterableEquality = const IterableEquality();
+const MapEquality _mapEquality = const MapEquality();
+const DeepCollectionEquality _deepEquality = const DeepCollectionEquality();
 
 class Document {
   Iterable<Block> contents;
@@ -17,7 +17,7 @@ class Document {
 
   String toString() => "Document $contents";
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Document && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -36,7 +36,7 @@ class EmptyAttr extends Attr {
 
   String toString() => "EmptyAttr";
 
-  bool operator ==(obj) => obj is EmptyAttr;
+  bool operator ==(dynamic obj) => obj is EmptyAttr;
 
   int get hashCode => 0;
 }
@@ -48,7 +48,7 @@ class InfoString extends Attr {
 
   String toString() => "InfoString($language)";
 
-  bool operator ==(obj) => obj is InfoString && language == obj.language;
+  bool operator ==(dynamic obj) => obj is InfoString && language == obj.language;
 
   int get hashCode => language.hashCode;
 }
@@ -64,7 +64,7 @@ class Target {
   String toString() =>
       'Target "$link" ${title == null ? "null" : "\"$title\""}';
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Target && link == obj.link && title == obj.title;
 
   int get hashCode => hash2(link, title);
@@ -86,7 +86,7 @@ class HorizontalRule extends Block {
 
   String toString() => "HorizontalRule";
 
-  bool operator ==(obj) => obj is HorizontalRule;
+  bool operator ==(dynamic obj) => obj is HorizontalRule;
 
   int get hashCode => 0;
 }
@@ -109,7 +109,7 @@ class AtxHeader extends Header {
 
   String toString() => "AtxHeader $level $contents";
 
-  bool operator ==(obj) => obj is AtxHeader &&
+  bool operator ==(dynamic obj) => obj is AtxHeader &&
       level == obj.level &&
       _iterableEquality.equals(contents, obj.contents);
 
@@ -123,7 +123,7 @@ class SetextHeader extends Header {
 
   String toString() => "SetextHeader $level $contents";
 
-  bool operator ==(obj) => obj is SetextHeader &&
+  bool operator ==(dynamic obj) => obj is SetextHeader &&
       level == obj.level &&
       _iterableEquality.equals(contents, obj.contents);
 
@@ -141,7 +141,7 @@ class FenceType {
 
   String toString() => name;
 
-  bool operator ==(obj) => obj is FenceType && value == obj.value;
+  bool operator ==(dynamic obj) => obj is FenceType && value == obj.value;
 
   int get hashCode => value.hashCode;
 }
@@ -158,7 +158,7 @@ class IndentedCodeBlock extends CodeBlock {
 
   String toString() => "IndentedCodeBlock $contents";
 
-  bool operator ==(obj) => obj is IndentedCodeBlock && contents == obj.contents;
+  bool operator ==(dynamic obj) => obj is IndentedCodeBlock && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
@@ -172,7 +172,7 @@ class FencedCodeBlock extends CodeBlock {
 
   String toString() => "FencedCodeBlock $attributes $contents";
 
-  bool operator ==(obj) => obj is FencedCodeBlock &&
+  bool operator ==(dynamic obj) => obj is FencedCodeBlock &&
       contents == obj.contents &&
       attributes == obj.attributes &&
       fenceType == obj.fenceType &&
@@ -192,7 +192,7 @@ class HtmlRawBlock extends RawBlock {
 
   String toString() => "HtmlRawBlock $contents";
 
-  bool operator ==(obj) => obj is HtmlRawBlock && contents == obj.contents;
+  bool operator ==(dynamic obj) => obj is HtmlRawBlock && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
@@ -204,7 +204,7 @@ class Blockquote extends Block {
 
   String toString() => "Blockquote $contents";
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Blockquote && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -217,7 +217,7 @@ class ListItem {
 
   String toString() => "ListItem $contents";
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is ListItem && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -234,7 +234,7 @@ class BulletType {
 
   const BulletType._(this.value, this.name, this.char);
 
-  static BulletType fromChar(markerChar) {
+  static BulletType fromChar(String markerChar) {
     BulletType type;
     switch (markerChar) {
       case '+':
@@ -259,7 +259,7 @@ class BulletType {
 
   String toString() => name;
 
-  bool operator ==(obj) => obj is BulletType && value == obj.value;
+  bool operator ==(dynamic obj) => obj is BulletType && value == obj.value;
 
   int get hashCode => value.hashCode;
 }
@@ -296,7 +296,7 @@ class IndexSeparator {
 
   String toString() => name;
 
-  bool operator ==(obj) => obj is IndexSeparator && value == obj.value;
+  bool operator ==(dynamic obj) => obj is IndexSeparator && value == obj.value;
 
   int get hashCode => value.hashCode;
 }
@@ -318,7 +318,7 @@ class UnorderedList extends ListBlock {
 
   String toString() => "UnorderedList $bulletType $items";
 
-  bool operator ==(obj) => obj is UnorderedList &&
+  bool operator ==(dynamic obj) => obj is UnorderedList &&
       bulletType == obj.bulletType &&
       tight == obj.tight &&
       _iterableEquality.equals(items, obj.items);
@@ -338,7 +338,7 @@ class OrderedList extends ListBlock {
 
   String toString() => "OrderedList start=$startIndex $indexSeparator $items";
 
-  bool operator ==(obj) => obj is OrderedList &&
+  bool operator ==(dynamic obj) => obj is OrderedList &&
       indexSeparator == obj.indexSeparator &&
       tight == obj.tight &&
       startIndex == obj.startIndex &&
@@ -354,7 +354,7 @@ class Para extends Block {
 
   String toString() => "Para $contents";
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Para && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -399,7 +399,7 @@ class Str extends Inline {
 
   String toString() => 'Str "$contents"';
 
-  bool operator ==(obj) => obj is Str && contents == obj.contents;
+  bool operator ==(dynamic obj) => obj is Str && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
@@ -415,7 +415,7 @@ class Space extends Inline {
 
   String toString() => "Space";
 
-  bool operator ==(obj) => obj is Space;
+  bool operator ==(dynamic obj) => obj is Space;
 
   int get hashCode => 0;
 }
@@ -431,7 +431,7 @@ class Tab extends Inline {
 
   String toString() => "Tab";
 
-  bool operator ==(obj) => obj is Tab;
+  bool operator ==(dynamic obj) => obj is Tab;
 
   int get hashCode => 0;
 }
@@ -447,7 +447,7 @@ class NonBreakableSpace extends Inline {
 
   String toString() => "NonBreakableSpace";
 
-  bool operator ==(obj) => obj is NonBreakableSpace;
+  bool operator ==(dynamic obj) => obj is NonBreakableSpace;
 
   int get hashCode => 0;
 }
@@ -463,7 +463,7 @@ class LineBreak extends Inline {
 
   String toString() => "LineBreak";
 
-  bool operator ==(obj) => obj is LineBreak;
+  bool operator ==(dynamic obj) => obj is LineBreak;
 
   int get hashCode => 0;
 }
@@ -481,7 +481,7 @@ class MDash extends SmartChar {
 
   String toString() => "MDash";
 
-  bool operator ==(obj) => obj is MDash;
+  bool operator ==(dynamic obj) => obj is MDash;
 
   int get hashCode => 0;
 }
@@ -497,7 +497,7 @@ class NDash extends SmartChar {
 
   String toString() => "NDash";
 
-  bool operator ==(obj) => obj is NDash;
+  bool operator ==(dynamic obj) => obj is NDash;
 
   int get hashCode => 0;
 }
@@ -513,7 +513,7 @@ class Ellipsis extends SmartChar {
 
   String toString() => "Ellipsis";
 
-  bool operator ==(obj) => obj is Ellipsis;
+  bool operator ==(dynamic obj) => obj is Ellipsis;
 
   int get hashCode => 0;
 }
@@ -532,7 +532,7 @@ class SmartQuote extends Inline {
           ? "${open ? "'" : ""}$contents${close ? "'" : ""}"
           : "${open ? '"' : ""}$contents${close ? '"' : ""}");
 
-  bool operator ==(obj) => obj is SmartQuote &&
+  bool operator ==(dynamic obj) => obj is SmartQuote &&
       single == obj.single &&
       open == obj.open &&
       close == obj.close &&
@@ -549,7 +549,7 @@ class Code extends Inline {
 
   String toString() => 'Code "$contents"';
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Code && contents == obj.contents && fenceSize == obj.fenceSize;
 
   int get hashCode => hash2(contents, fenceSize);
@@ -562,7 +562,7 @@ class Emph extends Inline {
 
   String toString() => 'Emph $contents';
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Emph && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -575,7 +575,7 @@ class Strong extends Inline {
 
   String toString() => 'Strong $contents';
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Strong && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -588,7 +588,7 @@ class Strikeout extends Inline {
 
   String toString() => 'Strikeout $contents';
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Strikeout && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -601,7 +601,7 @@ class Subscript extends Inline {
 
   String toString() => 'Subscript $contents';
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Subscript && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -614,7 +614,7 @@ class Superscript extends Inline {
 
   String toString() => 'Superscript $contents';
 
-  bool operator ==(obj) =>
+  bool operator ==(dynamic obj) =>
       obj is Superscript && _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => contents.hashCode;
@@ -632,7 +632,7 @@ class InlineLink extends Link {
 
   String toString() => 'InlineLink $label ($target)';
 
-  bool operator ==(obj) => obj is InlineLink &&
+  bool operator ==(dynamic obj) => obj is InlineLink &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
 
@@ -647,7 +647,7 @@ class ReferenceLink extends Link {
 
   String toString() => 'ReferenceLink[$reference] $label ($target)';
 
-  bool operator ==(obj) => obj is ReferenceLink &&
+  bool operator ==(dynamic obj) => obj is ReferenceLink &&
       reference == obj.reference &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
@@ -664,7 +664,7 @@ class Autolink extends Link {
 
   String toString() => 'Autolink (${target.link})';
 
-  bool operator ==(obj) => obj is Autolink && target == obj.target;
+  bool operator ==(dynamic obj) => obj is Autolink && target == obj.target;
 
   int get hashCode => target.hashCode;
 }
@@ -681,7 +681,7 @@ class InlineImage extends Image {
 
   String toString() => 'InlineImage $label ($target)';
 
-  bool operator ==(obj) => obj is InlineImage &&
+  bool operator ==(dynamic obj) => obj is InlineImage &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
 
@@ -696,7 +696,7 @@ class ReferenceImage extends Image {
 
   String toString() => 'ReferenceImage[$reference] $label ($target)';
 
-  bool operator ==(obj) => obj is ReferenceImage &&
+  bool operator ==(dynamic obj) => obj is ReferenceImage &&
       reference == obj.reference &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
@@ -715,7 +715,7 @@ class HtmlRawInline extends RawInline {
 
   String toString() => "HtmlRawInline $contents";
 
-  bool operator ==(obj) => obj is HtmlRawInline && contents == obj.contents;
+  bool operator ==(dynamic obj) => obj is HtmlRawInline && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }

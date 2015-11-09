@@ -22,15 +22,15 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
   @override
   Future<String> generateForAnnotatedElement(
       Element element, Entities annotation) async {
-    var r = new RegExp(r"^&(.*);$");
+    RegExp r = new RegExp(r"^&(.*);$");
     HttpClient client = new HttpClient();
     HttpClientRequest request = await client.getUrl(
         Uri.parse('https://html.spec.whatwg.org/multipage/entities.json'));
     HttpClientResponse response = await request.close();
-    var json =
+    dynamic json =
         await response.transform(UTF8.decoder).transform(JSON.decoder).first;
-    var result = 'final Map<String, String> _\$${element.displayName} = {\n';
-    json.forEach((String k, v) {
+    String result = 'final Map<String, String> _\$${element.displayName} = {\n';
+    json.forEach((String k, dynamic v) {
       Match match = r.firstMatch(k);
       if (match != null) {
         String entity = match.group(1);

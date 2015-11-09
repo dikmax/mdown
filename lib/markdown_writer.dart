@@ -142,8 +142,9 @@ class _NotCheckedPart extends _InlinePart {
         new RegExp("[" + replaceChars + "]"), (Match m) => r"\" + m.group(0));
 
     if (_options.smartPunctuation) {
-      content = content.replaceAllMapped(new RegExp(r"(\.\.\.|-{2,3})"), (m) {
-        var val = m.group(0);
+      content = content.replaceAllMapped(new RegExp(r"(\.\.\.|-{2,3})"),
+          (Match m) {
+        String val = m.group(0);
         if (val == '...' || val == '--') {
           return r"\" + val;
         } else if (val == '---') {
@@ -315,7 +316,7 @@ class _InlineRenderer {
     while (it.moveNext()) {
       Inline inline = it.current;
       if (inline is Str) {
-        var contents = inline.contents;
+        String contents = inline.contents;
         write(contents, context);
       } else if (inline is Space) {
         write(' ', context);
@@ -493,7 +494,7 @@ class _InlineRenderer {
   RegExp htmlEntity = new RegExp(r"&[0-9a-zA-Z]+;");
 
   void writeTarget(Target target, {bool isInline: false}) {
-    var link = target.link;
+    String link = target.link;
     if (link.contains(htmlEntity)) {
       link = link.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
       write('<' + link + '>');
@@ -525,8 +526,7 @@ class _InlineRenderer {
 
     while (current != null) {
       if (current is _NotCheckedPart) {
-        var c = current; // Workaround for dart-analyzer
-        buffer.write(c.smartEscape(prev, next));
+        buffer.write(current.smartEscape(prev, next));
       } else {
         buffer.write(current);
       }
@@ -659,7 +659,7 @@ class _MarkdownBuilder extends StringBuffer {
 
     // Indented code block
     write(codeBlock.contents.splitMapJoin("\n",
-        onNonMatch: (str) => str == "" ? str : "    " + str));
+        onNonMatch: (String str) => str == "" ? str : "    " + str));
   }
 
   void writeUnorderedList(UnorderedList list, {Block prevBlock: null}) {

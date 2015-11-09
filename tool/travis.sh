@@ -10,7 +10,7 @@ dartanalyzer --fatal-warnings \
   tool/build.dart
 
 # Linter
-pub run linter:linter `find lib test tool -type f \( -iname "*.dart" ! -iname "*.g.dart" \)`
+pub run linter:linter --config .linter.yaml `find lib test tool -type f \( -iname "*.dart" ! -iname "*.g.dart" \)`
 
 # TODO Use .analysis_config when Dart 1.12 is released
 

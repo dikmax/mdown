@@ -11,7 +11,7 @@ void main(List<String> args) {
   ], librarySearchPaths: [
     //'lib',
     'test'
-  ]).then((msg) {
+  ]).then((String msg) {
     print(msg);
   });
 }

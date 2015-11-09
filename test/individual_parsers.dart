@@ -5,7 +5,8 @@ import 'package:parsers/parsers.dart';
 
 import 'package:md_proc/md_proc.dart';
 
-_rest(parseResult) => parseResult.text.substring(parseResult.position.offset);
+String _rest(ParseResult parseResult) =>
+    parseResult.text.substring(parseResult.position.offset);
 
 class FailureMatcher extends Matcher {
   String rest;
@@ -36,15 +37,15 @@ class SuccessMatcher extends Matcher {
       description.add('a parse success with value $res and rest "$rest"');
 }
 
-isFailure(rest) => new FailureMatcher(rest);
+Matcher isFailure(String rest) => new FailureMatcher(rest);
 
-isSuccess(res, rest) => new SuccessMatcher(res, rest);
+Matcher isSuccess(Object res, String rest) => new SuccessMatcher(res, rest);
 
-var tabStopPosition = const Position(0, 1, 1, tabStop: 4);
+Position tabStopPosition = const Position(0, 1, 1, tabStop: 4);
 
 void individualParsersTests() {
   group('atMostIndent', () {
-    var atMostIndent = CommonMarkParser.atMostIndent(3);
+    Parser atMostIndent = CommonMarkParser.atMostIndent(3);
     test('should succeed without consuming any input.', () {
       expect(atMostIndent.run("asdf", tabStopPosition), isSuccess(0, 'asdf'));
     });
@@ -63,7 +64,7 @@ void individualParsersTests() {
   });
 
   group('count', () {
-    var count = CommonMarkParser.count(3, digit);
+    Parser count = CommonMarkParser.count(3, digit);
     test('should take exact count', () {
       expect(count.run('555', tabStopPosition), isSuccess(["5", "5", "5"], ''));
     });
@@ -77,8 +78,8 @@ void individualParsersTests() {
   });
 
   group('countBetween', () {
-    var countBeetween1 = CommonMarkParser.countBetween(2, 3, digit);
-    var countBeetween2 = CommonMarkParser.countBetween(0, 3, digit);
+    Parser countBeetween1 = CommonMarkParser.countBetween(2, 3, digit);
+    Parser countBeetween2 = CommonMarkParser.countBetween(0, 3, digit);
     test('should take defined count', () {
       expect(
           countBeetween1.run('55', tabStopPosition), isSuccess(["5", "5"], ''));

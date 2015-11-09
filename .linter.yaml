@@ -1,0 +1,12 @@
+files:
+  include:
+    - 'bin/**'
+    - 'lib/**'
+    - 'test/**'
+    - 'tool/**'
+  exclude:
+    - 'test/data/**'
+
+rules:
+  lint:
+    implementation_imports: false

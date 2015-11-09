@@ -24,7 +24,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
       {AssociatedFileSet associatedFileSet: AssociatedFileSet.sameDirectory})
       : this.associatedFileSet = associatedFileSet;
 
-  Map<String, String> readFile(fileName) {
+  Map<String, String> readFile(String fileName) {
     Map<String, String> result = <String, String>{};
 
     File file = new File(fileName);
@@ -36,8 +36,8 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
       if (line == ".") {
         state++;
         if (state == 3) {
-          result[source.map((line) => line + "\n").join()] =
-              destination.map((line) => line + "\n").join();
+          result[source.map((String line) => line + "\n").join()] =
+              destination.map((String line) => line + "\n").join();
           state = stateWait;
           destination = [];
           source = [];
@@ -59,22 +59,22 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
       throw 'must be relative path to the source file';
     }
 
-    var source = element.source as FileBasedSource;
-    var sourcePath = source.file.getAbsolutePath();
+    FileBasedSource source = element.source as FileBasedSource;
+    String sourcePath = source.file.getAbsolutePath();
 
-    var sourcePathDir = path.dirname(sourcePath);
+    String sourcePathDir = path.dirname(sourcePath);
 
-    var filePath = path.join(sourcePathDir, annotation.path);
+    String filePath = path.join(sourcePathDir, annotation.path);
 
     if (!await FileSystemEntity.isFile(filePath)) {
       throw 'Not a file! - $filePath';
     }
 
-    var content = readFile(filePath);
+    Map<String, String> content = readFile(filePath);
 
-    var result =
+    String result =
         'final Map<String, String> _\$${element.displayName}Tests = {\n';
-    content.forEach((k, v) {
+    content.forEach((String k, String v) {
       result += "r'''" + k + "''': r'''" + v + "''',\n";
     });
     result += '};\n';

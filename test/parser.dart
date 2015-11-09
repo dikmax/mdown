@@ -11,7 +11,7 @@ const int stateHtml = 2;
 enum TestType { html, markdown }
 
 typedef bool FilterFunc(TestType type, int num);
-bool emptyFilter(type, num) => true;
+bool emptyFilter(TestType type, int num) => true;
 typedef void TestFunc(int num, String source, String destination);
 
 void tests(String name, Map<String, String> tests, TestFunc testFunc) {
@@ -30,13 +30,13 @@ class ExampleDescription extends t.Matcher {
 
   ExampleDescription(this.inner, this.example);
 
-  bool matches(item, Map matchState) => inner.matches(item, matchState);
+  bool matches(dynamic item, Map matchState) => inner.matches(item, matchState);
 
   t.Description describe(t.Description description) =>
       inner.describe(description);
 
-  t.Description describeMismatch(
-      item, t.Description mismatchDescription, Map matchState, bool verbose) {
+  t.Description describeMismatch(dynamic item,
+      t.Description mismatchDescription, Map matchState, bool verbose) {
     t.Description d =
         inner.describeMismatch(item, mismatchDescription, matchState, verbose);
     d.add("\n  Source: \n" + example);
@@ -51,13 +51,13 @@ class Example2Description extends t.Matcher {
 
   Example2Description(this.inner, this.example, this.example2);
 
-  bool matches(item, Map matchState) => inner.matches(item, matchState);
+  bool matches(dynamic item, Map matchState) => inner.matches(item, matchState);
 
   t.Description describe(t.Description description) =>
       inner.describe(description);
 
-  t.Description describeMismatch(
-      item, t.Description mismatchDescription, Map matchState, bool verbose) {
+  t.Description describeMismatch(dynamic item,
+      t.Description mismatchDescription, Map matchState, bool verbose) {
     t.Description d =
         inner.describeMismatch(item, mismatchDescription, matchState, verbose);
     d.add("\n  Source: \n" + example);
@@ -120,7 +120,7 @@ TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) =>
       }
       if (filter(TestType.markdown, num)) {
         t.test('markdown $num', () {
-          var generatedMarkdown = mdWriter.write(parser.parse(md));
+          String generatedMarkdown = mdWriter.write(parser.parse(md));
           Document doc = parser.parse(generatedMarkdown);
           t.expect(
               tidy(writer.write(doc)),
@@ -137,7 +137,7 @@ TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) =>
 
       if (filter(TestType.markdown, num)) {
         t.test(num.toString(), () {
-          var generatedMarkdown = writer.write(parser.parse(md));
+          String generatedMarkdown = writer.write(parser.parse(md));
           t.expect(
               generatedMarkdown, new ExampleDescription(t.equals(destMd), md));
         });

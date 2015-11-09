@@ -40,7 +40,7 @@ void serviceTests() {
   t.group('Definitions', () {
     // Document
     t.group('Document', () {
-      var doc = new Document([new HorizontalRule()]);
+      Document doc = new Document([new HorizontalRule()]);
       t.test('toString', () {
         t.expect(doc.toString(), t.equals('Document [HorizontalRule]'));
       });
@@ -54,7 +54,7 @@ void serviceTests() {
 
     // Attributes
     t.group('EmptyAttr', () {
-      var attr = new EmptyAttr();
+      EmptyAttr attr = new EmptyAttr();
       t.test('toString', () {
         t.expect(attr.toString(), t.equals('EmptyAttr'));
       });
@@ -67,7 +67,7 @@ void serviceTests() {
     });
 
     t.group('InfoString', () {
-      var attr = new InfoString('dart');
+      InfoString attr = new InfoString('dart');
       t.test('toString', () {
         t.expect(attr.toString(), t.equals('InfoString(dart)'));
       });
@@ -82,7 +82,7 @@ void serviceTests() {
 
     // Target
     t.group('Target', () {
-      var target = new Target('https://www.dartlang.org/', 'Dart');
+      Target target = new Target('https://www.dartlang.org/', 'Dart');
       t.test('toString', () {
         t.expect(target.toString(),
             t.equals('Target "https://www.dartlang.org/" "Dart"'));
@@ -102,7 +102,7 @@ void serviceTests() {
 
     //Blocks
     t.group('HorizontalRule', () {
-      var rule = new HorizontalRule();
+      HorizontalRule rule = new HorizontalRule();
       t.test('toString', () {
         t.expect(rule.toString(), t.equals('HorizontalRule'));
       });
@@ -115,7 +115,8 @@ void serviceTests() {
     });
 
     t.group('AtxHeader', () {
-      var header = new AtxHeader(2, new Inlines.from([new Str('Header')]));
+      AtxHeader header =
+          new AtxHeader(2, new Inlines.from([new Str('Header')]));
       t.test('toString', () {
         t.expect(header.toString(), t.equals('AtxHeader 2 [Str "Header"]'));
       });
@@ -152,7 +153,8 @@ void serviceTests() {
     });
 
     t.group('SetextHeader', () {
-      var header = new SetextHeader(2, new Inlines.from([new Str('Header')]));
+      SetextHeader header =
+          new SetextHeader(2, new Inlines.from([new Str('Header')]));
       t.test('toString', () {
         t.expect(header.toString(), t.equals('SetextHeader 2 [Str "Header"]'));
       });
@@ -201,7 +203,7 @@ void serviceTests() {
     });
 
     t.group('IndentedCodeBlock', () {
-      var code = new IndentedCodeBlock("Code");
+      IndentedCodeBlock code = new IndentedCodeBlock("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('IndentedCodeBlock Code'));
       });
@@ -215,7 +217,7 @@ void serviceTests() {
     });
 
     t.group('FencedCodeBlock', () {
-      var code = new FencedCodeBlock("Code");
+      FencedCodeBlock code = new FencedCodeBlock("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('FencedCodeBlock EmptyAttr Code'));
       });
@@ -244,7 +246,7 @@ void serviceTests() {
     });
 
     t.group('HtmlRawBlock', () {
-      var raw = new HtmlRawBlock("<html>");
+      HtmlRawBlock raw = new HtmlRawBlock("<html>");
       t.test('toString', () {
         t.expect(raw.toString(), t.equals('HtmlRawBlock <html>'));
       });
@@ -258,7 +260,7 @@ void serviceTests() {
     });
 
     t.group('Blockquote', () {
-      var blockquote = new Blockquote([new HorizontalRule()]);
+      Blockquote blockquote = new Blockquote([new HorizontalRule()]);
       t.test('toString', () {
         t.expect(
             blockquote.toString(), t.equals('Blockquote [HorizontalRule]'));
@@ -273,7 +275,7 @@ void serviceTests() {
     });
 
     t.group('ListItem', () {
-      var listItem = new ListItem([new HorizontalRule()]);
+      ListItem listItem = new ListItem([new HorizontalRule()]);
       t.test('toString', () {
         t.expect(listItem.toString(), t.equals('ListItem [HorizontalRule]'));
       });
@@ -331,7 +333,7 @@ void serviceTests() {
     });
 
     t.group('UnorderedList', () {
-      var list = new UnorderedList([
+      UnorderedList list = new UnorderedList([
         new ListItem([new HorizontalRule()])
       ]);
       t.test('toString', () {
@@ -366,7 +368,7 @@ void serviceTests() {
     });
 
     t.group('OrderedList', () {
-      var list = new OrderedList([
+      OrderedList list = new OrderedList([
         new ListItem([new HorizontalRule()])
       ]);
       t.test('toString', () {
@@ -409,7 +411,7 @@ void serviceTests() {
     });
 
     t.group('Para', () {
-      var para = new Para(new Inlines.from([new Str('Para.')]));
+      Para para = new Para(new Inlines.from([new Str('Para.')]));
       t.test('toString', () {
         t.expect(para.toString(), t.equals('Para [Str "Para."]'));
       });
@@ -426,7 +428,7 @@ void serviceTests() {
     // Inlines
 
     t.group('Str', () {
-      var str = new Str('Str');
+      Str str = new Str('Str');
       t.test('toString', () {
         t.expect(str.toString(), t.equals('Str "Str"'));
       });
@@ -440,7 +442,7 @@ void serviceTests() {
     });
 
     t.group('Space', () {
-      var space = new Space();
+      Space space = new Space();
       t.test('toString', () {
         t.expect(space.toString(), t.equals('Space'));
       });
@@ -453,7 +455,7 @@ void serviceTests() {
     });
 
     t.group('NonBreakableSpace', () {
-      var nbsp = new NonBreakableSpace();
+      NonBreakableSpace nbsp = new NonBreakableSpace();
       t.test('toString', () {
         t.expect(nbsp.toString(), t.equals('NonBreakableSpace'));
       });
@@ -466,7 +468,7 @@ void serviceTests() {
     });
 
     t.group('Tab', () {
-      var tab = new Tab();
+      Tab tab = new Tab();
       t.test('toString', () {
         t.expect(tab.toString(), t.equals('Tab'));
       });
@@ -479,7 +481,7 @@ void serviceTests() {
     });
 
     t.group('LineBreak', () {
-      var lineBreak = new LineBreak();
+      LineBreak lineBreak = new LineBreak();
       t.test('toString', () {
         t.expect(lineBreak.toString(), t.equals('LineBreak'));
       });
@@ -492,7 +494,7 @@ void serviceTests() {
     });
 
     t.group('MDash', () {
-      var mdash = new MDash();
+      MDash mdash = new MDash();
       t.test('toString', () {
         t.expect(mdash.toString(), t.equals('MDash'));
       });
@@ -505,7 +507,7 @@ void serviceTests() {
     });
 
     t.group('NDash', () {
-      var ndash = new NDash();
+      NDash ndash = new NDash();
       t.test('toString', () {
         t.expect(ndash.toString(), t.equals('NDash'));
       });
@@ -518,7 +520,7 @@ void serviceTests() {
     });
 
     t.group('Ellipsis', () {
-      var ellipsis = new Ellipsis();
+      Ellipsis ellipsis = new Ellipsis();
       t.test('toString', () {
         t.expect(ellipsis.toString(), t.equals('Ellipsis'));
       });
@@ -531,7 +533,7 @@ void serviceTests() {
     });
 
     t.group('SmartQuote', () {
-      var smartQuote =
+      SmartQuote smartQuote =
           new SmartQuote(new Inlines.from([new Str('Quote')]), single: false);
       t.test('toString', () {
         t.expect(smartQuote.toString(), t.equals('SmartQuote "[Str "Quote"]"'));
@@ -567,7 +569,7 @@ void serviceTests() {
     });
 
     t.group('Code', () {
-      var code = new Code("Code");
+      Code code = new Code("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('Code "Code"'));
       });
@@ -582,7 +584,7 @@ void serviceTests() {
     });
 
     t.group('Emph', () {
-      var emph = new Emph(new Inlines.from([new Str('Emph')]));
+      Emph emph = new Emph(new Inlines.from([new Str('Emph')]));
       t.test('toString', () {
         t.expect(emph.toString(), t.equals('Emph [Str "Emph"]'));
       });
@@ -596,7 +598,7 @@ void serviceTests() {
     });
 
     t.group('Strong', () {
-      var strong = new Strong(new Inlines.from([new Str('Strong')]));
+      Strong strong = new Strong(new Inlines.from([new Str('Strong')]));
       t.test('toString', () {
         t.expect(strong.toString(), t.equals('Strong [Str "Strong"]'));
       });
@@ -612,7 +614,8 @@ void serviceTests() {
     });
 
     t.group('Strikeout', () {
-      var strikeout = new Strikeout(new Inlines.from([new Str('Strikeout')]));
+      Strikeout strikeout =
+          new Strikeout(new Inlines.from([new Str('Strikeout')]));
       t.test('toString', () {
         t.expect(strikeout.toString(), t.equals('Strikeout [Str "Strikeout"]'));
       });
@@ -628,7 +631,8 @@ void serviceTests() {
     });
 
     t.group('Subscript', () {
-      var subscript = new Subscript(new Inlines.from([new Str('Subscript')]));
+      Subscript subscript =
+          new Subscript(new Inlines.from([new Str('Subscript')]));
       t.test('toString', () {
         t.expect(subscript.toString(), t.equals('Subscript [Str "Subscript"]'));
       });
@@ -644,7 +648,7 @@ void serviceTests() {
     });
 
     t.group('Superscript', () {
-      var superscript =
+      Superscript superscript =
           new Superscript(new Inlines.from([new Str('Superscript')]));
       t.test('toString', () {
         t.expect(superscript.toString(),
@@ -664,7 +668,7 @@ void serviceTests() {
     });
 
     t.group('InlineLink', () {
-      var link = new InlineLink(new Inlines.from([new Str('Dart')]),
+      InlineLink link = new InlineLink(new Inlines.from([new Str('Dart')]),
           new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
         t.expect(
@@ -692,7 +696,9 @@ void serviceTests() {
     });
 
     t.group('ReferenceLink', () {
-      var link = new ReferenceLink('dart', new Inlines.from([new Str('Dart')]),
+      ReferenceLink link = new ReferenceLink(
+          'dart',
+          new Inlines.from([new Str('Dart')]),
           new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
         t.expect(
@@ -736,7 +742,7 @@ void serviceTests() {
     });
 
     t.group('Autolink', () {
-      var link = new Autolink('https://www.dartlang.org/');
+      Autolink link = new Autolink('https://www.dartlang.org/');
       t.test('toString', () {
         t.expect(
             link.toString(), t.equals('Autolink (https://www.dartlang.org/)'));
@@ -755,7 +761,7 @@ void serviceTests() {
     });
 
     t.group('Autolink.email', () {
-      var link = new Autolink.email('test@test.com');
+      Autolink link = new Autolink.email('test@test.com');
       t.test('toString', () {
         t.expect(link.toString(), t.equals('Autolink (mailto:test@test.com)'));
       });
@@ -774,7 +780,7 @@ void serviceTests() {
     });
 
     t.group('InlineImage', () {
-      var image = new InlineImage(new Inlines.from([new Str('Dart')]),
+      InlineImage image = new InlineImage(new Inlines.from([new Str('Dart')]),
           new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
         t.expect(
@@ -803,7 +809,7 @@ void serviceTests() {
     });
 
     t.group('ReferenceImage', () {
-      var image = new ReferenceImage(
+      ReferenceImage image = new ReferenceImage(
           'dart',
           new Inlines.from([new Str('Dart')]),
           new Target('https://www.dartlang.org/', null));
@@ -850,7 +856,7 @@ void serviceTests() {
     });
 
     t.group('HtmlRawInline', () {
-      var raw = new HtmlRawInline("<a>");
+      HtmlRawInline raw = new HtmlRawInline("<a>");
       t.test('toString', () {
         t.expect(raw.toString(), t.equals('HtmlRawInline <a>'));
       });
