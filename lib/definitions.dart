@@ -48,7 +48,8 @@ class InfoString extends Attr {
 
   String toString() => "InfoString($language)";
 
-  bool operator ==(dynamic obj) => obj is InfoString && language == obj.language;
+  bool operator ==(dynamic obj) =>
+      obj is InfoString && language == obj.language;
 
   int get hashCode => language.hashCode;
 }
@@ -158,7 +159,8 @@ class IndentedCodeBlock extends CodeBlock {
 
   String toString() => "IndentedCodeBlock $contents";
 
-  bool operator ==(dynamic obj) => obj is IndentedCodeBlock && contents == obj.contents;
+  bool operator ==(dynamic obj) =>
+      obj is IndentedCodeBlock && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
@@ -192,7 +194,8 @@ class HtmlRawBlock extends RawBlock {
 
   String toString() => "HtmlRawBlock $contents";
 
-  bool operator ==(dynamic obj) => obj is HtmlRawBlock && contents == obj.contents;
+  bool operator ==(dynamic obj) =>
+      obj is HtmlRawBlock && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
@@ -715,7 +718,8 @@ class HtmlRawInline extends RawInline {
 
   String toString() => "HtmlRawInline $contents";
 
-  bool operator ==(dynamic obj) => obj is HtmlRawInline && contents == obj.contents;
+  bool operator ==(dynamic obj) =>
+      obj is HtmlRawInline && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }
