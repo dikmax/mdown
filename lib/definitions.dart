@@ -74,7 +74,7 @@ class Target {
 
 abstract class Block {}
 
-// TODO char type, distace between chars, chars count
+// TODO char type, distance between chars, chars count
 class HorizontalRule extends Block {
   static final HorizontalRule _instance = new HorizontalRule._internal();
 
