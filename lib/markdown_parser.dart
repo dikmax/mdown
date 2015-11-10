@@ -288,8 +288,6 @@ class CommonMarkParser {
 
   // All indent and spaces parsers accepts spaces to skip, and returns spaces
   // that were actually skipped.
-  // TODO test all parsers that use skipNonindentSpaces, skipListNonindentSpaces, indentSpaces, atMostSpaces
-  // TODO rename indentSpaces => indent, atMostSpaces => atMostIndent
   static final Parser<int> skipNonindentChars =
       atMostIndent(tabStop - 1).notFollowedBy(whitespaceChar);
   static final Parser<int> skipNonindentCharsFromAnyPosition =
@@ -1223,7 +1221,6 @@ class CommonMarkParser {
   Parser<List<Inline>> get image => char('!') > _linkOrImage(false);
   Parser<List<Inline>> get link => _linkOrImage(true);
 
-  // TODO test benchmark
   static final Set<String> allowedSchemes = new Set<String>.from(<String>[
     "coap",
     "doi",

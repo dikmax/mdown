@@ -30,17 +30,17 @@ class MarkdownBenchmark extends BenchmarkBase {
 
   // The benchmark code.
   void run() {
-    markdown.markdownToHtml(data);
+    markdown.markdownToHtml(data, extensionSet: markdown.ExtensionSet.commonMark);
   }
 }
 
 main() async {
   // Using Pandoc documentation for benchmark
   HttpClient client = new HttpClient();
-  HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/0xAX/linux-insides/master/mm/linux-mm-2.md'));
+  //HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/0xAX/linux-insides/master/mm/linux-mm-2.md'));
   //HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/dikmax/dikmax.name/master/post/2014-04-13-vilnius.md'));
   //HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/dikmax/md_proc/master/README.md'));
-  //HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/jgm/pandoc/master/README'));
+  HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/jgm/pandoc/master/README'));
   HttpClientResponse response = await request.close();
   String data = await response.transform(UTF8.decoder).join();
   print("File length: ${data.length}");
