@@ -7,6 +7,7 @@ import 'definitions.dart';
 import 'entities.dart';
 import 'options.dart';
 
+// TODO make constructors in ParseResult (new ParseResult.success)
 // TODO remove
 ParseResult /*<E>*/ _success(
     dynamic /*E*/ value, String text, Position position,
@@ -240,8 +241,6 @@ String _trimAndReplaceSpaces(String s) {
 
 String _normalizeReference(String s) => _trimAndReplaceSpaces(s).toUpperCase();
 
-// TODO make constructors in ParseResult (new ParseResult.success)
-
 class _LinkReference extends Block {
   String reference;
   String normalizedReference;
@@ -289,8 +288,6 @@ class _EmphasisStackItem {
   _EmphasisStackItem(this.char, this.numDelims, this.inlines,
       {this.cantCloseAnyway: false});
 }
-
-// TODO make const parsers 'final'
 
 // CommonMark parser
 class CommonMarkParser {
@@ -925,7 +922,6 @@ class CommonMarkParser {
   // inline code
   //
 
-  // TODO many.record -> skipMany.record
   static final Parser<String> _inlineCode1 = record1Many(char('`'));
   static final Parser<String> _inlineCode2 = recordMany(noneOf2('\n', '`'));
 
@@ -998,7 +994,6 @@ class CommonMarkParser {
   Map<String, Parser<List<String>>> _scanDelimsParserCache = {};
   Parser<List<dynamic>> get scanDelims {
     if (_scanDelimsCache == null) {
-      // TODO dynamic parser depending of _inlineDelimiters length
       Parser<String> testParser = oneOfSet(_inlineDelimiters).lookAhead;
       _scanDelimsCache = new Parser<List<dynamic>>((String s, Position pos) {
         ParseResult<String> testRes = testParser.run(s, pos);
@@ -2363,7 +2358,6 @@ class CommonMarkParser {
               buildBuffer();
               List<Block> lineBlock =
                   lazyLineBlock.parse(line + "\n", tabStop: tabStop);
-              // TODO fix condition
               if (!closeParagraph &&
                   lineBlock.length == 1 &&
                   lineBlock[0] is Para) {
@@ -2418,7 +2412,6 @@ class CommonMarkParser {
   Parser<List<Block>> get list {
     if (_listCache == null) {
       _listCache = new Parser<List<Block>>((String s, Position pos) {
-        // TODO quick test
         List<_ListStackItem> stack = [];
 
         int getSubIndent() => stack.length > 0 ? stack.last.subIndent : 0;
@@ -2446,8 +2439,9 @@ class CommonMarkParser {
           }
           if (getTight()) {
             // TODO exctract parser
-            ParseResult<List<Block>> innerRes = (manyUntilSimple(listTightBlock, eof) ^
-                (Iterable res) => processParsedBlocks(res)).run(s);
+            ParseResult<List<Block>> innerRes =
+                (manyUntilSimple(listTightBlock, eof) ^
+                    (Iterable res) => processParsedBlocks(res)).run(s);
             if (innerRes.isSuccess) {
               innerBlocks = innerRes.value;
             } else {
@@ -2577,7 +2571,6 @@ class CommonMarkParser {
                   buildBuffer();
                 }
 
-                // TODO Speedup by checking impossible starts
                 ParseResult<String> lineRes = anyLine.run(s, position);
                 assert(lineRes.isSuccess);
                 List<Block> lineBlock = block
