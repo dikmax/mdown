@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-08-25T12:27:49.121Z
+// 2015-12-26T19:32:42.488Z
 
 part of md_proc.test.data.test_data;
 
@@ -4291,5 +4291,37 @@ final Map<String, String> _$superscriptTests = {
 ''',
   r'''H*^2\ 0^*O
 ''': r'''<p>H<em><sup>2 0</sup></em>O</p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> texMathDollars
+// **************************************************************************
+
+final Map<String, String> _$texMathDollarsTests = {
+  r'''$a+b=c$
+''': r'''<p><span class="math inline">\(a+b=c\)</span></p>
+''',
+  r'''$ a+b=c$
+''': r'''<p>$ a+b=c$</p>
+''',
+  r'''$a+b=c $
+''': r'''<p>$a+b=c $</p>
+''',
+  r'''$20,000 and $30,000
+''': r'''<p>$20,000 and $30,000</p>
+''',
+  r'''$a+\$b=c$
+''': r'''<p><span class="math inline">\(a+$b=c\)</span></p>
+''',
+  r'''$$a+b=c$$
+''': r'''<p><span class="math display">\[a+b=c\]</span></p>
+''',
+  r'''$$a+\$b=c$$
+''': r'''<p><span class="math display">\[a+\$b=c\]</span></p>
+''',
+  r'''$$a+$b=c$$
+''': r'''<p><span class="math display">\[a+$b=c\]</span></p>
 ''',
 };

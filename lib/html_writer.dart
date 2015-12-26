@@ -196,6 +196,10 @@ class _HtmlBuilder extends StringBuffer {
         writeSmartQuote(inline, stripped: stripped);
       } else if (inline is RawInline) {
         write(inline.contents);
+      } else if (inline is TexMathInline) {
+        writeTexMathInline(inline, stripped: stripped);
+      } else if (inline is TexMathDisplay) {
+        writeTexMathDisplay(inline, stripped: stripped);
       } else {
         throw new UnimplementedError(inline.toString());
       }
@@ -278,6 +282,31 @@ class _HtmlBuilder extends StringBuffer {
         // Single quote have no contents and always closing.
         write(quote.single ? '\u{2019}' : '\u{201d}');
       }
+    }
+  }
+
+  void writeTexMathInline(TexMathInline texMathInline, {bool stripped: false}) {
+    if (!stripped) {
+      write('<span class="math inline">');
+    }
+    write(r'\(');
+    write(texMathInline.contents);
+    write(r'\)');
+    if (!stripped) {
+      write('</span>');
+    }
+  }
+
+  void writeTexMathDisplay(TexMathDisplay texMathDisplay,
+      {bool stripped: false}) {
+    if (!stripped) {
+      write('<span class="math display">');
+    }
+    write(r'\[');
+    write(texMathDisplay.contents);
+    write(r'\]');
+    if (!stripped) {
+      write('</span>');
     }
   }
 

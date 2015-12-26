@@ -1752,6 +1752,24 @@ class CommonMarkParser {
                 return result;
               };
 
+  static final Parser _texMathSingleDollarStart =
+      char(r'$').notFollowedBy(oneOf(' 0123456789\n'));
+  static final Parser _texMathSingleDollarContent = choice([
+    string(r'\$') ^ (_) => r'$',
+    (oneOf(' \n\t') < char(r'$')) ^ (String c) => c + r'$',
+    anyChar
+  ]);
+  static final Parser _texMathSingleDollarEnd = char(r'$');
+  static final Parser _texMathSingleDollar = (_texMathSingleDollarStart >
+          _texMathSingleDollarContent.manyUntil(_texMathSingleDollarEnd)) ^
+      (List<String> content) => new TexMathInline(content.join());
+
+  static final Parser _texMathDoubleDollar = (string(r'$$') >
+          anyChar.manyUntil(string(r'$$'))) ^
+      (List<String> content) => new TexMathDisplay(content.join());
+  static final Parser texMathDollars =
+      _texMathDoubleDollar | _texMathSingleDollar;
+
   Parser<List<Inline>> _strCache;
   Parser<List<Inline>> get str {
     if (_strCache == null) {
@@ -1780,6 +1798,7 @@ class CommonMarkParser {
         autolink,
         rawInlineHtml,
         _options.smartPunctuation ? smartPunctuation : fail,
+        _options.texMathDollars ? texMathDollars : fail,
         str
       ]);
     }

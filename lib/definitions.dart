@@ -723,3 +723,31 @@ class HtmlRawInline extends RawInline {
 
   int get hashCode => contents.hashCode;
 }
+
+abstract class TexMath extends Inline {
+  String contents;
+
+  TexMath(this.contents);
+}
+
+class TexMathInline extends TexMath {
+  TexMathInline(String contents) : super(contents);
+
+  String toString() => "TexMathInline $contents";
+
+  bool operator ==(dynamic obj) =>
+      obj is TexMathInline && contents == obj.contents;
+
+  int get hashCode => contents.hashCode;
+}
+
+class TexMathDisplay extends TexMath {
+  TexMathDisplay(String contents) : super(contents);
+
+  String toString() => "TexMathDisplay $contents";
+
+  bool operator ==(dynamic obj) =>
+      obj is TexMathDisplay && contents == obj.contents;
+
+  int get hashCode => contents.hashCode;
+}

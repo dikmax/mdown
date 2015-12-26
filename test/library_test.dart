@@ -40,6 +40,10 @@ void main() {
   tests("Strikeout and subscript", strikeoutAndSubscript,
       mdToHtmlTest(new Options(strikeout: true, subscript: true)));
 
+  // Tex Math
+  tests("Tex math dollars", texMathDollars,
+      mdToHtmlTest(new Options(texMathDollars: true)));
+
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));
 

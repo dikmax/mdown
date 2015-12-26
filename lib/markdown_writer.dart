@@ -356,6 +356,10 @@ class _InlineRenderer {
         writeSuperscript(inline, context: context);
       } else if (inline is RawInline) {
         write(inline.contents);
+      } else if (inline is TexMathInline) {
+        writeTexMathInline(inline, context: context);
+      } else if (inline is TexMathDisplay) {
+        writeTexMathDisplay(inline, context: context);
       } else {
         throw new UnimplementedError(inline.toString());
       }
@@ -438,6 +442,20 @@ class _InlineRenderer {
     writeInlines(superscript.contents,
         context: context.copy(escapeSpace: true));
     write("^");
+  }
+
+  void writeTexMathInline(TexMathInline texMathInline,
+      {_EscapeContext context: _EscapeContext.empty}) {
+    write(r"$");
+    write(texMathInline.contents.replaceAll(r'$', r'\$'));
+    write(r"$");
+  }
+
+  void writeTexMathDisplay(TexMathDisplay texMathDisplay,
+      {_EscapeContext context: _EscapeContext.empty}) {
+    write(r"$$");
+    write(texMathDisplay.contents);
+    write(r"$$");
   }
 
   void writeLink(Link link) {

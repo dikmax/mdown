@@ -53,6 +53,17 @@ class Options {
   /// ```
   final bool superscript;
 
+  /// Enables tex math inside `$` or `$$`.
+  ///
+  /// Anything between two `$` characters will be treated as TeX math. The
+  /// opening `$` must have a non-space character immediately to its right,
+  /// while the closing `$` must have a non-space character immediately to its
+  /// left, and must not be followed immediately by a digit. Thus,
+  /// `$20,000 and $30,000` won’t parse as math. If for some reason you need to
+  /// enclose text in literal `$` characters, backslash-escape them and they
+  /// won’t be treated as math delimiters.
+  final bool texMathDollars;
+
   /// Custom reference resolver may be required when parsing document without implicit defined references, for example
   /// Dartdoc.
   ///
@@ -89,6 +100,7 @@ class Options {
       this.strikeout: false,
       this.subscript: false,
       this.superscript: false,
+      this.texMathDollars: false,
       this.linkResolver: defaultLinkResolver});
 
   /// Predefined version of Options. Alongside with strict also supports smart puctuation, which is declared separately
@@ -100,7 +112,8 @@ class Options {
       smartPunctuation: true,
       strikeout: true,
       subscript: true,
-      superscript: true);
+      superscript: true,
+      texMathDollars: true);
 
   /// Predefined strict version of Options. Only support [CommonMark specification](http://commonmark.org).
   static const Options strict = const Options();

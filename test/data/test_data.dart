@@ -28,3 +28,6 @@ final Map<String, String> subscript = _$subscriptTests;
 
 @EmbedTests('superscript.txt')
 final Map<String, String> superscript = _$superscriptTests;
+
+@EmbedTests('tex_math_dollars.txt')
+final Map<String, String> texMathDollars = _$texMathDollarsTests;
