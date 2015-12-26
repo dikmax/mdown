@@ -59,7 +59,8 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
       throw 'must be relative path to the source file';
     }
 
-    FileBasedSource source = element.source as FileBasedSource;
+    FileBasedSource source = element.source;
+
     String sourcePath = source.file.getAbsolutePath();
 
     String sourcePathDir = path.dirname(sourcePath);

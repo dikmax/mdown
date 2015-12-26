@@ -131,7 +131,7 @@ Parser<String> noneOfSet(Set<String> set) =>
 // No expectations, no commitment
 Parser choiceSimple(List<Parser> ps) {
   return new Parser((String s, Position pos) {
-    for (final p in ps) {
+    for (final Parser p in ps) {
       final ParseResult res = p.run(s, pos);
       if (res.isSuccess) {
         return res;
@@ -159,7 +159,7 @@ Parser _manySimple(Parser p, List acc()) {
 
 Parser<List> manySimple(Parser p) => _manySimple(p, () => []);
 
-Parser<List> many1Simple(Parser p) => p >> (x) => _manySimple(p, () => [x]);
+Parser<List> many1Simple(Parser p) => p >> (dynamic x) => _manySimple(p, () => [x]);
 
 Parser skipManySimple(Parser p) {
   return new Parser((String s, Position pos) {
@@ -182,15 +182,15 @@ Parser<String> record1Many(Parser p) => skipMany1Simple(p).record;
 
 Parser manyUntilSimple(Parser p, Parser end) {
   // Imperative version to avoid stack overflows.
-  return new Parser((s, pos) {
+  return new Parser((String s, Position pos) {
     List res = [];
     Position index = pos;
     while (true) {
-      final endRes = end.run(s, index);
+      ParseResult endRes = end.run(s, index);
       if (endRes.isSuccess) {
         return _success(res, s, endRes.position);
       } else {
-        final xRes = p.run(s, index);
+        ParseResult xRes = p.run(s, index);
         if (xRes.isSuccess) {
           res.add(xRes.value);
           index = xRes.position;
@@ -204,14 +204,14 @@ Parser manyUntilSimple(Parser p, Parser end) {
 
 Parser skipManyUntilSimple(Parser p, Parser end) {
   // Imperative version to avoid stack overflows.
-  return new Parser((s, pos) {
+  return new Parser((String s, Position pos) {
     Position index = pos;
     while (true) {
-      final endRes = end.run(s, index);
+      ParseResult endRes = end.run(s, index);
       if (endRes.isSuccess) {
         return _success(null, s, endRes.position);
       } else {
-        final xRes = p.run(s, index);
+        ParseResult xRes = p.run(s, index);
         if (xRes.isSuccess) {
           index = xRes.position;
         } else {
@@ -2284,7 +2284,8 @@ class CommonMarkParser {
     if (blocks.length > 0) {
       if (blocks.last is Para) {
         Para last = blocks.last;
-        (last.contents as _UnparsedInlines).raw += "\n" + s;
+        _UnparsedInlines inlines = last.contents;
+        inlines.raw += "\n" + s;
         return true;
       } else if (blocks.last is Blockquote) {
         Blockquote last = blocks.last;
@@ -2332,7 +2333,8 @@ class CommonMarkParser {
               innerRes.length > 0 &&
               innerRes.first is Para) {
             Para first = innerRes.first;
-            if (_acceptLazy(blocks, (first.contents as _UnparsedInlines).raw)) {
+            _UnparsedInlines inlines = first.contents;
+            if (_acceptLazy(blocks, inlines.raw)) {
               innerRes.removeAt(0);
             }
           }
@@ -2362,8 +2364,8 @@ class CommonMarkParser {
                   lineBlock.length == 1 &&
                   lineBlock[0] is Para) {
                 Para block = lineBlock[0];
-                if (!_acceptLazy(
-                    blocks, (block.contents as _UnparsedInlines).raw)) {
+                _UnparsedInlines inlines = block.contents;
+                if (!_acceptLazy(blocks, inlines.raw)) {
                   break;
                 }
               } else {
@@ -2456,12 +2458,12 @@ class CommonMarkParser {
           }
           if (!afterEmptyLine &&
               innerBlocks.length > 0 &&
-              innerBlocks.first is Para &&
-              _acceptLazy(
-                  blocks,
-                  ((innerBlocks.first as Para).contents as _UnparsedInlines)
-                      .raw)) {
-            innerBlocks.removeAt(0);
+              innerBlocks.first is Para) {
+            Para para = innerBlocks.first;
+            _UnparsedInlines inlines = para.contents;
+            if (_acceptLazy(blocks, inlines.raw)) {
+              innerBlocks.removeAt(0);
+            }
           }
           if (innerBlocks.length > 0) {
             blocks.addAll(innerBlocks);
@@ -2471,7 +2473,8 @@ class CommonMarkParser {
 
         void addToListItem(ListItem item, Iterable<Block> c) {
           if (item.contents is List) {
-            (item.contents as List).addAll(c);
+            List contents = item.contents;
+            contents.addAll(c);
             return;
           }
           List<Block> contents = new List.from(item.contents);
@@ -2505,7 +2508,8 @@ class CommonMarkParser {
             addToListItem(block.items.last, blocks);
             blocks = [];
             if (block.items is List) {
-              (block.items as List).add(new ListItem([]));
+              List items = block.items;
+              items.add(new ListItem([]));
             } else {
               List<ListItem> list = new List.from(block.items);
               list.add(new ListItem([]));
@@ -2575,14 +2579,13 @@ class CommonMarkParser {
                 assert(lineRes.isSuccess);
                 List<Block> lineBlock = block
                     .parse(lineRes.value.trimLeft() + "\n", tabStop: tabStop);
-                if (lineBlock.length == 1 &&
-                    lineBlock[0] is Para &&
-                    _acceptLazy(
-                        blocks,
-                        ((lineBlock[0] as Para).contents as _UnparsedInlines)
-                            .raw)) {
-                  position = lineRes.position;
-                  continue;
+                if (lineBlock.length == 1 && lineBlock[0] is Para) {
+                  Para para = lineBlock[0];
+                  _UnparsedInlines inlines = para.contents;
+                  if (_acceptLazy(blocks, inlines.raw)) {
+                    position = lineRes.position;
+                    continue;
+                  }
                 }
               }
 
