@@ -159,7 +159,8 @@ Parser _manySimple(Parser p, List acc()) {
 
 Parser<List> manySimple(Parser p) => _manySimple(p, () => []);
 
-Parser<List> many1Simple(Parser p) => p >> (dynamic x) => _manySimple(p, () => [x]);
+Parser<List> many1Simple(Parser p) =>
+    p >> (dynamic x) => _manySimple(p, () => [x]);
 
 Parser skipManySimple(Parser p) {
   return new Parser((String s, Position pos) {
