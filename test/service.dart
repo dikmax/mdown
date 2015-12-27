@@ -868,5 +868,35 @@ void serviceTests() {
         t.expect(raw, t.isNot(t.equals(null)));
       });
     });
+
+    t.group('TexMathInline', () {
+      TexMathInline raw = new TexMathInline("a+b=c");
+      t.test('toString', () {
+        t.expect(raw.toString(), t.equals('TexMathInline a+b=c'));
+      });
+      t.test('==', () {
+        t.expect(raw, t.equals(new TexMathInline("a+b=c")));
+      });
+      t.test('!=', () {
+        t.expect(raw, t.isNot(t.equals(new TexMathInline("a-b=c"))));
+        t.expect(raw, t.isNot(t.equals(new TexMathDisplay("a+b=c"))));
+        t.expect(raw, t.isNot(t.equals(null)));
+      });
+    });
+
+    t.group('TexMathDisplay', () {
+      TexMathDisplay raw = new TexMathDisplay("a+b=c");
+      t.test('toString', () {
+        t.expect(raw.toString(), t.equals('TexMathDisplay a+b=c'));
+      });
+      t.test('==', () {
+        t.expect(raw, t.equals(new TexMathDisplay("a+b=c")));
+      });
+      t.test('!=', () {
+        t.expect(raw, t.isNot(t.equals(new TexMathDisplay("a-b=c"))));
+        t.expect(raw, t.isNot(t.equals(new TexMathInline("a+b=c"))));
+        t.expect(raw, t.isNot(t.equals(null)));
+      });
+    });
   });
 }
