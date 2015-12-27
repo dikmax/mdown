@@ -56,7 +56,7 @@ void main() {
       "CommonMark [commonmark]",
       specification,
       mdToHtmlTest(Options.commonmark,
-          (_, num) => !smartPunctuationContradictions.contains(num)));
+          (_, int num) => !smartPunctuationContradictions.contains(num)));
 
   // Strikeout
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
@@ -85,6 +85,16 @@ void main() {
       mdToHtmlTest(new Options(texMathDollars: true)));
   tests("Tex math dollars spec", specification,
       mdToHtmlTest(new Options(texMathDollars: true)));
+
+  // Tex Math
+  Set<int> texMathSingleBackslashContradictions = new Set.from([
+    273, 465, 481
+  ]);
+  tests("Tex math single backslash", texMathSingleBackslash,
+      mdToHtmlTest(new Options(texMathSingleBackslash: true)));
+  tests("Tex math single backslash spec", specification,
+      mdToHtmlTest(new Options(texMathSingleBackslash: true),
+          (_, int num) => !texMathSingleBackslashContradictions.contains(num)));
 
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));

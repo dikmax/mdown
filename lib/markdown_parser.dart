@@ -1694,26 +1694,8 @@ class CommonMarkParser {
           (_) => [new LineBreak()];
 
   //
-  // str
+  // smartPunctuation extension
   //
-
-  static final RegExp _nbspRegExp = new RegExp("\u{a0}");
-  static List<Inline> _transformString(String str) {
-    Match m = _nbspRegExp.firstMatch(str);
-    List<Inline> result = [];
-    while (m != null) {
-      if (m.start > 0) {
-        result.add(new Str(str.substring(0, m.start)));
-      }
-      result.add(new NonBreakableSpace());
-      str = str.substring(m.end);
-      m = _nbspRegExp.firstMatch(str);
-    }
-    if (str.length > 0) {
-      result.add(new Str(str));
-    }
-    return result;
-  }
 
   static final Parser<List<Inline>> smartPunctuation =
       (string("...") ^ (_) => [new Ellipsis()]) |
@@ -1752,23 +1734,63 @@ class CommonMarkParser {
                 return result;
               };
 
-  static final Parser _texMathSingleDollarStart =
+  //
+  // TEX math between `$`s or `$$`s.
+  //
+
+  static final Parser<String> _texMathSingleDollarStart =
       char(r'$').notFollowedBy(oneOf(' 0123456789\n'));
-  static final Parser _texMathSingleDollarContent = choice([
+  static final Parser<String> _texMathSingleDollarContent = choice([
     string(r'\$') ^ (_) => r'$',
     (oneOf(' \n\t') < char(r'$')) ^ (String c) => c + r'$',
     anyChar
   ]);
-  static final Parser _texMathSingleDollarEnd = char(r'$');
-  static final Parser _texMathSingleDollar = (_texMathSingleDollarStart >
-          _texMathSingleDollarContent.manyUntil(_texMathSingleDollarEnd)) ^
-      (List<String> content) => new TexMathInline(content.join());
+  static final Parser<String> _texMathSingleDollarEnd = char(r'$');
+  static final Parser<List<Inline>> _texMathSingleDollar =
+      (_texMathSingleDollarStart >
+              _texMathSingleDollarContent.manyUntil(_texMathSingleDollarEnd)) ^
+          (List<String> content) => [new TexMathInline(content.join())];
 
-  static final Parser _texMathDoubleDollar = (string(r'$$') >
+  static final Parser<List<Inline>> _texMathDoubleDollar = (string(r'$$') >
           anyChar.manyUntil(string(r'$$'))) ^
-      (List<String> content) => new TexMathDisplay(content.join());
-  static final Parser texMathDollars =
+      (List<String> content) => [new TexMathDisplay(content.join())];
+  static final Parser<List<Inline>> texMathDollars =
       _texMathDoubleDollar | _texMathSingleDollar;
+
+  //
+  // TEX math between `\(` and `\)`, or `\[` and `\]`
+  //
+
+  static final Parser<List<Inline>> _texMathSingleBackslashParens =
+      (string(r'\(') > anyChar.manyUntil(string(r'\)'))) ^
+          (List<String> content) => [new TexMathInline(content.join())];
+  static final Parser<List<Inline>> _texMathSingleBackslashBracket =
+      (string(r'\[') > anyChar.manyUntil(string(r'\]'))) ^
+          (List<String> content) => [new TexMathDisplay(content.join())];
+  static final Parser<List<Inline>> texMathSingleBackslash =
+      _texMathSingleBackslashParens | _texMathSingleBackslashBracket;
+
+  //
+  // str
+  //
+
+  static final RegExp _nbspRegExp = new RegExp("\u{a0}");
+  static List<Inline> _transformString(String str) {
+    Match m = _nbspRegExp.firstMatch(str);
+    List<Inline> result = [];
+    while (m != null) {
+      if (m.start > 0) {
+        result.add(new Str(str.substring(0, m.start)));
+      }
+      result.add(new NonBreakableSpace());
+      str = str.substring(m.end);
+      m = _nbspRegExp.firstMatch(str);
+    }
+    if (str.length > 0) {
+      result.add(new Str(str));
+    }
+    return result;
+  }
 
   Parser<List<Inline>> _strCache;
   Parser<List<Inline>> get str {
@@ -1783,12 +1805,21 @@ class CommonMarkParser {
     return _strCache;
   }
 
+  //
+  // Inline
+  //
+
   Parser<List<Inline>> _inlineCache;
   Parser<List<Inline>> get inline {
     if (_inlineCache == null) {
-      _inlineCache = choiceSimple([
+      List<Parser<List<Inline>>> inlineParsers = [
         lineBreak,
-        whitespace,
+        whitespace
+      ];
+      if (_options.texMathSingleBackslash) {
+        inlineParsers.add(texMathSingleBackslash);
+      }
+      inlineParsers.addAll([
         escapedChar,
         htmlEntity,
         inlineCode,
@@ -1796,11 +1827,16 @@ class CommonMarkParser {
         link,
         image,
         autolink,
-        rawInlineHtml,
-        _options.smartPunctuation ? smartPunctuation : fail,
-        _options.texMathDollars ? texMathDollars : fail,
-        str
+        rawInlineHtml
       ]);
+      if (_options.smartPunctuation) {
+        inlineParsers.add(smartPunctuation);
+      }
+      if (_options.texMathDollars) {
+        inlineParsers.add(texMathDollars);
+      }
+      inlineParsers.add(str);
+      _inlineCache = choiceSimple(inlineParsers);
     }
     return _inlineCache;
   }

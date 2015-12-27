@@ -31,3 +31,7 @@ final Map<String, String> superscript = _$superscriptTests;
 
 @EmbedTests('tex_math_dollars.txt')
 final Map<String, String> texMathDollars = _$texMathDollarsTests;
+
+@EmbedTests('tex_math_single_backslash.txt')
+final Map<String, String> texMathSingleBackslash =
+    _$texMathSingleBackslashTests;

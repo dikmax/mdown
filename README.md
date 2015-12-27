@@ -19,6 +19,7 @@ results back to markdown.
 
 Project main goal is create processing library for Markdown.
 
+
 Parsing
 -------
 
@@ -30,6 +31,7 @@ void main() {
   print(doc); // Document [SetextHeader 1 [Str "Hello", Space, Str "world", Str "!"]]
 }
 ```
+
 
 Writing html
 ------------
@@ -44,6 +46,7 @@ void main() {
 }
 ```
 
+
 Writing markdown
 ----------------
 
@@ -57,6 +60,7 @@ void main() {
               // ============
 }
 ```
+
 
 Extensions
 ==========
@@ -76,7 +80,7 @@ There three predefined versions of parsers/writers:
 
 - `strict`: all extensions are disabled
 - `commonmark`: enabled only `smartPunctuation` extension.
-- `defaults`: all extensions (`smartPunctuation`, `strikeout`, `subscript`, `superscript`) are enabled.
+- `defaults`: `smartPunctuation`, `strikeout`, `subscript`, `superscript`, `texMathDollars` are enabled.
 
 To get correspondent parser/writer instance use static getter on class:
 
@@ -85,16 +89,18 @@ CommonMarkParser defaultParser = CommonMarkParser.defaults;
 HtmlWriter strictWriter = HtmlWriter.strict;
 ```
 
-Smart punctuation
------------------
+
+Smart punctuation (`Options.smartPunctuation`)
+----------------------------------------------
 
 Smart punctuation is automatic replacement of `...`, `---`, `--`, `"` and `'` to "…", "—", "–" and curly versions of
 quote marks accordingly. It's only official extension to date.
 
 **NOTE:** This extension uses Unicode chars. Make sure that your code support it.
 
-Strikeout
----------
+
+Strikeout (`Options.strikeout`)
+-------------------------------
 
 Strikeouts text (~~like this~~). Just wrap text with double tildes (`~~`).
 
@@ -102,8 +108,9 @@ Strikeouts text (~~like this~~). Just wrap text with double tildes (`~~`).
 Strikeouts text (~~like this~~).
 ```
 
-Subscript
----------
+
+Subscript (`Options.subscript`)
+-------------------------------
 
 Support for subscript (H<sub>2</sub>O). Wrap text with tildes (`~`).
 
@@ -117,8 +124,9 @@ Subscript couldn't contain spaces. If you need to insert space into subscript, e
 subscript~with\ spaces~
 ```
 
-Superscript
------------
+
+Superscript (`Options.superscript`)
+-----------------------------------
 
 Support for superscript (2<sup>2</sup>=4). Wrap text with caret (`^`).
 
@@ -131,6 +139,28 @@ Superscript couldn't contain spaces. If you need to insert space into superscrip
 ```md
 superscript^with\ spaces^
 ```
+
+
+TeX Math between dollars (`Options.texMathDollars`)
+---------------------------------------------------
+
+Anything between two `$` characters will be treated as inline TeX math. The opening `$` must have a non-space character
+immediately to its right, while the closing `$` must have a non-space character immediately to its left, and must not
+be followed immediately by a digit. Thus, `$20,000 and $30,000` won’t parse as math. If for some reason you need to
+enclose text in literal `$` characters, backslash-escape them and they won’t be treated as math delimiters.
+
+Anything between two `$$` will be treated as display TeX math.
+
+
+TeX Math between backslashed `()` or `[]` (`Options.texMathSingleBackslash`)
+----------------------------------------------------------------------------
+
+Causes anything between `\(` and `\)` to be interpreted as inline TeX math, and anything between `\[` and `\]` to be
+interpreted as display TeX math.
+
+**NOTE:** This extensions is disabled by default.
+
+
 
 Custom reference resolver
 -------------------------
@@ -168,7 +198,7 @@ High-level plan for development
 ===============================
 
 1. Follow CommonMark specification changes.
-2. Add MarkDown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
+2. Add Markdown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
 and accepted. (inline math, footnotes, etc.)
 3. AST-processing classes. Don't have much time to think about this. But this is definitely required.
 

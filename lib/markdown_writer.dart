@@ -446,16 +446,32 @@ class _InlineRenderer {
 
   void writeTexMathInline(TexMathInline texMathInline,
       {_EscapeContext context: _EscapeContext.empty}) {
-    write(r"$");
-    write(texMathInline.contents.replaceAll(r'$', r'\$'));
-    write(r"$");
+    if (_options.texMathDollars) {
+      write(r"$");
+      write(texMathInline.contents.replaceAll(r'$', r'\$'));
+      write(r"$");
+    } else if (_options.texMathSingleBackslash) {
+      write(r"\(");
+      write(texMathInline.contents);
+      write(r"\)");
+    } else {
+      throw new UnsupportedError("No TEX math extensions enabled");
+    }
   }
 
   void writeTexMathDisplay(TexMathDisplay texMathDisplay,
       {_EscapeContext context: _EscapeContext.empty}) {
-    write(r"$$");
-    write(texMathDisplay.contents);
-    write(r"$$");
+    if (_options.texMathDollars) {
+      write(r"$$");
+      write(texMathDisplay.contents);
+      write(r"$$");
+    } else if (_options.texMathSingleBackslash) {
+      write(r"\[");
+      write(texMathDisplay.contents);
+      write(r"\]");
+    } else {
+      throw new UnsupportedError("No TEX math extensions enabled");
+    }
   }
 
   void writeLink(Link link) {
