@@ -23,25 +23,67 @@ void main() {
       mdToHtmlTest(Options.strict));
 
   // SmartPunct
+  Set<int> smartPunctuationContradictions = new Set.from([
+    11,
+    20,
+    50,
+    54,
+    151,
+    161,
+    162,
+    275,
+    307,
+    315,
+    321,
+    325,
+    342,
+    347,
+    357,
+    461,
+    539,
+    565,
+    566,
+    568,
+    570,
+    572,
+    573,
+    579,
+    597
+  ]);
   tests("SmartPunct [commonmark]", smartPunctuation,
       mdToHtmlTest(Options.commonmark));
+  tests(
+      "CommonMark [commonmark]",
+      specification,
+      mdToHtmlTest(Options.commonmark,
+          (_, num) => !smartPunctuationContradictions.contains(num)));
 
   // Strikeout
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
+  tests("Strikeout spec", specification,
+      mdToHtmlTest(new Options(strikeout: true)));
 
   // Subscript
   tests("Subscript", subscript, mdToHtmlTest(new Options(subscript: true)));
+  tests("Subscript spec", specification,
+      mdToHtmlTest(new Options(subscript: true)));
 
   // Superscript
   tests(
       "Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
+  tests("Superscript spec", specification,
+      mdToHtmlTest(new Options(superscript: true)));
 
   // Strikeout
   tests("Strikeout and subscript", strikeoutAndSubscript,
       mdToHtmlTest(new Options(strikeout: true, subscript: true)));
+  tests("Strikeout and subscript spec", specification,
+      mdToHtmlTest(new Options(strikeout: true, subscript: true)));
 
   // Tex Math
   tests("Tex math dollars", texMathDollars,
+      mdToHtmlTest(new Options(texMathDollars: true)));
+  tests("Tex math dollars spec", specification,
       mdToHtmlTest(new Options(texMathDollars: true)));
 
   // Markdown to markdown tests
