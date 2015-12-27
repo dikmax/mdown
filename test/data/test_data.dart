@@ -35,3 +35,7 @@ final Map<String, String> texMathDollars = _$texMathDollarsTests;
 @EmbedTests('tex_math_single_backslash.txt')
 final Map<String, String> texMathSingleBackslash =
     _$texMathSingleBackslashTests;
+
+@EmbedTests('tex_math_double_backslash.txt')
+final Map<String, String> texMathDoubleBackslash =
+    _$texMathDoubleBackslashTests;

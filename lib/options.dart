@@ -72,6 +72,11 @@ class Options {
   /// `[`.
   final bool texMathSingleBackslash;
 
+  /// Causes anything between `\\(` and `\\)` to be interpreted as inline TeX
+  /// math, and anything between `\\[` and `\\]` to be interpreted as display
+  /// TeX math.
+  final bool texMathDoubleBackslash;
+
   /// Custom reference resolver may be required when parsing document without implicit defined references, for example
   /// Dartdoc.
   ///
@@ -110,6 +115,7 @@ class Options {
       this.superscript: false,
       this.texMathDollars: false,
       this.texMathSingleBackslash: false,
+      this.texMathDoubleBackslash: false,
       this.linkResolver: defaultLinkResolver});
 
   /// Predefined version of Options. Alongside with strict also supports smart puctuation, which is declared separately

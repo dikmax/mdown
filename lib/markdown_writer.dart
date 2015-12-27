@@ -450,6 +450,10 @@ class _InlineRenderer {
       write(r"$");
       write(texMathInline.contents.replaceAll(r'$', r'\$'));
       write(r"$");
+    } else if (_options.texMathDoubleBackslash) {
+      write(r"\\(");
+      write(texMathInline.contents);
+      write(r"\\)");
     } else if (_options.texMathSingleBackslash) {
       write(r"\(");
       write(texMathInline.contents);
@@ -465,6 +469,10 @@ class _InlineRenderer {
       write(r"$$");
       write(texMathDisplay.contents);
       write(r"$$");
+    } else if (_options.texMathDoubleBackslash) {
+      write(r"\\[");
+      write(texMathDisplay.contents);
+      write(r"\\]");
     } else if (_options.texMathSingleBackslash) {
       write(r"\[");
       write(texMathDisplay.contents);

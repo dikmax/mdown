@@ -151,11 +151,25 @@ enclose text in literal `$` characters, backslash-escape them and they won’t b
 
 Anything between two `$$` will be treated as display TeX math.
 
+HTML writer generates markup for MathJax library. I.e. wraps content with `\(...\)` or `\[...\]` and additionally wraps
+it with`<span class="math inline">` or `<span class="math display">`.
+
 
 TeX Math between backslashed `()` or `[]` (`Options.texMathSingleBackslash`)
 ----------------------------------------------------------------------------
 
 Causes anything between `\(` and `\)` to be interpreted as inline TeX math, and anything between `\[` and `\]` to be
+interpreted as display TeX math.
+
+**NOTE 1:** This extensions breaks escaping of `(` and `[]`.
+
+**NOTE 2:** This extensions is disabled by default.
+
+
+TeX Math between double backslashed `()` or `[]` (`Options.texMathDoubleBackslash`)
+-----------------------------------------------------------------------------------
+
+Causes anything between `\\(` and `\\)` to be interpreted as inline TeX math, and anything between `\\[` and `\\]` to be
 interpreted as display TeX math.
 
 **NOTE:** This extensions is disabled by default.

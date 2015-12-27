@@ -1771,6 +1771,19 @@ class CommonMarkParser {
       _texMathSingleBackslashParens | _texMathSingleBackslashBracket;
 
   //
+  // TEX math between `\\(` and `\\)`, or `\\[` and `\\]`
+  //
+
+  static final Parser<List<Inline>> _texMathDoubleBackslashParens =
+      (string(r'\\(') > anyChar.manyUntil(string(r'\\)'))) ^
+          (List<String> content) => [new TexMathInline(content.join())];
+  static final Parser<List<Inline>> _texMathDoubleBackslashBracket =
+      (string(r'\\[') > anyChar.manyUntil(string(r'\\]'))) ^
+          (List<String> content) => [new TexMathDisplay(content.join())];
+  static final Parser<List<Inline>> texMathDoubleBackslash =
+      _texMathDoubleBackslashParens | _texMathDoubleBackslashBracket;
+
+  //
   // str
   //
 
@@ -1818,6 +1831,9 @@ class CommonMarkParser {
       ];
       if (_options.texMathSingleBackslash) {
         inlineParsers.add(texMathSingleBackslash);
+      }
+      if (_options.texMathDoubleBackslash) {
+        inlineParsers.add(texMathDoubleBackslash);
       }
       inlineParsers.addAll([
         escapedChar,

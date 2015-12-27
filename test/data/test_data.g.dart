@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-12-27T09:10:07.546Z
+// 2015-12-27T09:45:50.375Z
 
 part of md_proc.test.data.test_data;
 
@@ -4348,5 +4348,33 @@ c\)</span></p>
 ''',
   r'''\(a+b=c\]
 ''': r'''<p>(a+b=c]</p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> texMathDoubleBackslash
+// **************************************************************************
+
+final Map<String, String> _$texMathDoubleBackslashTests = {
+  r'''$a+b=c$
+''': r'''<p>$a+b=c$</p>
+''',
+  r'''\\(a+b=c\\)
+''': r'''<p><span class="math inline">\(a+b=c\)</span></p>
+''',
+  r'''\(a+b=c\)
+''': r'''<p>(a+b=c)</p>
+''',
+  r'''\\(a+b=
+c\\)
+''': r'''<p><span class="math inline">\(a+b=
+c\)</span></p>
+''',
+  r'''\\[a+b=c\\]
+''': r'''<p><span class="math display">\[a+b=c\]</span></p>
+''',
+  r'''\\(a+b=c\\]
+''': r'''<p>\(a+b=c\]</p>
 ''',
 };

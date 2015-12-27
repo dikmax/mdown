@@ -1,0 +1,37 @@
+.
+$a+b=c$
+.
+<p>$a+b=c$</p>
+.
+
+.
+\\(a+b=c\\)
+.
+<p><span class="math inline">\(a+b=c\)</span></p>
+.
+
+.
+\(a+b=c\)
+.
+<p>(a+b=c)</p>
+.
+
+.
+\\(a+b=
+c\\)
+.
+<p><span class="math inline">\(a+b=
+c\)</span></p>
+.
+
+.
+\\[a+b=c\\]
+.
+<p><span class="math display">\[a+b=c\]</span></p>
+.
+
+.
+\\(a+b=c\\]
+.
+<p>\(a+b=c\]</p>
+.
