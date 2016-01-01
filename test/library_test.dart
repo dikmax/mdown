@@ -1,5 +1,6 @@
 import 'package:md_proc/options.dart';
 
+import 'custom_classes.dart';
 import 'individual_parsers.dart';
 import 'parser.dart';
 import 'reference_resolver.dart';
@@ -87,26 +88,30 @@ void main() {
       mdToHtmlTest(new Options(texMathDollars: true)));
 
   // TeX Math between backslashed `()` or `[]`
-  Set<int> texMathSingleBackslashContradictions = new Set.from([
-    273, 465, 481
-  ]);
+  Set<int> texMathSingleBackslashContradictions = new Set.from([273, 465, 481]);
   tests("Tex math single backslash", texMathSingleBackslash,
       mdToHtmlTest(new Options(texMathSingleBackslash: true)));
-  tests("Tex math single backslash spec", specification,
+  tests(
+      "Tex math single backslash spec",
+      specification,
       mdToHtmlTest(new Options(texMathSingleBackslash: true),
           (_, int num) => !texMathSingleBackslashContradictions.contains(num)));
 
   // TeX Math between double backslashed `()` or `[]`
-  Set<int> texMathDoubleBackslashContradictions = new Set.from([
-  ]);
+  Set<int> texMathDoubleBackslashContradictions = new Set.from([]);
   tests("Tex math double backslash", texMathDoubleBackslash,
       mdToHtmlTest(new Options(texMathDoubleBackslash: true)));
-  tests("Tex math double backslash spec", specification,
+  tests(
+      "Tex math double backslash spec",
+      specification,
       mdToHtmlTest(new Options(texMathDoubleBackslash: true),
           (_, int num) => !texMathDoubleBackslashContradictions.contains(num)));
 
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));
+
+  // Custom classes
+  customClassesTests();
 
   // Custom resolver
   referenceResolverTests();

@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2015-12-27T09:45:50.375Z
+// 2016-01-01T14:50:58.566Z
 
 part of md_proc.test.data.test_data;
 
@@ -4376,5 +4376,19 @@ c\)</span></p>
 ''',
   r'''\\(a+b=c\\]
 ''': r'''<p>\(a+b=c\]</p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> texMathCustomClasses
+// **************************************************************************
+
+final Map<String, String> _$texMathCustomClassesTests = {
+  r'''$a+b=c$
+''': r'''<p><span class="custom_inline">\(a+b=c\)</span></p>
+''',
+  r'''$$a+b=c$$
+''': r'''<p><span class="custom_display">\[a+b=c\]</span></p>
 ''',
 };

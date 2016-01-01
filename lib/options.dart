@@ -77,6 +77,14 @@ class Options {
   /// TeX math.
   final bool texMathDoubleBackslash;
 
+  /// Classes added to `span` on rendering inline math into html.
+  /// Defaults to `['math', 'inline']`.
+  final Iterable<String> inlineTexMathClasses;
+
+  /// Classes added to `span` on rendering display math into html.
+  /// Defaults to `['math', 'display']`.
+  final Iterable<String> displayTexMathClasses;
+
   /// Custom reference resolver may be required when parsing document without implicit defined references, for example
   /// Dartdoc.
   ///
@@ -116,6 +124,8 @@ class Options {
       this.texMathDollars: false,
       this.texMathSingleBackslash: false,
       this.texMathDoubleBackslash: false,
+      this.inlineTexMathClasses: const ['math', 'inline'],
+      this.displayTexMathClasses: const ['math', 'display'],
       this.linkResolver: defaultLinkResolver});
 
   /// Predefined version of Options. Alongside with strict also supports smart puctuation, which is declared separately

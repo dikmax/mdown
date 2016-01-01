@@ -1,0 +1,11 @@
+.
+$a+b=c$
+.
+<p><span class="custom_inline">\(a+b=c\)</span></p>
+.
+
+.
+$$a+b=c$$
+.
+<p><span class="custom_display">\[a+b=c\]</span></p>
+.

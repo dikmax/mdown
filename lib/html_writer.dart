@@ -287,7 +287,9 @@ class _HtmlBuilder extends StringBuffer {
 
   void writeTexMathInline(TexMathInline texMathInline, {bool stripped: false}) {
     if (!stripped) {
-      write('<span class="math inline">');
+      write('<span class="');
+      write(_options.inlineTexMathClasses.join(' '));
+      write('">');
     }
     write(r'\(');
     write(texMathInline.contents);
@@ -300,7 +302,9 @@ class _HtmlBuilder extends StringBuffer {
   void writeTexMathDisplay(TexMathDisplay texMathDisplay,
       {bool stripped: false}) {
     if (!stripped) {
-      write('<span class="math display">');
+      write('<span class="');
+      write(_options.displayTexMathClasses.join(' '));
+      write('">');
     }
     write(r'\[');
     write(texMathDisplay.contents);
