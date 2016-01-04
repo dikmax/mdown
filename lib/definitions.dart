@@ -92,39 +92,39 @@ class HorizontalRule extends Block {
   int get hashCode => 0;
 }
 
-abstract class Header extends Block {
+abstract class Heading extends Block {
   int level;
   Inlines contents;
 
-  Header(this.level, this.contents);
+  Heading(this.level, this.contents);
 }
 
-class AtxHeader extends Header {
-  AtxHeader(int level, Inlines contents) : super(level, contents);
-  AtxHeader.h1(Inlines contents) : super(1, contents);
-  AtxHeader.h2(Inlines contents) : super(2, contents);
-  AtxHeader.h3(Inlines contents) : super(3, contents);
-  AtxHeader.h4(Inlines contents) : super(4, contents);
-  AtxHeader.h5(Inlines contents) : super(5, contents);
-  AtxHeader.h6(Inlines contents) : super(6, contents);
+class AtxHeading extends Heading {
+  AtxHeading(int level, Inlines contents) : super(level, contents);
+  AtxHeading.h1(Inlines contents) : super(1, contents);
+  AtxHeading.h2(Inlines contents) : super(2, contents);
+  AtxHeading.h3(Inlines contents) : super(3, contents);
+  AtxHeading.h4(Inlines contents) : super(4, contents);
+  AtxHeading.h5(Inlines contents) : super(5, contents);
+  AtxHeading.h6(Inlines contents) : super(6, contents);
 
   String toString() => "AtxHeader $level $contents";
 
-  bool operator ==(dynamic obj) => obj is AtxHeader &&
+  bool operator ==(dynamic obj) => obj is AtxHeading &&
       level == obj.level &&
       _iterableEquality.equals(contents, obj.contents);
 
   int get hashCode => hash2(level, contents);
 }
 
-class SetextHeader extends Header {
-  SetextHeader(int level, Inlines contents) : super(level, contents);
-  SetextHeader.h1(Inlines contents) : super(1, contents);
-  SetextHeader.h2(Inlines contents) : super(2, contents);
+class SetextHeading extends Heading {
+  SetextHeading(int level, Inlines contents) : super(level, contents);
+  SetextHeading.h1(Inlines contents) : super(1, contents);
+  SetextHeading.h2(Inlines contents) : super(2, contents);
 
   String toString() => "SetextHeader $level $contents";
 
-  bool operator ==(dynamic obj) => obj is SetextHeader &&
+  bool operator ==(dynamic obj) => obj is SetextHeading &&
       level == obj.level &&
       _iterableEquality.equals(contents, obj.contents);
 

@@ -616,7 +616,7 @@ class _MarkdownBuilder extends StringBuffer {
 
       if (block is Para) {
         writePara(block);
-      } else if (block is Header) {
+      } else if (block is Heading) {
         writeHeader(block);
       } else if (block is HorizontalRule) {
         writeHorizontalRule(block, unorderedListChar);
@@ -667,9 +667,9 @@ class _MarkdownBuilder extends StringBuffer {
         "\n");
   }
 
-  void writeHeader(Header header) {
+  void writeHeader(Heading header) {
     // TODO throw exception in case of multiline header ? Or replace with space
-    if (header is SetextHeader && header.level <= 2) {
+    if (header is SetextHeading && header.level <= 2) {
       _InlineRenderer inner = new _InlineRenderer(_references, _options);
       inner.writeInlines(header.contents);
       String inlines = inner.toString();

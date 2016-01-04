@@ -39,7 +39,7 @@ class _HtmlBuilder extends StringBuffer {
         } else {
           writePara(block);
         }
-      } else if (block is Header) {
+      } else if (block is Heading) {
         writeHeader(block);
       } else if (block is HorizontalRule) {
         write('<hr/>');
@@ -69,7 +69,7 @@ class _HtmlBuilder extends StringBuffer {
     write("\n</blockquote>");
   }
 
-  void writeHeader(Header header) {
+  void writeHeader(Heading header) {
     write("<h");
     write(header.level);
     write(">");

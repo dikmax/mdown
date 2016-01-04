@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2016-01-01T14:50:58.566Z
+// 2016-01-04T18:18:24.453Z
 
 part of md_proc.test.data.test_data;
 
@@ -176,9 +176,12 @@ bar
 ''',
   r'''#5 bolt
 
-#foobar
+#hashtag
 ''': r'''<p>#5 bolt</p>
-<p>#foobar</p>
+<p>#hashtag</p>
+''',
+  r'''#→foo
+''': r'''<p>#→foo</p>
 ''',
   r'''\## foo
 ''': r'''<p>## foo</p>
@@ -477,16 +480,16 @@ bar
 </code></pre>
 <p>bar</p>
 ''',
-  r'''# Header
+  r'''# Heading
     foo
-Header
+Heading
 ------
     foo
 ----
-''': r'''<h1>Header</h1>
+''': r'''<h1>Heading</h1>
 <pre><code>foo
 </code></pre>
-<h2>Header</h2>
+<h2>Heading</h2>
 <pre><code>foo
 </code></pre>
 <hr />
@@ -1682,6 +1685,37 @@ bar
 </li>
 </ol>
 ''',
+  r'''- Foo
+
+      bar
+
+      baz
+''': r'''<ul>
+<li>
+<p>Foo</p>
+<pre><code>bar
+
+baz
+</code></pre>
+</li>
+</ul>
+''',
+  r'''- Foo
+
+      bar
+
+
+      baz
+''': r'''<ul>
+<li>
+<p>Foo</p>
+<pre><code>bar
+</code></pre>
+</li>
+</ul>
+<pre><code>  baz
+</code></pre>
+''',
   r'''123456789. ok
 ''': r'''<ol start="123456789">
 <li>ok</li>
@@ -2420,7 +2454,7 @@ baz</li>
 \`not code`
 1\. not a list
 \* not a list
-\# not a header
+\# not a heading
 \[foo]: /url "not a reference"
 ''': r'''<p>*not emphasized*
 &lt;br/&gt; not a tag
@@ -2428,7 +2462,7 @@ baz</li>
 `not code`
 1. not a list
 * not a list
-# not a header
+# not a heading
 [foo]: /url &quot;not a reference&quot;</p>
 ''',
   r'''\\*emphasis*
@@ -2485,8 +2519,10 @@ foo
   r'''&#X22; &#XD06; &#xcab;
 ''': r'''<p>&quot; ആ ಫ</p>
 ''',
-  r'''&nbsp &x; &#; &#x; &ThisIsWayTooLongToBeAnEntityIsntIt; &hi?;
-''': r'''<p>&amp;nbsp &amp;x; &amp;#; &amp;#x; &amp;ThisIsWayTooLongToBeAnEntityIsntIt; &amp;hi?;</p>
+  r'''&nbsp &x; &#; &#x;
+&ThisIsWayTooLongToBeAnEntityIsntIt; &hi?;
+''': r'''<p>&amp;nbsp &amp;x; &amp;#; &amp;#x;
+&amp;ThisIsWayTooLongToBeAnEntityIsntIt; &amp;hi?;</p>
 ''',
   r'''&copy
 ''': r'''<p>&amp;copy</p>
@@ -2517,6 +2553,9 @@ foo
   r'''    f&ouml;f&ouml;
 ''': r'''<pre><code>f&amp;ouml;f&amp;ouml;
 </code></pre>
+''',
+  r'''<a href="f&ouml;f&ouml;"/>
+''': r'''<a href="f&ouml;f&ouml;"/>
 ''',
   r'''`foo`
 ''': r'''<p><code>foo</code></p>
@@ -3014,10 +3053,10 @@ bar>)</p>
 
 [link](http://example.com#fragment)
 
-[link](http://example.com?foo=bar&baz#fragment)
+[link](http://example.com?foo=3#frag)
 ''': r'''<p><a href="#fragment">link</a></p>
 <p><a href="http://example.com#fragment">link</a></p>
-<p><a href="http://example.com?foo=bar&amp;baz#fragment">link</a></p>
+<p><a href="http://example.com?foo=3#frag">link</a></p>
 ''',
   r'''[link](foo\bar)
 ''': r'''<p><a href="foo%5Cbar">link</a></p>
@@ -3175,13 +3214,14 @@ bar>)</p>
   r'''[foo] [bar]
 
 [bar]: /url "title"
-''': r'''<p><a href="/url" title="title">foo</a></p>
+''': r'''<p>[foo] <a href="/url" title="title">bar</a></p>
 ''',
   r'''[foo]
 [bar]
 
 [bar]: /url "title"
-''': r'''<p><a href="/url" title="title">foo</a></p>
+''': r'''<p>[foo]
+<a href="/url" title="title">bar</a></p>
 ''',
   r'''[foo]: /url1
 
@@ -3218,6 +3258,11 @@ bar>)</p>
 [ref\[]: /uri
 ''': r'''<p><a href="/uri">foo</a></p>
 ''',
+  r'''[bar\\]: /uri
+
+[bar\\]
+''': r'''<p><a href="/uri">bar\</a></p>
+''',
   r'''[]
 
 []: /uri
@@ -3253,7 +3298,8 @@ bar>)</p>
 []
 
 [foo]: /url "title"
-''': r'''<p><a href="/url" title="title">foo</a></p>
+''': r'''<p><a href="/url" title="title">foo</a>
+[]</p>
 ''',
   r'''[foo]
 
@@ -3354,12 +3400,12 @@ bar>)</p>
   r'''![](/url)
 ''': r'''<p><img src="/url" alt="" /></p>
 ''',
-  r'''![foo] [bar]
+  r'''![foo][bar]
 
 [bar]: /url
 ''': r'''<p><img src="/url" alt="foo" /></p>
 ''',
-  r'''![foo] [bar]
+  r'''![foo][bar]
 
 [BAR]: /url
 ''': r'''<p><img src="/url" alt="foo" /></p>
@@ -3383,7 +3429,8 @@ bar>)</p>
 []
 
 [foo]: /url "title"
-''': r'''<p><img src="/url" alt="foo" title="title" /></p>
+''': r'''<p><img src="/url" alt="foo" title="title" />
+[]</p>
 ''',
   r'''![foo]
 
@@ -3480,15 +3527,8 @@ _boolean zoop:33=zoop:33 />
 ''': r'''<p><a foo="bar" bam = 'baz <em>"</em>'
 _boolean zoop:33=zoop:33 /></p>
 ''',
-  r'''<responsive-image src="foo.jpg" />
-
-<My-Tag>
-foo
-</My-Tag>
-''': r'''<responsive-image src="foo.jpg" />
-<My-Tag>
-foo
-</My-Tag>
+  r'''Foo <responsive-image src="foo.jpg" />
+''': r'''<p>Foo <responsive-image src="foo.jpg" /></p>
 ''',
   r'''<33> <__>
 ''': r'''<p>&lt;33&gt; &lt;__&gt;</p>
@@ -3507,10 +3547,8 @@ foo&gt;&lt;bar/ &gt;</p>
   r'''<a href='bar'title=title>
 ''': r'''<p>&lt;a href='bar'title=title&gt;</p>
 ''',
-  r'''</a>
-</foo >
-''': r'''</a>
-</foo >
+  r'''</a></foo >
+''': r'''<p></a></foo ></p>
 ''',
   r'''</a href="foo">
 ''': r'''<p>&lt;/a href=&quot;foo&quot;&gt;</p>
@@ -3538,11 +3576,11 @@ foo <!-- foo--->
   r'''foo <![CDATA[>&<]]>
 ''': r'''<p>foo <![CDATA[>&<]]></p>
 ''',
-  r'''<a href="&ouml;">
-''': r'''<a href="&ouml;">
+  r'''foo <a href="&ouml;">
+''': r'''<p>foo <a href="&ouml;"></p>
 ''',
-  r'''<a href="\*">
-''': r'''<a href="\*">
+  r'''foo <a href="\*">
+''': r'''<p>foo <a href="\*"></p>
 ''',
   r'''<a href="\"">
 ''': r'''<p>&lt;a href=&quot;&quot;&quot;&gt;</p>

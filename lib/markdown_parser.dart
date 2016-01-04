@@ -378,7 +378,7 @@ class CommonMarkParser {
   }
 
   Block _inlinesInBlock(Block block) {
-    if (block is Header) {
+    if (block is Heading) {
       Inlines contents = block.contents;
       if (contents is _UnparsedInlines) {
         block.contents = _parseInlines(contents.raw);
@@ -477,9 +477,11 @@ class CommonMarkParser {
   });
 
   static final Parser<String> whitespaceChar = oneOf2(" ", "\t");
+  static final Parser<String> space = char(' ');
   static final Parser<String> nonSpaceChar = noneOf4("\t", "\n", " ", "\r");
-  static final Parser<dynamic> skipSpaces = skipManySimple(whitespaceChar);
-  static final Parser<String> blankline = skipSpaces > newline;
+  static final Parser<dynamic> skipSpaces = skipManySimple(space);
+  static final Parser<dynamic> skipWhitespace = skipManySimple(whitespaceChar);
+  static final Parser<String> blankline = skipWhitespace > newline;
   static final Parser<List<String>> blanklines = many1Simple(blankline);
 
   // All indent and spaces parsers accepts spaces to skip, and returns spaces
@@ -492,7 +494,7 @@ class CommonMarkParser {
   static Parser<int> skipListIndentChars(int max) =>
       (atMostIndent(max - 1) | atMostIndent(tabStop - 1, fromLineStart: false))
           .notFollowedBy(whitespaceChar);
-  static final Parser<String> spnl = (skipSpaces > newline);
+  static final Parser<String> spnl = (skipWhitespace > newline);
   static final Parser<int> indent = waitForIndent(tabStop);
 
   static Map<int, Parser<int>> _atMostIndentCache = {};
@@ -1361,8 +1363,8 @@ class CommonMarkParser {
   //
 
   static final Parser<String> linkWhitespace = (blankline >
-          (whitespaceChar < skipSpaces)) |
-      (whitespaceChar < skipSpaces);
+          (whitespaceChar < skipWhitespace)) |
+      (whitespaceChar < skipWhitespace);
   static final Parser<Target> linkInline = (char('(') >
           (((linkWhitespace.maybe > linkInlineDestination) +
                   ((linkWhitespace > linkTitle).maybe < linkWhitespace.maybe)) ^
@@ -1386,8 +1388,6 @@ class CommonMarkParser {
       });
 
   static final Parser<String> _linkOrImageTestParser = char('[');
-  static final Parser<String> _linkOrImageRefParser =
-      (blankline | whitespaceChar).maybe > linkLabel;
   Parser<List<Inline>> _linkOrImage(bool isLink) {
     Parser<String> labelParser = isLink ? linkText : imageText;
     return new Parser<List<Inline>>((String s, Position pos) {
@@ -1423,8 +1423,7 @@ class CommonMarkParser {
       }
 
       // Try reference link
-      ParseResult<String> refRes =
-          _linkOrImageRefParser.run(s, labelRes.position);
+      ParseResult<String> refRes = linkLabel.run(s, labelRes.position);
       if (refRes.isSuccess) {
         String reference = refRes.value == "" ? labelRes.value : refRes.value;
         String normalizedReference = _normalizeReference(reference);
@@ -1888,8 +1887,8 @@ class CommonMarkParser {
         list,
         codeBlockIndented,
         codeBlockFenced,
-        atxHeader,
-        setextHeader,
+        atxHeading,
+        setextHeading,
         rawHtml,
         linkReference,
         blockquote,
@@ -1907,8 +1906,8 @@ class CommonMarkParser {
         hrule,
         list,
         codeBlockFenced,
-        atxHeader,
-        setextHeader,
+        atxHeading,
+        setextHeading,
         rawHtml,
         linkReference,
         blockquote,
@@ -1925,8 +1924,8 @@ class CommonMarkParser {
         hrule,
         codeBlockIndented,
         codeBlockFenced,
-        atxHeader,
-        setextHeader,
+        atxHeading,
+        setextHeading,
         rawHtml,
         linkReference,
         blockquote,
@@ -1943,7 +1942,7 @@ class CommonMarkParser {
   static Map<String, Parser<List<Block>>> _hruleParserCache = {};
   static Parser<List<Block>> _hruleParser(String start) {
     if (_hruleParserCache[start] == null) {
-      _hruleParserCache[start] = ((((count(2, skipSpaces > char(start)) >
+      _hruleParserCache[start] = ((((count(2, skipWhitespace > char(start)) >
                       skipManySimple(whitespaceChar | char(start))) >
                   newline) >
               blanklines.maybe) >
@@ -1965,23 +1964,23 @@ class CommonMarkParser {
   });
 
   //
-  // ATX Header
+  // ATX Heading
   //
 
-  static final Parser<List<String>> _atxHeaderStartParser =
+  static final Parser<List<String>> _atxHeadingStartParser =
       skipNonindentChars > many1Simple(char('#'));
-  static final Parser<String> _atxHeaderEmptyParser = ((whitespaceChar >
-              skipSpaces) >
+  static final Parser<String> _atxHeadingEmptyParser = ((whitespaceChar >
+              skipWhitespace) >
           (skipManySimple(char('#')) > blankline)) |
       (newline ^ (_) => null);
-  static final Parser<List<String>> _atxHeaderRegularParser = ((whitespaceChar >
+  static final Parser<List<String>> _atxHeadingRegularParser = ((space >
               skipSpaces) >
           manyUntilSimple(escapedChar.record | anyChar,
               (string(' #') > skipManySimple(char('#'))).maybe > blankline)) |
       (newline ^ (_) => []);
-  static final Parser<List<Block>> atxHeader =
+  static final Parser<List<Block>> atxHeading =
       new Parser<List<Block>>((String s, Position pos) {
-    ParseResult<List<String>> startRes = _atxHeaderStartParser.run(s, pos);
+    ParseResult<List<String>> startRes = _atxHeadingStartParser.run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
     }
@@ -1992,32 +1991,32 @@ class CommonMarkParser {
 
     // Try empty
     ParseResult<String> textRes =
-        _atxHeaderEmptyParser.run(s, startRes.position);
+        _atxHeadingEmptyParser.run(s, startRes.position);
     if (textRes.isSuccess) {
-      return _success([new AtxHeader(level, new _UnparsedInlines(''))], s,
+      return _success([new AtxHeading(level, new _UnparsedInlines(''))], s,
           textRes.position);
     }
     ParseResult<List<String>> textRes2 =
-        _atxHeaderRegularParser.run(s, startRes.position);
+        _atxHeadingRegularParser.run(s, startRes.position);
     if (!textRes2.isSuccess) {
       return textRes2;
     }
     String raw = textRes2.value.join();
     _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
-    return _success([new AtxHeader(level, inlines)], s, textRes2.position);
+    return _success([new AtxHeading(level, inlines)], s, textRes2.position);
   });
 
   //
-  // Setext Header
+  // Setext Heading
   //
 
-  static final Parser<List<dynamic>> _setextHeaderParser =
+  static final Parser<List<dynamic>> _setextHeadingParser =
       (((skipNonindentChars.notFollowedBy(char('>')) > anyLine) +
               (skipNonindentChars > many1Simple(oneOf2("=", "-")))).list <
           blankline);
-  static final Parser<List<Block>> setextHeader =
+  static final Parser<List<Block>> setextHeading =
       new Parser<List<Block>>((String s, Position pos) {
-    ParseResult<List<dynamic>> res = _setextHeaderParser.run(s, pos);
+    ParseResult<List<dynamic>> res = _setextHeadingParser.run(s, pos);
     if (!res.isSuccess) {
       return res;
     }
@@ -2025,7 +2024,7 @@ class CommonMarkParser {
     String raw = res.value[0];
     int level = res.value[1][0] == '=' ? 1 : 2;
     _UnparsedInlines inlines = new _UnparsedInlines(raw.trim());
-    return _success([new SetextHeader(level, inlines)], s, res.position);
+    return _success([new SetextHeading(level, inlines)], s, res.position);
   });
 
   //
@@ -2050,7 +2049,7 @@ class CommonMarkParser {
       (skipNonindentCharsFromAnyPosition + (string('~~~') | string('```')))
           .list;
   static Parser<List<String>> _openFenceInfoStringParser(String fenceChar) =>
-      ((skipSpaces >
+      ((skipWhitespace >
                   manySimple(choiceSimple([
                     noneOfSet(new Set.from(["&", "\n", "\\", " ", fenceChar])),
                     escapedChar1,
@@ -2116,7 +2115,7 @@ class CommonMarkParser {
     Parser<String> endFenceParser = (((skipNonindentChars >
                     string(fenceChar * fenceSize)) >
                 skipManySimple(char(fenceChar))) >
-            skipSpaces) >
+            skipWhitespace) >
         newline;
     Parser<List<Block>> restParser =
         manyUntilSimple(lineParser, endFenceParser | eof) ^
@@ -2270,9 +2269,9 @@ class CommonMarkParser {
   static final Parser<String> _linkReferenceLabelParser =
       (skipNonindentChars > linkLabel) < char(':');
   static final Parser<String> _linkReferenceDestinationParser =
-      (blankline.maybe > skipSpaces) > linkBlockDestination;
+      (blankline.maybe > skipWhitespace) > linkBlockDestination;
   static final Parser<String> _linkReferenceTitleParser =
-      (skipSpaces > linkTitle) < blankline;
+      (skipWhitespace > linkTitle) < blankline;
   static final Parser<_LinkReference> linkReference =
       new Parser<_LinkReference>((String s, Position pos) {
     ParseResult<String> labelRes = _linkReferenceLabelParser.run(s, pos);
@@ -2321,7 +2320,7 @@ class CommonMarkParser {
     blankline,
     hrule,
     listMarkerTest(4),
-    atxHeader,
+    atxHeading,
     openFence,
     rawHtmlParagraphStopTest,
     skipNonindentChars >
@@ -2810,10 +2809,10 @@ class CommonMarkParser {
               position = openFenceRes.position;
 
               Parser<int> indentParser = waitForIndent(indent);
-              Parser<String> endFenceParser = (((skipSpaces >
+              Parser<String> endFenceParser = (((skipWhitespace >
                               string(fenceChar * fenceSize)) >
                           skipManySimple(char(fenceChar))) >
-                      skipSpaces) >
+                      skipWhitespace) >
                   newline;
               Parser<String> lineParser = anyLine;
 

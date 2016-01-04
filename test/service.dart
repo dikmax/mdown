@@ -115,76 +115,76 @@ void serviceTests() {
     });
 
     t.group('AtxHeader', () {
-      AtxHeader header =
-          new AtxHeader(2, new Inlines.from([new Str('Header')]));
+      AtxHeading header =
+          new AtxHeading(2, new Inlines.from([new Str('Header')]));
       t.test('toString', () {
         t.expect(header.toString(), t.equals('AtxHeader 2 [Str "Header"]'));
       });
       t.test('Special constructors', () {
-        t.expect(new AtxHeader.h1(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeader(1, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h2(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h3(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeader(3, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h4(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeader(4, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h5(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeader(5, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeader.h6(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeader(6, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeading.h1(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeading(1, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeading.h2(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeading(2, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeading.h3(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeading(3, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeading.h4(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeading(4, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeading.h5(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeading(5, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeading.h6(new Inlines.from([new Str('Header')])),
+            t.equals(new AtxHeading(6, new Inlines.from([new Str('Header')]))));
       });
       t.test('==', () {
         t.expect(header,
-            t.equals(new AtxHeader(2, new Inlines.from([new Str('Header')]))));
+            t.equals(new AtxHeading(2, new Inlines.from([new Str('Header')]))));
       });
       t.test('!=', () {
         t.expect(
             header,
             t.isNot(t.equals(
-                new AtxHeader(3, new Inlines.from([new Str('Header')])))));
+                new AtxHeading(3, new Inlines.from([new Str('Header')])))));
         t.expect(
-            header, t.isNot(t.equals(new AtxHeader(2, new Inlines.from([])))));
+            header, t.isNot(t.equals(new AtxHeading(2, new Inlines.from([])))));
         t.expect(
             header,
             t.isNot(t.equals(
-                new SetextHeader(2, new Inlines.from([new Str('Header')])))));
+                new SetextHeading(2, new Inlines.from([new Str('Header')])))));
       });
     });
 
     t.group('SetextHeader', () {
-      SetextHeader header =
-          new SetextHeader(2, new Inlines.from([new Str('Header')]));
+      SetextHeading header =
+          new SetextHeading(2, new Inlines.from([new Str('Header')]));
       t.test('toString', () {
         t.expect(header.toString(), t.equals('SetextHeader 2 [Str "Header"]'));
       });
       t.test('Special constructors', () {
         t.expect(
-            new SetextHeader.h1(new Inlines.from([new Str('Header')])),
+            new SetextHeading.h1(new Inlines.from([new Str('Header')])),
             t.equals(
-                new SetextHeader(1, new Inlines.from([new Str('Header')]))));
+                new SetextHeading(1, new Inlines.from([new Str('Header')]))));
         t.expect(
-            new SetextHeader.h2(new Inlines.from([new Str('Header')])),
+            new SetextHeading.h2(new Inlines.from([new Str('Header')])),
             t.equals(
-                new SetextHeader(2, new Inlines.from([new Str('Header')]))));
+                new SetextHeading(2, new Inlines.from([new Str('Header')]))));
       });
       t.test('==', () {
         t.expect(
             header,
             t.equals(
-                new SetextHeader(2, new Inlines.from([new Str('Header')]))));
+                new SetextHeading(2, new Inlines.from([new Str('Header')]))));
       });
       t.test('!=', () {
         t.expect(
             header,
             t.isNot(t.equals(
-                new SetextHeader(3, new Inlines.from([new Str('Header')])))));
+                new SetextHeading(3, new Inlines.from([new Str('Header')])))));
         t.expect(header,
-            t.isNot(t.equals(new SetextHeader(2, new Inlines.from([])))));
+            t.isNot(t.equals(new SetextHeading(2, new Inlines.from([])))));
         t.expect(
             header,
             t.isNot(t.equals(
-                new AtxHeader(2, new Inlines.from([new Str('Header')])))));
+                new AtxHeading(2, new Inlines.from([new Str('Header')])))));
       });
     });
 
