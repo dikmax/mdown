@@ -1824,10 +1824,7 @@ class CommonMarkParser {
   Parser<List<Inline>> _inlineCache;
   Parser<List<Inline>> get inline {
     if (_inlineCache == null) {
-      List<Parser<List<Inline>>> inlineParsers = [
-        lineBreak,
-        whitespace
-      ];
+      List<Parser<List<Inline>>> inlineParsers = [lineBreak, whitespace];
       if (_options.texMathSingleBackslash) {
         inlineParsers.add(texMathSingleBackslash);
       }
