@@ -109,8 +109,7 @@ void main() {
 
   // Raw TeX
   Set<int> rawTexContradictions = new Set.from([]);
-  tests("Raw TeX", rawTex,
-      mdToHtmlTest(new Options(rawTex: true)));
+  tests("Raw TeX", rawTex, mdToHtmlTest(new Options(rawTex: true)));
   tests(
       "Raw TeX spec",
       specification,

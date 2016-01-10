@@ -1891,10 +1891,7 @@ class CommonMarkParser {
       if (_options.rawTex) {
         blocks.add(rawTex);
       }
-      blocks.addAll([
-        linkReference,
-        blockquote,
-        para]);
+      blocks.addAll([linkReference, blockquote, para]);
       _blockCached = choiceSimple(blocks);
     }
     return _blockCached;
@@ -1915,11 +1912,7 @@ class CommonMarkParser {
       if (_options.rawTex) {
         blocks.add(rawTex);
       }
-      blocks.addAll([
-        linkReference,
-        blockquote,
-        para
-      ]);
+      blocks.addAll([linkReference, blockquote, para]);
       _lazyLineBlockCache = choiceSimple(blocks);
     }
     return _lazyLineBlockCache;
@@ -1939,11 +1932,7 @@ class CommonMarkParser {
       if (_options.rawTex) {
         blocks.add(rawTex);
       }
-      blocks.addAll([
-        linkReference,
-        blockquote,
-        para
-      ]);
+      blocks.addAll([linkReference, blockquote, para]);
       _listTightBlockCache = choiceSimple(blocks);
     }
     return _listTightBlockCache;
@@ -2280,11 +2269,17 @@ class CommonMarkParser {
   // Raw TeX blocks
   //
 
-  static final Set<String> _texEnvironmentChars = new Set.from(_alphanum)..addAll(['_', '-', '+', '*']);
-  static final Parser<String> _rawTexStart = (((skipNonindentChars > string(r'\begin{')) >
-    many1Simple(oneOfSet(_texEnvironmentChars))) < char('}')) ^ (List<String> env) => env.join();
-  static Parser<String> _rawTexEnd(String env) => ((skipNonindentChars > string(r'\end{' + env + '}')) < blankline).record;
-  static final Parser<List<Block>> rawTex = new Parser((String s, Position pos) {
+  static final Set<String> _texEnvironmentChars = new Set.from(_alphanum)
+    ..addAll(['_', '-', '+', '*']);
+  static final Parser<String> _rawTexStart = (((skipNonindentChars >
+                  string(r'\begin{')) >
+              many1Simple(oneOfSet(_texEnvironmentChars))) <
+          char('}')) ^
+      (List<String> env) => env.join();
+  static Parser<String> _rawTexEnd(String env) =>
+      ((skipNonindentChars > string(r'\end{' + env + '}')) < blankline).record;
+  static final Parser<List<Block>> rawTex =
+      new Parser((String s, Position pos) {
     ParseResult<String> startRes = _rawTexStart.run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
@@ -2311,7 +2306,6 @@ class CommonMarkParser {
       position = lineRes.position;
     } while (true);
   });
-
 
   //
   // Link reference

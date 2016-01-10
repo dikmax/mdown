@@ -121,30 +121,44 @@ void serviceTests() {
         t.expect(heading.toString(), t.equals('AtxHeading 2 [Str "Heading"]'));
       });
       t.test('Special constructors', () {
-        t.expect(new AtxHeading.h1(new Inlines.from([new Str('Heading')])),
-            t.equals(new AtxHeading(1, new Inlines.from([new Str('Heading')]))));
-        t.expect(new AtxHeading.h2(new Inlines.from([new Str('Heading')])),
-            t.equals(new AtxHeading(2, new Inlines.from([new Str('Heading')]))));
-        t.expect(new AtxHeading.h3(new Inlines.from([new Str('Heading')])),
-            t.equals(new AtxHeading(3, new Inlines.from([new Str('Heading')]))));
-        t.expect(new AtxHeading.h4(new Inlines.from([new Str('Heading')])),
-            t.equals(new AtxHeading(4, new Inlines.from([new Str('Heading')]))));
-        t.expect(new AtxHeading.h5(new Inlines.from([new Str('Heading')])),
-            t.equals(new AtxHeading(5, new Inlines.from([new Str('Heading')]))));
-        t.expect(new AtxHeading.h6(new Inlines.from([new Str('Heading')])),
-            t.equals(new AtxHeading(6, new Inlines.from([new Str('Heading')]))));
+        t.expect(
+            new AtxHeading.h1(new Inlines.from([new Str('Heading')])),
+            t.equals(
+                new AtxHeading(1, new Inlines.from([new Str('Heading')]))));
+        t.expect(
+            new AtxHeading.h2(new Inlines.from([new Str('Heading')])),
+            t.equals(
+                new AtxHeading(2, new Inlines.from([new Str('Heading')]))));
+        t.expect(
+            new AtxHeading.h3(new Inlines.from([new Str('Heading')])),
+            t.equals(
+                new AtxHeading(3, new Inlines.from([new Str('Heading')]))));
+        t.expect(
+            new AtxHeading.h4(new Inlines.from([new Str('Heading')])),
+            t.equals(
+                new AtxHeading(4, new Inlines.from([new Str('Heading')]))));
+        t.expect(
+            new AtxHeading.h5(new Inlines.from([new Str('Heading')])),
+            t.equals(
+                new AtxHeading(5, new Inlines.from([new Str('Heading')]))));
+        t.expect(
+            new AtxHeading.h6(new Inlines.from([new Str('Heading')])),
+            t.equals(
+                new AtxHeading(6, new Inlines.from([new Str('Heading')]))));
       });
       t.test('==', () {
-        t.expect(heading,
-            t.equals(new AtxHeading(2, new Inlines.from([new Str('Heading')]))));
+        t.expect(
+            heading,
+            t.equals(
+                new AtxHeading(2, new Inlines.from([new Str('Heading')]))));
       });
       t.test('!=', () {
         t.expect(
             heading,
             t.isNot(t.equals(
                 new AtxHeading(3, new Inlines.from([new Str('Heading')])))));
-        t.expect(
-            heading, t.isNot(t.equals(new AtxHeading(2, new Inlines.from([])))));
+        t.expect(heading,
+            t.isNot(t.equals(new AtxHeading(2, new Inlines.from([])))));
         t.expect(
             heading,
             t.isNot(t.equals(
@@ -156,7 +170,8 @@ void serviceTests() {
       SetextHeading heading =
           new SetextHeading(2, new Inlines.from([new Str('Heading')]));
       t.test('toString', () {
-        t.expect(heading.toString(), t.equals('SetextHeading 2 [Str "Heading"]'));
+        t.expect(
+            heading.toString(), t.equals('SetextHeading 2 [Str "Heading"]'));
       });
       t.test('Special constructors', () {
         t.expect(
@@ -262,13 +277,15 @@ void serviceTests() {
     t.group('TexRawBlock', () {
       TexRawBlock raw = new TexRawBlock("\\begin{env}\n\\end{env}");
       t.test('toString', () {
-        t.expect(raw.toString(), t.equals('TexRawBlock \\begin{env}\n\\end{env}'));
+        t.expect(
+            raw.toString(), t.equals('TexRawBlock \\begin{env}\n\\end{env}'));
       });
       t.test('==', () {
         t.expect(raw, t.equals(new TexRawBlock("\\begin{env}\n\\end{env}")));
       });
       t.test('!=', () {
-        t.expect(raw, t.isNot(t.equals(new TexRawBlock("\\begin{enz}\n\\end{enz}"))));
+        t.expect(raw,
+            t.isNot(t.equals(new TexRawBlock("\\begin{enz}\n\\end{enz}"))));
         t.expect(raw, t.isNot(t.equals(null)));
       });
     });
