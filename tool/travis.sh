@@ -7,7 +7,8 @@ set -e
 dartanalyzer --fatal-warnings \
   lib/md_proc.dart \
   test/library_test.dart \
-  tool/build.dart
+  tool/build.dart \
+  tool/reporter.dart
 
 # Linter
 pub run linter:linter --config .linter.yaml `find lib test tool -type f \( -iname "*.dart" ! -iname "*.g.dart" \)`
@@ -15,7 +16,7 @@ pub run linter:linter --config .linter.yaml `find lib test tool -type f \( -inam
 # TODO Use .analysis_config when Dart 1.12 is released
 
 # Run the tests.
-pub run test:test -p "vm,phantomjs"
+pub run test:test --reporter json -p "vm,phantomjs" | dart tool/reporter.dart
 
 # If the COVERALLS_TOKEN token is set on travis
 # Install dart_coveralls
