@@ -15,7 +15,7 @@ void serviceTests() {
       t.expect(
           CommonMarkParser.defaults.parse('Hello world!\n===').toString(),
           t.equals(
-              'Document [SetextHeader 1 [Str "Hello", Space, Str "world", Str "!"]]'));
+              'Document [SetextHeading 1 [Str "Hello", Space, Str "world", Str "!"]]'));
     });
 
     t.test('Writing html', () {
@@ -114,77 +114,77 @@ void serviceTests() {
       });
     });
 
-    t.group('AtxHeader', () {
-      AtxHeading header =
-          new AtxHeading(2, new Inlines.from([new Str('Header')]));
+    t.group('AtxHeading', () {
+      AtxHeading heading =
+          new AtxHeading(2, new Inlines.from([new Str('Heading')]));
       t.test('toString', () {
-        t.expect(header.toString(), t.equals('AtxHeader 2 [Str "Header"]'));
+        t.expect(heading.toString(), t.equals('AtxHeading 2 [Str "Heading"]'));
       });
       t.test('Special constructors', () {
-        t.expect(new AtxHeading.h1(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeading(1, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeading.h2(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeading(2, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeading.h3(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeading(3, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeading.h4(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeading(4, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeading.h5(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeading(5, new Inlines.from([new Str('Header')]))));
-        t.expect(new AtxHeading.h6(new Inlines.from([new Str('Header')])),
-            t.equals(new AtxHeading(6, new Inlines.from([new Str('Header')]))));
+        t.expect(new AtxHeading.h1(new Inlines.from([new Str('Heading')])),
+            t.equals(new AtxHeading(1, new Inlines.from([new Str('Heading')]))));
+        t.expect(new AtxHeading.h2(new Inlines.from([new Str('Heading')])),
+            t.equals(new AtxHeading(2, new Inlines.from([new Str('Heading')]))));
+        t.expect(new AtxHeading.h3(new Inlines.from([new Str('Heading')])),
+            t.equals(new AtxHeading(3, new Inlines.from([new Str('Heading')]))));
+        t.expect(new AtxHeading.h4(new Inlines.from([new Str('Heading')])),
+            t.equals(new AtxHeading(4, new Inlines.from([new Str('Heading')]))));
+        t.expect(new AtxHeading.h5(new Inlines.from([new Str('Heading')])),
+            t.equals(new AtxHeading(5, new Inlines.from([new Str('Heading')]))));
+        t.expect(new AtxHeading.h6(new Inlines.from([new Str('Heading')])),
+            t.equals(new AtxHeading(6, new Inlines.from([new Str('Heading')]))));
       });
       t.test('==', () {
-        t.expect(header,
-            t.equals(new AtxHeading(2, new Inlines.from([new Str('Header')]))));
+        t.expect(heading,
+            t.equals(new AtxHeading(2, new Inlines.from([new Str('Heading')]))));
       });
       t.test('!=', () {
         t.expect(
-            header,
+            heading,
             t.isNot(t.equals(
-                new AtxHeading(3, new Inlines.from([new Str('Header')])))));
+                new AtxHeading(3, new Inlines.from([new Str('Heading')])))));
         t.expect(
-            header, t.isNot(t.equals(new AtxHeading(2, new Inlines.from([])))));
+            heading, t.isNot(t.equals(new AtxHeading(2, new Inlines.from([])))));
         t.expect(
-            header,
+            heading,
             t.isNot(t.equals(
-                new SetextHeading(2, new Inlines.from([new Str('Header')])))));
+                new SetextHeading(2, new Inlines.from([new Str('Heading')])))));
       });
     });
 
-    t.group('SetextHeader', () {
-      SetextHeading header =
-          new SetextHeading(2, new Inlines.from([new Str('Header')]));
+    t.group('SetextHeading', () {
+      SetextHeading heading =
+          new SetextHeading(2, new Inlines.from([new Str('Heading')]));
       t.test('toString', () {
-        t.expect(header.toString(), t.equals('SetextHeader 2 [Str "Header"]'));
+        t.expect(heading.toString(), t.equals('SetextHeading 2 [Str "Heading"]'));
       });
       t.test('Special constructors', () {
         t.expect(
-            new SetextHeading.h1(new Inlines.from([new Str('Header')])),
+            new SetextHeading.h1(new Inlines.from([new Str('Heading')])),
             t.equals(
-                new SetextHeading(1, new Inlines.from([new Str('Header')]))));
+                new SetextHeading(1, new Inlines.from([new Str('Heading')]))));
         t.expect(
-            new SetextHeading.h2(new Inlines.from([new Str('Header')])),
+            new SetextHeading.h2(new Inlines.from([new Str('Heading')])),
             t.equals(
-                new SetextHeading(2, new Inlines.from([new Str('Header')]))));
+                new SetextHeading(2, new Inlines.from([new Str('Heading')]))));
       });
       t.test('==', () {
         t.expect(
-            header,
+            heading,
             t.equals(
-                new SetextHeading(2, new Inlines.from([new Str('Header')]))));
+                new SetextHeading(2, new Inlines.from([new Str('Heading')]))));
       });
       t.test('!=', () {
         t.expect(
-            header,
+            heading,
             t.isNot(t.equals(
-                new SetextHeading(3, new Inlines.from([new Str('Header')])))));
-        t.expect(header,
+                new SetextHeading(3, new Inlines.from([new Str('Heading')])))));
+        t.expect(heading,
             t.isNot(t.equals(new SetextHeading(2, new Inlines.from([])))));
         t.expect(
-            header,
+            heading,
             t.isNot(t.equals(
-                new AtxHeading(2, new Inlines.from([new Str('Header')])))));
+                new AtxHeading(2, new Inlines.from([new Str('Heading')])))));
       });
     });
 
@@ -255,6 +255,20 @@ void serviceTests() {
       });
       t.test('!=', () {
         t.expect(raw, t.isNot(t.equals(new HtmlRawBlock("<body>"))));
+        t.expect(raw, t.isNot(t.equals(null)));
+      });
+    });
+
+    t.group('TexRawBlock', () {
+      TexRawBlock raw = new TexRawBlock("\\begin{env}\n\\end{env}");
+      t.test('toString', () {
+        t.expect(raw.toString(), t.equals('TexRawBlock \\begin{env}\n\\end{env}'));
+      });
+      t.test('==', () {
+        t.expect(raw, t.equals(new TexRawBlock("\\begin{env}\n\\end{env}")));
+      });
+      t.test('!=', () {
+        t.expect(raw, t.isNot(t.equals(new TexRawBlock("\\begin{enz}\n\\end{enz}"))));
         t.expect(raw, t.isNot(t.equals(null)));
       });
     });

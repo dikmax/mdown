@@ -47,6 +47,8 @@ class _HtmlBuilder extends StringBuffer {
         writeCodeBlock(block);
       } else if (block is Blockquote) {
         writeBlockquote(block);
+      } else if (block is TexRawBlock) {
+        writeTexRawBlock(block);
       } else if (block is RawBlock) {
         write(block.contents);
       } else if (block is UnorderedList) {
@@ -67,6 +69,10 @@ class _HtmlBuilder extends StringBuffer {
     write("<blockquote>\n");
     writeBlocks(blockquote.contents);
     write("\n</blockquote>");
+  }
+
+  void writeTexRawBlock(TexRawBlock texRawBlock) {
+    write(htmlEscape(texRawBlock.contents));
   }
 
   void writeHeader(Heading header) {

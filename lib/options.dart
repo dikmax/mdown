@@ -85,8 +85,14 @@ class Options {
   /// Defaults to `['math', 'display']`.
   final Iterable<String> displayTexMathClasses;
 
-  /// Custom reference resolver may be required when parsing document without implicit defined references, for example
-  /// Dartdoc.
+  /// Enables raw TeX blocks.
+  ///
+  /// Everything between \begin{env} \end{env} is treated as TeX. Delimiters
+  /// should be placed on separate lines and `env` identifiers should be same.
+  final bool rawTex;
+
+  /// Custom reference resolver may be required when parsing document without
+  /// implicit defined references, for example Dartdoc.
   ///
   /// ```dart
   /// /**
@@ -124,6 +130,7 @@ class Options {
       this.texMathDollars: false,
       this.texMathSingleBackslash: false,
       this.texMathDoubleBackslash: false,
+      this.rawTex: false,
       this.inlineTexMathClasses: const ['math', 'inline'],
       this.displayTexMathClasses: const ['math', 'display'],
       this.linkResolver: defaultLinkResolver});
@@ -138,7 +145,8 @@ class Options {
       strikeout: true,
       subscript: true,
       superscript: true,
-      texMathDollars: true);
+      texMathDollars: true,
+      rawTex: true);
 
   /// Predefined strict version of Options. Only support [CommonMark specification](http://commonmark.org).
   static const Options strict = const Options();

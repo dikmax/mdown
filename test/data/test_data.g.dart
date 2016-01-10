@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2016-01-04T18:18:24.453Z
+// 2016-01-10T13:53:25.510Z
 
 part of md_proc.test.data.test_data;
 
@@ -4428,5 +4428,61 @@ final Map<String, String> _$texMathCustomClassesTests = {
 ''',
   r'''$$a+b=c$$
 ''': r'''<p><span class="custom_display">\[a+b=c\]</span></p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> rawTex
+// **************************************************************************
+
+final Map<String, String> _$rawTexTests = {
+  r'''This is the identity matrix:
+
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 &1 \\
+\end{pmatrix}
+''': r'''<p>This is the identity matrix:</p>
+
+\begin{pmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp;1 \\
+\end{pmatrix}
+''',
+  r'''This is the identity matrix:
+
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 &1 \\
+
+
+\end{pmatrix}
+''': r'''<p>This is the identity matrix:</p>
+
+\begin{pmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp;1 \\
+
+
+\end{pmatrix}
+''',
+  r'''\begin{theorem}[Fred]
+All odd numbers are prime.
+\end{theorem}
+''': r'''\begin{theorem}[Fred]
+All odd numbers are prime.
+\end{theorem}
+''',
+  r'''\begin{theorem*}[Fred]
+All odd numbers are prime.
+\end{theorem}
+''': r'''<p>\begin{theorem*}[Fred]
+All odd numbers are prime.
+\end{theorem}</p>
 ''',
 };

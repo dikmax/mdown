@@ -80,7 +80,7 @@ There three predefined versions of parsers/writers:
 
 - `strict`: all extensions are disabled
 - `commonmark`: enabled only `smartPunctuation` extension.
-- `defaults`: `smartPunctuation`, `strikeout`, `subscript`, `superscript`, `texMathDollars` are enabled.
+- `defaults`: `smartPunctuation`, `strikeout`, `subscript`, `superscript`, `texMathDollars`, `rawTex` are enabled.
 
 To get correspondent parser/writer instance use static getter on class:
 
@@ -175,6 +175,12 @@ interpreted as display TeX math.
 
 **NOTE:** This extensions is disabled by default.
 
+
+Raw TeX (`Options.rawTex`)
+--------------------------
+
+Allows to include raw TeX blocks into documents. Right now only environment blocks are supported. Everything between
+`\begin{...}` and `\end{...}` is treated as TeX and passed into resulting HTML as is.
 
 
 Custom reference resolver

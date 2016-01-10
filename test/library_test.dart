@@ -61,51 +61,61 @@ void main() {
 
   // Strikeout
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
-  /*tests("Strikeout spec", specification,
-      mdToHtmlTest(new Options(strikeout: true)));*/
+  tests("Strikeout spec", specification,
+      mdToHtmlTest(new Options(strikeout: true)));
 
   // Subscript
   tests("Subscript", subscript, mdToHtmlTest(new Options(subscript: true)));
-  /*tests("Subscript spec", specification,
-      mdToHtmlTest(new Options(subscript: true)));*/
+  tests("Subscript spec", specification,
+      mdToHtmlTest(new Options(subscript: true)));
 
   // Superscript
   tests(
       "Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
-  /*tests("Superscript spec", specification,
-      mdToHtmlTest(new Options(superscript: true)));*/
+  tests("Superscript spec", specification,
+      mdToHtmlTest(new Options(superscript: true)));
 
   // Strikeout
   tests("Strikeout and subscript", strikeoutAndSubscript,
       mdToHtmlTest(new Options(strikeout: true, subscript: true)));
-  /*tests("Strikeout and subscript spec", specification,
-      mdToHtmlTest(new Options(strikeout: true, subscript: true)));*/
+  tests("Strikeout and subscript spec", specification,
+      mdToHtmlTest(new Options(strikeout: true, subscript: true)));
 
   // TeX Math between dollars
-  tests("Tex math dollars", texMathDollars,
+  tests("TeX math dollars", texMathDollars,
       mdToHtmlTest(new Options(texMathDollars: true)));
-  tests("Tex math dollars spec", specification,
+  tests("TeX math dollars spec", specification,
       mdToHtmlTest(new Options(texMathDollars: true)));
 
   // TeX Math between backslashed `()` or `[]`
   Set<int> texMathSingleBackslashContradictions = new Set.from([276, 469, 485]);
-  tests("Tex math single backslash", texMathSingleBackslash,
+  tests("TeX math single backslash", texMathSingleBackslash,
       mdToHtmlTest(new Options(texMathSingleBackslash: true)));
   tests(
-      "Tex math single backslash spec",
+      "TeX math single backslash spec",
       specification,
       mdToHtmlTest(new Options(texMathSingleBackslash: true),
           (_, int num) => !texMathSingleBackslashContradictions.contains(num)));
 
   // TeX Math between double backslashed `()` or `[]`
   Set<int> texMathDoubleBackslashContradictions = new Set.from([]);
-  tests("Tex math double backslash", texMathDoubleBackslash,
+  tests("TeX math double backslash", texMathDoubleBackslash,
       mdToHtmlTest(new Options(texMathDoubleBackslash: true)));
   tests(
-      "Tex math double backslash spec",
+      "TeX math double backslash spec",
       specification,
       mdToHtmlTest(new Options(texMathDoubleBackslash: true),
           (_, int num) => !texMathDoubleBackslashContradictions.contains(num)));
+
+  // Raw TeX
+  Set<int> rawTexContradictions = new Set.from([]);
+  tests("Raw TeX", rawTex,
+      mdToHtmlTest(new Options(rawTex: true)));
+  tests(
+      "Raw TeX spec",
+      specification,
+      mdToHtmlTest(new Options(rawTex: true),
+          (_, int num) => !rawTexContradictions.contains(num)));
 
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));

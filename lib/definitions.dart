@@ -108,7 +108,7 @@ class AtxHeading extends Heading {
   AtxHeading.h5(Inlines contents) : super(5, contents);
   AtxHeading.h6(Inlines contents) : super(6, contents);
 
-  String toString() => "AtxHeader $level $contents";
+  String toString() => "AtxHeading $level $contents";
 
   bool operator ==(dynamic obj) => obj is AtxHeading &&
       level == obj.level &&
@@ -122,7 +122,7 @@ class SetextHeading extends Heading {
   SetextHeading.h1(Inlines contents) : super(1, contents);
   SetextHeading.h2(Inlines contents) : super(2, contents);
 
-  String toString() => "SetextHeader $level $contents";
+  String toString() => "SetextHeading $level $contents";
 
   bool operator ==(dynamic obj) => obj is SetextHeading &&
       level == obj.level &&
@@ -196,6 +196,17 @@ class HtmlRawBlock extends RawBlock {
 
   bool operator ==(dynamic obj) =>
       obj is HtmlRawBlock && contents == obj.contents;
+
+  int get hashCode => contents.hashCode;
+}
+
+class TexRawBlock extends RawBlock {
+  TexRawBlock(String contents) : super(contents);
+
+  String toString() => "TexRawBlock $contents";
+
+  bool operator ==(dynamic obj) =>
+      obj is TexRawBlock && contents == obj.contents;
 
   int get hashCode => contents.hashCode;
 }

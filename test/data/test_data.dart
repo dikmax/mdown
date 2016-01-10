@@ -42,3 +42,6 @@ final Map<String, String> texMathDoubleBackslash =
 
 @EmbedTests('tex_math_custom_classes.txt')
 final Map<String, String> texMathCustomClasses = _$texMathCustomClassesTests;
+
+@EmbedTests('raw_tex.txt')
+final Map<String, String> rawTex  = _$rawTexTests;

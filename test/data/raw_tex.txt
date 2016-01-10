@@ -1,0 +1,61 @@
+.
+This is the identity matrix:
+
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 &1 \\
+\end{pmatrix}
+.
+<p>This is the identity matrix:</p>
+
+\begin{pmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp;1 \\
+\end{pmatrix}
+.
+
+
+.
+This is the identity matrix:
+
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 &1 \\
+
+
+\end{pmatrix}
+.
+<p>This is the identity matrix:</p>
+
+\begin{pmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp;1 \\
+
+
+\end{pmatrix}
+.
+
+
+.
+\begin{theorem}[Fred]
+All odd numbers are prime.
+\end{theorem}
+.
+\begin{theorem}[Fred]
+All odd numbers are prime.
+\end{theorem}
+.
+
+.
+\begin{theorem*}[Fred]
+All odd numbers are prime.
+\end{theorem}
+.
+<p>\begin{theorem*}[Fred]
+All odd numbers are prime.
+\end{theorem}</p>
+.

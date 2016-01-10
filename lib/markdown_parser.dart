@@ -1878,7 +1878,7 @@ class CommonMarkParser {
   Parser<List<Block>> _blockCached;
   Parser<List<Block>> get block {
     if (_blockCached == null) {
-      _blockCached = choiceSimple([
+      List<Parser<List<Block>>> blocks = [
         blanklines ^ (_) => [],
         hrule,
         list,
@@ -1886,11 +1886,16 @@ class CommonMarkParser {
         codeBlockFenced,
         atxHeading,
         setextHeading,
-        rawHtml,
+        rawHtml
+      ];
+      if (_options.rawTex) {
+        blocks.add(rawTex);
+      }
+      blocks.addAll([
         linkReference,
         blockquote,
-        para
-      ]);
+        para]);
+      _blockCached = choiceSimple(blocks);
     }
     return _blockCached;
   }
@@ -1898,18 +1903,24 @@ class CommonMarkParser {
   Parser<List<Block>> _lazyLineBlockCache;
   Parser<List<Block>> get lazyLineBlock {
     if (_lazyLineBlockCache == null) {
-      _lazyLineBlockCache = choiceSimple([
+      List<Parser<List<Block>>> blocks = [
         blanklines ^ (_) => [],
         hrule,
         list,
         codeBlockFenced,
         atxHeading,
         setextHeading,
-        rawHtml,
+        rawHtml
+      ];
+      if (_options.rawTex) {
+        blocks.add(rawTex);
+      }
+      blocks.addAll([
         linkReference,
         blockquote,
         para
       ]);
+      _lazyLineBlockCache = choiceSimple(blocks);
     }
     return _lazyLineBlockCache;
   }
@@ -1917,17 +1928,23 @@ class CommonMarkParser {
   Parser<List<Block>> _listTightBlockCache;
   Parser<List<Block>> get listTightBlock {
     if (_listTightBlockCache == null) {
-      _listTightBlockCache = choiceSimple([
+      List<Parser<List<Block>>> blocks = [
         hrule,
         codeBlockIndented,
         codeBlockFenced,
         atxHeading,
         setextHeading,
-        rawHtml,
+        rawHtml
+      ];
+      if (_options.rawTex) {
+        blocks.add(rawTex);
+      }
+      blocks.addAll([
         linkReference,
         blockquote,
         para
       ]);
+      _listTightBlockCache = choiceSimple(blocks);
     }
     return _listTightBlockCache;
   }
@@ -2193,7 +2210,7 @@ class CommonMarkParser {
       (skipNonindentChars < char('<')).record;
   static final Parser<String> _rawHtmlRule7Parser =
       ((skipNonindentChars < (htmlOpenTag | htmlCloseTag)) < blankline).record;
-  static final Parser<HtmlRawBlock> rawHtml =
+  static final Parser<List<Block>> rawHtml =
       new Parser((String s, Position pos) {
     // Simple test
     ParseResult<String> testRes = _rawHtmlTest.run(s, pos);
@@ -2217,12 +2234,12 @@ class CommonMarkParser {
         lineRes = anyLine.run(s, position);
         if (!lineRes.isSuccess) {
           // eof
-          return _success(new HtmlRawBlock(content), s, position);
+          return _success([new HtmlRawBlock(content)], s, position);
         }
         content += lineRes.value + '\n';
         position = lineRes.position;
       }
-      return _success(new HtmlRawBlock(content), s, position);
+      return _success([new HtmlRawBlock(content)], s, position);
     }
 
     Match match = rawHtmlTest6.matchAsPrefix(lineRes.value);
@@ -2247,17 +2264,54 @@ class CommonMarkParser {
     do {
       ParseResult<String> blanklineRes = blankline.run(s, position);
       if (blanklineRes.isSuccess) {
-        return _success(new HtmlRawBlock(content), s, blanklineRes.position);
+        return _success([new HtmlRawBlock(content)], s, blanklineRes.position);
       }
       lineRes = anyLine.run(s, position);
       if (!lineRes.isSuccess) {
         // eof
-        return _success(new HtmlRawBlock(content), s, position);
+        return _success([new HtmlRawBlock(content)], s, position);
       }
       content += lineRes.value + '\n';
       position = lineRes.position;
     } while (true);
   });
+
+  //
+  // Raw TeX blocks
+  //
+
+  static final Set<String> _texEnvironmentChars = new Set.from(_alphanum)..addAll(['_', '-', '+', '*']);
+  static final Parser<String> _rawTexStart = (((skipNonindentChars > string(r'\begin{')) >
+    many1Simple(oneOfSet(_texEnvironmentChars))) < char('}')) ^ (List<String> env) => env.join();
+  static Parser<String> _rawTexEnd(String env) => ((skipNonindentChars > string(r'\end{' + env + '}')) < blankline).record;
+  static final Parser<List<Block>> rawTex = new Parser((String s, Position pos) {
+    ParseResult<String> startRes = _rawTexStart.run(s, pos);
+    if (!startRes.isSuccess) {
+      return startRes;
+    }
+    String env = startRes.value;
+
+    ParseResult<String> lineRes = anyLine.run(s, pos);
+    assert(lineRes.isSuccess);
+    String contents = lineRes.value + '\n';
+    Position position = lineRes.position;
+    Parser<String> endParser = _rawTexEnd(env);
+    do {
+      ParseResult<String> endRes = endParser.run(s, position);
+      if (endRes.isSuccess) {
+        contents += endRes.value + '\n';
+        return _success([new TexRawBlock(contents)], s, endRes.position);
+      }
+      lineRes = anyLine.run(s, position);
+      if (!lineRes.isSuccess) {
+        // eof
+        return _failure(s, pos);
+      }
+      contents += lineRes.value + '\n';
+      position = lineRes.position;
+    } while (true);
+  });
+
 
   //
   // Link reference
