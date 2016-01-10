@@ -13,7 +13,11 @@ void main() {
       break;
     }
     if (type == 'testStart') {
-      tests[res['test']['id']] = res['test'];
+      int id = res['test']['id'];
+      tests[id] = res['test'];
+      if (id % 1000 == 999) {
+        print('Running test ${id + 1}');
+      }
     }
     if (type == 'testDone') {
       tests.remove(res['testID']);
