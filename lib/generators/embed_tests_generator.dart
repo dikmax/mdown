@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:source_gen/source_gen.dart';
 
 import 'embed_tests.dart';
+import 'package:md_proc/md_proc.dart';
 
 class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
   static const int stateWait = 0;
@@ -28,26 +29,20 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     Map<String, String> result = <String, String>{};
 
     File file = new File(fileName);
-    int state = stateWait;
-    List<String> destination = [];
-    List<String> source = [];
-    List<String> lines = file.readAsLinesSync();
-    for (String line in lines) {
-      if (line == ".") {
-        state++;
-        if (state == 3) {
-          result[source.map((String line) => line + "\n").join()] =
-              destination.map((String line) => line + "\n").join();
-          state = stateWait;
-          destination = [];
-          source = [];
+    String md = file.readAsStringSync();
+
+    Document doc = CommonMarkParser.strict.parse(md);
+    doc.contents.forEach((Block block) {
+      if (block is FencedCodeBlock) {
+        if (block.attributes is InfoString) {
+          InfoString attr = block.attributes;
+          if (attr.language == 'example') {
+            List<String> example = block.contents.split('\n.\n');
+            result[example[0] + '\n'] = example[1];
+          }
         }
-      } else if (state == stateSource) {
-        source.add(line);
-      } else if (state == stateDestination) {
-        destination.add(line);
       }
-    }
+    });
 
     return result;
   }

@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// 2016-01-10T13:53:25.510Z
+// 2016-01-21T20:14:33.997Z
 
 part of md_proc.test.data.test_data;
 
@@ -263,6 +263,12 @@ Foo *bar*
 ''': r'''<h1>Foo <em>bar</em></h1>
 <h2>Foo <em>bar</em></h2>
 ''',
+  r'''Foo *bar
+baz*
+====
+''': r'''<h1>Foo <em>bar
+baz</em></h1>
+''',
   r'''Foo
 -------------------------
 
@@ -341,6 +347,15 @@ of dashes"/>
 </blockquote>
 <hr />
 ''',
+  r'''> foo
+bar
+===
+''': r'''<blockquote>
+<p>foo
+bar
+===</p>
+</blockquote>
+''',
   r'''- Foo
 ---
 ''': r'''<ul>
@@ -351,16 +366,8 @@ of dashes"/>
   r'''Foo
 Bar
 ---
-
-Foo
-Bar
-===
-''': r'''<p>Foo
-Bar</p>
-<hr />
-<p>Foo
-Bar
-===</p>
+''': r'''<h2>Foo
+Bar</h2>
 ''',
   r'''---
 Foo
@@ -405,6 +412,44 @@ Baz
   r'''\> foo
 ------
 ''': r'''<h2>&gt; foo</h2>
+''',
+  r'''Foo
+
+bar
+---
+baz
+''': r'''<p>Foo</p>
+<h2>bar</h2>
+<p>baz</p>
+''',
+  r'''Foo
+bar
+
+---
+
+baz
+''': r'''<p>Foo
+bar</p>
+<hr />
+<p>baz</p>
+''',
+  r'''Foo
+bar
+* * *
+baz
+''': r'''<p>Foo
+bar</p>
+<hr />
+<p>baz</p>
+''',
+  r'''Foo
+bar
+\---
+baz
+''': r'''<p>Foo
+bar
+---
+baz</p>
 ''',
   r'''    a simple
       indented code block
@@ -1099,7 +1144,7 @@ Hi
 ''': r'''<p><a href="my_(url)" title="title (with parens)">Foo*bar]</a></p>
 ''',
   r'''[Foo bar]:
-<my url>
+<my%20url>
 'title'
 
 [Foo bar]
@@ -2520,9 +2565,9 @@ foo
 ''': r'''<p>&quot; ആ ಫ</p>
 ''',
   r'''&nbsp &x; &#; &#x;
-&ThisIsWayTooLongToBeAnEntityIsntIt; &hi?;
+&ThisIsNotDefined; &hi?;
 ''': r'''<p>&amp;nbsp &amp;x; &amp;#; &amp;#x;
-&amp;ThisIsWayTooLongToBeAnEntityIsntIt; &amp;hi?;</p>
+&amp;ThisIsNotDefined; &amp;hi?;</p>
 ''',
   r'''&copy
 ''': r'''<p>&amp;copy</p>
@@ -2553,9 +2598,6 @@ foo
   r'''    f&ouml;f&ouml;
 ''': r'''<pre><code>f&amp;ouml;f&amp;ouml;
 </code></pre>
-''',
-  r'''<a href="f&ouml;f&ouml;"/>
-''': r'''<a href="f&ouml;f&ouml;"/>
 ''',
   r'''`foo`
 ''': r'''<p><code>foo</code></p>
@@ -3022,7 +3064,7 @@ bim</em> bop</strong></p>
 ''': r'''<p>[link](/my uri)</p>
 ''',
   r'''[link](</my uri>)
-''': r'''<p><a href="/my%20uri">link</a></p>
+''': r'''<p>[link](&lt;/my uri&gt;)</p>
 ''',
   r'''[link](foo
 bar)
@@ -3033,6 +3075,9 @@ bar)</p>
 bar>)
 ''': r'''<p>[link](<foo
 bar>)</p>
+''',
+  r'''[link](\(foo\))
+''': r'''<p><a href="(foo)">link</a></p>
 ''',
   r'''[link]((foo)and(bar))
 ''': r'''<p><a href="(foo)and(bar)">link</a></p>
@@ -3475,6 +3520,18 @@ bar>)</p>
   r'''<MAILTO:FOO@BAR.BAZ>
 ''': r'''<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>
 ''',
+  r'''<a+b+c:d>
+''': r'''<p><a href="a+b+c:d">a+b+c:d</a></p>
+''',
+  r'''<made-up-scheme://foo,bar>
+''': r'''<p><a href="made-up-scheme://foo,bar">made-up-scheme://foo,bar</a></p>
+''',
+  r'''<http://../>
+''': r'''<p><a href="http://../">http://../</a></p>
+''',
+  r'''<localhost:5001/foo>
+''': r'''<p><a href="localhost:5001/foo">localhost:5001/foo</a></p>
+''',
   r'''<http://foo.bar/baz bim>
 ''': r'''<p>&lt;http://foo.bar/baz bim&gt;</p>
 ''',
@@ -3493,17 +3550,14 @@ bar>)</p>
   r'''<>
 ''': r'''<p>&lt;&gt;</p>
 ''',
-  r'''<heck://bing.bong>
-''': r'''<p>&lt;heck://bing.bong&gt;</p>
-''',
   r'''< http://foo.bar >
 ''': r'''<p>&lt; http://foo.bar &gt;</p>
 ''',
+  r'''<m:abc>
+''': r'''<p>&lt;m:abc&gt;</p>
+''',
   r'''<foo.bar.baz>
 ''': r'''<p>&lt;foo.bar.baz&gt;</p>
-''',
-  r'''<localhost:5001/foo>
-''': r'''<p>&lt;localhost:5001/foo&gt;</p>
 ''',
   r'''http://example.com
 ''': r'''<p>http://example.com</p>

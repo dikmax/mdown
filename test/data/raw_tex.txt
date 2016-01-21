@@ -1,4 +1,4 @@
-.
+```````````````````````````````` example
 This is the identity matrix:
 
 \begin{pmatrix}
@@ -14,10 +14,10 @@ This is the identity matrix:
 0 &amp; 1 &amp; 0 \\
 0 &amp; 0 &amp;1 \\
 \end{pmatrix}
-.
+````````````````````````````````
 
 
-.
+```````````````````````````````` example
 This is the identity matrix:
 
 \begin{pmatrix}
@@ -37,10 +37,10 @@ This is the identity matrix:
 
 
 \end{pmatrix}
-.
+````````````````````````````````
 
 
-.
+```````````````````````````````` example
 \begin{theorem}[Fred]
 All odd numbers are prime.
 \end{theorem}
@@ -48,9 +48,9 @@ All odd numbers are prime.
 \begin{theorem}[Fred]
 All odd numbers are prime.
 \end{theorem}
-.
+````````````````````````````````
 
-.
+```````````````````````````````` example
 \begin{theorem*}[Fred]
 All odd numbers are prime.
 \end{theorem}
@@ -58,4 +58,4 @@ All odd numbers are prime.
 <p>\begin{theorem*}[Fred]
 All odd numbers are prime.
 \end{theorem}</p>
-.
+````````````````````````````````

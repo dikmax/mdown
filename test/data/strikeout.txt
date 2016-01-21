@@ -1,43 +1,43 @@
 ## Strikeout tests
 
-.
+```````````````````````````````` example
 ~~Strikeout text~~
 .
 <p><del>Strikeout text</del></p>
-.
+````````````````````````````````
 
-.
+```````````````````````````````` example
 ~~__Strikeout text__~~
 .
 <p><del><strong>Strikeout text</strong></del></p>
-.
+````````````````````````````````
 
-.
+```````````````````````````````` example
 Ins~~e~~ide w~~a~~ord
 .
 <p>Ins<del>e</del>ide w<del>a</del>ord</p>
-.
+````````````````````````````````
 
-.
+```````````````````````````````` example
 ~\~No strikeout~~
 .
 <p>~~No strikeout~~</p>
-.
+````````````````````````````````
 
-.
+```````````````````````````````` example
 \~~No strikeout~~
 .
 <p>~~No strikeout~~</p>
-.
+````````````````````````````````
 
-.
+```````````````````````````````` example
 ~No strikeout~
 .
 <p>~No strikeout~</p>
-.
+````````````````````````````````
 
-.
+```````````````````````````````` example
 ~~ this ~~ is not one neither is ~this~
 .
 <p>~~ this ~~ is not one neither is ~this~</p>
-.
+````````````````````````````````
