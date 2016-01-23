@@ -2209,7 +2209,7 @@ class CommonMarkParser {
   static final Parser<List<String>> _paraOrSetextParser =
       (_paraFirstLineParser.notAhead > anyLine) +
               manySimple(_paraEndParser.notAhead > anyLine) ^
-          (a, List b) {
+          (String a, List<String> b) {
             b.insert(0, a);
             return b;
           };
