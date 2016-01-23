@@ -24,40 +24,8 @@ void main() {
       mdToHtmlTest(Options.strict));
 
   // SmartPunct
-  Set<int> smartPunctuationContradictions = new Set.from([
-    11,
-    20,
-    51,
-    55,
-    152,
-    162,
-    163,
-    278,
-    311,
-    319,
-    325,
-    329,
-    346,
-    351,
-    361,
-    465,
-    544,
-    570,
-    571,
-    573,
-    575,
-    577,
-    578,
-    584,
-    602
-  ]);
   tests("SmartPunct [commonmark]", smartPunctuation,
       mdToHtmlTest(Options.commonmark));
-  tests(
-      "CommonMark [commonmark]",
-      specification,
-      mdToHtmlTest(Options.commonmark,
-          (_, int num) => !smartPunctuationContradictions.contains(num)));
 
   // Strikeout
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
@@ -88,7 +56,7 @@ void main() {
       mdToHtmlTest(new Options(texMathDollars: true)));
 
   // TeX Math between backslashed `()` or `[]`
-  Set<int> texMathSingleBackslashContradictions = new Set.from([276, 469, 485]);
+  Set<int> texMathSingleBackslashContradictions = new Set.from([282, 475, 491]);
   tests("TeX math single backslash", texMathSingleBackslash,
       mdToHtmlTest(new Options(texMathSingleBackslash: true)));
   tests(
