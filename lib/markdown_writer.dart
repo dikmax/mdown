@@ -143,8 +143,8 @@ class _NotCheckedPart extends _InlinePart {
         new RegExp("[" + replaceChars + "]"), (Match m) => r"\" + m.group(0));
 
     if (_options.smartPunctuation) {
-      content = content.replaceAllMapped(new RegExp(r"(\.\.\.|-{2,3})"),
-          (Match m) {
+      content =
+          content.replaceAllMapped(new RegExp(r"(\.\.\.|-{2,3})"), (Match m) {
         String val = m.group(0);
         if (val == '...' || val == '--') {
           return r"\" + val;

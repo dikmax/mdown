@@ -110,7 +110,8 @@ class AtxHeading extends Heading {
 
   String toString() => "AtxHeading $level $contents";
 
-  bool operator ==(dynamic obj) => obj is AtxHeading &&
+  bool operator ==(dynamic obj) =>
+      obj is AtxHeading &&
       level == obj.level &&
       _iterableEquality.equals(contents, obj.contents);
 
@@ -124,7 +125,8 @@ class SetextHeading extends Heading {
 
   String toString() => "SetextHeading $level $contents";
 
-  bool operator ==(dynamic obj) => obj is SetextHeading &&
+  bool operator ==(dynamic obj) =>
+      obj is SetextHeading &&
       level == obj.level &&
       _iterableEquality.equals(contents, obj.contents);
 
@@ -174,7 +176,8 @@ class FencedCodeBlock extends CodeBlock {
 
   String toString() => "FencedCodeBlock $attributes $contents";
 
-  bool operator ==(dynamic obj) => obj is FencedCodeBlock &&
+  bool operator ==(dynamic obj) =>
+      obj is FencedCodeBlock &&
       contents == obj.contents &&
       attributes == obj.attributes &&
       fenceType == obj.fenceType &&
@@ -332,7 +335,8 @@ class UnorderedList extends ListBlock {
 
   String toString() => "UnorderedList $bulletType $items";
 
-  bool operator ==(dynamic obj) => obj is UnorderedList &&
+  bool operator ==(dynamic obj) =>
+      obj is UnorderedList &&
       bulletType == obj.bulletType &&
       tight == obj.tight &&
       _iterableEquality.equals(items, obj.items);
@@ -352,7 +356,8 @@ class OrderedList extends ListBlock {
 
   String toString() => "OrderedList start=$startIndex $indexSeparator $items";
 
-  bool operator ==(dynamic obj) => obj is OrderedList &&
+  bool operator ==(dynamic obj) =>
+      obj is OrderedList &&
       indexSeparator == obj.indexSeparator &&
       tight == obj.tight &&
       startIndex == obj.startIndex &&
@@ -541,12 +546,14 @@ class SmartQuote extends Inline {
 
   SmartQuote(this.contents, {this.single, this.open: true, this.close: true});
 
-  String toString() => 'SmartQuote ' +
+  String toString() =>
+      'SmartQuote ' +
       (single
           ? "${open ? "'" : ""}$contents${close ? "'" : ""}"
           : "${open ? '"' : ""}$contents${close ? '"' : ""}");
 
-  bool operator ==(dynamic obj) => obj is SmartQuote &&
+  bool operator ==(dynamic obj) =>
+      obj is SmartQuote &&
       single == obj.single &&
       open == obj.open &&
       close == obj.close &&
@@ -646,7 +653,8 @@ class InlineLink extends Link {
 
   String toString() => 'InlineLink $label ($target)';
 
-  bool operator ==(dynamic obj) => obj is InlineLink &&
+  bool operator ==(dynamic obj) =>
+      obj is InlineLink &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
 
@@ -661,7 +669,8 @@ class ReferenceLink extends Link {
 
   String toString() => 'ReferenceLink[$reference] $label ($target)';
 
-  bool operator ==(dynamic obj) => obj is ReferenceLink &&
+  bool operator ==(dynamic obj) =>
+      obj is ReferenceLink &&
       reference == obj.reference &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
@@ -695,7 +704,8 @@ class InlineImage extends Image {
 
   String toString() => 'InlineImage $label ($target)';
 
-  bool operator ==(dynamic obj) => obj is InlineImage &&
+  bool operator ==(dynamic obj) =>
+      obj is InlineImage &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
 
@@ -710,7 +720,8 @@ class ReferenceImage extends Image {
 
   String toString() => 'ReferenceImage[$reference] $label ($target)';
 
-  bool operator ==(dynamic obj) => obj is ReferenceImage &&
+  bool operator ==(dynamic obj) =>
+      obj is ReferenceImage &&
       reference == obj.reference &&
       target == obj.target &&
       _iterableEquality.equals(label, obj.label);
