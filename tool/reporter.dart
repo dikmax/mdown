@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
+/// Main method for custom tests reporter
 void main() {
   stdin.lineMode = true;
   String line;

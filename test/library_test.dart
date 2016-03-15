@@ -7,6 +7,7 @@ import 'reference_resolver.dart';
 import 'service.dart';
 import 'data/test_data.dart';
 
+/// Main tests runner
 void main() {
   serviceTests();
 
@@ -56,7 +57,8 @@ void main() {
       mdToHtmlTest(new Options(texMathDollars: true)));
 
   // TeX Math between backslashed `()` or `[]`
-  Set<int> texMathSingleBackslashContradictions = new Set.from([282, 475, 491]);
+  Set<int> texMathSingleBackslashContradictions =
+      new Set<int>.from([282, 475, 491]);
   tests("TeX math single backslash", texMathSingleBackslash,
       mdToHtmlTest(new Options(texMathSingleBackslash: true)));
   tests(
@@ -66,7 +68,7 @@ void main() {
           (_, int num) => !texMathSingleBackslashContradictions.contains(num)));
 
   // TeX Math between double backslashed `()` or `[]`
-  Set<int> texMathDoubleBackslashContradictions = new Set.from([]);
+  Set<int> texMathDoubleBackslashContradictions = new Set<int>.from([]);
   tests("TeX math double backslash", texMathDoubleBackslash,
       mdToHtmlTest(new Options(texMathDoubleBackslash: true)));
   tests(
@@ -76,7 +78,7 @@ void main() {
           (_, int num) => !texMathDoubleBackslashContradictions.contains(num)));
 
   // Raw TeX
-  Set<int> rawTexContradictions = new Set.from([]);
+  Set<int> rawTexContradictions = new Set<int>.from([]);
   tests("Raw TeX", rawTex, mdToHtmlTest(new Options(rawTex: true)));
   tests(
       "Raw TeX spec",
