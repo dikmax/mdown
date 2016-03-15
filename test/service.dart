@@ -4,6 +4,7 @@ import 'package:test/test.dart' as t;
 
 import 'package:md_proc/md_proc.dart';
 
+/// Library APIs tests
 void serviceTests() {
   t.group('README examples test', () {
     t.test('Basic usage', () {
