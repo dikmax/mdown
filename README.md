@@ -14,7 +14,7 @@ Basic usage:
 print(markdownToHtml('# Hello world!'));
 ```
 
-Main difference from other parsers is Markdown-based AST. You can parse Markdown, process resulting AST and write
+The main difference from other parsers is Markdown-based AST. You can parse Markdown, process resulting AST and write
 results back to markdown.
 
 Project main goal is create processing library for Markdown.
@@ -79,7 +79,7 @@ String res = writer.write(doc);
 There three predefined versions of parsers/writers:
 
 - `strict`: all extensions are disabled
-- `commonmark`: enabled only `smartPunctuation` extension.
+- `commonmark`: only `smartPunctuation` extension is enabled.
 - `defaults`: `smartPunctuation`, `strikeout`, `subscript`, `superscript`, `texMathDollars`, `rawTex` are enabled.
 
 To get correspondent parser/writer instance use static getter on class:
@@ -96,7 +96,7 @@ Smart punctuation (`Options.smartPunctuation`)
 Smart punctuation is automatic replacement of `...`, `---`, `--`, `"` and `'` to "…", "—", "–" and curly versions of
 quote marks accordingly. It's only official extension to date.
 
-**NOTE:** This extension uses Unicode chars. Make sure that your code support it.
+**NOTE:** This extension uses Unicode chars. Make sure that your code supports it.
 
 
 Strikeout (`Options.strikeout`)
@@ -118,7 +118,7 @@ Support for subscript (H<sub>2</sub>O). Wrap text with tildes (`~`).
 H~2~O
 ```
 
-Subscript couldn't contain spaces. If you need to insert space into subscript, escape space (`\ `).
+Subscript couldn't contain spaces. If you need to insert space into the subscript, escape space (`\ `).
 
 ```md
 subscript~with\ spaces~
@@ -128,7 +128,7 @@ subscript~with\ spaces~
 Superscript (`Options.superscript`)
 -----------------------------------
 
-Support for superscript (2<sup>2</sup>=4). Wrap text with caret (`^`).
+Support for superscript (2<sup>2</sup>=4). Wrap text with carets (`^`).
 
 ```md
 2^2^=4
@@ -159,21 +159,21 @@ override them with `Options.inlineTexMathClasses` and `Options.displayTexMathCla
 TeX Math between backslashed `()` or `[]` (`Options.texMathSingleBackslash`)
 ----------------------------------------------------------------------------
 
-Causes anything between `\(` and `\)` to be interpreted as inline TeX math, and anything between `\[` and `\]` to be
+Causes anything between `\(` and `\)` to be interpreted as inline TeX math and anything between `\[` and `\]` to be
 interpreted as display TeX math.
 
-**NOTE 1:** This extensions breaks escaping of `(` and `[]`.
+**NOTE 1:** This extension breaks escaping of `(` and `[]`.
 
-**NOTE 2:** This extensions is disabled by default.
+**NOTE 2:** This extension is disabled by default.
 
 
 TeX Math between double backslashed `()` or `[]` (`Options.texMathDoubleBackslash`)
 -----------------------------------------------------------------------------------
 
-Causes anything between `\\(` and `\\)` to be interpreted as inline TeX math, and anything between `\\[` and `\\]` to be
+Causes anything between `\\(` and `\\)` to be interpreted as inline TeX math and anything between `\\[` and `\\]` to be
 interpreted as display TeX math.
 
-**NOTE:** This extensions is disabled by default.
+**NOTE:** This extension is disabled by default.
 
 
 Raw TeX (`Options.rawTex`)
@@ -186,7 +186,7 @@ Allows to include raw TeX blocks into documents. Right now only environment bloc
 Custom reference resolver
 -------------------------
 
-Custom reference resolver may be required when parsing document without implicit defined references, for example 
+Custom reference resolver may be required when parsing document without implicitly defined references, for example, 
 Dartdoc.
 
 ```dart
@@ -196,7 +196,7 @@ Dartdoc.
  */
 ```
 
-In that case you could supply parser with resolver, which should provide all missing links.
+In that case, you could supply parser with the resolver, which should provide all missing links.
   
 ```dart
 String library = "md_proc";
