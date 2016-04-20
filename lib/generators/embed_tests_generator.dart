@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:analyzer/src/generated/element.dart';
-import 'package:analyzer/src/generated/source_io.dart';
 import 'package:build/build.dart';
 import 'package:path/path.dart' as path;
 import 'package:source_gen/source_gen.dart';
@@ -12,14 +11,12 @@ import 'package:source_gen/source_gen.dart';
 import 'embed_tests.dart';
 import 'package:md_proc/md_proc.dart';
 
+/// Embed test into file
 class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
-  static const int stateWait = 0;
-  static const int stateSource = 1;
-  static const int stateDestination = 2;
-
+  /// Constructor
   const EmbedTestsGenerator();
 
-  Map<String, String> readFile(String fileName) {
+  Map<String, String> _readFile(String fileName) {
     Map<String, String> result = <String, String>{};
 
     File file = new File(fileName);
@@ -56,7 +53,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
       throw 'Not a file! - $filePath';
     }
 
-    Map<String, String> content = readFile(filePath);
+    Map<String, String> content = _readFile(filePath);
 
     String result =
         'final Map<String, String> _\$${element.displayName}Tests = {\n';
