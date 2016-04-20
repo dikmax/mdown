@@ -15,6 +15,6 @@ final PhaseGroup _phases = new PhaseGroup.singleAction(
         const ['lib/entities.dart', 'test/data/test_data.dart']));
 
 /// Main method for generated code builder.
-Future main(List<String> args) async {
+Future<dynamic> main(List<String> args) async {
   await build (_phases, deleteFilesByDefault: true);
 }
