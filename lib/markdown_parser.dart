@@ -2826,9 +2826,14 @@ class CommonMarkParser {
   Parser<Document> get document => (manyUntilSimple(block, eof) ^
       (Iterable res) => new Document(processParsedBlocks(res)));
 
+  /// Predefined markdown parser with CommonMark default settings
   static final CommonMarkParser commonmark =
       new CommonMarkParser(Options.commonmark);
+
+  /// Predefined markdown parser with default settings
   static final CommonMarkParser defaults =
       new CommonMarkParser(Options.defaults);
+
+  /// Predefined markdown parser with strict settings
   static final CommonMarkParser strict = new CommonMarkParser(Options.strict);
 }

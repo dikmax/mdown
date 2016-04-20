@@ -13,6 +13,7 @@ abstract class _InlinePart {
 class _CheckedPart extends _InlinePart {
   _CheckedPart(String content) : super(content);
 
+  @override
   String toString() {
     return content;
   }
@@ -69,11 +70,6 @@ class _EscapeContext {
 }
 
 class _NotCheckedPart extends _InlinePart {
-  RegExp escapedChars =
-      new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
-  String escapeString(String str) =>
-      str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
-
   _EscapeContext context;
   Options _options;
   CommonMarkParser _parser;
@@ -83,6 +79,12 @@ class _NotCheckedPart extends _InlinePart {
       : super(content) {
     _parser = new CommonMarkParser(_options, {});
   }
+
+  RegExp escapedChars =
+  new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
+
+  String escapeString(String str) =>
+      str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
   RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
   RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
@@ -263,6 +265,7 @@ class _NotCheckedPart extends _InlinePart {
     });
   }
 
+  @override
   String toString() {
     return escapeString(content);
   }
@@ -554,15 +557,16 @@ class _InlineRenderer {
     }
   }
 
+  @override
   String toString() {
     StringBuffer buffer = new StringBuffer();
     Iterator<_InlinePart> it = parts.iterator;
-    _InlinePart prev = null;
+    _InlinePart prev;
     if (!it.moveNext()) {
       return '';
     }
     _InlinePart current = it.current;
-    _InlinePart next = null;
+    _InlinePart next;
     if (it.moveNext()) {
       next = it.current;
     }
@@ -601,7 +605,7 @@ class _MarkdownBuilder extends StringBuffer {
 
   void writeBlocks(Iterable<Block> blocks,
       {bool tight: false, String unorderedListChar: "*"}) {
-    Block prevBlock = null;
+    Block prevBlock;
     Iterator<Block> it = blocks.iterator;
     bool first = true;
     while (it.moveNext()) {
@@ -814,11 +818,14 @@ class _MarkdownBuilder extends StringBuffer {
   }
 }
 
+/// Markdown Writer class
 class MarkdownWriter {
   final Options _options;
 
+  /// Default constructor
   const MarkdownWriter(this._options);
 
+  /// Converts document to markdown string
   String write(Document document) {
     _MarkdownBuilder builder =
         new _MarkdownBuilder(<String, Target>{}, _options);
@@ -827,8 +834,13 @@ class MarkdownWriter {
     return builder.toString();
   }
 
+  /// Predefined markdown writer with CommonMark default settings
   static const MarkdownWriter commonmark =
       const MarkdownWriter(Options.commonmark);
+
+  /// Predefined markdown writer with strict settings
   static const MarkdownWriter strict = const MarkdownWriter(Options.strict);
+
+  /// Predefined markdown writer with default settings
   static const MarkdownWriter defaults = const MarkdownWriter(Options.defaults);
 }

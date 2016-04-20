@@ -398,7 +398,12 @@ class HtmlWriter {
     return builder.toString();
   }
 
+  /// Predefined html writer with CommonMark default settings
   static HtmlWriter commonmark = new HtmlWriter(Options.commonmark);
+
+  /// Predefined html writer with strict settings
   static HtmlWriter strict = new HtmlWriter(Options.strict);
+
+  /// Predefined html writer with default settings
   static HtmlWriter defaults = new HtmlWriter(Options.defaults);
 }
