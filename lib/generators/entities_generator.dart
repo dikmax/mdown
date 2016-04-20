@@ -10,7 +10,9 @@ import 'package:source_gen/source_gen.dart';
 
 import 'entities.dart';
 
+/// Generator for entities file
 class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
+  /// Constructor
   const EntitiesGenerator();
 
   @override

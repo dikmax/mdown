@@ -387,11 +387,14 @@ class _HtmlBuilder extends StringBuffer {
   }
 }
 
+/// Html writer
 class HtmlWriter {
   Options _options;
 
+  /// Constructor
   HtmlWriter(this._options);
 
+  /// Renders document to string
   String write(Document document) {
     _HtmlBuilder builder = new _HtmlBuilder(_options);
     builder.writeDocument(document);
