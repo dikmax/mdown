@@ -10,22 +10,23 @@ import 'options.dart';
 // TODO make constructors in ParseResult (new ParseResult.success)
 // TODO remove
 // TODO replace some ParseResult.isSuccess checks with assert
-ParseResult /*<E>*/ _success(
+ParseResult<dynamic> /*<E>*/ _success(
     dynamic /*E*/ value, String text, Position position,
     [Expectations expectations, bool committed = false]) {
   final Expectations exps =
       (expectations != null) ? expectations : new Expectations.empty(position);
-  return new ParseResult /*<E>*/ (text, exps, position, true, committed, value);
+  return new ParseResult<dynamic> /*<E>*/(
+      text, exps, position, true, committed, value);
 }
 
-ParseResult /*<any*/ _failure(String text, Position position,
+ParseResult<dynamic> _failure(String text, Position position,
     [Expectations expectations, bool committed = false]) {
   final Expectations exps =
       (expectations != null) ? expectations : new Expectations.empty(position);
-  return new ParseResult /*<any>*/ (
-      text, exps, position, false, committed, null);
+  return new ParseResult<dynamic>(text, exps, position, false, committed, null);
 }
 
+/// Parses char
 Parser<String> char(String c1) => new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
         return _failure(s, pos);
@@ -35,6 +36,7 @@ Parser<String> char(String c1) => new Parser<String>((String s, Position pos) {
       }
     });
 
+/// Parses char when it one of 2
 Parser<String> oneOf2(String c1, String c2) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -47,6 +49,7 @@ Parser<String> oneOf2(String c1, String c2) =>
       }
     });
 
+/// Parses char when it one of 3
 Parser<String> oneOf3(String c1, String c2, String c3) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -59,6 +62,7 @@ Parser<String> oneOf3(String c1, String c2, String c3) =>
       }
     });
 
+/// Parses char when it in set
 Parser<String> oneOfSet(Set<String> set) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -71,6 +75,7 @@ Parser<String> oneOfSet(Set<String> set) =>
       }
     });
 
+/// Parses char when it not in 1
 Parser<String> noneOf1(String c1) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -81,6 +86,7 @@ Parser<String> noneOf1(String c1) =>
       }
     });
 
+/// Parses char when it not in 2
 Parser<String> noneOf2(String c1, String c2) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -93,6 +99,7 @@ Parser<String> noneOf2(String c1, String c2) =>
       }
     });
 
+/// Parses char when it not in 3
 Parser<String> noneOf3(String c1, String c2, String c3) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -105,6 +112,7 @@ Parser<String> noneOf3(String c1, String c2, String c3) =>
       }
     });
 
+/// Parses char when it not in 4
 Parser<String> noneOf4(String c1, String c2, String c3, String c4) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -117,6 +125,7 @@ Parser<String> noneOf4(String c1, String c2, String c3, String c4) =>
       }
     });
 
+/// Parses char when it not from set
 Parser<String> noneOfSet(Set<String> set) =>
     new Parser<String>((String s, Position pos) {
       if (pos.offset >= s.length) {
@@ -129,11 +138,11 @@ Parser<String> noneOfSet(Set<String> set) =>
       }
     });
 
-// No expectations, no commitment
-Parser choiceSimple(List<Parser> ps) {
-  return new Parser((String s, Position pos) {
-    for (final Parser p in ps) {
-      final ParseResult res = p.run(s, pos);
+/// choice without expectations
+Parser<dynamic> choiceSimple(List<Parser<dynamic>> ps) {
+  return new Parser<dynamic>((String s, Position pos) {
+    for (final Parser<dynamic> p in ps) {
+      final ParseResult<dynamic> res = p.run(s, pos);
       if (res.isSuccess) {
         return res;
       }
@@ -142,12 +151,12 @@ Parser choiceSimple(List<Parser> ps) {
   });
 }
 
-Parser _manySimple(Parser p, List acc()) {
-  return new Parser((String s, Position pos) {
-    final List res = acc();
+Parser<dynamic> _manySimple(Parser<dynamic> p, List<dynamic> acc()) {
+  return new Parser<dynamic>((String s, Position pos) {
+    final List<dynamic> res = acc();
     Position position = pos;
     while (true) {
-      ParseResult o = p.run(s, position);
+      ParseResult<dynamic> o = p.run(s, position);
       if (o.isSuccess) {
         res.add(o.value);
         position = o.position;
@@ -158,16 +167,19 @@ Parser _manySimple(Parser p, List acc()) {
   });
 }
 
-Parser<List> manySimple(Parser p) => _manySimple(p, () => []);
+/// many without error processing
+Parser<List<dynamic>> manySimple(Parser<dynamic> p) => _manySimple(p, () => []);
 
-Parser<List> many1Simple(Parser p) =>
+/// many1 without error processing
+Parser<List<dynamic>> many1Simple(Parser<dynamic> p) =>
     p >> (dynamic x) => _manySimple(p, () => [x]);
 
-Parser skipManySimple(Parser p) {
-  return new Parser((String s, Position pos) {
+/// skipMany without error processing
+Parser<dynamic> skipManySimple(Parser<dynamic> p) {
+  return new Parser<dynamic>((String s, Position pos) {
     Position index = pos;
     while (true) {
-      ParseResult o = p.run(s, index);
+      ParseResult<dynamic> o = p.run(s, index);
       if (o.isSuccess) {
         index = o.position;
       } else {
@@ -177,22 +189,27 @@ Parser skipManySimple(Parser p) {
   });
 }
 
-Parser skipMany1Simple(Parser p) => p > p.skipMany;
+/// skipMany1 without error processing
+Parser<dynamic> skipMany1Simple(Parser<dynamic> p) => p > p.skipMany;
 
-Parser<String> recordMany(Parser p) => skipManySimple(p).record;
-Parser<String> record1Many(Parser p) => skipMany1Simple(p).record;
+/// record without error processing
+Parser<String> recordMany(Parser<dynamic> p) => skipManySimple(p).record;
 
-Parser manyUntilSimple(Parser p, Parser end) {
+/// record1 without error processing
+Parser<String> record1Many(Parser<dynamic> p) => skipMany1Simple(p).record;
+
+/// manyUntil without error processing
+Parser<dynamic> manyUntilSimple(Parser<dynamic> p, Parser<dynamic> end) {
   // Imperative version to avoid stack overflows.
-  return new Parser((String s, Position pos) {
-    List res = [];
+  return new Parser<dynamic>((String s, Position pos) {
+    List<dynamic> res = [];
     Position index = pos;
     while (true) {
-      ParseResult endRes = end.run(s, index);
+      ParseResult<dynamic> endRes = end.run(s, index);
       if (endRes.isSuccess) {
         return _success(res, s, endRes.position);
       } else {
-        ParseResult xRes = p.run(s, index);
+        ParseResult<dynamic> xRes = p.run(s, index);
         if (xRes.isSuccess) {
           res.add(xRes.value);
           index = xRes.position;
@@ -204,16 +221,17 @@ Parser manyUntilSimple(Parser p, Parser end) {
   });
 }
 
-Parser skipManyUntilSimple(Parser p, Parser end) {
+/// skipManyUntil without error processing
+Parser<dynamic> skipManyUntilSimple(Parser<dynamic> p, Parser<dynamic> end) {
   // Imperative version to avoid stack overflows.
-  return new Parser((String s, Position pos) {
+  return new Parser<dynamic>((String s, Position pos) {
     Position index = pos;
     while (true) {
-      ParseResult endRes = end.run(s, index);
+      ParseResult<dynamic> endRes = end.run(s, index);
       if (endRes.isSuccess) {
         return _success(null, s, endRes.position);
       } else {
-        ParseResult xRes = p.run(s, index);
+        ParseResult<dynamic> xRes = p.run(s, index);
         if (xRes.isSuccess) {
           index = xRes.position;
         } else {
@@ -229,10 +247,13 @@ class _UnparsedInlines extends Inlines {
 
   _UnparsedInlines(this.raw);
 
+  @override
   String toString() => raw;
 
+  @override
   bool operator ==(dynamic obj) => obj is _UnparsedInlines && raw == obj.raw;
 
+  @override
   int get hashCode => raw.hashCode;
 }
 
@@ -262,10 +283,13 @@ class _EscapedSpace extends Inline {
 
   _EscapedSpace._internal();
 
+  @override
   String toString() => "_EscapedSpace";
 
+  @override
   bool operator ==(dynamic obj) => obj is _EscapedSpace;
 
+  @override
   int get hashCode => 0;
 }
 
@@ -291,8 +315,9 @@ class _EmphasisStackItem {
       {this.cantCloseAnyway: false});
 }
 
-// CommonMark parser
+/// CommonMark parser
 class CommonMarkParser {
+  /// Tab stop value
   static const int tabStop = 4;
 
   Options _options;
@@ -303,6 +328,7 @@ class CommonMarkParser {
   Set<String> _strSpecialChars;
   Set<String> _intrawordDelimiters;
 
+  /// Constructor
   CommonMarkParser(this._options, [this._references]) {
     _inlineDelimiters = new Set<String>.from(["_", "*"]);
     _strSpecialChars = new Set<String>.from(
@@ -324,6 +350,7 @@ class CommonMarkParser {
     }
   }
 
+  /// Parse document from string
   Document parse(String s) {
     // TODO separate preprocess option
 
@@ -339,10 +366,7 @@ class CommonMarkParser {
     return doc;
   }
 
-  //
-  // Preprocess
-  //
-
+  /// Preprocess input string
   String preprocess(String s) {
     StringBuffer sb = new StringBuffer();
 
@@ -408,9 +432,9 @@ class CommonMarkParser {
   // Aux methods
   //
 
-  List<Block> processParsedBlocks(Iterable blocks) {
-    List list = flatten(blocks);
-    List result = [];
+  List<Block> _processParsedBlocks(Iterable<dynamic> blocks) {
+    List<dynamic> list = _flatten(blocks);
+    List<Block> result = [];
     list.forEach((Block block) {
       if (block is _LinkReference) {
         String nr = block.normalizedReference;
@@ -424,18 +448,18 @@ class CommonMarkParser {
     return result;
   }
 
-  Inlines processParsedInlines(Iterable inlines) {
+  Inlines _processParsedInlines(Iterable<dynamic> inlines) {
     Inlines result = new Inlines();
-    result.addAll(flatten(inlines));
+    result.addAll(_flatten(inlines));
     return result;
   }
 
-  static List flatten(Iterable list) {
-    List result = [];
+  static List<dynamic> _flatten(Iterable<dynamic> list) {
+    List<dynamic> result = [];
 
     for (dynamic item in list) {
-      if (item is Iterable) {
-        result.addAll(flatten(item));
+      if (item is Iterable<dynamic>) {
+        result.addAll(_flatten(item));
       } else {
         result.add(item);
       }
@@ -444,7 +468,7 @@ class CommonMarkParser {
     return result;
   }
 
-  static String stripTrailingNewlines(String str) {
+  static String _stripTrailingNewlines(String str) {
     int l = str.length;
     while (l > 0 && str[l - 1] == '\n') {
       --l;
@@ -456,6 +480,7 @@ class CommonMarkParser {
   // Aux parsers
   //
 
+  /// Parses any line (fast version)
   static final Parser<String> anyLine =
       new Parser<String>((String s, Position pos) {
     String result = '';
@@ -477,29 +502,46 @@ class CommonMarkParser {
     return _success(result, s, newPos);
   });
 
+  /// Parses space or tab
   static final Parser<String> whitespaceChar = oneOf2(" ", "\t");
+
+  /// Parses one space char
   static final Parser<String> space = char(' ');
+
+  /// Parses not space
   static final Parser<String> nonSpaceChar = noneOf4("\t", "\n", " ", "\r");
+
+  /// Skips spaces
   static final Parser<dynamic> skipSpaces = skipManySimple(space);
+
+  /// Skips whitespace (space or tab)
   static final Parser<dynamic> skipWhitespace = skipManySimple(whitespaceChar);
+
+  /// Skips one blankline
   static final Parser<String> blankline = skipWhitespace > newline;
+
+  /// Parses 1+ blanklines
   static final Parser<List<String>> blanklines = many1Simple(blankline);
 
   // All indent and spaces parsers accepts spaces to skip, and returns spaces
   // that were actually skipped.
-  static final Parser<int> skipNonindentChars =
+  static final Parser<int> _skipNonindentChars =
       atMostIndent(tabStop - 1).notFollowedBy(whitespaceChar);
-  static final Parser<int> skipNonindentCharsFromAnyPosition =
+  static final Parser<int> _skipNonindentCharsFromAnyPosition =
       atMostIndent(tabStop - 1, fromLineStart: false)
           .notFollowedBy(whitespaceChar);
-  static Parser<int> skipListIndentChars(int max) =>
+
+  static Parser<int> _skipListIndentChars(int max) =>
       (atMostIndent(max - 1) | atMostIndent(tabStop - 1, fromLineStart: false))
           .notFollowedBy(whitespaceChar);
-  static final Parser<String> spnl = (skipWhitespace > newline);
-  static final Parser<int> indent = waitForIndent(tabStop);
+
+  /// Indent parser
+  static final Parser<int> indent = _waitForIndent(tabStop);
 
   static Map<int, Parser<int>> _atMostIndentCache = {};
   static Map<int, Parser<int>> _atMostIndentStartCache = {};
+
+  /// Parses maximum indent, could be less
   static Parser<int> atMostIndent(int indent, {bool fromLineStart: true}) {
     if (fromLineStart && _atMostIndentStartCache[indent] != null) {
       return _atMostIndentStartCache[indent];
@@ -533,7 +575,7 @@ class CommonMarkParser {
   }
 
   static Map<int, Parser<int>> _waitForIndentCache = {};
-  static Parser<int> waitForIndent(int length) {
+  static Parser<int> _waitForIndent(int length) {
     if (_waitForIndentCache[length] == null) {
       _waitForIndentCache[length] = new Parser<int>((String s, Position pos) {
         if (pos.character != 1) {
@@ -555,15 +597,18 @@ class CommonMarkParser {
     return _waitForIndentCache[length];
   }
 
-  static Parser<List /*<A>*/ > count(int l, Parser /*<A>*/ p) =>
+  /// Parses exactly l occurrences of parser
+  static Parser<List<dynamic> /*<A>*/ > count(
+          int l, Parser<dynamic> /*<A>*/ p) =>
       countBetween(l, l, p);
 
-  static Parser<List /*<A>*/ > countBetween(
-          int min, int max, Parser /*<A>*/ p) =>
-      new Parser<List /*<A>*/ >((String s, Position pos) {
+  /// Parses min...max occurrences of a parser
+  static Parser<List<dynamic> /*<A>*/ > countBetween(
+          int min, int max, Parser<dynamic> /*<A>*/ p) =>
+      new Parser<List<dynamic> /*<A>*/ >((String s, Position pos) {
         Position position = pos;
-        List /*<A>*/ value = [];
-        ParseResult /*<A>*/ res;
+        List<dynamic> /*<A>*/ value = [];
+        ParseResult<dynamic> /*<A>*/ res;
         for (int i = 0; i < max; ++i) {
           res = p.run(s, position);
           if (res.isSuccess) {
@@ -585,29 +630,38 @@ class CommonMarkParser {
 
   // TODO move to utils
   static final String _lowerChars = "abcdefghijklmnopqrstuvwxyz";
-  static final Set<String> _lower = new Set.from(_lowerChars.split(""));
+  static final Set<String> _lower = new Set<String>.from(_lowerChars.split(""));
   static final Set<String> _upper =
-      new Set.from(_lowerChars.toUpperCase().split(""));
-  static final Set<String> _alpha = new Set.from(_lower)..addAll(_upper);
+      new Set<String>.from(_lowerChars.toUpperCase().split(""));
+  static final Set<String> _alpha = new Set<String>.from(_lower)
+    ..addAll(_upper);
   static final String _digitChars = "1234567890";
-  static final Set<String> _digit = new Set.from(_digitChars.split(""));
-  static final Set<String> _alphanum = new Set.from(_alpha)..addAll(_digit);
+  static final Set<String> _digit = new Set<String>.from(_digitChars.split(""));
+  static final Set<String> _alphanum = new Set<String>.from(_alpha)
+    ..addAll(_digit);
 
+  /// Parses tab char
   static final Parser<String> tab = char('\t');
 
+  /// Parses new line char
   static final Parser<String> newline = char('\n');
 
+  /// Parses uppercase letter
   static final Parser<String> upper = oneOfSet(_upper);
 
+  /// Parses lowercase letter
   static final Parser<String> lower = oneOfSet(_lower);
 
+  /// Parses alphanumeric char
   static final Parser<String> alphanum = oneOfSet(_alphanum);
 
+  /// Parses single letter
   static final Parser<String> letter = oneOfSet(_alpha);
 
+  /// Parses single digit
   static final Parser<String> digit = oneOfSet(_digit);
 
-  static final Set<String> _allowedTags = new Set.from([
+  static final Set<String> _allowedTags = new Set<String>.from([
     "address",
     "article",
     "aside",
@@ -668,20 +722,20 @@ class CommonMarkParser {
     "ul"
   ]);
 
-  static final Parser<String> spaceOrNL = oneOf3(" ", "\t", "\n");
+  static final Parser<String> _spaceOrNL = oneOf3(" ", "\t", "\n");
 
-  static final Parser<String> htmlTagName =
-      (letter > skipManySimple(oneOfSet(new Set.from(_alphanum)..add("-"))))
-          .record;
-  static final Parser<String> htmlAttributeName = (oneOfSet(
-              new Set.from(_alpha)..addAll(["_", ":"])) >
-          skipManySimple(
-              oneOfSet(new Set.from(_alphanum)..addAll(["_", ".", ":", "-"]))))
+  static final Parser<String> _htmlTagName = (letter >
+          skipManySimple(oneOfSet(new Set<String>.from(_alphanum)..add("-"))))
       .record;
+  static final Parser<String> _htmlAttributeName =
+      (oneOfSet(new Set<String>.from(_alpha)..addAll(["_", ":"])) >
+              skipManySimple(oneOfSet(new Set<String>.from(_alphanum)
+                ..addAll(["_", ".", ":", "-"]))))
+          .record;
   // TODO generic parser that takes everything in order (replace + + .list.record)
-  static final Parser<String> htmlAttributeValue = (manySimple(spaceOrNL) +
+  static final Parser<String> _htmlAttributeValue = (manySimple(_spaceOrNL) +
           char('=') +
-          manySimple(spaceOrNL) +
+          manySimple(_spaceOrNL) +
           choiceSimple([
             _htmlUnquotedAttributeValue,
             _htmlSingleQuotedAttributeValue,
@@ -690,31 +744,31 @@ class CommonMarkParser {
       .list
       .record;
   static final Parser<String> _htmlUnquotedAttributeValue =
-      record1Many(noneOfSet(new Set.from(" \t\n\"'=<>`".split(""))));
+      record1Many(noneOfSet(new Set<String>.from(" \t\n\"'=<>`".split(""))));
   static final Parser<String> _htmlSingleQuotedAttributeValue =
       ((char("'") > skipManySimple(noneOf1("'"))) < char("'")).record;
   static final Parser<String> _htmlDoubleQuotedAttributeValue =
       ((char('"') > skipManySimple(noneOf1('"'))) < char('"')).record;
-  static final Parser<String> htmlAttribute =
-      (spaceOrNL.many1 + htmlAttributeName + htmlAttributeValue.maybe)
+  static final Parser<String> _htmlAttribute =
+      (_spaceOrNL.many1 + _htmlAttributeName + _htmlAttributeValue.maybe)
           .list
           .record;
-  static final Parser<String> htmlOpenTag =
-      (((((char("<") > htmlTagName) < skipManySimple(htmlAttribute)) <
-                      skipManySimple(spaceOrNL)) <
+  static final Parser<String> _htmlOpenTag =
+      (((((char("<") > _htmlTagName) < skipManySimple(_htmlAttribute)) <
+                      skipManySimple(_spaceOrNL)) <
                   char('/').maybe) <
               char('>'))
           .record;
-  static final Parser<String> htmlCloseTag =
-      (((string("</") > htmlTagName) < skipManySimple(spaceOrNL)) < char('>'))
+  static final Parser<String> _htmlCloseTag =
+      (((string("</") > _htmlTagName) < skipManySimple(_spaceOrNL)) < char('>'))
           .record;
-  static final Parser<String> _htmlCompleteComment =
+  static final Parser<String> _htmlCompleteComment2 =
       (string('<!--').notFollowedBy(char('>') | string('->')) >
               skipManyUntilSimple(anyChar, string('--')))
           .record;
-  static final Parser<String> htmlCompleteComment =
+  static final Parser<String> _htmlCompleteComment =
       new Parser<String>((String s, Position pos) {
-    ParseResult<String> res = _htmlCompleteComment.run(s, pos);
+    ParseResult<String> res = _htmlCompleteComment2.run(s, pos);
     if (!res.isSuccess) {
       return res;
     }
@@ -725,15 +779,15 @@ class CommonMarkParser {
     }
     return res2;
   });
-  static final Parser<String> htmlCompletePI =
+  static final Parser<String> _htmlCompletePI =
       (string('<?') > skipManyUntilSimple(anyChar, string('?>'))).record;
-  static final Parser<String> htmlDeclaration = (string('<!') +
+  static final Parser<String> _htmlDeclaration = (string('<!') +
           skipMany1Simple(upper) +
-          skipMany1Simple(spaceOrNL) +
+          skipMany1Simple(_spaceOrNL) +
           skipManyUntilSimple(anyChar, char('>')))
       .list
       .record;
-  static final Parser<String> htmlCompleteCDATA =
+  static final Parser<String> _htmlCompleteCDATA =
       (string('<![CDATA[') > skipManyUntilSimple(anyChar, string(']]>')))
           .record;
 
@@ -752,7 +806,7 @@ class CommonMarkParser {
         autolink,
         rawInlineHtml,
         escapedChar,
-        rec(() => linkText),
+        rec(() => _linkText),
         str
       ]);
     }
@@ -760,7 +814,7 @@ class CommonMarkParser {
   }
 
   Parser<String> _linkTextCache;
-  Parser<String> get linkText {
+  Parser<String> get _linkText {
     if (_linkTextCache == null) {
       _linkTextCache = (char('[') >
               (_linkTextChoice >
@@ -772,7 +826,7 @@ class CommonMarkParser {
   }
 
   Parser<String> _imageTextCache;
-  Parser<String> get imageText {
+  Parser<String> get _imageText {
     if (_imageTextCache == null) {
       _imageTextCache =
           (char('[') > skipManyUntilSimple(_linkTextChoice, char(']')).record) ^
@@ -782,17 +836,17 @@ class CommonMarkParser {
   }
 
   static final Set<String> _linkLabelStrSpecialChars =
-      new Set.from(" *_`!<\\".split(""));
+      new Set<String>.from(" *_`!<\\".split(""));
   static final Parser<List<Inline>> _linkLabelStr = choiceSimple([
-    record1Many(noneOfSet(new Set.from(_linkLabelStrSpecialChars)
+    record1Many(noneOfSet(new Set<String>.from(_linkLabelStrSpecialChars)
           ..addAll(["[", "]", "\n"]))) ^
         (String str) => _transformString(str),
     oneOfSet(_linkLabelStrSpecialChars) ^
         (String char) => _transformString(char),
-    char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]
+    char("\n").notFollowedBy(blankline) ^ (_) => [new Str("\n")]
   ]);
 
-  static final Parser<String> linkLabel = (char('[') >
+  static final Parser<String> _linkLabel = (char('[') >
           skipManyUntilSimple(
                   choiceSimple([
                     whitespace,
@@ -808,75 +862,76 @@ class CommonMarkParser {
       (String label) => label.substring(0, label.length - 1);
 
   static final Set<String> _linkStopChars =
-      new Set.from(['&', '\\', '\n', ' ', '(', ')']);
+      new Set<String>.from(['&', '\\', '\n', ' ', '(', ')']);
   static final Set<String> _linkStopCharsPointed =
       new Set<String>.from([' ', '\n', '<', '>']);
-  static final Parser<String> linkBalancedParenthesis = ((char("(") >
+  static final Parser<String> _linkBalancedParenthesis = ((char("(") >
               many1Simple(choiceSimple([
                 noneOfSet(_linkStopChars),
-                escapedChar1,
-                htmlEntity1,
+                _escapedChar1,
+                _htmlEntity1,
                 oneOf2('&', '\\')
               ]))) <
           char(')')) ^
       (List<String> i) => "(${i.join()})";
 
   // manySimple(noneOf3("<", ">", "\n"))
-  static final Parser<String> linkInlineDestination = (((char("<") >
+  static final Parser<String> _linkInlineDestination = (((char("<") >
                   manySimple(choiceSimple([
                     noneOfSet(_linkStopCharsPointed),
-                    escapedChar1,
-                    htmlEntity1,
-                    linkBalancedParenthesis,
+                    _escapedChar1,
+                    _htmlEntity1,
+                    _linkBalancedParenthesis,
                     oneOf2('&', '\\')
                   ]))) <
               char(">")) |
           manySimple(choiceSimple([
             noneOfSet(_linkStopChars),
-            escapedChar1,
-            htmlEntity1,
-            linkBalancedParenthesis,
+            _escapedChar1,
+            _htmlEntity1,
+            _linkBalancedParenthesis,
             oneOf2('&', '\\')
           ]))) ^
       (List<String> i) => i.join();
 
-  static final Parser<String> linkBlockDestination =
+  static final Parser<String> _linkBlockDestination =
       (((char("<") > many1Simple(noneOf3("<", ">", "\n"))) < char(">")) |
               many1Simple(choiceSimple([
                 noneOfSet(_linkStopChars),
-                escapedChar1,
-                htmlEntity1,
-                linkBalancedParenthesis,
+                _escapedChar1,
+                _htmlEntity1,
+                _linkBalancedParenthesis,
                 oneOf2('&', '\\')
               ]))) ^
           (List<String> i) => i.join();
 
-  static final Parser<String> oneNewLine = newline.notFollowedBy(blankline);
-  static final Parser<String> linkTitle = choiceSimple([
+  static final Parser<String> _oneNewLine = newline.notFollowedBy(blankline);
+
+  static final Parser<String> _linkTitle = choiceSimple([
         ((char("'") >
                 manySimple(choiceSimple([
                   noneOf4("'", "&", "\\", "\n"),
-                  oneNewLine,
-                  escapedChar1,
-                  htmlEntity1,
+                  _oneNewLine,
+                  _escapedChar1,
+                  _htmlEntity1,
                   oneOf2('&', '\\')
                 ]))) <
             char("'")),
         ((char('"') >
                 manySimple(choiceSimple([
                   noneOf4('"', "&", "\\", "\n"),
-                  oneNewLine,
-                  escapedChar1,
-                  htmlEntity1,
+                  _oneNewLine,
+                  _escapedChar1,
+                  _htmlEntity1,
                   oneOf2('&', '\\')
                 ]))) <
             char('"')),
         ((char('(') >
                 manySimple(choiceSimple([
                   noneOf4(')', "&", "\\", "\n"),
-                  oneNewLine,
-                  escapedChar1,
-                  htmlEntity1,
+                  _oneNewLine,
+                  _escapedChar1,
+                  _htmlEntity1,
                   oneOf2('&', '\\')
                 ]))) <
             char(')'))
@@ -891,27 +946,31 @@ class CommonMarkParser {
   // whitespace
   //
 
+  /// Parser for whitespace
   static final Parser<List<Inline>> whitespace =
       (char(' ') ^ (_) => [new Space()]) | (char('\t') ^ (_) => [new Tab()]);
 
   // TODO better escaped chars support
   static final Set<String> _escapedCharSet =
-      new Set.from("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~".split(""));
-  static final Parser<String> escapedChar1 =
+      new Set<String>.from("!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~".split(""));
+  static final Parser<String> _escapedChar1 =
       (char('\\') > oneOfSet(_escapedCharSet));
+
+  /// Parser for escaped chars
   static final Parser<List<Inline>> escapedChar =
-      escapedChar1 ^ (String char) => [new Str(char)];
+      _escapedChar1 ^ (String char) => [new Str(char)];
 
   //
   // html entities
   //
 
-  static final RegExp decimalEntity = new RegExp(r'^#(\d{1,8})$');
-  static final RegExp hexadecimalEntity =
+  static final RegExp _decimalEntity = new RegExp(r'^#(\d{1,8})$');
+  static final RegExp _hexadecimalEntity =
       new RegExp(r'^#[xX]([0-9a-fA-F]{1,8})$');
-  static final Parser<String> htmlEntity1 = (((char('&') >
+  static final Parser<String> _htmlEntity1 = (((char('&') >
               ((char('#').maybe + record1Many(alphanum)) ^
-                  (Option a, String b) => (a.isDefined ? '#' : '') + b)) <
+                  (Option<String> a, String b) =>
+                      (a.isDefined ? '#' : '') + b)) <
           char(';')) ^
       (String entity) {
         if (htmlEntities.containsKey(entity)) {
@@ -919,12 +978,12 @@ class CommonMarkParser {
         }
 
         int code;
-        Match m = decimalEntity.firstMatch(entity);
+        Match m = _decimalEntity.firstMatch(entity);
         if (m != null) {
           code = int.parse(m.group(1));
         }
 
-        m = hexadecimalEntity.firstMatch(entity);
+        m = _hexadecimalEntity.firstMatch(entity);
 
         if (m != null) {
           code = int.parse(m.group(1), radix: 16);
@@ -939,7 +998,9 @@ class CommonMarkParser {
 
         return '&$entity;';
       });
-  static final Parser<List<Inline>> htmlEntity = htmlEntity1 ^
+
+  /// Parser for html entities
+  static final Parser<List<Inline>> htmlEntity = _htmlEntity1 ^
       (String str) =>
           str == "\u{a0}" ? [new NonBreakableSpace()] : [new Str(str)];
 
@@ -950,6 +1011,7 @@ class CommonMarkParser {
   static final Parser<String> _inlineCode1 = record1Many(char('`'));
   static final Parser<String> _inlineCode2 = recordMany(noneOf2('\n', '`'));
 
+  /// Parser for inline code
   static final Parser<List<Inline>> inlineCode =
       new Parser<List<Inline>>((String s, Position pos) {
     if (pos.offset >= s.length || s[pos.offset] != '`') {
@@ -1013,7 +1075,7 @@ class CommonMarkParser {
   // Can't be static
   Parser<List<dynamic>> _scanDelimsCache;
   Map<String, Parser<List<String>>> _scanDelimsParserCache = {};
-  Parser<List<dynamic>> get scanDelims {
+  Parser<List<dynamic>> get _scanDelims {
     if (_scanDelimsCache == null) {
       Parser<String> testParser = oneOfSet(_inlineDelimiters).lookAhead;
       _scanDelimsCache = new Parser<List<dynamic>>((String s, Position pos) {
@@ -1077,10 +1139,12 @@ class CommonMarkParser {
   }
 
   Parser<List<Inline>> _emphasisCache;
+
+  /// Parser for emphasis, strong, subscrip, superscript and smart quotes
   Parser<List<Inline>> get emphasis {
     if (_emphasisCache == null) {
       _emphasisCache = new Parser<List<Inline>>((String s, Position pos) {
-        ParseResult<List<dynamic>> res = scanDelims.run(s, pos);
+        ParseResult<List<dynamic>> res = _scanDelims.run(s, pos);
         if (!res.isSuccess) {
           return res;
         }
@@ -1335,7 +1399,7 @@ class CommonMarkParser {
                   }, orElse: () => null) !=
                   null;
           while (true) {
-            ParseResult<List<dynamic>> res = scanDelims.run(s, position);
+            ParseResult<List<dynamic>> res = _scanDelims.run(s, position);
             if (res.isSuccess) {
               numDelims = res.value[0];
               canOpen = res.value[1];
@@ -1380,13 +1444,14 @@ class CommonMarkParser {
   // link and image
   //
 
-  static final Parser<String> linkWhitespace =
+  static final Parser<String> _linkWhitespace =
       (blankline > (whitespaceChar < skipWhitespace)) |
           (whitespaceChar < skipWhitespace);
-  static final Parser<Target> linkInline = (char('(') >
-          (((linkWhitespace.maybe > linkInlineDestination) +
-                  ((linkWhitespace > linkTitle).maybe < linkWhitespace.maybe)) ^
-              (String a, Option b) => new Target(a, b.asNullable))) <
+  static final Parser<Target> _linkInline = (char('(') >
+          (((_linkWhitespace.maybe > _linkInlineDestination) +
+                  ((_linkWhitespace > _linkTitle).maybe <
+                      _linkWhitespace.maybe)) ^
+              (String a, Option<String> b) => new Target(a, b.asNullable))) <
       char(')');
 
   bool _isContainsLink(Inlines inlines) => inlines.any((Inline inline) {
@@ -1407,7 +1472,7 @@ class CommonMarkParser {
 
   static final Parser<String> _linkOrImageTestParser = char('[');
   Parser<List<Inline>> _linkOrImage(bool isLink) {
-    Parser<String> labelParser = isLink ? linkText : imageText;
+    Parser<String> labelParser = isLink ? _linkText : _imageText;
     return new Parser<List<Inline>>((String s, Position pos) {
       ParseResult<String> testRes = _linkOrImageTestParser.run(s, pos);
       if (!testRes.isSuccess) {
@@ -1429,7 +1494,7 @@ class CommonMarkParser {
         resValue.add(new Str(']'));
         return _success(resValue, s, labelRes.position);
       }
-      ParseResult<Target> destRes = linkInline.run(s, labelRes.position);
+      ParseResult<Target> destRes = _linkInline.run(s, labelRes.position);
       if (destRes.isSuccess) {
         // Links inside link content are not allowed
         return _success(
@@ -1441,7 +1506,7 @@ class CommonMarkParser {
       }
 
       // Try reference link
-      ParseResult<String> refRes = linkLabel.run(s, labelRes.position);
+      ParseResult<String> refRes = _linkLabel.run(s, labelRes.position);
       if (refRes.isSuccess) {
         String reference = refRes.value == "" ? labelRes.value : refRes.value;
         String normalizedReference = _normalizeReference(reference);
@@ -1459,7 +1524,7 @@ class CommonMarkParser {
         }
       } else {
         // Try again from beginning because reference couldn't contain brackets
-        labelRes = linkLabel.run(s, pos);
+        labelRes = _linkLabel.run(s, pos);
         if (!labelRes.isSuccess) {
           return labelRes;
         }
@@ -1482,10 +1547,13 @@ class CommonMarkParser {
     });
   }
 
+  /// Parser for image inlines
   Parser<List<Inline>> get image => char('!') > _linkOrImage(false);
+
+  /// Parser for link inlines
   Parser<List<Inline>> get link => _linkOrImage(true);
 
-  static final RegExp autolinkEmailRegExp = new RegExp(
+  static final RegExp _autolinkEmailRegExp = new RegExp(
       r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
       r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
 
@@ -1494,6 +1562,8 @@ class CommonMarkParser {
           pred((String char) =>
               char.codeUnitAt(0) > 0x20 && char != "<" && char != ">"),
           char('>'));
+
+  /// Parser for autolink inlines
   static final Parser<List<Inline>> autolink =
       new Parser<List<Inline>>((String s, Position pos) {
     if (pos.offset >= s.length || s[pos.offset] != '<') {
@@ -1510,7 +1580,7 @@ class CommonMarkParser {
       return _success([new Autolink(contents)], s, res.position);
     }
 
-    if (contents.contains(autolinkEmailRegExp)) {
+    if (contents.contains(_autolinkEmailRegExp)) {
       return _success([new Autolink.email(contents)], s, res.position);
     }
 
@@ -1521,13 +1591,14 @@ class CommonMarkParser {
   // raw html
   //
 
+  /// Parser for raw inline HTML.
   static final Parser<List<Inline>> rawInlineHtml = choiceSimple([
-        htmlOpenTag,
-        htmlCloseTag,
-        htmlCompleteComment,
-        htmlCompletePI,
-        htmlDeclaration,
-        htmlCompleteCDATA
+        _htmlOpenTag,
+        _htmlCloseTag,
+        _htmlCompleteComment,
+        _htmlCompletePI,
+        _htmlDeclaration,
+        _htmlCompleteCDATA
       ]) ^
       (String result) => [new HtmlRawInline(result)];
 
@@ -1535,6 +1606,7 @@ class CommonMarkParser {
   // Line break
   //
 
+  /// Parser for line breaks
   static final Parser<List<Inline>> lineBreak =
       (((string('  ') < skipManySimple(whitespaceChar)) < newline) |
               string("\\\n")) ^
@@ -1544,11 +1616,12 @@ class CommonMarkParser {
   // smartPunctuation extension
   //
 
-  static final Parser<List<Inline>> smartPunctuation =
-      (string("...") ^ (_) => [new Ellipsis()]) |
-          (char("-") > many1Simple(char("-"))) ^
-              (List<String> res) {
-                /*
+  /// Parser for smart punctuation (quotes processed separately)
+  static final Parser<List<Inline>> smartPunctuation = (string("...") ^
+          (_) => [new Ellipsis()]) |
+      (char("-") > many1Simple(char("-"))) ^
+          (List<String> res) {
+            /*
                   From spec.
 
                   A sequence of more than three hyphens is
@@ -1562,27 +1635,27 @@ class CommonMarkParser {
                   used (so, 7 hyphens = 2 em dashes an 1 en
                   dash).
                  */
-                int len = res.length + 1;
-                if (len % 3 == 0) {
-                  return new List.filled(len ~/ 3, new MDash());
-                }
-                if (len % 2 == 0) {
-                  return new List.filled(len ~/ 2, new NDash());
-                }
-                List result = [];
-                if (len % 3 == 2) {
-                  result.addAll(new List.filled(len ~/ 3, new MDash()));
-                  result.add(new NDash());
-                } else {
-                  result.addAll(new List.filled(len ~/ 3 - 1, new MDash()));
-                  result.addAll([new NDash(), new NDash()]);
-                }
+            int len = res.length + 1;
+            if (len % 3 == 0) {
+              return new List<Inline>.filled(len ~/ 3, new MDash());
+            }
+            if (len % 2 == 0) {
+              return new List<Inline>.filled(len ~/ 2, new NDash());
+            }
+            List<Inline> result = [];
+            if (len % 3 == 2) {
+              result.addAll(new List<Inline>.filled(len ~/ 3, new MDash()));
+              result.add(new NDash());
+            } else {
+              result.addAll(new List<Inline>.filled(len ~/ 3 - 1, new MDash()));
+              result.addAll([new NDash(), new NDash()]);
+            }
 
-                return result;
-              };
+            return result;
+          };
 
   //
-  // TEX math between `$`s or `$$`s.
+  // TeX math between `$`s or `$$`s.
   //
 
   static final Parser<String> _texMathSingleDollarStart =
@@ -1601,11 +1674,13 @@ class CommonMarkParser {
   static final Parser<List<Inline>> _texMathDoubleDollar =
       (string(r'$$') > anyChar.manyUntil(string(r'$$'))) ^
           (List<String> content) => [new TexMathDisplay(content.join())];
+
+  /// Parser for TeX math between `$`s or `$$`s.
   static final Parser<List<Inline>> texMathDollars =
       _texMathDoubleDollar | _texMathSingleDollar;
 
   //
-  // TEX math between `\(` and `\)`, or `\[` and `\]`
+  // TeX math between `\(` and `\)`, or `\[` and `\]`
   //
 
   static final Parser<List<Inline>> _texMathSingleBackslashParens =
@@ -1614,11 +1689,13 @@ class CommonMarkParser {
   static final Parser<List<Inline>> _texMathSingleBackslashBracket =
       (string(r'\[') > anyChar.manyUntil(string(r'\]'))) ^
           (List<String> content) => [new TexMathDisplay(content.join())];
+
+  /// Parser for TeX math between `\(` and `\)`, or `\[` and `\]`
   static final Parser<List<Inline>> texMathSingleBackslash =
       _texMathSingleBackslashParens | _texMathSingleBackslashBracket;
 
   //
-  // TEX math between `\\(` and `\\)`, or `\\[` and `\\]`
+  // TeX math between `\\(` and `\\)`, or `\\[` and `\\]`
   //
 
   static final Parser<List<Inline>> _texMathDoubleBackslashParens =
@@ -1627,6 +1704,8 @@ class CommonMarkParser {
   static final Parser<List<Inline>> _texMathDoubleBackslashBracket =
       (string(r'\\[') > anyChar.manyUntil(string(r'\\]'))) ^
           (List<String> content) => [new TexMathDisplay(content.join())];
+
+  /// Parser for TEX math between `\\(` and `\\)`, or `\\[` and `\\]`
   static final Parser<List<Inline>> texMathDoubleBackslash =
       _texMathDoubleBackslashParens | _texMathDoubleBackslashBracket;
 
@@ -1653,13 +1732,16 @@ class CommonMarkParser {
   }
 
   Parser<List<Inline>> _strCache;
+
+  /// Parser for str inlines
   Parser<List<Inline>> get str {
     if (_strCache == null) {
       _strCache = choiceSimple([
-        record1Many(noneOfSet(new Set.from(_strSpecialChars)..add("\n"))) ^
+        record1Many(
+                noneOfSet(new Set<String>.from(_strSpecialChars)..add("\n"))) ^
             (String chars) => _transformString(chars),
         oneOfSet(_strSpecialChars) ^ (String chars) => _transformString(chars),
-        char("\n").notFollowedBy(spnl) ^ (_) => [new Str("\n")]
+        char("\n").notFollowedBy(blankline) ^ (_) => [new Str("\n")]
       ]);
     }
     return _strCache;
@@ -1670,6 +1752,8 @@ class CommonMarkParser {
   //
 
   Parser<List<Inline>> _inlineCache;
+
+  /// Parser for any inline
   Parser<List<Inline>> get inline {
     if (_inlineCache == null) {
       List<Parser<List<Inline>>> inlineParsers = [lineBreak, whitespace];
@@ -1702,6 +1786,8 @@ class CommonMarkParser {
   }
 
   Parser<List<Inline>> _spaceEscapedInlineCache;
+
+  /// Parser for inlines with escaped spaces (subscript, superscript)
   Parser<List<Inline>> get spaceEscapedInline {
     if (_spaceEscapedInlineCache == null) {
       _spaceEscapedInlineCache =
@@ -1711,10 +1797,12 @@ class CommonMarkParser {
   }
 
   Parser<Inlines> _inlinesCache;
+
+  /// Parser for all inlines in block
   Parser<Inlines> get inlines {
     if (_inlinesCache == null) {
       _inlinesCache = manyUntilSimple(inline, eof) ^
-          (List<List<Inline>> res) => processParsedInlines(res);
+          (List<List<Inline>> res) => _processParsedInlines(res);
     }
     return _inlinesCache;
   }
@@ -1724,6 +1812,8 @@ class CommonMarkParser {
   //
 
   Parser<List<Block>> _blockCached;
+
+  /// Parser for any blocks
   Parser<List<Block>> get block {
     if (_blockCached == null) {
       List<Parser<List<Block>>> blocks = [
@@ -1745,6 +1835,8 @@ class CommonMarkParser {
   }
 
   Parser<List<Block>> _lazyLineBlockCache;
+
+  /// Parser for lazy line blocks
   Parser<List<Block>> get lazyLineBlock {
     if (_lazyLineBlockCache == null) {
       List<Parser<List<Block>>> blocks = [
@@ -1765,6 +1857,8 @@ class CommonMarkParser {
   }
 
   Parser<List<Block>> _listTightBlockCache;
+
+  /// Parser for tight list blocks
   Parser<List<Block>> get listTightBlock {
     if (_listTightBlockCache == null) {
       List<Parser<List<Block>>> blocks = [
@@ -1800,7 +1894,9 @@ class CommonMarkParser {
   }
 
   static final Parser<String> _hruleStartParser =
-      (skipNonindentCharsFromAnyPosition > oneOf3('*', '-', '_'));
+      (_skipNonindentCharsFromAnyPosition > oneOf3('*', '-', '_'));
+
+  /// Parser for HRule blocks
   static final Parser<List<Block>> hrule =
       new Parser<List<Block>>((String s, Position pos) {
     ParseResult<String> startRes = _hruleStartParser.run(s, pos);
@@ -1816,7 +1912,7 @@ class CommonMarkParser {
   //
 
   static final Parser<List<String>> _atxHeadingStartParser =
-      skipNonindentChars > many1Simple(char('#'));
+      _skipNonindentChars > many1Simple(char('#'));
   static final Parser<String> _atxHeadingEmptyParser =
       ((whitespaceChar > skipWhitespace) >
               (skipManySimple(char('#')) > blankline)) |
@@ -1826,6 +1922,8 @@ class CommonMarkParser {
           manyUntilSimple(escapedChar.record | anyChar,
               (string(' #') > skipManySimple(char('#'))).maybe > blankline)) |
       (newline ^ (_) => []);
+
+  /// Parser for ATX heading blocks
   static final Parser<List<Block>> atxHeading =
       new Parser<List<Block>>((String s, Position pos) {
     ParseResult<List<String>> startRes = _atxHeadingStartParser.run(s, pos);
@@ -1858,29 +1956,32 @@ class CommonMarkParser {
   // Indented code
   //
 
-  static final Parser<String> indentedLine =
+  static final Parser<String> _indentedLine =
       (indent > anyLine) ^ (String line) => line + "\n";
 
-  static final Parser<List<Block>> codeBlockIndented = (indentedLine +
-          (manySimple(indentedLine |
-              (blanklines + indentedLine) ^
+  /// Parser for indented code blocks
+  static final Parser<List<Block>> codeBlockIndented = (_indentedLine +
+          (manySimple(_indentedLine |
+              (blanklines + _indentedLine) ^
                   (List<String> b, String l) => b.join('') + l))) ^
-      (String f, List<String> c) =>
-          [new IndentedCodeBlock(stripTrailingNewlines(f + c.join('')) + '\n')];
+      (String f, List<String> c) => [
+            new IndentedCodeBlock(_stripTrailingNewlines(f + c.join('')) + '\n')
+          ];
 
   //
   // Fenced code
   //
 
   static final Parser<List<dynamic>> _openFenceStartParser =
-      (skipNonindentCharsFromAnyPosition + (string('~~~') | string('```')))
+      (_skipNonindentCharsFromAnyPosition + (string('~~~') | string('```')))
           .list;
   static Parser<List<String>> _openFenceInfoStringParser(String fenceChar) =>
       ((skipWhitespace >
               manySimple(choiceSimple([
-                noneOfSet(new Set.from(["&", "\n", "\\", " ", fenceChar])),
-                escapedChar1,
-                htmlEntity1,
+                noneOfSet(
+                    new Set<String>.from(["&", "\n", "\\", " ", fenceChar])),
+                _escapedChar1,
+                _htmlEntity1,
                 oneOf2('&', '\\')
               ]))) <
           skipManySimple(noneOf2("\n", fenceChar))) <
@@ -1894,7 +1995,7 @@ class CommonMarkParser {
   static final Parser<List<List<String>>> _openFenceBacktickTopFenceParser =
       _openFenceTopFenceParser('`');
   // TODO special record class for openFence results
-  static final Parser<List<dynamic>> openFence =
+  static final Parser<List<dynamic>> _openFence =
       new Parser<List<dynamic>>((String s, Position pos) {
     ParseResult<List<dynamic>> fenceStartRes =
         _openFenceStartParser.run(s, pos);
@@ -1918,9 +2019,10 @@ class CommonMarkParser {
         [indent, fenceChar, fenceSize, infoString], s, topFenceRes.position);
   });
 
+  /// Parser for fenced code blocks
   static final Parser<List<Block>> codeBlockFenced =
       new Parser<List<Block>>((String s, Position pos) {
-    ParseResult<List<dynamic>> openFenceRes = openFence.run(s, pos);
+    ParseResult<List<dynamic>> openFenceRes = _openFence.run(s, pos);
     if (!openFenceRes.isSuccess) {
       return openFenceRes;
     }
@@ -1940,7 +2042,7 @@ class CommonMarkParser {
     }
     // TODO extract creation
     Parser<String> endFenceParser =
-        (((skipNonindentChars > string(fenceChar * fenceSize)) >
+        (((_skipNonindentChars > string(fenceChar * fenceSize)) >
                     skipManySimple(char(fenceChar))) >
                 skipWhitespace) >
             newline;
@@ -1960,7 +2062,7 @@ class CommonMarkParser {
   // Raw html block
   //
 
-  static final List<Map<String, Pattern>> rawHtmlTests = [
+  static final List<Map<String, Pattern>> _rawHtmlTests = [
     {
       // <script>, <pre> or <style>
       "start": new RegExp(r'^(script|pre|style)( |>|$)',
@@ -1988,12 +2090,12 @@ class CommonMarkParser {
       "end": "]]>"
     }
   ];
-  static final Pattern rawHtmlTest6 =
+  static final Pattern _rawHtmlTest6 =
       new RegExp(r'^/?([a-zA-Z]+)( |>|$)'); // TODO \t
 
   static final Parser<int> _rawHtmlParagraphStopTestSimple =
-      skipNonindentChars < char('<');
-  static final Parser<bool> rawHtmlParagraphStopTest =
+      _skipNonindentChars < char('<');
+  static final Parser<bool> _rawHtmlParagraphStopTest =
       new Parser<bool>((String s, Position pos) {
     // Simple test
     ParseResult<int> testRes = _rawHtmlParagraphStopTestSimple.run(s, pos);
@@ -2004,14 +2106,14 @@ class CommonMarkParser {
     ParseResult<String> lineRes = anyLine.run(s, testRes.position);
     assert(lineRes.isSuccess);
     Map<String, Pattern> passedTest =
-        rawHtmlTests.firstWhere((Map<String, Pattern> element) {
+        _rawHtmlTests.firstWhere((Map<String, Pattern> element) {
       return lineRes.value.contains(element['start']);
     }, orElse: () => null);
     if (passedTest != null) {
       return _success(true, s, pos);
     }
 
-    Match match = rawHtmlTest6.matchAsPrefix(lineRes.value);
+    Match match = _rawHtmlTest6.matchAsPrefix(lineRes.value);
     if (match != null && _allowedTags.contains(match.group(1).toLowerCase())) {
       return _success(true, s, pos);
     }
@@ -2020,11 +2122,14 @@ class CommonMarkParser {
   });
 
   static final Parser<String> _rawHtmlTest =
-      (skipNonindentChars < char('<')).record;
+      (_skipNonindentChars < char('<')).record;
   static final Parser<String> _rawHtmlRule7Parser =
-      ((skipNonindentChars < (htmlOpenTag | htmlCloseTag)) < blankline).record;
+      ((_skipNonindentChars < (_htmlOpenTag | _htmlCloseTag)) < blankline)
+          .record;
+
+  /// Parser for raw HTML blocks
   static final Parser<List<Block>> rawHtml =
-      new Parser((String s, Position pos) {
+      new Parser<List<Block>>((String s, Position pos) {
     // Simple test
     ParseResult<String> testRes = _rawHtmlTest.run(s, pos);
     if (!testRes.isSuccess) {
@@ -2036,7 +2141,7 @@ class CommonMarkParser {
     ParseResult<String> lineRes = anyLine.run(s, testRes.position);
     assert(lineRes.isSuccess);
     Map<String, Pattern> passedTest =
-        rawHtmlTests.firstWhere((Map<String, Pattern> element) {
+        _rawHtmlTests.firstWhere((Map<String, Pattern> element) {
       return lineRes.value.contains(element['start']);
     }, orElse: () => null);
     if (passedTest != null) {
@@ -2055,7 +2160,7 @@ class CommonMarkParser {
       return _success([new HtmlRawBlock(content)], s, position);
     }
 
-    Match match = rawHtmlTest6.matchAsPrefix(lineRes.value);
+    Match match = _rawHtmlTest6.matchAsPrefix(lineRes.value);
     Position position;
     if (match == null || !_allowedTags.contains(match.group(1).toLowerCase())) {
       // Trying rule 7
@@ -2093,17 +2198,19 @@ class CommonMarkParser {
   // Raw TeX blocks
   //
 
-  static final Set<String> _texEnvironmentChars = new Set.from(_alphanum)
-    ..addAll(['_', '-', '+', '*']);
+  static final Set<String> _texEnvironmentChars =
+      new Set<String>.from(_alphanum)..addAll(['_', '-', '+', '*']);
   static final Parser<String> _rawTexStart =
-      (((skipNonindentChars > string(r'\begin{')) >
+      (((_skipNonindentChars > string(r'\begin{')) >
                   many1Simple(oneOfSet(_texEnvironmentChars))) <
               char('}')) ^
           (List<String> env) => env.join();
   static Parser<String> _rawTexEnd(String env) =>
-      ((skipNonindentChars > string(r'\end{' + env + '}')) < blankline).record;
+      ((_skipNonindentChars > string(r'\end{' + env + '}')) < blankline).record;
+
+  /// Parser for raw TeX blocks
   static final Parser<List<Block>> rawTex =
-      new Parser((String s, Position pos) {
+      new Parser<List<Block>>((String s, Position pos) {
     ParseResult<String> startRes = _rawTexStart.run(s, pos);
     if (!startRes.isSuccess) {
       return startRes;
@@ -2136,11 +2243,13 @@ class CommonMarkParser {
   //
 
   static final Parser<String> _linkReferenceLabelParser =
-      (skipNonindentChars > linkLabel) < char(':');
+      (_skipNonindentChars > _linkLabel) < char(':');
   static final Parser<String> _linkReferenceDestinationParser =
-      (blankline.maybe > skipWhitespace) > linkBlockDestination;
+      (blankline.maybe > skipWhitespace) > _linkBlockDestination;
   static final Parser<String> _linkReferenceTitleParser =
-      (skipWhitespace > linkTitle) < blankline;
+      (skipWhitespace > _linkTitle) < blankline;
+
+  /// Parser for link reference block
   static final Parser<_LinkReference> linkReference =
       new Parser<_LinkReference>((String s, Position pos) {
     ParseResult<String> labelRes = _linkReferenceLabelParser.run(s, pos);
@@ -2185,17 +2294,17 @@ class CommonMarkParser {
   // Paragraph and setext heading
   //
 
-  static final Parser<List<String>> _setextHeadingLine =
-      (skipNonindentChars > (many1Simple(char('=')) | many1Simple(char('-')))) <
-          blankline;
+  static final Parser<List<String>> _setextHeadingLine = (_skipNonindentChars >
+          (many1Simple(char('=')) | many1Simple(char('-')))) <
+      blankline;
   static final Parser<dynamic> _paraFirstLineParser = choiceSimple([
     blankline,
     hrule,
-    listMarkerTest(4),
+    _listMarkerTest(4),
     atxHeading,
-    openFence,
-    rawHtmlParagraphStopTest,
-    skipNonindentChars >
+    _openFence,
+    _rawHtmlParagraphStopTest,
+    _skipNonindentChars >
         choiceSimple([
           char('>'),
           (oneOf3('+', '-', '*') > whitespaceChar),
@@ -2205,12 +2314,12 @@ class CommonMarkParser {
   static final Parser<dynamic> _paraEndParser = choiceSimple([
     blankline,
     hrule,
-    listMarkerTest(4),
+    _listMarkerTest(4),
     atxHeading,
-    openFence,
-    rawHtmlParagraphStopTest,
+    _openFence,
+    _rawHtmlParagraphStopTest,
     _setextHeadingLine,
-    skipNonindentChars >
+    _skipNonindentChars >
         choiceSimple([
           char('>'),
           (oneOf3('+', '-', '*') > whitespaceChar),
@@ -2225,6 +2334,7 @@ class CommonMarkParser {
             return b;
           };
 
+  /// Parser for paragraph or Setext
   static final Parser<List<Block>> paraOrSetextHeading =
       new Parser<List<Block>>((String s, Position pos) {
     ParseResult<List<String>> res = _paraOrSetextParser.run(s, pos);
@@ -2251,6 +2361,7 @@ class CommonMarkParser {
   static final Parser<List<String>> _paraParser =
       manySimple(_paraFirstLineParser.notAhead > anyLine);
 
+  /// Parser for para blocks
   static final Parser<List<Block>> para =
       new Parser<List<Block>>((String s, Position pos) {
     ParseResult<List<String>> res = _paraParser.run(s, pos);
@@ -2294,19 +2405,21 @@ class CommonMarkParser {
   // Blockquote
   //
 
-  static final Parser<String> blockquoteStrictLine =
-      ((skipNonindentChars > char('>')) > whitespaceChar.maybe) >
+  static final Parser<String> _blockquoteStrictLine =
+      ((_skipNonindentChars > char('>')) > whitespaceChar.maybe) >
           anyLine; // TODO check tab
   // TODO special record class for blockquoteLine
-  static final Parser<List<dynamic>> blockquoteLine =
-      (blockquoteStrictLine ^ (String l) => [true, l]) |
+  static final Parser<List<dynamic>> _blockquoteLine =
+      (_blockquoteStrictLine ^ (String l) => [true, l]) |
           (anyLine ^ (String l) => [false, l]);
 
   Parser<List<Block>> _blockquoteCache;
+
+  /// Parser for blockquote blocks
   Parser<List<Block>> get blockquote {
     if (_blockquoteCache == null) {
       _blockquoteCache = new Parser<List<Block>>((String s, Position pos) {
-        ParseResult<String> firstLineRes = blockquoteStrictLine.run(s, pos);
+        ParseResult<String> firstLineRes = _blockquoteStrictLine.run(s, pos);
         if (!firstLineRes.isSuccess) {
           return firstLineRes;
         }
@@ -2318,7 +2431,7 @@ class CommonMarkParser {
         void buildBuffer() {
           String s = buffer.map((String l) => l + "\n").join();
           List<Block> innerRes = (manyUntilSimple(block, eof) ^
-                  (List<List<Block>> res) => processParsedBlocks(res))
+                  (List<List<Block>> res) => _processParsedBlocks(res))
               .parse(s, tabStop: tabStop);
           if (!closeParagraph &&
               innerRes.length > 0 &&
@@ -2337,7 +2450,7 @@ class CommonMarkParser {
 
         Position position = firstLineRes.position;
         while (true) {
-          ParseResult<List<dynamic>> res = blockquoteLine.run(s, position);
+          ParseResult<List<dynamic>> res = _blockquoteLine.run(s, position);
           if (!res.isSuccess) {
             break;
           }
@@ -2384,17 +2497,23 @@ class CommonMarkParser {
 
   static const int _listTypeOrdered = 0;
   static const int _listTypeUnordered = 1;
-  static ParserAccumulator3 orderedListMarkerTest(int indent) =>
-      skipListIndentChars(indent) +
+
+  /// Parser for ordered list marker
+  static ParserAccumulator3 _orderedListMarkerTest(int indent) =>
+      _skipListIndentChars(indent) +
       countBetween(1, 9, digit) + // 1-9 digits
       oneOf2('.', ')');
-  static ParserAccumulator2 unorderedListMarkerTest(int indent) =>
-      skipListIndentChars(indent).notFollowedBy(hrule) + oneOf3('-', '+', '*');
-  static Parser<List<dynamic>> listMarkerTest(int indent) =>
-      (((orderedListMarkerTest(indent) ^
-                      (int sp, List d, String c) =>
+
+  /// Parser for unordered list marker
+  static ParserAccumulator2 _unorderedListMarkerTest(int indent) =>
+      _skipListIndentChars(indent).notFollowedBy(hrule) + oneOf3('-', '+', '*');
+
+  /// Parser for list marker
+  static Parser<List<dynamic>> _listMarkerTest(int indent) =>
+      (((_orderedListMarkerTest(indent) ^
+                      (int sp, List<dynamic> d, String c) =>
                           [_listTypeOrdered, sp, d, c]) |
-                  (unorderedListMarkerTest(indent) ^
+                  (_unorderedListMarkerTest(indent) ^
                       (int sp, String c) => [_listTypeUnordered, sp, c])) +
               choiceSimple([
                 char("\n"),
@@ -2404,6 +2523,8 @@ class CommonMarkParser {
           .list;
 
   Parser<List<Block>> _listCache;
+
+  /// Parser for list blocks
   Parser<List<Block>> get list {
     if (_listCache == null) {
       _listCache = new Parser<List<Block>>((String s, Position pos) {
@@ -2436,7 +2557,7 @@ class CommonMarkParser {
             // TODO extract parser
             ParseResult<List<Block>> innerRes =
                 (manyUntilSimple(listTightBlock, eof) ^
-                        (Iterable res) => processParsedBlocks(res))
+                        (Iterable<dynamic> res) => _processParsedBlocks(res))
                     .run(s);
             if (innerRes.isSuccess) {
               innerBlocks = innerRes.value;
@@ -2447,7 +2568,7 @@ class CommonMarkParser {
 
           if (!getTight()) {
             innerBlocks = (manyUntilSimple(block, eof) ^
-                    (Iterable res) => processParsedBlocks(res))
+                    (Iterable<dynamic> res) => _processParsedBlocks(res))
                 .parse(s, tabStop: tabStop);
           }
           if (!afterEmptyLine &&
@@ -2466,12 +2587,12 @@ class CommonMarkParser {
         }
 
         void addToListItem(ListItem item, Iterable<Block> c) {
-          if (item.contents is List) {
-            List contents = item.contents;
+          if (item.contents is List<Block>) {
+            List<Block> contents = item.contents;
             contents.addAll(c);
             return;
           }
-          List<Block> contents = new List.from(item.contents);
+          List<Block> contents = new List<Block>.from(item.contents);
           contents.addAll(c);
           item.contents = contents;
         }
@@ -2501,11 +2622,11 @@ class CommonMarkParser {
             buildBuffer();
             addToListItem(block.items.last, blocks);
             blocks = [];
-            if (block.items is List) {
-              List items = block.items;
+            if (block.items is List<ListItem>) {
+              List<ListItem> items = block.items;
               items.add(new ListItem([]));
             } else {
-              List<ListItem> list = new List.from(block.items);
+              List<ListItem> list = new List<ListItem>.from(block.items);
               list.add(new ListItem([]));
               block.items = list;
             }
@@ -2533,7 +2654,7 @@ class CommonMarkParser {
         // TODO Split loop to smaller parts
         while (true) {
           bool closeListItem = false;
-          ParseResult /*<any>*/ eofRes = eof.run(s, position);
+          ParseResult<dynamic> eofRes = eof.run(s, position);
           if (eofRes.isSuccess) {
             // End of input reached
             break;
@@ -2557,7 +2678,7 @@ class CommonMarkParser {
           if (position.character == 1 && getSubIndent() > 0) {
             // Waiting for indent
             ParseResult<int> indentRes =
-                waitForIndent(getSubIndent()).run(s, position);
+                _waitForIndent(getSubIndent()).run(s, position);
             if (indentRes.isSuccess) {
               position = indentRes.position;
               nextLevel = true;
@@ -2593,7 +2714,7 @@ class CommonMarkParser {
               nextLevel = false;
               while (stack.length > 1) {
                 ParseResult<int> indentRes =
-                    waitForIndent(getIndent()).run(s, position);
+                    _waitForIndent(getIndent()).run(s, position);
                 if (indentRes.isSuccess) {
                   position = indentRes.position;
                   closeListItem = true;
@@ -2608,7 +2729,7 @@ class CommonMarkParser {
           // Trying to find new list item
 
           ParseResult<List<dynamic>> markerRes =
-              listMarkerTest(getIndent() + tabStop).run(s, position);
+              _listMarkerTest(getIndent() + tabStop).run(s, position);
           if (markerRes.isSuccess) {
             markerOnSaparateLine = false;
             int type = markerRes.value[0][0];
@@ -2713,7 +2834,7 @@ class CommonMarkParser {
           if (position.character > 1) {
             // Fenced code block requires special treatment.
             ParseResult<List<dynamic>> openFenceRes =
-                openFence.run(s, position);
+                _openFence.run(s, position);
             if (openFenceRes.isSuccess) {
               if (buffer.length > 0) {
                 buildBuffer();
@@ -2731,7 +2852,7 @@ class CommonMarkParser {
 
               position = openFenceRes.position;
 
-              Parser<int> indentParser = waitForIndent(indent);
+              Parser<int> indentParser = _waitForIndent(indent);
               Parser<String> endFenceParser =
                   (((skipWhitespace > string(fenceChar * fenceSize)) >
                               skipManySimple(char(fenceChar))) >
@@ -2741,7 +2862,7 @@ class CommonMarkParser {
 
               List<String> code = [];
               while (true) {
-                ParseResult /*<any>*/ eofRes = eof.run(s, position);
+                ParseResult<dynamic> eofRes = eof.run(s, position);
                 if (eofRes.isSuccess) {
                   break;
                 }
@@ -2823,8 +2944,9 @@ class CommonMarkParser {
   // Document
   //
 
+  /// Main document parser
   Parser<Document> get document => (manyUntilSimple(block, eof) ^
-      (Iterable res) => new Document(processParsedBlocks(res)));
+      (Iterable<dynamic> res) => new Document(_processParsedBlocks(res)));
 
   /// Predefined markdown parser with CommonMark default settings
   static final CommonMarkParser commonmark =
