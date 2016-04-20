@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:analyzer/src/generated/element.dart';
 import 'package:analyzer/src/generated/source_io.dart';
+import 'package:build/build.dart';
 import 'package:path/path.dart' as path;
 import 'package:source_gen/source_gen.dart';
 
@@ -16,14 +17,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
   static const int stateSource = 1;
   static const int stateDestination = 2;
 
-  @override
-  final AssociatedFileSet associatedFileSet;
-
-  /// If [associatedFileSet] is not set, the default value of
-  /// [AssociatedFileSet.sameDirectory] is used.
-  const EmbedTestsGenerator(
-      {AssociatedFileSet associatedFileSet: AssociatedFileSet.sameDirectory})
-      : this.associatedFileSet = associatedFileSet;
+  const EmbedTestsGenerator();
 
   Map<String, String> readFile(String fileName) {
     Map<String, String> result = <String, String>{};
@@ -49,16 +43,12 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
 
   @override
   Future<String> generateForAnnotatedElement(
-      Element element, EmbedTests annotation) async {
+      Element element, EmbedTests annotation, BuildStep buildStep) async {
     if (path.isAbsolute(annotation.path)) {
       throw 'must be relative path to the source file';
     }
 
-    FileBasedSource source = element.source;
-
-    String sourcePath = source.file.getAbsolutePath();
-
-    String sourcePathDir = path.dirname(sourcePath);
+    String sourcePathDir = path.dirname(buildStep.input.id.path);
 
     String filePath = path.join(sourcePathDir, annotation.path);
 
