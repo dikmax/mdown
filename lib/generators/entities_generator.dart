@@ -11,7 +11,6 @@ import 'package:source_gen/source_gen.dart';
 import 'entities.dart';
 
 class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
-
   const EntitiesGenerator();
 
   @override
@@ -19,8 +18,8 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
       Element element, Entities annotation, BuildStep buildStep) async {
     RegExp r = new RegExp(r"^&(.*);$");
     HttpClient client = new HttpClient();
-    HttpClientRequest request = await client.getUrl(
-        Uri.parse('https://html.spec.whatwg.org/entities.json'));
+    HttpClientRequest request = await client
+        .getUrl(Uri.parse('https://html.spec.whatwg.org/entities.json'));
     HttpClientResponse response = await request.close();
     dynamic json =
         await response.transform(UTF8.decoder).transform(JSON.decoder).first;

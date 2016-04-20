@@ -81,7 +81,7 @@ class _NotCheckedPart extends _InlinePart {
   }
 
   RegExp escapedChars =
-  new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
+      new RegExp(r'[!\"#\$%&' r"'()*+,-./:;<=>?@\[\\\]^_`{|}~]");
 
   String escapeString(String str) =>
       str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
