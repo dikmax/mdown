@@ -9,16 +9,17 @@ import 'data/test_data.dart';
 
 /// Main tests runner
 void main() {
-  serviceTests();
+  // serviceTests();
 
-  individualParsersTests();
+  // individualParsersTests();
 
   // CommonMark tests
-  //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num == 129)));
+  tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num == 5)));
   //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num >= 103 && num < 144)));
   //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html));
-  tests("CommonMark [strict]", specification, mdToHtmlTest(Options.strict));
+  //tests("CommonMark [strict]", specification, mdToHtmlTest(Options.strict));
 
+  return;
   // Additional tests
   //tests("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
   tests("Additional [strict]", additionalMarkdownToHtml,
