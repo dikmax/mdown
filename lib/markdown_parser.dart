@@ -581,16 +581,35 @@ class CommonMarkParser {
         if (pos.character != 1) {
           return _failure(s, pos);
         }
-        int startCharacter = pos.character;
         Position position = pos;
+        Position prevPosition = pos;
         while (position.character <= length) {
           ParseResult<String> res = whitespaceChar.run(s, position);
           if (!res.isSuccess) {
             return res;
           }
+          prevPosition = position;
           position = res.position;
         }
-        return _success(position.character - startCharacter, s, position);
+
+        int endLength = position.character - 1;
+        if (endLength == length) {
+          return _success(endLength, s, position);
+        }
+
+        // It was tab and we get to far. So we split tab to spaces and
+        // return partial result.
+
+        s = s.replaceRange(
+            prevPosition.offset, prevPosition.offset + 1, '    ');
+
+        return _success(
+            length,
+            s,
+            prevPosition.copy(
+                offset:
+                    prevPosition.offset + length - (prevPosition.character - 1),
+                character: length + 1));
       });
     }
 
@@ -2681,6 +2700,7 @@ class CommonMarkParser {
                 _waitForIndent(getSubIndent()).run(s, position);
             if (indentRes.isSuccess) {
               position = indentRes.position;
+              s = indentRes.text; // We've probably updated text
               nextLevel = true;
             } else {
               // Trying lazy line
@@ -2717,6 +2737,7 @@ class CommonMarkParser {
                     _waitForIndent(getIndent()).run(s, position);
                 if (indentRes.isSuccess) {
                   position = indentRes.position;
+                  s = indentRes.text;
                   closeListItem = true;
                   break;
                 }
@@ -2879,6 +2900,7 @@ class CommonMarkParser {
                   break;
                 }
                 position = indentRes.position;
+                s = indentRes.text;
 
                 ParseResult<String> endFenceRes =
                     endFenceParser.run(s, position);

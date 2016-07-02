@@ -32,16 +32,51 @@ final Map<String, String> _$specificationTests = {
 </li>
 </ul>
 ''',
-  r'''>→foo→bar
+  r'''- foo
+
+→→bar
+''': r'''<ul>
+<li>
+<p>foo</p>
+<pre><code>  bar
+</code></pre>
+</li>
+</ul>
+''',
+  r'''>→→foo
 ''': r'''<blockquote>
-<p>foo→bar</p>
+<pre><code>  foo
+</code></pre>
 </blockquote>
+''',
+  r'''-→→foo
+''': r'''<ul>
+<li>
+<pre><code>  foo
+</code></pre>
+</li>
+</ul>
 ''',
   r'''    foo
 →bar
 ''': r'''<pre><code>foo
 bar
 </code></pre>
+''',
+  r''' - foo
+   - bar
+→ - baz
+''': r'''<ul>
+<li>foo
+<ul>
+<li>bar
+<ul>
+<li>baz</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 ''',
   r'''- `one
 - two`
