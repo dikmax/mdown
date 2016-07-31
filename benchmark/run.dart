@@ -4,13 +4,35 @@ import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:md_proc/md_proc.dart';
 import 'package:markdown/markdown.dart' as markdown;
 
+class MapEmitter implements ScoreEmitter {
+  String name;
+  Map<String, double> scores = <String, double>{};
+
+  MapEmitter(this.name);
+
+  @override
+  void emit(String testName, double value) {
+    scores[testName] = value;
+  }
+
+  double report() {
+    print("$name: ");
+    double sum = scores.values.reduce((double v1, double v2) => v1 + v2);
+    print(" - sum: $sum");
+    double avg = sum / scores.length;
+    print(" - avg: $avg");
+    return avg;
+  }
+}
+
 class MdProcBenchmark extends BenchmarkBase {
   String data;
 
-  MdProcBenchmark(this.data) : super("md_proc");
+  MdProcBenchmark(String name, this.data, ScoreEmitter emitter)
+      : super(name, emitter: emitter);
 
-  static void main(String data) {
-    new MdProcBenchmark(data).report();
+  static void main(String name, String data, ScoreEmitter emitter) {
+    new MdProcBenchmark(name, data, emitter).report();
   }
 
   // The benchmark code.
@@ -22,28 +44,51 @@ class MdProcBenchmark extends BenchmarkBase {
 class MarkdownBenchmark extends BenchmarkBase {
   String data;
 
-  MarkdownBenchmark(this.data) : super("markdown");
+  MarkdownBenchmark(String name, this.data, ScoreEmitter emitter)
+      : super(name, emitter: emitter);
 
-  static void main(String data) {
-    new MarkdownBenchmark(data).report();
+  static void main(String name, String data, ScoreEmitter emitter) {
+    new MarkdownBenchmark(name, data, emitter).report();
   }
 
   // The benchmark code.
   void run() {
-    markdown.markdownToHtml(data, extensionSet: markdown.ExtensionSet.commonMark);
+    markdown.markdownToHtml(data,
+        extensionSet: markdown.ExtensionSet.commonMark);
   }
 }
 
+// TODO fix block-ref-flat inline-links-flat performance
+
 main() async {
-  // Using Pandoc documentation for benchmark
-  HttpClient client = new HttpClient();
-  //HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/0xAX/linux-insides/master/mm/linux-mm-2.md'));
-  //HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/dikmax/dikmax.name/master/post/2014-04-13-vilnius.md'));
-  //HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/dikmax/md_proc/master/README.md'));
-  HttpClientRequest request = await client.getUrl(Uri.parse('https://raw.githubusercontent.com/jgm/pandoc/master/README'));
-  HttpClientResponse response = await request.close();
-  String data = await response.transform(UTF8.decoder).join();
-  print("File length: ${data.length}");
-  MdProcBenchmark.main(data);
-  MarkdownBenchmark.main(data);
+  Directory dir = new Directory('benchmark/texts');
+
+  MapEmitter mdProcResults = new MapEmitter("md_proc");
+  MapEmitter markdownResults = new MapEmitter("markdown");
+
+  await for (FileSystemEntity entity in dir.list()) {
+    if (entity is File) {
+      String name = entity.uri.pathSegments.last;
+      if (name.endsWith('.md')) {
+        name = name.replaceAll(new RegExp(r'\.md$'), '');
+        print('Benchmarking: $name...');
+        String data = await entity.readAsString();
+        MdProcBenchmark.main(name, data, mdProcResults);
+        print('md_proc: ${mdProcResults.scores[name]}');
+        MarkdownBenchmark.main(name, data, markdownResults);
+        print('markdown: ${markdownResults.scores[name]}');
+      }
+    }
+  }
+
+  double mdProcAvg = mdProcResults.report();
+  double markdownAvg = markdownResults.report();
+
+  if (mdProcAvg < markdownAvg) {
+    print('md_proc is ${markdownAvg / mdProcAvg} times faster');
+  } else {
+    print('md_proc is ${mdProcAvg / markdownAvg} times slover');
+  }
+
+  exit(0);
 }

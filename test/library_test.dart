@@ -1,7 +1,6 @@
 import 'package:md_proc/options.dart';
 
 import 'custom_classes.dart';
-import 'individual_parsers.dart';
 import 'parser.dart';
 import 'reference_resolver.dart';
 import 'service.dart';
@@ -9,22 +8,20 @@ import 'data/test_data.dart';
 
 /// Main tests runner
 void main() {
-  // serviceTests();
-
-  // individualParsersTests();
+  serviceTests();
 
   // CommonMark tests
-  tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num == 5)));
-  //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && (num >= 103 && num < 144)));
-  //tests("CommonMark", specification, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html));
-  //tests("CommonMark [strict]", specification, mdToHtmlTest(Options.strict));
+  tests("CommonMark [strict]", specification, mdToHtmlTest(Options.strict));
+  tests("CommonMark [strict]", specification, mdToHtml2Test(Options.strict));
 
-  return;
   // Additional tests
   //tests("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
   tests("Additional [strict]", additionalMarkdownToHtml,
       mdToHtmlTest(Options.strict));
+  tests("Additional [strict]", additionalMarkdownToHtml,
+      mdToHtml2Test(Options.strict));
 
+  return;
   // SmartPunct
   tests("SmartPunct [commonmark]", smartPunctuation,
       mdToHtmlTest(Options.commonmark));
@@ -88,7 +85,7 @@ void main() {
           (_, int num) => !rawTexContradictions.contains(num)));
 
   // Markdown to markdown tests
-  tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));
+  // tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));
 
   // Custom classes
   customClassesTests();

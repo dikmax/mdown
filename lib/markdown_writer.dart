@@ -1,8 +1,8 @@
 library md_proc.markdown_writer;
 
-import 'definitions.dart';
-import 'markdown_parser.dart';
-import 'options.dart';
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/commonmark_parser.dart';
+import 'package:md_proc/options.dart';
 
 abstract class _InlinePart {
   String content;
@@ -77,7 +77,7 @@ class _NotCheckedPart extends _InlinePart {
   _NotCheckedPart(String content, this._options,
       [this.context = _EscapeContext.empty])
       : super(content) {
-    _parser = new CommonMarkParser(_options, {});
+    _parser = new CommonMarkParser(_options);
   }
 
   RegExp escapedChars =
@@ -182,7 +182,7 @@ class _NotCheckedPart extends _InlinePart {
     while (test) {
       test = false;
 
-      Inlines parsed = _parser.inlines.parse(content);
+      Iterable<Inline> parsed = _parser.parseInlines(content);
       _InlineTypes types = new _InlineTypes();
       detectInlines(parsed, types);
 
@@ -519,8 +519,8 @@ class _InlineRenderer {
 
     // Autolink
     write('<');
-    if (link.label.length > 0 && link.label[0] is Str) {
-      Str labelContents = link.label[0];
+    if (link.label.length > 0 && link.label.first is Str) {
+      Str labelContents = link.label.first;
       write(labelContents.contents);
     } else {
       write(link.target.link);
@@ -623,13 +623,10 @@ class _MarkdownBuilder extends StringBuffer {
         writePara(block);
       } else if (block is Heading) {
         writeHeader(block);
-      } else if (block is HorizontalRule) {
+      } else if (block is ThematicBreak) {
         writeHorizontalRule(block, unorderedListChar);
       } else if (block is CodeBlock) {
-        if (_b is ListBlock) {
-          write('\n');
-        }
-        writeCodeBlock(block);
+        writeCodeBlock(block, _b);
       } else if (block is Blockquote) {
         writeBlockquote(block);
       } else if (block is RawBlock) {
@@ -647,7 +644,7 @@ class _MarkdownBuilder extends StringBuffer {
     }
   }
 
-  void writeHorizontalRule(HorizontalRule hRule,
+  void writeHorizontalRule(ThematicBreak hRule,
       [String unorderedListChar = "*"]) {
     if (unorderedListChar == "-") {
       write('*' * 10);
@@ -688,7 +685,15 @@ class _MarkdownBuilder extends StringBuffer {
     write("\n");
   }
 
-  void writeCodeBlock(CodeBlock codeBlock) {
+  void writeCodeBlock(CodeBlock codeBlock, Block prevBlock) {
+    if (codeBlock is IndentedCodeBlock && prevBlock is ListBlock) {
+      // We can't write indented code block, because it will be treated as
+      // part of list.
+      // Replacing it with fenced code block.
+
+      codeBlock = new FencedCodeBlock(codeBlock.contents);
+    }
+
     if (codeBlock is FencedCodeBlock) {
       String fence = (codeBlock.fenceType == FenceType.backtick ? '`' : '~') *
           codeBlock.fenceSize;
@@ -714,17 +719,15 @@ class _MarkdownBuilder extends StringBuffer {
       write("\n");
     }
 
-    Iterator<ListItem> it = list.items.iterator;
     bool first = true;
     bool tight = list.tight;
-    while (it.moveNext()) {
+    for (ListItem listItem in list.items) {
       if (first) {
         first = false;
       } else if (!tight) {
         write("\n");
       }
 
-      ListItem listItem = it.current;
       _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
       builder.writeBlocks(listItem.contents,
           tight: list.tight, unorderedListChar: list.bulletType.char);
@@ -759,17 +762,15 @@ class _MarkdownBuilder extends StringBuffer {
       write("\n");
     }
     int index = list.startIndex;
-    Iterator<ListItem> it = list.items.iterator;
     bool first = true;
     bool tight = list.tight;
-    while (it.moveNext()) {
+    for (ListItem listItem in list.items) {
       if (first) {
         first = false;
       } else if (!tight) {
         write("\n");
       }
 
-      ListItem listItem = it.current;
       _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
       builder.writeBlocks(listItem.contents, tight: list.tight);
       String contents = builder.toString();

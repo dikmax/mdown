@@ -29,7 +29,11 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
           InfoString attr = block.attributes;
           if (attr.language == 'example') {
             List<String> example = block.contents.split('\n.\n');
-            result[example[0] + '\n'] = example[1];
+            if (result.containsKey(example[0] + '\n')) {
+              print('Duplicate test: ${example[0]}');
+            } else {
+              result[example[0] + '\n'] = example[1];
+            }
           }
         }
       }
@@ -58,7 +62,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     String result =
         'final Map<String, String> _\$${element.displayName}Tests = {\n';
     content.forEach((String k, String v) {
-      result += "r'''" + k + "''': r'''" + v + "''',\n";
+      result += "r'''$k''': r'''$v''',\n";
     });
     result += '};\n';
 

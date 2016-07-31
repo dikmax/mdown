@@ -1,6 +1,5 @@
 library md_proc.definitions;
 
-import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:quiver/core.dart';
 
@@ -105,22 +104,22 @@ class Target {
 abstract class Block {}
 
 // TODO char type, distance between chars, chars count
-/// Horizontal rule block
-class HorizontalRule extends Block {
-  static final HorizontalRule _instance = new HorizontalRule._internal();
+/// Thematic break block
+class ThematicBreak extends Block {
+  static final ThematicBreak _instance = new ThematicBreak._internal();
 
   /// Constructor
-  factory HorizontalRule() {
+  factory ThematicBreak() {
     return _instance;
   }
 
-  HorizontalRule._internal();
+  ThematicBreak._internal();
 
   @override
-  String toString() => "HorizontalRule";
+  String toString() => "ThematicBreak";
 
   @override
-  bool operator ==(dynamic obj) => obj is HorizontalRule;
+  bool operator ==(dynamic obj) => obj is ThematicBreak;
 
   @override
   int get hashCode => 0;
@@ -132,7 +131,7 @@ abstract class Heading extends Block {
   int level;
 
   /// Heading contents
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// constructor
   Heading(this.level, this.contents);
@@ -141,25 +140,25 @@ abstract class Heading extends Block {
 /// ATX heading block
 class AtxHeading extends Heading {
   /// constructor
-  AtxHeading(int level, Inlines contents) : super(level, contents);
+  AtxHeading(int level, Iterable<Inline> contents) : super(level, contents);
 
   /// H1 constructor
-  AtxHeading.h1(Inlines contents) : super(1, contents);
+  AtxHeading.h1(Iterable<Inline> contents) : super(1, contents);
 
   /// H2 constructor
-  AtxHeading.h2(Inlines contents) : super(2, contents);
+  AtxHeading.h2(Iterable<Inline> contents) : super(2, contents);
 
   /// H3 constructor
-  AtxHeading.h3(Inlines contents) : super(3, contents);
+  AtxHeading.h3(Iterable<Inline> contents) : super(3, contents);
 
   /// H4 constructor
-  AtxHeading.h4(Inlines contents) : super(4, contents);
+  AtxHeading.h4(Iterable<Inline> contents) : super(4, contents);
 
   /// H5 constructor
-  AtxHeading.h5(Inlines contents) : super(5, contents);
+  AtxHeading.h5(Iterable<Inline> contents) : super(5, contents);
 
   /// H6 constructor
-  AtxHeading.h6(Inlines contents) : super(6, contents);
+  AtxHeading.h6(Iterable<Inline> contents) : super(6, contents);
 
   @override
   String toString() => "AtxHeading $level $contents";
@@ -177,13 +176,13 @@ class AtxHeading extends Heading {
 /// Setext heading block
 class SetextHeading extends Heading {
   /// constructor
-  SetextHeading(int level, Inlines contents) : super(level, contents);
+  SetextHeading(int level, Iterable<Inline> contents) : super(level, contents);
 
   /// H1 constructor
-  SetextHeading.h1(Inlines contents) : super(1, contents);
+  SetextHeading.h1(Iterable<Inline> contents) : super(1, contents);
 
   /// H2 constructor
-  SetextHeading.h2(Inlines contents) : super(2, contents);
+  SetextHeading.h2(Iterable<Inline> contents) : super(2, contents);
 
   @override
   String toString() => "SetextHeading $level $contents";
@@ -214,6 +213,26 @@ class FenceType {
 
   /// Constructor
   const FenceType._(this.value, this.name);
+
+  /// Create from char
+  static FenceType fromChar(String markerChar) {
+    FenceType type;
+    switch (markerChar) {
+      case '~':
+        type = FenceType.tilde;
+        break;
+
+      case '`':
+        type = FenceType.backtick;
+        break;
+
+      default:
+        assert(false);
+        type = FenceType.backtick;
+    }
+
+    return type;
+  }
 
   @override
   String toString() => name;
@@ -539,7 +558,7 @@ class OrderedList extends ListBlock {
 /// Paragraph block
 class Para extends Block {
   /// Paragraph contents
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// Constructor
   Para(this.contents);
@@ -553,45 +572,6 @@ class Para extends Block {
 
   @override
   int get hashCode => contents.hashCode;
-}
-
-// Inlines
-
-/// Inlines list
-class Inlines extends ListBase<Inline> {
-  List<Inline> _inlines = new List<Inline>();
-
-  /// Constructor
-  Inlines();
-
-  /// Constructor from
-  Inlines.from(Iterable<Inline> inlines)
-      : _inlines = new List<Inline>.from(inlines);
-
-  @override
-  int get length => _inlines.length;
-
-  @override
-  set length(int length) {
-    _inlines.length = length;
-  }
-
-  @override
-  void operator []=(int index, Inline value) {
-    _inlines[index] = value;
-  }
-
-  @override
-  Inline operator [](int index) => _inlines[index];
-
-  // Though not strictly necessary, for performance reasons
-  // you should implement add and addAll.
-
-  @override
-  void add(Inline value) => _inlines.add(value);
-
-  @override
-  void addAll(Iterable<Inline> all) => _inlines.addAll(all);
 }
 
 /// Abstract inline
@@ -777,7 +757,7 @@ class SmartQuote extends Inline {
   bool close;
 
   /// Inner inlines
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// Constructor
   SmartQuote(this.contents, {this.single, this.open: true, this.close: true});
@@ -826,7 +806,7 @@ class Code extends Inline {
 /// Emphasis inline
 class Emph extends Inline {
   /// Inner inlines
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// Constructor
   Emph(this.contents);
@@ -845,7 +825,7 @@ class Emph extends Inline {
 /// Strong inline
 class Strong extends Inline {
   /// Inner inlines
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// Constructor
   Strong(this.contents);
@@ -864,7 +844,7 @@ class Strong extends Inline {
 /// Strikeout inline
 class Strikeout extends Inline {
   /// Inner inlines
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// Constructor
   Strikeout(this.contents);
@@ -883,7 +863,7 @@ class Strikeout extends Inline {
 /// Subscript inline
 class Subscript extends Inline {
   /// Inner inlines
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// Constructor
   Subscript(this.contents);
@@ -902,7 +882,7 @@ class Subscript extends Inline {
 /// Superscript inline
 class Superscript extends Inline {
   /// Inner inlines
-  Inlines contents;
+  Iterable<Inline> contents;
 
   /// Constructor
   Superscript(this.contents);
@@ -921,7 +901,7 @@ class Superscript extends Inline {
 /// Abstract link inline
 abstract class Link extends Inline {
   /// Link label
-  Inlines label;
+  Iterable<Inline> label;
 
   /// Link target
   Target target;
@@ -933,7 +913,7 @@ abstract class Link extends Inline {
 /// Inline link
 class InlineLink extends Link {
   /// Constructor
-  InlineLink(Inlines label, Target target) : super(label, target);
+  InlineLink(Iterable<Inline> label, Target target) : super(label, target);
 
   @override
   String toString() => 'InlineLink $label ($target)';
@@ -954,7 +934,7 @@ class ReferenceLink extends Link {
   String reference;
 
   /// Constructor
-  ReferenceLink(this.reference, Inlines label, Target target)
+  ReferenceLink(this.reference, Iterable<Inline> label, Target target)
       : super(label, target);
 
   @override
@@ -975,12 +955,11 @@ class ReferenceLink extends Link {
 class Autolink extends Link {
   /// Constructor
   Autolink(String link)
-      : super(new Inlines.from([new Str(link)]), new Target(link, null));
+      : super(<Inline>[new Str(link)], new Target(link, null));
 
   /// Constructor from email
   Autolink.email(String email)
-      : super(new Inlines.from([new Str(email)]),
-            new Target("mailto:" + email, null));
+      : super(<Inline>[new Str(email)], new Target("mailto:" + email, null));
 
   @override
   String toString() => 'Autolink (${target.link})';
@@ -995,7 +974,7 @@ class Autolink extends Link {
 /// Image inline
 abstract class Image extends Inline {
   /// Image label
-  Inlines label;
+  Iterable<Inline> label;
 
   /// Image target
   Target target;
@@ -1007,7 +986,7 @@ abstract class Image extends Inline {
 /// Inline image
 class InlineImage extends Image {
   /// Constructor
-  InlineImage(Inlines label, Target target) : super(label, target);
+  InlineImage(Iterable<Inline> label, Target target) : super(label, target);
 
   @override
   String toString() => 'InlineImage $label ($target)';
@@ -1028,7 +1007,7 @@ class ReferenceImage extends Image {
   String reference;
 
   /// Constructor
-  ReferenceImage(this.reference, Inlines label, Target target)
+  ReferenceImage(this.reference, Iterable<Inline> label, Target target)
       : super(label, target);
 
   @override
