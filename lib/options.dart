@@ -16,6 +16,10 @@ Target defaultLinkResolver(String normalizedReference, String reference) =>
 
 /// Parser or writer options. Mostly contains list of enabled extensions.
 class Options {
+  /// Enables raw html blocks and inlines. This officially supported extension
+  /// from Commonmart and thus requires explicit disabling.
+  final bool rawHtml;
+
   /// Enables smart punctuation extension. It's automatic replacement of `...`, `---`, `--`, `"` and `'` to `…`, `—`,
   /// `–` and curly versions of quote marks accordingly. It's only official extension to date.
   final bool smartPunctuation;
@@ -123,7 +127,8 @@ class Options {
 
   /// Constant constructor with required options.
   const Options(
-      {this.smartPunctuation: false,
+      {this.rawHtml: true,
+      this.smartPunctuation: false,
       this.strikeout: false,
       this.subscript: false,
       this.superscript: false,

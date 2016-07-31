@@ -78,6 +78,12 @@ bar
 </li>
 </ul>
 ''',
+  r'''#→Foo
+''': r'''<h1>Foo</h1>
+''',
+  r'''*→*→*→
+''': r'''<hr />
+''',
   r'''- `one
 - two`
 ''': r'''<ul>
@@ -213,9 +219,6 @@ bar
 #hashtag
 ''': r'''<p>#5 bolt</p>
 <p>#hashtag</p>
-''',
-  r'''#→foo
-''': r'''<p>#→foo</p>
 ''',
   r'''\## foo
 ''': r'''<p>## foo</p>
@@ -942,23 +945,27 @@ import Text.HTML.TagSoup
 main :: IO ()
 main = print $ parseTags tags
 </code></pre>
+okay
 ''': r'''<pre language="haskell"><code>
 import Text.HTML.TagSoup
 
 main :: IO ()
 main = print $ parseTags tags
 </code></pre>
+<p>okay</p>
 ''',
   r'''<script type="text/javascript">
 // JavaScript example
 
 document.getElementById("demo").innerHTML = "Hello JavaScript!";
 </script>
+okay
 ''': r'''<script type="text/javascript">
 // JavaScript example
 
 document.getElementById("demo").innerHTML = "Hello JavaScript!";
 </script>
+<p>okay</p>
 ''',
   r'''<style
   type="text/css">
@@ -966,12 +973,14 @@ h1 {color:red;}
 
 p {color:blue;}
 </style>
+okay
 ''': r'''<style
   type="text/css">
 h1 {color:red;}
 
 p {color:blue;}
 </style>
+<p>okay</p>
 ''',
   r'''<style
   type="text/css">
@@ -1022,21 +1031,25 @@ foo
 
 bar
    baz -->
+okay
 ''': r'''<!-- Foo
 
 bar
    baz -->
+<p>okay</p>
 ''',
   r'''<?php
 
   echo '>';
 
 ?>
+okay
 ''': r'''<?php
 
   echo '>';
 
 ?>
+<p>okay</p>
 ''',
   r'''<!DOCTYPE html>
 ''': r'''<!DOCTYPE html>
@@ -1053,6 +1066,7 @@ function matchwo(a,b)
   }
 }
 ]]>
+okay
 ''': r'''<![CDATA[
 function matchwo(a,b)
 {
@@ -1065,6 +1079,7 @@ function matchwo(a,b)
   }
 }
 ]]>
+<p>okay</p>
 ''',
   r'''  <!-- foo -->
 
@@ -1689,57 +1704,12 @@ with two lines.</p>
 ''',
   r'''- foo
 
-  bar
-
-- foo
-
 
   bar
-
-- ```
-  foo
-
-
-  bar
-  ```
-
-- baz
-
-  + ```
-    foo
-
-
-    bar
-    ```
 ''': r'''<ul>
 <li>
 <p>foo</p>
 <p>bar</p>
-</li>
-<li>
-<p>foo</p>
-</li>
-</ul>
-<p>bar</p>
-<ul>
-<li>
-<pre><code>foo
-
-
-bar
-</code></pre>
-</li>
-<li>
-<p>baz</p>
-<ul>
-<li>
-<pre><code>foo
-
-
-bar
-</code></pre>
-</li>
-</ul>
 </li>
 </ul>
 ''',
@@ -1768,32 +1738,18 @@ bar
 
       bar
 
+
       baz
 ''': r'''<ul>
 <li>
 <p>Foo</p>
 <pre><code>bar
+
 
 baz
 </code></pre>
 </li>
 </ul>
-''',
-  r'''- Foo
-
-      bar
-
-
-      baz
-''': r'''<ul>
-<li>
-<p>Foo</p>
-<pre><code>bar
-</code></pre>
-</li>
-</ul>
-<pre><code>  baz
-</code></pre>
 ''',
   r'''123456789. ok
 ''': r'''<ol start="123456789">
@@ -1923,6 +1879,12 @@ bar
 </li>
 </ul>
 ''',
+  r'''-   
+  foo
+''': r'''<ul>
+<li>foo</li>
+</ul>
+''',
   r'''-
 
   foo
@@ -1962,6 +1924,16 @@ bar
 ''': r'''<ul>
 <li></li>
 </ul>
+''',
+  r'''foo
+*
+
+foo
+1.
+''': r'''<p>foo
+*</p>
+<p>foo
+1.</p>
 ''',
   r''' 1.  A paragraph
      with two lines.
@@ -2085,12 +2057,17 @@ continued here.</p>
   r'''- foo
   - bar
     - baz
+      - boo
 ''': r'''<ul>
 <li>foo
 <ul>
 <li>bar
 <ul>
-<li>baz</li>
+<li>baz
+<ul>
+<li>boo</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -2100,10 +2077,12 @@ continued here.</p>
   r'''- foo
  - bar
   - baz
+   - boo
 ''': r'''<ul>
 <li>foo</li>
 <li>bar</li>
 <li>baz</li>
+<li>boo</li>
 </ul>
 ''',
   r'''10) foo
@@ -2193,8 +2172,13 @@ baz</li>
 ''',
   r'''The number of windows in my house is
 14.  The number of doors is 6.
+''': r'''<p>The number of windows in my house is
+14.  The number of doors is 6.</p>
+''',
+  r'''The number of windows in my house is
+1.  The number of doors is 6.
 ''': r'''<p>The number of windows in my house is</p>
-<ol start="14">
+<ol>
 <li>The number of doors is 6.</li>
 </ol>
 ''',
@@ -2211,22 +2195,9 @@ baz</li>
 <li>
 <p>bar</p>
 </li>
-</ul>
-<ul>
-<li>baz</li>
-</ul>
-''',
-  r'''- foo
-
-
-  bar
-- baz
-''': r'''<ul>
-<li>foo</li>
-</ul>
-<p>bar</p>
-<ul>
-<li>baz</li>
+<li>
+<p>baz</p>
+</li>
 </ul>
 ''',
   r'''- foo
@@ -2240,18 +2211,20 @@ baz</li>
 <ul>
 <li>bar
 <ul>
-<li>baz</li>
-</ul>
+<li>
+<p>baz</p>
+<p>bim</p>
 </li>
 </ul>
 </li>
 </ul>
-<pre><code>  bim
-</code></pre>
+</li>
+</ul>
 ''',
   r'''- foo
 - bar
 
+<!-- -->
 
 - baz
 - bim
@@ -2259,6 +2232,7 @@ baz</li>
 <li>foo</li>
 <li>bar</li>
 </ul>
+<!-- -->
 <ul>
 <li>baz</li>
 <li>bim</li>
@@ -2270,6 +2244,7 @@ baz</li>
 
 -   foo
 
+<!-- -->
 
     code
 ''': r'''<ul>
@@ -2281,6 +2256,7 @@ baz</li>
 <p>foo</p>
 </li>
 </ul>
+<!-- -->
 <pre><code>code
 </code></pre>
 ''',
@@ -2731,10 +2707,8 @@ foo
 ''',
   r'''*foo bar
 *
-''': r'''<p>*foo bar</p>
-<ul>
-<li></li>
-</ul>
+''': r'''<p>*foo bar
+*</p>
 ''',
   r'''*(*foo)
 ''': r'''<p>*(*foo)</p>
@@ -2872,7 +2846,7 @@ bar</em></p>
 ''': r'''<p><em>foo <strong>bar</strong> baz</em></p>
 ''',
   r'''*foo**bar**baz*
-''': r'''<p><em>foo</em><em>bar</em><em>baz</em></p>
+''': r'''<p><em>foo<strong>bar</strong>baz</em></p>
 ''',
   r'''***foo** bar*
 ''': r'''<p><em><strong>foo</strong> bar</em></p>
@@ -2881,7 +2855,7 @@ bar</em></p>
 ''': r'''<p><em>foo <strong>bar</strong></em></p>
 ''',
   r'''*foo**bar***
-''': r'''<p><em>foo</em><em>bar</em>**</p>
+''': r'''<p><em>foo<strong>bar</strong></em></p>
 ''',
   r'''*foo **bar *baz* bim** bop*
 ''': r'''<p><em>foo <strong>bar <em>baz</em> bim</strong> bop</em></p>
@@ -2919,7 +2893,7 @@ bar</strong></p>
 ''': r'''<p><strong>foo <em>bar</em> baz</strong></p>
 ''',
   r'''**foo*bar*baz**
-''': r'''<p><em><em>foo</em>bar</em>baz**</p>
+''': r'''<p><strong>foo<em>bar</em>baz</strong></p>
 ''',
   r'''***foo* bar**
 ''': r'''<p><strong><em>foo</em> bar</strong></p>
@@ -3042,9 +3016,6 @@ bim</em> bop</strong></p>
 ''',
   r'''*foo _bar* baz_
 ''': r'''<p><em>foo _bar</em> baz_</p>
-''',
-  r'''**foo*bar**
-''': r'''<p><em><em>foo</em>bar</em>*</p>
 ''',
   r'''*foo __bar *baz bim__ bam*
 ''': r'''<p><em>foo <strong>bar *baz bim</strong> bam</em></p>
@@ -4056,13 +4027,6 @@ final Map<String, String> _$additionalMarkdownToHtmlTests = {
 <li></li>
 </ul>
 ''',
-  r'''a
-*
-''': r'''<p>a</p>
-<ul>
-<li></li>
-</ul>
-''',
   r'''- - ```
     a
 
@@ -4166,6 +4130,17 @@ b
      baz
 </code></pre>
 ''',
+  r'''- -
+  - - -
+''': r'''<ul>
+<li>
+<ul>
+<li></li>
+</ul>
+<hr />
+</li>
+</ul>
+''',
   r'''```
 -
 ''': r'''<pre><code>-
@@ -4186,7 +4161,7 @@ b
 *a*
 ''',
   r'''[foo](</f&ouml;&ouml;> "f&ouml;&ouml;")
-''': r'''<p><a href="/f&ouml;&ouml;" title="föö">foo</a></p>
+''': r'''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>
 ''',
   r'''* a
 

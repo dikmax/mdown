@@ -1,5 +1,6 @@
 library md_proc.test.reference_resolver;
 
+@t.Skip("Not implemented")
 import 'package:test/test.dart' as t;
 
 import 'package:md_proc/md_proc.dart';

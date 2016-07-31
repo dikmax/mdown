@@ -1,7 +1,7 @@
 library md_proc.html_writer;
 
-import 'definitions.dart';
-import 'options.dart';
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/options.dart';
 
 class _HtmlBuilder extends StringBuffer {
   Options _options;
@@ -41,7 +41,7 @@ class _HtmlBuilder extends StringBuffer {
         }
       } else if (block is Heading) {
         writeHeader(block);
-      } else if (block is HorizontalRule) {
+      } else if (block is ThematicBreak) {
         write('<hr/>');
       } else if (block is CodeBlock) {
         writeCodeBlock(block);
@@ -361,6 +361,7 @@ class _HtmlBuilder extends StringBuffer {
   // Escaping
 
   RegExp _escapedChars = new RegExp(r'[<>&"]');
+  // TODO HashMap.
   Map<String, String> _escape = <String, String>{
     "<": "&lt;",
     ">": "&gt;",

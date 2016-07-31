@@ -40,7 +40,7 @@ class _ExampleDescription extends t.Matcher {
   _ExampleDescription(this.inner, this.example);
 
   @override
-  bool matches(dynamic item, Map<String, dynamic> matchState) =>
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) =>
       inner.matches(item, matchState);
 
   @override
@@ -51,7 +51,7 @@ class _ExampleDescription extends t.Matcher {
   t.Description describeMismatch(
       dynamic item,
       t.Description mismatchDescription,
-      Map<String, dynamic> matchState,
+      Map<dynamic, dynamic> matchState,
       bool verbose) {
     t.Description d =
         inner.describeMismatch(item, mismatchDescription, matchState, verbose);
@@ -68,7 +68,7 @@ class _Example2Description extends t.Matcher {
   _Example2Description(this.inner, this.example, this.example2);
 
   @override
-  bool matches(dynamic item, Map<String, dynamic> matchState) =>
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) =>
       inner.matches(item, matchState);
 
   @override
@@ -79,7 +79,7 @@ class _Example2Description extends t.Matcher {
   t.Description describeMismatch(
       dynamic item,
       t.Description mismatchDescription,
-      Map<String, dynamic> matchState,
+      Map<dynamic, dynamic> matchState,
       bool verbose) {
     t.Description d =
         inner.describeMismatch(item, mismatchDescription, matchState, verbose);
@@ -97,7 +97,7 @@ RegExp _spaceBeforeTagCloseRegExp = new RegExp(r' *\/>');
 String _tidy(String html) {
   List<String> lines = html.split('\n');
   bool inPre = false;
-  List<String> result = [];
+  List<String> result = <String>[];
   for (String line in lines) {
     if (line.contains("<pre")) {
       inPre = true;
@@ -131,7 +131,6 @@ TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) =>
     (int num, String mdOrig, String html) {
       CommonMarkParser parser = new CommonMarkParser(options);
       HtmlWriter writer = new HtmlWriter(options);
-      MarkdownWriter mdWriter = new MarkdownWriter(options);
 
       String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
       html = html.replaceAll("→", "\t").replaceAll("␣", " ");
@@ -143,6 +142,18 @@ TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) =>
               new _ExampleDescription(t.equals(_tidy(html)), mdOrig));
         });
       }
+    };
+
+/// Generate md->html->md->html tests
+TestFunc mdToHtml2Test(Options options, [FilterFunc filter = emptyFilter]) =>
+    (int num, String mdOrig, String html) {
+      CommonMarkParser parser = new CommonMarkParser(options);
+      HtmlWriter writer = new HtmlWriter(options);
+      MarkdownWriter mdWriter = new MarkdownWriter(options);
+
+      String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
+      html = html.replaceAll("→", "\t").replaceAll("␣", " ");
+
       if (filter(TestType.markdown, num)) {
         t.test('markdown $num', () {
           String generatedMarkdown = mdWriter.write(parser.parse(md));
@@ -156,6 +167,7 @@ TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) =>
     };
 
 /// Generate md->html->md tests
+/*
 TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) =>
     (int num, String md, String destMd) {
       CommonMarkParser parser = new CommonMarkParser(options);
@@ -168,7 +180,7 @@ TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) =>
               generatedMarkdown, new _ExampleDescription(t.equals(destMd), md));
         });
       }
-    };
+    };*/
 
 /*
 void preprocessTest() {
