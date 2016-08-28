@@ -745,41 +745,111 @@ class Ellipsis extends SmartChar {
   int get hashCode => 0;
 }
 
-/// Smart quote inline
-class SmartQuote extends Inline {
-  /// Is single (not double)
-  bool single;
-
-  /// Have open quote
-  bool open;
-
-  /// Have close quote
-  bool close;
-
-  /// Inner inlines
-  Iterable<Inline> contents;
+/// Single open quote `'`
+class SingleOpenQuote extends SmartChar {
+  static final SingleOpenQuote _instance = new SingleOpenQuote._internal();
 
   /// Constructor
-  SmartQuote(this.contents, {this.single, this.open: true, this.close: true});
+  factory SingleOpenQuote() {
+    return _instance;
+  }
+
+  SingleOpenQuote._internal();
 
   @override
-  String toString() =>
-      'SmartQuote ' +
-      (single
-          ? "${open ? "'" : ""}$contents${close ? "'" : ""}"
-          : "${open ? '"' : ""}$contents${close ? '"' : ""}");
+  String toString() => "SingleOpenQuote";
 
   @override
-  bool operator ==(dynamic obj) =>
-      obj is SmartQuote &&
-      single == obj.single &&
-      open == obj.open &&
-      close == obj.close &&
-      _iterableEquality.equals(contents, obj.contents);
+  bool operator ==(dynamic obj) => obj is SingleOpenQuote;
 
   @override
-  int get hashCode => hash4(single, open, close, contents);
+  int get hashCode => 0;
 }
+
+/// Single close quote `'`
+class SingleCloseQuote extends SmartChar {
+  static final SingleCloseQuote _instance = new SingleCloseQuote._internal();
+
+  /// Constructor
+  factory SingleCloseQuote() {
+    return _instance;
+  }
+
+  SingleCloseQuote._internal();
+
+  @override
+  String toString() => "SingleCloseQuote";
+
+  @override
+  bool operator ==(dynamic obj) => obj is SingleCloseQuote;
+
+  @override
+  int get hashCode => 0;
+}
+
+/// Double open quote `"`
+class DoubleOpenQuote extends SmartChar {
+  static final DoubleOpenQuote _instance = new DoubleOpenQuote._internal();
+
+  /// Constructor
+  factory DoubleOpenQuote() {
+    return _instance;
+  }
+
+  DoubleOpenQuote._internal();
+
+  @override
+  String toString() => "DoubleOpenQuote";
+
+  @override
+  bool operator ==(dynamic obj) => obj is DoubleOpenQuote;
+
+  @override
+  int get hashCode => 0;
+}
+
+/// Double close quote `"`
+class DoubleCloseQuote extends SmartChar {
+  static final DoubleCloseQuote _instance = new DoubleCloseQuote._internal();
+
+  /// Constructor
+  factory DoubleCloseQuote() {
+    return _instance;
+  }
+
+  DoubleCloseQuote._internal();
+
+  @override
+  String toString() => "DoubleCloseQuote";
+
+  @override
+  bool operator ==(dynamic obj) => obj is DoubleCloseQuote;
+
+  @override
+  int get hashCode => 0;
+}
+
+/// Apostrophe `'`
+class Apostrophe extends SmartChar {
+  static final Apostrophe _instance = new Apostrophe._internal();
+
+  /// Constructor
+  factory Apostrophe() {
+    return _instance;
+  }
+
+  Apostrophe._internal();
+
+  @override
+  String toString() => "Apostrophe";
+
+  @override
+  bool operator ==(dynamic obj) => obj is Apostrophe;
+
+  @override
+  int get hashCode => 0;
+}
+
 
 /// Code inline
 class Code extends Inline {

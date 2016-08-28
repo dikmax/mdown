@@ -20,11 +20,13 @@ class DocumentParser extends AbstractParser<Document> {
       ];
     });
 
-    _blockParsers[_UNDERSCORE_CODE_UNIT] =
-    <AbstractParser<Iterable<Block>>>[container.thematicBreakParser];
+    _blockParsers[_UNDERSCORE_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
+      container.thematicBreakParser
+    ];
 
-    _blockParsers[_SHARP_CODE_UNIT] =
-    <AbstractParser<Iterable<Block>>>[container.atxHeadingParser];
+    _blockParsers[_SHARP_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
+      container.atxHeadingParser
+    ];
 
     <
         int>[_SPACE_CODE_UNIT, _TAB_CODE_UNIT].forEach((int char) {
@@ -37,20 +39,23 @@ class DocumentParser extends AbstractParser<Document> {
     <
             int>[_NEWLINE_CODE_UNIT, _CARRIAGE_RETURN_CODE_UNIT]
         .forEach((int char) {
-      _blockParsers[char] =
-      <AbstractParser<Iterable<Block>>>[container.blanklineParser];
+      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+        container.blanklineParser
+      ];
     });
 
     <
         int>[_TILDE_CODE_UNIT, _BACKTICK_CODE_UNIT].forEach((int char) {
-      _blockParsers[char] =
-      <AbstractParser<Iterable<Block>>>[container.fencedCodeParser];
+      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+        container.fencedCodeParser
+      ];
     });
 
     <
         int>[_PLUS_CODE_UNIT, _GREATER_THAN_CODE_UNIT].forEach((int char) {
-      _blockParsers[char] =
-      <AbstractParser<Iterable<Block>>>[container.blockquoteListParser];
+      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+        container.blockquoteListParser
+      ];
     });
 
     if (container.options.rawHtml) {
@@ -61,8 +66,9 @@ class DocumentParser extends AbstractParser<Document> {
     }
 
     for (int char = _ZERO_CODE_UNIT; char <= _NINE_CODE_UNIT; char++) {
-      _blockParsers[char] =
-      <AbstractParser<Iterable<Block>>>[container.blockquoteListParser];
+      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+        container.blockquoteListParser
+      ];
     }
 
     // Inline parsers
@@ -114,6 +120,12 @@ class DocumentParser extends AbstractParser<Document> {
       _inlineParsers[_MINUS_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
         container.mnDashParser
       ];
+
+      _inlineParsers[_SINGLE_QUOTE_CODE_UNIT] =
+          <AbstractParser<Iterable<Inline>>>[container.inlineStructureParser];
+
+      _inlineParsers[_DOUBLE_QUOTE_CODE_UNIT] =
+          <AbstractParser<Iterable<Inline>>>[container.inlineStructureParser];
     }
   }
 

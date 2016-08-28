@@ -347,11 +347,13 @@ class _InlineRenderer {
           write('---');
         } else if (inline is NDash) {
           write('--');
+        } else if (inline is SingleOpenQuote || inline is SingleCloseQuote || inline is Apostrophe) {
+          write('\'');
+        } else if (inline is DoubleOpenQuote || inline is DoubleCloseQuote) {
+          write('"');
         } else {
           throw new UnimplementedError(inline.toString());
         }
-      } else if (inline is SmartQuote) {
-        writeSmartQuote(inline, context: context);
       } else if (inline is Strikeout) {
         writeStrikeout(inline, context: context);
       } else if (inline is Subscript) {
@@ -413,17 +415,6 @@ class _InlineRenderer {
     write(delimiterString);
     writeInlines(strong.contents, context: context);
     write(delimiterString);
-  }
-
-  void writeSmartQuote(SmartQuote quote,
-      {_EscapeContext context: _EscapeContext.empty}) {
-    if (quote.open) {
-      write(quote.single ? "'" : '"');
-    }
-    writeInlines(quote.contents, context: context);
-    if (quote.close) {
-      write(quote.single ? "'" : '"');
-    }
   }
 
   void writeStrikeout(Strikeout strikeout,
