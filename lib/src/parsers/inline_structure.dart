@@ -75,6 +75,10 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       _inlineParsers[_DOT_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
         container.ellipsisParser
       ];
+
+      _inlineParsers[_MINUS_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+        container.mnDashParser
+      ];
     }
   }
 

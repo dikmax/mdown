@@ -27,6 +27,7 @@ class ParsersContainer {
   AutolinkParser autolinkParser;
   InlineHtmlParser inlineHtmlParser;
   EllipsisParser ellipsisParser;
+  MNDashParser mnDashParser;
   StrParser strParser;
 
   DocumentParser documentParser;
@@ -56,6 +57,7 @@ class ParsersContainer {
     autolinkParser = new AutolinkParser(this);
     inlineHtmlParser = new InlineHtmlParser(this);
     ellipsisParser = new EllipsisParser(this);
+    mnDashParser = new MNDashParser(this);
     strParser = new StrParser(this);
 
     // Document
@@ -88,6 +90,7 @@ class ParsersContainer {
     autolinkParser.init();
     inlineHtmlParser.init();
     ellipsisParser.init();
+    mnDashParser.init();
     strParser.init();
 
     // Document
