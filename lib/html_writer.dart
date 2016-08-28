@@ -195,11 +195,17 @@ class _HtmlBuilder extends StringBuffer {
           write('\u{2014}');
         } else if (inline is NDash) {
           write('\u{2013}');
+        } else if (inline is SingleOpenQuote) {
+          write('\u{2018}');
+        } else if (inline is SingleCloseQuote || inline is Apostrophe) {
+          write('\u{2019}');
+        } else if (inline is DoubleOpenQuote) {
+          write('\u{201c}');
+        } else if (inline is DoubleCloseQuote) {
+          write('\u{201d}');
         } else {
           throw new UnimplementedError(inline.toString());
         }
-      } else if (inline is SmartQuote) {
-        writeSmartQuote(inline, stripped: stripped);
       } else if (inline is RawInline) {
         write(inline.contents);
       } else if (inline is TexMathInline) {
@@ -271,23 +277,6 @@ class _HtmlBuilder extends StringBuffer {
     writeInlines(superscript.contents, stripped: stripped);
     if (!stripped) {
       write('</sup>');
-    }
-  }
-
-  void writeSmartQuote(SmartQuote quote, {bool stripped: false}) {
-    // TODO different quotation styles
-    if (quote.open && quote.close) {
-      write(quote.single ? '\u{2018}' : '\u{201c}');
-      writeInlines(quote.contents, stripped: stripped);
-      write(quote.single ? '\u{2019}' : '\u{201d}');
-    } else {
-      if (!quote.single && quote.open && _firstInline) {
-        // If double quote is first char in inline then it can be opening.
-        write('\u{201c}');
-      } else {
-        // Single quote have no contents and always closing.
-        write(quote.single ? '\u{2019}' : '\u{201d}');
-      }
     }
   }
 

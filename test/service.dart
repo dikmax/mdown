@@ -536,34 +536,55 @@ void serviceTests() {
       });
     });
 
-    t.group('SmartQuote', () {
-      SmartQuote smartQuote =
-          new SmartQuote(<Inline>[new Str('Quote')], single: false);
+    t.group('SingleOpenQuote', () {
+      SingleOpenQuote singleOpenQuote = new SingleOpenQuote();
       t.test('toString', () {
-        t.expect(smartQuote.toString(), t.equals('SmartQuote "[Str "Quote"]"'));
+        t.expect(singleOpenQuote.toString(), t.equals('SingleOpenQuote'));
       });
       t.test('==', () {
-        t.expect(
-            smartQuote,
-            t.equals(
-                new SmartQuote(<Inline>[new Str('Quote')], single: false)));
+        t.expect(singleOpenQuote, t.equals(new SingleOpenQuote()));
       });
       t.test('!=', () {
-        t.expect(smartQuote,
-            t.isNot(t.equals(new SmartQuote(<Inline>[], single: false))));
-        t.expect(
-            smartQuote,
-            t.isNot(t.equals(
-                new SmartQuote(<Inline>[new Str('Quote')], single: true))));
-        t.expect(
-            smartQuote,
-            t.isNot(t.equals(new SmartQuote(<Inline>[new Str('Quote')],
-                single: false, open: false))));
-        t.expect(
-            smartQuote,
-            t.isNot(t.equals(new SmartQuote(<Inline>[new Str('Quote')],
-                single: false, close: false))));
-        t.expect(smartQuote, t.isNot(t.equals(null)));
+        t.expect(singleOpenQuote, t.isNot(t.equals(new MDash())));
+      });
+    });
+
+    t.group('SingleCloseQuote', () {
+      SingleCloseQuote singleCloseQuote = new SingleCloseQuote();
+      t.test('toString', () {
+        t.expect(singleCloseQuote.toString(), t.equals('SingleCloseQuote'));
+      });
+      t.test('==', () {
+        t.expect(singleCloseQuote, t.equals(new SingleCloseQuote()));
+      });
+      t.test('!=', () {
+        t.expect(singleCloseQuote, t.isNot(t.equals(new MDash())));
+      });
+    });
+
+    t.group('DoubleOpenQuote', () {
+      DoubleOpenQuote doubleOpenQuote = new DoubleOpenQuote();
+      t.test('toString', () {
+        t.expect(doubleOpenQuote.toString(), t.equals('DoubleOpenQuote'));
+      });
+      t.test('==', () {
+        t.expect(doubleOpenQuote, t.equals(new DoubleOpenQuote()));
+      });
+      t.test('!=', () {
+        t.expect(doubleOpenQuote, t.isNot(t.equals(new MDash())));
+      });
+    });
+
+    t.group('DoubleCloseQuote', () {
+      DoubleCloseQuote doubleCloseQuote = new DoubleCloseQuote();
+      t.test('toString', () {
+        t.expect(doubleCloseQuote.toString(), t.equals('DoubleCloseQuote'));
+      });
+      t.test('==', () {
+        t.expect(doubleCloseQuote, t.equals(new DoubleCloseQuote()));
+      });
+      t.test('!=', () {
+        t.expect(doubleCloseQuote, t.isNot(t.equals(new MDash())));
       });
     });
 
@@ -581,6 +602,20 @@ void serviceTests() {
         t.expect(code, t.isNot(t.equals(null)));
       });
     });
+
+    t.group('Apostrophe', () {
+      Apostrophe apostrophe = new Apostrophe();
+      t.test('toString', () {
+        t.expect(apostrophe.toString(), t.equals('Apostrophe'));
+      });
+      t.test('==', () {
+        t.expect(apostrophe, t.equals(new Apostrophe()));
+      });
+      t.test('!=', () {
+        t.expect(apostrophe, t.isNot(t.equals(new MDash())));
+      });
+    });
+
 
     t.group('Emph', () {
       Emph emph = new Emph(<Inline>[new Str('Emph')]);

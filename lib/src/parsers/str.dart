@@ -17,9 +17,15 @@ class StrParser extends AbstractParser<Inlines> {
     _UNDERSCORE_CODE_UNIT
   ]);
 
+  /// Constructor.
   StrParser(ParsersContainer container) : super(container) {
     if (container.options.smartPunctuation) {
-      _specialChars.addAll(<int>[_DOT_CODE_UNIT, _MINUS_CODE_UNIT]);
+      _specialChars.addAll(<int>[
+        _DOT_CODE_UNIT,
+        _MINUS_CODE_UNIT,
+        _SINGLE_QUOTE_CODE_UNIT,
+        _DOUBLE_QUOTE_CODE_UNIT
+      ]);
     }
   }
 
@@ -47,7 +53,7 @@ class StrParser extends AbstractParser<Inlines> {
         endOffset++;
       }
 
-      return new ParseResult.success(
+      return new ParseResult<Inlines>.success(
           new Inlines.single(new Str(text.substring(offset, endOffset))),
           endOffset);
     }

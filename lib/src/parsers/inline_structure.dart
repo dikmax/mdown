@@ -5,6 +5,9 @@ class _Delim {
   int count;
   final bool canOpen;
   final bool canClose;
+
+  // Used for unmathed single quote
+  bool matched = false;
   Inlines inlines = new Inlines();
 
   _Delim(this.charCode, this.count, this.canOpen, this.canClose);
@@ -12,6 +15,10 @@ class _Delim {
   int countCloses(_Delim delim) {
     if (charCode != delim.charCode) {
       return 0;
+    }
+    if (charCode == _SINGLE_QUOTE_CODE_UNIT ||
+        charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+      return 1; // Always closes.
     }
     if ((canClose || delim.canOpen) && (count + delim.count) % 3 == 0) {
       return 0;
@@ -31,9 +38,15 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
   Map<int, List<AbstractParser<Iterable<Inline>>>> _inlineParsers;
 
+  /// Constructor.
   InlineStructureParser(ParsersContainer container) : super(container) {
     this._delimitersChars =
         new Set<int>.from(<int>[_STAR_CODE_UNIT, _UNDERSCORE_CODE_UNIT]);
+
+    if (container.options.smartPunctuation) {
+      _delimitersChars.add(_SINGLE_QUOTE_CODE_UNIT);
+      _delimitersChars.add(_DOUBLE_QUOTE_CODE_UNIT);
+    }
   }
 
   @override
@@ -112,18 +125,29 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     if (charCode == _UNDERSCORE_CODE_UNIT) {
       canOpen = canOpen && (!rightFlanking || punctuationBefore);
       canClose = canClose && (!leftFlanking || punctuationAfter);
+    } else if (charCode == _SINGLE_QUOTE_CODE_UNIT ||
+        charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+      canOpen = canOpen && !rightFlanking;
     }
 
     return new _Delim(charCode, count, canOpen, canClose);
   }
 
-  Inlines buildStack(List<_Delim> stack, int skip) {
+  Inlines _buildStack(List<_Delim> stack, int skip) {
     Inlines result = new Inlines();
     Iterable<_Delim> list = skip > 0 ? stack.skip(skip) : stack;
     list.forEach((_Delim delim) {
       if (delim.count > 0) {
-        result.add(
-            new Str(new String.fromCharCode(delim.charCode) * delim.count));
+        int charCode = delim.charCode;
+        if (charCode == _SINGLE_QUOTE_CODE_UNIT) {
+          result.addAll(new List<Inline>.filled(delim.count,
+              delim.matched ? new SingleOpenQuote() : new Apostrophe()));
+        } else if (charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+          result.addAll(
+              new List<Inline>.filled(delim.count, new DoubleOpenQuote()));
+        } else {
+          result.add(new Str(new String.fromCharCode(charCode) * delim.count));
+        }
       }
       result.addAll(delim.inlines);
     });
@@ -143,10 +167,19 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     offset += delim.count;
 
     if (!delim.canOpen) {
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(
-              new Str(new String.fromCharCode(delim.charCode) * delim.count)),
-          offset);
+      int charCode = delim.charCode;
+      List<Inline> result;
+      if (charCode == _SINGLE_QUOTE_CODE_UNIT) {
+        result = new List<Inline>.filled(delim.count, new Apostrophe());
+      } else if (charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+        result = new List<Inline>.filled(delim.count, new DoubleCloseQuote());
+      } else {
+        result = <Inline>[
+          new Str(new String.fromCharCode(charCode) * delim.count)
+        ];
+      }
+
+      return new ParseResult<Inlines>.success(new Inlines.from(result), offset);
     }
 
     List<_Delim> stack = <_Delim>[delim];
@@ -158,50 +191,72 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       _Delim delim = _scanDelims(text, offset);
       if (delim != null) {
         if (delim.canClose) {
-          // Going down through stack, and searching delimiter to close.
-          int countCloses = 0;
-          int openDelimIndex = stack.length - 1;
-          while (openDelimIndex >= 0 && delim.count > 0) {
-            _Delim openDelim = stack[openDelimIndex];
-            countCloses = openDelim.countCloses(delim);
-            if (countCloses > 0) {
+          if (delim.charCode == _SINGLE_QUOTE_CODE_UNIT ||
+              delim.charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+            int openDelimIndex = stack.length - 1;
+            while (openDelimIndex >= 0) {
               _Delim openDelim = stack[openDelimIndex];
-              if (openDelimIndex < stack.length - 1) {
-                Inlines inner = buildStack(stack, openDelimIndex + 1);
-                openDelim.inlines.addAll(inner);
+              if (openDelim.charCode == delim.charCode) {
+                openDelim.matched = true;
+                break;
               }
-
-              Inlines itemRes = openDelim.inlines;
-
-              if (delim.charCode == _UNDERSCORE_CODE_UNIT ||
-                  delim.charCode == _STAR_CODE_UNIT) {
-                int delimsLeft = countCloses;
-                if ((delimsLeft & 1) == 1) {
-                  itemRes = new Inlines.single(new Emph(itemRes));
-                  delimsLeft--;
-                }
-
-                while (delimsLeft > 0) {
-                  itemRes = new Inlines.single(new Strong(itemRes));
-                  delimsLeft -= 2;
-                }
-              }
-              openDelim.inlines = itemRes;
-
-              openDelim.count -= countCloses;
-              if (openDelim.count == 0) {
-                Inlines itemRes = buildStack(stack, stack.length - 1);
-                if (stack.length == 0) {
-                  result.addAll(itemRes);
-                } else {
-                  stack.last.inlines.addAll(itemRes);
-                }
-              }
-
-              offset += countCloses;
-              delim.count -= countCloses;
+              openDelimIndex--;
             }
-            openDelimIndex--;
+
+            stack.last.inlines.addAll(new List<Inline>.filled(
+                delim.count,
+                delim.charCode == _SINGLE_QUOTE_CODE_UNIT
+                    ? new SingleCloseQuote()
+                    : new DoubleCloseQuote()));
+
+            offset += delim.count;
+            delim.count = 0;
+          } else {
+            // Going down through stack, and searching delimiter to close.
+            int countCloses = 0;
+            int openDelimIndex = stack.length - 1;
+            while (openDelimIndex >= 0 && delim.count > 0) {
+              _Delim openDelim = stack[openDelimIndex];
+              countCloses = openDelim.countCloses(delim);
+              if (countCloses > 0) {
+                _Delim openDelim = stack[openDelimIndex];
+                if (openDelimIndex < stack.length - 1) {
+                  Inlines inner = _buildStack(stack, openDelimIndex + 1);
+                  openDelim.inlines.addAll(inner);
+                }
+
+                Inlines itemRes = openDelim.inlines;
+
+                if (delim.charCode == _UNDERSCORE_CODE_UNIT ||
+                    delim.charCode == _STAR_CODE_UNIT) {
+                  int delimsLeft = countCloses;
+                  if ((delimsLeft & 1) == 1) {
+                    itemRes = new Inlines.single(new Emph(itemRes));
+                    delimsLeft--;
+                  }
+
+                  while (delimsLeft > 0) {
+                    itemRes = new Inlines.single(new Strong(itemRes));
+                    delimsLeft -= 2;
+                  }
+                }
+                openDelim.inlines = itemRes;
+
+                openDelim.count -= countCloses;
+                if (openDelim.count == 0) {
+                  Inlines itemRes = _buildStack(stack, stack.length - 1);
+                  if (stack.length == 0) {
+                    result.addAll(itemRes);
+                  } else {
+                    stack.last.inlines.addAll(itemRes);
+                  }
+                }
+
+                offset += countCloses;
+                delim.count -= countCloses;
+              }
+              openDelimIndex--;
+            }
           }
         }
 
@@ -261,7 +316,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       offset = res.offset;
     }
 
-    result.addAll(buildStack(stack, 0));
+    result.addAll(_buildStack(stack, 0));
 
     return new ParseResult<Inlines>.success(result, offset);
   }
