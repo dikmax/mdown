@@ -2,23 +2,26 @@ part of md_proc.src.parsers;
 
 class StrParser extends AbstractParser<Inlines> {
   final Set<int> _specialChars = new Set<int>.from(<int>[
-    _NEWLINE_CODE_UNIT,
     _AMPERSAND_CODE_UNIT,
-    _STAR_CODE_UNIT,
+    _BACKTICK_CODE_UNIT,
+    _CLOSE_BRACKET_CODE_UNIT,
     _EXCLAMATION_MARK_CODE_UNIT,
+    _LESS_THAN_CODE_UNIT,
+    _NBSP_CODE_UNIT,
+    _NEWLINE_CODE_UNIT,
     _OPEN_BRACKET_CODE_UNIT,
     _SLASH_CODE_UNIT,
-    _CLOSE_BRACKET_CODE_UNIT,
-    _UNDERSCORE_CODE_UNIT,
-    _LESS_THAN_CODE_UNIT,
-    _BACKTICK_CODE_UNIT,
     _SPACE_CODE_UNIT,
+    _STAR_CODE_UNIT,
     _TAB_CODE_UNIT,
-    _NBSP_CODE_UNIT,
-    _DOT_CODE_UNIT
+    _UNDERSCORE_CODE_UNIT
   ]);
 
-  StrParser(ParsersContainer container) : super(container) {}
+  StrParser(ParsersContainer container) : super(container) {
+    if (container.options.smartPunctuation) {
+      _specialChars.addAll(<int>[_DOT_CODE_UNIT, _MINUS_CODE_UNIT]);
+    }
+  }
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
