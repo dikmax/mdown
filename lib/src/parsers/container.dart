@@ -26,6 +26,7 @@ class ParsersContainer {
   LinkImageParser linkImageParser;
   AutolinkParser autolinkParser;
   InlineHtmlParser inlineHtmlParser;
+  EllipsisParser ellipsisParser;
   StrParser strParser;
 
   DocumentParser documentParser;
@@ -54,6 +55,7 @@ class ParsersContainer {
     linkImageParser = new LinkImageParser(this);
     autolinkParser = new AutolinkParser(this);
     inlineHtmlParser = new InlineHtmlParser(this);
+    ellipsisParser = new EllipsisParser(this);
     strParser = new StrParser(this);
 
     // Document
@@ -85,6 +87,7 @@ class ParsersContainer {
     linkImageParser.init();
     autolinkParser.init();
     inlineHtmlParser.init();
+    ellipsisParser.init();
     strParser.init();
 
     // Document

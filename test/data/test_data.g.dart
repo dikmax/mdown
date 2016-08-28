@@ -3822,6 +3822,26 @@ thirteen———––.</p>
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
+// Target: final Map<String, String> regression
+// **************************************************************************
+
+final Map<String, String> _$regressionTests = {
+  r'''* foo
+→bar
+''': r'''<ul>
+<li>foo
+bar</li>
+</ul>
+''',
+  r'''<a>  
+x
+''': r'''<a>  
+x
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
 // Target: final Map<String, String> markdownToMarkdown
 // **************************************************************************
 

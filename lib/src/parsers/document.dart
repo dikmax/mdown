@@ -14,19 +14,21 @@ class DocumentParser extends AbstractParser<Document> {
 
     <
         int>[_STAR_CODE_UNIT, _MINUS_CODE_UNIT].forEach((int char) {
-      _blockParsers[char] = [
+      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser,
         container.blockquoteListParser
       ];
     });
 
-    _blockParsers[_UNDERSCORE_CODE_UNIT] = [container.thematicBreakParser];
+    _blockParsers[_UNDERSCORE_CODE_UNIT] =
+    <AbstractParser<Iterable<Block>>>[container.thematicBreakParser];
 
-    _blockParsers[_SHARP_CODE_UNIT] = [container.atxHeadingParser];
+    _blockParsers[_SHARP_CODE_UNIT] =
+    <AbstractParser<Iterable<Block>>>[container.atxHeadingParser];
 
     <
         int>[_SPACE_CODE_UNIT, _TAB_CODE_UNIT].forEach((int char) {
-      _blockParsers[char] = [
+      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser,
         container.indentedCodeParser
       ];
@@ -35,54 +37,79 @@ class DocumentParser extends AbstractParser<Document> {
     <
             int>[_NEWLINE_CODE_UNIT, _CARRIAGE_RETURN_CODE_UNIT]
         .forEach((int char) {
-      _blockParsers[char] = [container.blanklineParser];
+      _blockParsers[char] =
+      <AbstractParser<Iterable<Block>>>[container.blanklineParser];
     });
 
     <
         int>[_TILDE_CODE_UNIT, _BACKTICK_CODE_UNIT].forEach((int char) {
-      _blockParsers[char] = [container.fencedCodeParser];
+      _blockParsers[char] =
+      <AbstractParser<Iterable<Block>>>[container.fencedCodeParser];
     });
 
     <
         int>[_PLUS_CODE_UNIT, _GREATER_THAN_CODE_UNIT].forEach((int char) {
-      _blockParsers[char] = [container.blockquoteListParser];
+      _blockParsers[char] =
+      <AbstractParser<Iterable<Block>>>[container.blockquoteListParser];
     });
 
     if (container.options.rawHtml) {
-      _blockParsers[_LESS_THAN_CODE_UNIT] = [
+      _blockParsers[_LESS_THAN_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
         container.htmlBlockParser,
         container.htmlBlock7Parser
       ];
     }
 
     for (int char = _ZERO_CODE_UNIT; char <= _NINE_CODE_UNIT; char++) {
-      _blockParsers[char] = [container.blockquoteListParser];
+      _blockParsers[char] =
+      <AbstractParser<Iterable<Block>>>[container.blockquoteListParser];
     }
 
     // Inline parsers
     _inlineParsers = new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
 
-    _inlineParsers[_SPACE_CODE_UNIT] = [container.hardLineBreakParser];
+    _inlineParsers[_SPACE_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.hardLineBreakParser
+    ];
 
-    _inlineParsers[_TAB_CODE_UNIT] = [container.hardLineBreakParser];
+    _inlineParsers[_TAB_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.hardLineBreakParser
+    ];
 
-    _inlineParsers[_SLASH_CODE_UNIT] = [container.escapesParser];
+    _inlineParsers[_SLASH_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.escapesParser
+    ];
 
-    _inlineParsers[_AMPERSAND_CODE_UNIT] = [container.entityParser];
+    _inlineParsers[_AMPERSAND_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.entityParser
+    ];
 
-    _inlineParsers[_BACKTICK_CODE_UNIT] = [container.inlineCodeParser];
+    _inlineParsers[_BACKTICK_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.inlineCodeParser
+    ];
 
     <
         int>[_STAR_CODE_UNIT, _UNDERSCORE_CODE_UNIT].forEach((int char) {
-      _inlineParsers[char] = [container.inlineStructureParser];
+      _inlineParsers[char] = <AbstractParser<Iterable<Inline>>>[
+        container.inlineStructureParser
+      ];
     });
 
-    _inlineParsers[_OPEN_BRACKET_CODE_UNIT] = [container.linkImageParser];
+    _inlineParsers[_OPEN_BRACKET_CODE_UNIT] =
+        <AbstractParser<Iterable<Inline>>>[container.linkImageParser];
 
-    _inlineParsers[_LESS_THAN_CODE_UNIT] = [container.autolinkParser];
+    _inlineParsers[_LESS_THAN_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.autolinkParser
+    ];
 
     if (container.options.rawHtml) {
       _inlineParsers[_LESS_THAN_CODE_UNIT].add(container.inlineHtmlParser);
+    }
+
+    if (container.options.smartPunctuation) {
+      _inlineParsers[_DOT_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+        container.ellipsisParser
+      ];
     }
   }
 
