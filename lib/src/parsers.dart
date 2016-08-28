@@ -30,6 +30,7 @@ part 'parsers/inline_html.dart';
 part 'parsers/inline_structure.dart';
 part 'parsers/link_image.dart';
 part 'parsers/autolink.dart';
+part 'parsers/ellipsis.dart';
 part 'parsers/str.dart';
 
 part 'parsers/document.dart';

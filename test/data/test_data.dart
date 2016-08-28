@@ -12,6 +12,10 @@ final Map<String, String> specification = _$specificationTests;
 @EmbedTests('smart_punct.txt')
 final Map<String, String> smartPunctuation = _$smartPunctuationTests;
 
+/// commonmark.js regression tests
+@EmbedTests('regression.txt')
+final Map<String, String> regression = _$regressionTests;
+
 /// Additional md->md tests
 @EmbedTests('markdownToMarkdown.txt')
 final Map<String, String> markdownToMarkdown = _$markdownToMarkdownTests;

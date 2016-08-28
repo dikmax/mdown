@@ -14,7 +14,8 @@ class StrParser extends AbstractParser<Inlines> {
     _BACKTICK_CODE_UNIT,
     _SPACE_CODE_UNIT,
     _TAB_CODE_UNIT,
-    _NBSP_CODE_UNIT
+    _NBSP_CODE_UNIT,
+    _DOT_CODE_UNIT
   ]);
 
   StrParser(ParsersContainer container) : super(container) {}

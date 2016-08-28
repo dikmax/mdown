@@ -63,6 +63,7 @@ const int _CLOSE_PAREN_CODE_UNIT = 41;
 const int _STAR_CODE_UNIT = 42;
 const int _PLUS_CODE_UNIT = 43;
 const int _MINUS_CODE_UNIT = 45;
+const int _DOT_CODE_UNIT = 46;
 const int _ZERO_CODE_UNIT = 48;
 const int _NINE_CODE_UNIT = 57;
 const int _LESS_THAN_CODE_UNIT = 60;

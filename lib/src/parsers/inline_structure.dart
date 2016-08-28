@@ -40,22 +40,41 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   void init() {
     _inlineParsers = new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
 
-    _inlineParsers[_SPACE_CODE_UNIT] = [container.hardLineBreakParser];
+    _inlineParsers[_SPACE_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.hardLineBreakParser
+    ];
 
-    _inlineParsers[_TAB_CODE_UNIT] = [container.hardLineBreakParser];
+    _inlineParsers[_TAB_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.hardLineBreakParser
+    ];
 
-    _inlineParsers[_SLASH_CODE_UNIT] = [container.escapesParser];
+    _inlineParsers[_SLASH_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.escapesParser
+    ];
 
-    _inlineParsers[_AMPERSAND_CODE_UNIT] = [container.entityParser];
+    _inlineParsers[_AMPERSAND_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.entityParser
+    ];
 
-    _inlineParsers[_BACKTICK_CODE_UNIT] = [container.inlineCodeParser];
+    _inlineParsers[_BACKTICK_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.inlineCodeParser
+    ];
 
-    _inlineParsers[_OPEN_BRACKET_CODE_UNIT] = [container.linkImageParser];
+    _inlineParsers[_OPEN_BRACKET_CODE_UNIT] =
+        <AbstractParser<Iterable<Inline>>>[container.linkImageParser];
 
-    _inlineParsers[_LESS_THAN_CODE_UNIT] = [container.autolinkParser];
+    _inlineParsers[_LESS_THAN_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      container.autolinkParser
+    ];
 
     if (container.options.rawHtml) {
       _inlineParsers[_LESS_THAN_CODE_UNIT].add(container.inlineHtmlParser);
+    }
+
+    if (container.options.smartPunctuation) {
+      _inlineParsers[_DOT_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+        container.ellipsisParser
+      ];
     }
   }
 

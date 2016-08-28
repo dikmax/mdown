@@ -21,11 +21,19 @@ void main() {
   tests("Additional [strict]", additionalMarkdownToHtml,
       mdToHtml2Test(Options.strict));
 
-  return;
+  // commonmark.js regression tests
+  tests("Regressions [strict]", regression,
+      mdToHtmlTest(Options.strict));
+  tests("Regressions [strict]", regression,
+      mdToHtml2Test(Options.strict));
+
   // SmartPunct
   tests("SmartPunct [commonmark]", smartPunctuation,
       mdToHtmlTest(Options.commonmark));
+  tests("SmartPunct [commonmark]", smartPunctuation,
+      mdToHtml2Test(Options.commonmark));
 
+  return;
   // Strikeout
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
   tests("Strikeout spec", specification,
