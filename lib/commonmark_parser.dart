@@ -6,41 +6,19 @@ import 'package:md_proc/definitions.dart';
 import 'package:md_proc/src/parsers.dart';
 import 'package:md_proc/src/parse_result.dart';
 
+/// Main parser class.
 class CommonMarkParser {
   Options _options;
 
-  // Map<String, Target> _references;
-
-  Set<String> _inlineDelimiters;
-  Set<String> _strSpecialChars;
-  Set<String> _intrawordDelimiters;
-
+  /// DI container + options.
   ParsersContainer container;
 
   /// Constructor
   CommonMarkParser(this._options) {
     container = new ParsersContainer(_options);
-
-    _inlineDelimiters = new Set<String>.from(["_", "*"]);
-    _strSpecialChars = new Set<String>.from(
-        [" ", "*", "_", "`", "!", "[", "]", "&", "<", "\\"]);
-    _intrawordDelimiters = new Set<String>.from(["*"]);
-    if (_options.smartPunctuation) {
-      _inlineDelimiters.addAll(["'", "\""]);
-      _strSpecialChars.addAll(["'", "\"", ".", "-"]);
-    }
-    if (_options.strikeout || _options.subscript) {
-      _inlineDelimiters.add("~");
-      _strSpecialChars.add("~");
-      _intrawordDelimiters.add("~");
-    }
-    if (_options.superscript) {
-      _inlineDelimiters.add('^');
-      _strSpecialChars.add('^');
-      _intrawordDelimiters.add('^');
-    }
   }
 
+  /// Parses [markdown] and returns [Document].
   Document parse(String markdown) {
     container.references = new HashMap<String, Target>();
     final ParseResult<Document> result =
@@ -50,6 +28,7 @@ class CommonMarkParser {
     return result.value;
   }
 
+  /// Parses string as inlines.
   Iterable<Inline> parseInlines(String inlinesString,
       [Map<String, Target> references]) {
     container.references =

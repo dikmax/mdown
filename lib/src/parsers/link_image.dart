@@ -1,7 +1,8 @@
 part of md_proc.src.parsers;
 
+/// Parser for links and images.
 class LinkImageParser extends AbstractParser<Inlines> {
-  static final _LINK_REGEXP = new RegExp(
+  static final RegExp _linkRegExp = new RegExp(
       // Space after opening paren (optional)
       r'(?:[ \t\r\n]*)'
       // Link in <>
@@ -19,10 +20,11 @@ class LinkImageParser extends AbstractParser<Inlines> {
       // Closing paren
       r'\)');
 
-  static final _REFERENCE_REGEXP = new RegExp(r'\[((?:[^\]]|\\\])+)\]');
+  static final RegExp _referenceRegExp = new RegExp(r'\[((?:[^\]]|\\\])+)\]');
 
   Map<int, List<AbstractParser<Iterable<Inline>>>> _higherPriorityInlineParsers;
 
+  /// Constructor.
   LinkImageParser(ParsersContainer container) : super(container);
 
   @override
@@ -30,28 +32,29 @@ class LinkImageParser extends AbstractParser<Inlines> {
     _higherPriorityInlineParsers =
         new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
 
-    _higherPriorityInlineParsers[_BACKTICK_CODE_UNIT] = [
-      container.inlineCodeParser
-    ];
+    _higherPriorityInlineParsers[_backtickCodeUnit] =
+        <AbstractParser<Iterable<Inline>>>[container.inlineCodeParser];
 
-    _higherPriorityInlineParsers[_LESS_THAN_CODE_UNIT] = [
+    _higherPriorityInlineParsers[_lessThanCodeUnit] =
+        <AbstractParser<Iterable<Inline>>>[
       container.inlineHtmlParser,
       container.autolinkParser
     ];
   }
 
   // TODO reorder parse to put all fallbacks in the end.
+  @override
   ParseResult<Inlines> parse(String text, int offset) {
     int length = text.length;
     bool isImage = false;
-    if (text.codeUnitAt(offset) == _EXCLAMATION_MARK_CODE_UNIT) {
+    if (text.codeUnitAt(offset) == _exclamationMarkCodeUnit) {
       offset++;
       if (offset == length) {
         return new ParseResult<Inlines>.failure();
       }
       isImage = true;
     }
-    if (text.codeUnitAt(offset) != _OPEN_BRACKET_CODE_UNIT) {
+    if (text.codeUnitAt(offset) != _openBracketCodeUnit) {
       return new ParseResult<Inlines>.failure();
     }
     offset++;
@@ -61,11 +64,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
     int startOffset = offset;
     int endOffset = -1;
-    // Inlines labelInlines = new Inlines();
     int brackets = 1;
     while (offset < length) {
       int codeUnit = text.codeUnitAt(offset);
-      if (codeUnit == _CLOSE_BRACKET_CODE_UNIT) {
+      if (codeUnit == _closeBracketCodeUnit) {
         brackets--;
         if (brackets == 0) {
           endOffset = offset;
@@ -75,7 +77,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
         offset++;
         continue;
       }
-      if (codeUnit == _SLASH_CODE_UNIT) {
+      if (codeUnit == _slashCodeUnit) {
         // Escaped char
         offset += 2;
         if (offset > length) {
@@ -84,7 +86,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
         }
         continue;
       }
-      if (codeUnit == _OPEN_BRACKET_CODE_UNIT) {
+      if (codeUnit == _openBracketCodeUnit) {
         brackets++;
         offset++;
         continue;
@@ -115,7 +117,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
     }
 
     if (endOffset == -1) {
-      return new ParseResult.success(
+      return new ParseResult<Inlines>.success(
           new Inlines.single(new Str(isImage ? '![' : '[')), startOffset);
     }
 
@@ -126,8 +128,8 @@ class LinkImageParser extends AbstractParser<Inlines> {
       if (offset != length) {
         // Test link in parens.
         int codeUnit = text.codeUnitAt(offset);
-        if (codeUnit == _OPEN_PAREN_CODE_UNIT) {
-          Match match = _LINK_REGEXP.matchAsPrefix(text, offset + 1);
+        if (codeUnit == _openParenCodeUnit) {
+          Match match = _linkRegExp.matchAsPrefix(text, offset + 1);
           if (match != null) {
             // Normal link. It also can be dropped,
             // if contains links inside label.
@@ -151,14 +153,14 @@ class LinkImageParser extends AbstractParser<Inlines> {
           }
         }
 
-        if (codeUnit == _OPEN_BRACKET_CODE_UNIT) {
+        if (codeUnit == _openBracketCodeUnit) {
           if (offset + 1 < length &&
-              text.codeUnitAt(offset + 1) == _CLOSE_BRACKET_CODE_UNIT) {
+              text.codeUnitAt(offset + 1) == _closeBracketCodeUnit) {
             String reference = _LinkReference
                 .normalize(text.substring(startOffset, endOffset));
 
             if (container.references.containsKey(reference)) {
-              var result = isImage
+              Inline result = isImage
                   ? new ReferenceImage(
                       reference, labelInlines, container.references[reference])
                   : new ReferenceLink(
@@ -173,7 +175,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
           }
 
           // Full reference parsing
-          Match referenceMatch = _REFERENCE_REGEXP.matchAsPrefix(text, offset);
+          Match referenceMatch = _referenceRegExp.matchAsPrefix(text, offset);
           if (referenceMatch != null) {
             String reference = _LinkReference.normalize(referenceMatch[1]);
             if (container.references.containsKey(reference)) {

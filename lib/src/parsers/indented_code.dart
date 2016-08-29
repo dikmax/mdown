@@ -1,15 +1,17 @@
 part of md_proc.src.parsers;
 
+/// Parser for indented code blocks.
 class IndentedCodeParser extends AbstractParser<Iterable<Block>> {
-  static final RegExp _CODE_LINE = new RegExp('^(?: {0,3}\t|    )(.*)\$');
+  static final RegExp _codeLineRegExp = new RegExp('^(?: {0,3}\t|    )(.*)\$');
 
+  /// Constructor.
   IndentedCodeParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
     // Simple test, that we have indent
     int codeUnit = text.codeUnitAt(offset);
-    if (codeUnit != _SPACE_CODE_UNIT && codeUnit != _TAB_CODE_UNIT) {
+    if (codeUnit != _spaceCodeUnit && codeUnit != _tabCodeUnit) {
       return const ParseResult<Iterable<Block>>.failure();
     }
 
@@ -24,20 +26,20 @@ class IndentedCodeParser extends AbstractParser<Iterable<Block>> {
       assert(lineResult.isSuccess);
 
       String line = lineResult.value;
-      Match emptyLine = EMPTY_LINE.firstMatch(line);
+      Match emptyLine = _emptyLineRegExp.firstMatch(line);
       if (emptyLine != null) {
         if (firstLine) {
           break;
         }
 
-        Match codeLine = _CODE_LINE.firstMatch(line);
+        Match codeLine = _codeLineRegExp.firstMatch(line);
         if (codeLine != null) {
           rest.writeln(codeLine[1]);
         } else {
           rest.writeln();
         }
       } else {
-        Match codeLine = _CODE_LINE.firstMatch(line);
+        Match codeLine = _codeLineRegExp.firstMatch(line);
         if (codeLine == null) {
           break;
         }

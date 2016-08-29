@@ -64,7 +64,7 @@ void main() {
 
   // TeX Math between backslashed `()` or `[]`
   Set<int> texMathSingleBackslashContradictions =
-      new Set<int>.from([282, 475, 491]);
+      new Set<int>.from(<int>[282, 475, 491]);
   tests("TeX math single backslash", texMathSingleBackslash,
       mdToHtmlTest(new Options(texMathSingleBackslash: true)));
   tests(
@@ -74,7 +74,7 @@ void main() {
           (_, int num) => !texMathSingleBackslashContradictions.contains(num)));
 
   // TeX Math between double backslashed `()` or `[]`
-  Set<int> texMathDoubleBackslashContradictions = new Set<int>.from([]);
+  Set<int> texMathDoubleBackslashContradictions = new Set<int>.from(<int>[]);
   tests("TeX math double backslash", texMathDoubleBackslash,
       mdToHtmlTest(new Options(texMathDoubleBackslash: true)));
   tests(
@@ -84,7 +84,7 @@ void main() {
           (_, int num) => !texMathDoubleBackslashContradictions.contains(num)));
 
   // Raw TeX
-  Set<int> rawTexContradictions = new Set<int>.from([]);
+  Set<int> rawTexContradictions = new Set<int>.from(<int>[]);
   tests("Raw TeX", rawTex, mdToHtmlTest(new Options(rawTex: true)));
   tests(
       "Raw TeX spec",

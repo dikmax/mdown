@@ -1,13 +1,15 @@
 part of md_proc.src.parsers;
 
+/// Parser for ATX-headings.
 class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
+  /// Constructor.
   AtxHeadingParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
     // TODO remove fast check.
     // They a performed by caller
-    if (!fastBlockTest(text, offset, _SHARP_CODE_UNIT)) {
+    if (!fastBlockTest(text, offset, _sharpCodeUnit)) {
       return new ParseResult<Iterable<Block>>.failure();
     }
 
@@ -16,7 +18,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
     assert(lineResult.isSuccess);
 
     String line = lineResult.value;
-    Match match = _ATX_HEADING_TEST.firstMatch(line);
+    Match match = _atxHeadingText.firstMatch(line);
     if (match == null) {
       return const ParseResult<Iterable<Block>>.failure();
     }
@@ -31,7 +33,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
           result, lineResult.offset);
     }
 
-    int state = line.codeUnitAt(match.end) == _SHARP_CODE_UNIT ? 2 : 0;
+    int state = line.codeUnitAt(match.end) == _sharpCodeUnit ? 2 : 0;
     List<int> rest = <int>[];
     List<int> result = <int>[];
     for (int i = match.end; i < line.length; ++i) {
@@ -41,28 +43,28 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
       // TODO use constants for states
       switch (state) {
         case 0:
-          if (code == _SPACE_CODE_UNIT || code == _TAB_CODE_UNIT) {
+          if (code == _spaceCodeUnit || code == _tabCodeUnit) {
             state = 1;
           }
           result.add(code);
           break;
 
         case 1:
-          if (code == _SHARP_CODE_UNIT) {
+          if (code == _sharpCodeUnit) {
             state = 2;
             rest.add(code);
           } else {
             result.add(code);
-            if (code != _SPACE_CODE_UNIT && code != _TAB_CODE_UNIT) {
+            if (code != _spaceCodeUnit && code != _tabCodeUnit) {
               state = 0;
             }
           }
           break;
 
         case 2:
-          if (code == _SHARP_CODE_UNIT) {
+          if (code == _sharpCodeUnit) {
             rest.add(code);
-          } else if (code == _SPACE_CODE_UNIT || code == _TAB_CODE_UNIT) {
+          } else if (code == _spaceCodeUnit || code == _tabCodeUnit) {
             state = 3;
             rest.add(code);
           } else {
@@ -73,9 +75,9 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
           break;
 
         case 3:
-          if (code == _SPACE_CODE_UNIT || code == _TAB_CODE_UNIT) {
+          if (code == _spaceCodeUnit || code == _tabCodeUnit) {
             rest.add(code);
-          } else if (code == _SHARP_CODE_UNIT) {
+          } else if (code == _sharpCodeUnit) {
             result.addAll(rest);
             rest = <int>[code];
             state = 2;

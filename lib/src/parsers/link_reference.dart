@@ -12,36 +12,38 @@ class _LinkReference extends Block {
   static String normalize(String s) => _trimAndReplaceSpaces(s).toUpperCase();
 }
 
+/// Parser for link reference blocks.
 class LinkReferenceParser extends AbstractParser<_LinkReference> {
+  /// Constructor.
   LinkReferenceParser(ParsersContainer container) : super(container);
 
   /// Regexp to check that we don't have empty line.
-  static const String _NOT_EMPTY_LINE =
+  static const String _notEmptyLineRegExp =
       r'(?:\r\n|\n|\r)(?![ \t]*(?:\r\n|\n|\r))';
 
-  static final RegExp _LINK_REFERENCE = new RegExp(
+  static final RegExp _linkRefereceRegExp = new RegExp(
       // Label
       r' {0,3}\[((?:[^\[\]\r\n]|\\\]|\\\[|' +
-          _NOT_EMPTY_LINE +
+          _notEmptyLineRegExp +
           r')+)\]:' +
           // Space after label
           r'(?:[ \t]|' +
-          _NOT_EMPTY_LINE +
+          _notEmptyLineRegExp +
           r')*' +
           // Link
           r'([^ \t\r\n]*)' +
           // Space after and title (optional)
           r'(?:(?:[ \t]|' +
-          _NOT_EMPTY_LINE +
+          _notEmptyLineRegExp +
           r')+(' +
           r'"(?:[^"\r\n]|\\"|' +
-          _NOT_EMPTY_LINE +
+          _notEmptyLineRegExp +
           r')*"|' +
           r"'(?:[^'\r\n]|\\'|" +
-          _NOT_EMPTY_LINE +
+          _notEmptyLineRegExp +
           r")*'|" +
           r'\((?:[^)\r\n]|\\\)|' +
-          _NOT_EMPTY_LINE +
+          _notEmptyLineRegExp +
           r')*\)' +
           r'))?' +
           // End line whitespace and end (required).
@@ -50,11 +52,11 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
   @override
   ParseResult<_LinkReference> parse(String text, int offset) {
     // DO not run heavy matching regexp every time.
-    if (!fastBlockTest(text, offset, _OPEN_BRACKET_CODE_UNIT)) {
+    if (!fastBlockTest(text, offset, _openBracketCodeUnit)) {
       return new ParseResult<_LinkReference>.failure();
     }
 
-    Match match = _LINK_REFERENCE.matchAsPrefix(text, offset);
+    Match match = _linkRefereceRegExp.matchAsPrefix(text, offset);
 
     if (match == null) {
       return new ParseResult<_LinkReference>.failure();

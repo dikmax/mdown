@@ -1,14 +1,16 @@
 part of md_proc.src.parsers;
 
+/// Parser for html blocks using rule 7.
 class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
+  /// Constructor.
   HtmlBlock7Parser(ParsersContainer container) : super(container);
 
   RegExp _startRegExp =
-      new RegExp(r'^ {0,3}(?:' + HTML_OPENTAG + '|' + HTML_CLOSETAG + r')\s*$');
+      new RegExp(r'^ {0,3}(?:' + _htmlOpenTag + '|' + _htmlCloseTag + r')\s*$');
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockTest(text, offset, _LESS_THAN_CODE_UNIT)) {
+    if (!fastBlockTest(text, offset, _lessThanCodeUnit)) {
       return new ParseResult<Iterable<Block>>.failure();
     }
 
@@ -25,7 +27,7 @@ class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (EMPTY_LINE.hasMatch(lineRes.value)) {
+        if (_emptyLineRegExp.hasMatch(lineRes.value)) {
           break;
         }
       }

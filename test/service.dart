@@ -42,15 +42,15 @@ void serviceTests() {
   t.group('Definitions', () {
     // Document
     t.group('Document', () {
-      Document doc = new Document([new ThematicBreak()]);
+      Document doc = new Document(<Block>[new ThematicBreak()]);
       t.test('toString', () {
         t.expect(doc.toString(), t.equals('Document [ThematicBreak]'));
       });
       t.test('==', () {
-        t.expect(doc, t.equals(new Document([new ThematicBreak()])));
+        t.expect(doc, t.equals(new Document(<Block>[new ThematicBreak()])));
       });
       t.test('!=', () {
-        t.expect(doc, t.isNot(t.equals(new Document([]))));
+        t.expect(doc, t.isNot(t.equals(new Document(<Block>[]))));
       });
     });
 
@@ -64,7 +64,7 @@ void serviceTests() {
         t.expect(attr, t.equals(new EmptyAttr()));
       });
       t.test('!=', () {
-        t.expect(attr, t.isNot(t.equals(new Document([]))));
+        t.expect(attr, t.isNot(t.equals(new Document(<Block>[]))));
       });
     });
 
@@ -266,29 +266,30 @@ void serviceTests() {
     });
 
     t.group('Blockquote', () {
-      Blockquote blockquote = new Blockquote([new ThematicBreak()]);
+      Blockquote blockquote = new Blockquote(<Block>[new ThematicBreak()]);
       t.test('toString', () {
         t.expect(blockquote.toString(), t.equals('Blockquote [ThematicBreak]'));
       });
       t.test('==', () {
-        t.expect(blockquote, t.equals(new Blockquote([new ThematicBreak()])));
+        t.expect(blockquote, t.equals(new Blockquote(
+            <Block>[new ThematicBreak()])));
       });
       t.test('!=', () {
-        t.expect(blockquote, t.isNot(t.equals(new Blockquote([]))));
+        t.expect(blockquote, t.isNot(t.equals(new Blockquote(<Block>[]))));
         t.expect(blockquote, t.isNot(t.equals(3)));
       });
     });
 
     t.group('ListItem', () {
-      ListItem listItem = new ListItem([new ThematicBreak()]);
+      ListItem listItem = new ListItem(<Block>[new ThematicBreak()]);
       t.test('toString', () {
         t.expect(listItem.toString(), t.equals('ListItem [ThematicBreak]'));
       });
       t.test('==', () {
-        t.expect(listItem, t.equals(new ListItem([new ThematicBreak()])));
+        t.expect(listItem, t.equals(new ListItem(<Block>[new ThematicBreak()])));
       });
       t.test('!=', () {
-        t.expect(listItem, t.isNot(t.equals(new ListItem([]))));
+        t.expect(listItem, t.isNot(t.equals(new ListItem(<Block>[]))));
         t.expect(listItem, t.isNot(t.equals('ListItem [ThematicBreak]')));
       });
     });
@@ -338,8 +339,8 @@ void serviceTests() {
     });
 
     t.group('UnorderedList', () {
-      UnorderedList list = new UnorderedList([
-        new ListItem([new ThematicBreak()])
+      UnorderedList list = new UnorderedList(<ListItem>[
+        new ListItem(<Block>[new ThematicBreak()])
       ]);
       t.test('toString', () {
         t.expect(list.toString(),
@@ -348,33 +349,33 @@ void serviceTests() {
       t.test('==', () {
         t.expect(
             list,
-            t.equals(new UnorderedList([
-              new ListItem([new ThematicBreak()])
+            t.equals(new UnorderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ], tight: false, bulletType: BulletType.minus)));
       });
       t.test('!=', () {
-        t.expect(list, t.isNot(new UnorderedList([])));
+        t.expect(list, t.isNot(new UnorderedList(<ListItem>[])));
         t.expect(
             list,
-            t.isNot(new UnorderedList([
-              new ListItem([new ThematicBreak()])
+            t.isNot(new UnorderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ], tight: true)));
         t.expect(
             list,
-            t.isNot(new UnorderedList([
-              new ListItem([new ThematicBreak()])
+            t.isNot(new UnorderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ], bulletType: BulletType.plus)));
         t.expect(
             list,
-            t.isNot(new OrderedList([
-              new ListItem([new ThematicBreak()])
+            t.isNot(new OrderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ])));
       });
     });
 
     t.group('OrderedList', () {
-      OrderedList list = new OrderedList([
-        new ListItem([new ThematicBreak()])
+      OrderedList list = new OrderedList(<ListItem>[
+        new ListItem(<Block>[new ThematicBreak()])
       ]);
       t.test('toString', () {
         t.expect(list.toString(),
@@ -383,34 +384,34 @@ void serviceTests() {
       t.test('==', () {
         t.expect(
             list,
-            t.equals(new OrderedList([
-              new ListItem([new ThematicBreak()])
+            t.equals(new OrderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ],
                 tight: false,
                 indexSeparator: IndexSeparator.dot,
                 startIndex: 1)));
       });
       t.test('!=', () {
-        t.expect(list, t.isNot(new OrderedList([])));
+        t.expect(list, t.isNot(new OrderedList(<ListItem>[])));
         t.expect(
             list,
-            t.isNot(new OrderedList([
-              new ListItem([new ThematicBreak()])
+            t.isNot(new OrderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ], tight: true)));
         t.expect(
             list,
-            t.isNot(new OrderedList([
-              new ListItem([new ThematicBreak()])
+            t.isNot(new OrderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ], indexSeparator: IndexSeparator.parenthesis)));
         t.expect(
             list,
-            t.isNot(new OrderedList([
-              new ListItem([new ThematicBreak()])
+            t.isNot(new OrderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ], startIndex: 0)));
         t.expect(
             list,
-            t.isNot(new UnorderedList([
-              new ListItem([new ThematicBreak()])
+            t.isNot(new UnorderedList(<ListItem>[
+              new ListItem(<Block>[new ThematicBreak()])
             ])));
       });
     });

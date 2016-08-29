@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:md_proc/md_proc.dart';
@@ -6,7 +7,7 @@ import 'package:markdown/markdown.dart' as markdown;
 
 class MapEmitter implements ScoreEmitter {
   String name;
-  Map<String, double> scores = <String, double>{};
+  Map<String, double> scores = new HashMap<String, double>();
 
   MapEmitter(this.name);
 
@@ -28,6 +29,7 @@ class MapEmitter implements ScoreEmitter {
 class MdProcBenchmark extends BenchmarkBase {
   String data;
 
+  /// Constructor.
   MdProcBenchmark(String name, this.data, ScoreEmitter emitter)
       : super(name, emitter: emitter);
 
@@ -36,6 +38,7 @@ class MdProcBenchmark extends BenchmarkBase {
   }
 
   // The benchmark code.
+  @override
   void run() {
     markdownToHtml(data);
   }
@@ -44,6 +47,7 @@ class MdProcBenchmark extends BenchmarkBase {
 class MarkdownBenchmark extends BenchmarkBase {
   String data;
 
+  /// Constructor.
   MarkdownBenchmark(String name, this.data, ScoreEmitter emitter)
       : super(name, emitter: emitter);
 
@@ -52,6 +56,7 @@ class MarkdownBenchmark extends BenchmarkBase {
   }
 
   // The benchmark code.
+  @override
   void run() {
     markdown.markdownToHtml(data,
         extensionSet: markdown.ExtensionSet.commonMark);
@@ -60,7 +65,7 @@ class MarkdownBenchmark extends BenchmarkBase {
 
 // TODO fix block-ref-flat inline-links-flat performance
 
-main() async {
+Future<dynamic> main() async {
   Directory dir = new Directory('benchmark/texts');
 
   MapEmitter mdProcResults = new MapEmitter("md_proc");

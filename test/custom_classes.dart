@@ -11,6 +11,6 @@ void customClassesTests() {
       texMathCustomClasses,
       mdToHtmlTest(new Options(
           texMathDollars: true,
-          inlineTexMathClasses: ['custom_inline'],
-          displayTexMathClasses: ['custom_display'])));
+          inlineTexMathClasses: <String>['custom_inline'],
+          displayTexMathClasses: <String>['custom_display'])));
 }

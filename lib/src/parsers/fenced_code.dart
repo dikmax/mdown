@@ -1,18 +1,20 @@
 part of md_proc.src.parsers;
 
+/// Parser for fenced code blocks.
 class FencedCodeParser extends AbstractParser<Iterable<Block>> {
+  /// Constructor.
   FencedCodeParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockTest2(text, offset, _BACKTICK_CODE_UNIT, _TILDE_CODE_UNIT)) {
+    if (!fastBlockTest2(text, offset, _backtickCodeUnit, _tildeCodeUnit)) {
       return new ParseResult<Iterable<Block>>.failure();
     }
 
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    Match startRes = _FENCED_CODE_START_TEST.firstMatch(lineResult.value);
+    Match startRes = _fencedCodeStartTest.firstMatch(lineResult.value);
     if (startRes == null) {
       return const ParseResult<Iterable<FencedCodeBlock>>.failure();
     }
@@ -49,7 +51,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
 
     Attr attributes;
     if (infoString != '') {
-      Match space = WHITESPACE_CHAR.firstMatch(infoString);
+      Match space = _whitespaceCharRegExp.firstMatch(infoString);
       if (space != null) {
         infoString = infoString.substring(0, space.start);
       }

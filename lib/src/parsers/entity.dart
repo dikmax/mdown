@@ -1,11 +1,13 @@
 part of md_proc.src.parsers;
 
+/// Parser for entities.
 class EntityParser extends AbstractParser<Inlines> {
+  /// Constructor.
   EntityParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    Match match = _ENTITY_REGEXP.matchAsPrefix(text, offset);
+    Match match = _entityRegExp.matchAsPrefix(text, offset);
     if (match != null) {
       if (match[3] != null) {
         String code = match[3];
@@ -30,7 +32,7 @@ class EntityParser extends AbstractParser<Inlines> {
           code = 0xFFFD;
         }
 
-        if (code == _NBSP_CODE_UNIT) {
+        if (code == _nonBreakableSpaceCodeUnit) {
           return new ParseResult<Inlines>.success(
               new Inlines.single(new NonBreakableSpace()), match.end);
         }

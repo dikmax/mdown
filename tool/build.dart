@@ -8,9 +8,9 @@ import 'package:md_proc/generators/entities_generator.dart';
 
 final PhaseGroup _phases = new PhaseGroup.singleAction(
     new GeneratorBuilder(
-        const [const EmbedTestsGenerator(), const EntitiesGenerator()]),
+        const <Generator>[const EmbedTestsGenerator(), const EntitiesGenerator()]),
     new InputSet(
-        'md_proc', const ['lib/entities.dart', 'test/data/test_data.dart']));
+        'md_proc', const <String>['lib/entities.dart', 'test/data/test_data.dart']));
 
 /// Main method for generated code builder.
 Future<dynamic> main(List<String> args) async {

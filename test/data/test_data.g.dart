@@ -7,7 +7,7 @@ part of md_proc.test.data.test_data;
 // Target: final Map<String, String> specification
 // **************************************************************************
 
-final Map<String, String> _$specificationTests = {
+final Map<String, String> _$specificationTests = <String, String>{
   r'''→foo→baz→→bim
 ''': r'''<pre><code>foo→baz→→bim
 </code></pre>
@@ -3735,7 +3735,7 @@ baz</p>
 // Target: final Map<String, String> smartPunctuation
 // **************************************************************************
 
-final Map<String, String> _$smartPunctuationTests = {
+final Map<String, String> _$smartPunctuationTests = <String, String>{
   r'''"Hello," said the spider.
 "'Shelob' is my name."
 ''': r'''<p>“Hello,” said the spider.
@@ -3825,7 +3825,7 @@ thirteen———––.</p>
 // Target: final Map<String, String> regression
 // **************************************************************************
 
-final Map<String, String> _$regressionTests = {
+final Map<String, String> _$regressionTests = <String, String>{
   r'''* foo
 →bar
 ''': r'''<ul>
@@ -3845,7 +3845,7 @@ x
 // Target: final Map<String, String> markdownToMarkdown
 // **************************************************************************
 
-final Map<String, String> _$markdownToMarkdownTests = {
+final Map<String, String> _$markdownToMarkdownTests = <String, String>{
   r'''Test!
 ''': r'''Test!
 ''',
@@ -4038,7 +4038,7 @@ Not a code
 // Target: final Map<String, String> additionalMarkdownToHtml
 // **************************************************************************
 
-final Map<String, String> _$additionalMarkdownToHtmlTests = {
+final Map<String, String> _$additionalMarkdownToHtmlTests = <String, String>{
   r'''Simple test
 ''': r'''<p>Simple test</p>
 ''',
@@ -4332,7 +4332,7 @@ bar
 // Target: final Map<String, String> strikeout
 // **************************************************************************
 
-final Map<String, String> _$strikeoutTests = {
+final Map<String, String> _$strikeoutTests = <String, String>{
   r'''~~Strikeout text~~
 ''': r'''<p><del>Strikeout text</del></p>
 ''',
@@ -4361,7 +4361,7 @@ final Map<String, String> _$strikeoutTests = {
 // Target: final Map<String, String> strikeoutAndSubscript
 // **************************************************************************
 
-final Map<String, String> _$strikeoutAndSubscriptTests = {
+final Map<String, String> _$strikeoutAndSubscriptTests = <String, String>{
   r'''~~Strikeout text~~
 ''': r'''<p><del>Strikeout text</del></p>
 ''',
@@ -4405,7 +4405,7 @@ final Map<String, String> _$strikeoutAndSubscriptTests = {
 // Target: final Map<String, String> subscript
 // **************************************************************************
 
-final Map<String, String> _$subscriptTests = {
+final Map<String, String> _$subscriptTests = <String, String>{
   r'''H~2~O
 ''': r'''<p>H<sub>2</sub>O</p>
 ''',
@@ -4428,7 +4428,7 @@ final Map<String, String> _$subscriptTests = {
 // Target: final Map<String, String> superscript
 // **************************************************************************
 
-final Map<String, String> _$superscriptTests = {
+final Map<String, String> _$superscriptTests = <String, String>{
   r'''2^2^=4
 ''': r'''<p>2<sup>2</sup>=4</p>
 ''',
@@ -4451,7 +4451,7 @@ final Map<String, String> _$superscriptTests = {
 // Target: final Map<String, String> texMathDollars
 // **************************************************************************
 
-final Map<String, String> _$texMathDollarsTests = {
+final Map<String, String> _$texMathDollarsTests = <String, String>{
   r'''$a+b=c$
 ''': r'''<p><span class="math inline">\(a+b=c\)</span></p>
 ''',
@@ -4483,7 +4483,7 @@ final Map<String, String> _$texMathDollarsTests = {
 // Target: final Map<String, String> texMathSingleBackslash
 // **************************************************************************
 
-final Map<String, String> _$texMathSingleBackslashTests = {
+final Map<String, String> _$texMathSingleBackslashTests = <String, String>{
   r'''$a+b=c$
 ''': r'''<p>$a+b=c$</p>
 ''',
@@ -4508,7 +4508,7 @@ c\)</span></p>
 // Target: final Map<String, String> texMathDoubleBackslash
 // **************************************************************************
 
-final Map<String, String> _$texMathDoubleBackslashTests = {
+final Map<String, String> _$texMathDoubleBackslashTests = <String, String>{
   r'''$a+b=c$
 ''': r'''<p>$a+b=c$</p>
 ''',
@@ -4536,7 +4536,7 @@ c\)</span></p>
 // Target: final Map<String, String> texMathCustomClasses
 // **************************************************************************
 
-final Map<String, String> _$texMathCustomClassesTests = {
+final Map<String, String> _$texMathCustomClassesTests = <String, String>{
   r'''$a+b=c$
 ''': r'''<p><span class="custom_inline">\(a+b=c\)</span></p>
 ''',
@@ -4550,7 +4550,7 @@ final Map<String, String> _$texMathCustomClassesTests = {
 // Target: final Map<String, String> rawTex
 // **************************************************************************
 
-final Map<String, String> _$rawTexTests = {
+final Map<String, String> _$rawTexTests = <String, String>{
   r'''This is the identity matrix:
 
 \begin{pmatrix}

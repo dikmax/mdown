@@ -1,13 +1,15 @@
 part of md_proc.src.parsers;
 
+/// Parser for mdashes and ndashes.
 class MNDashParser extends AbstractParser<Inlines> {
+  /// Constructor.
   MNDashParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
     int length = text.length;
     int count = 0;
-    while(offset < length && text.codeUnitAt(offset) == _MINUS_CODE_UNIT) {
+    while(offset < length && text.codeUnitAt(offset) == _minusCodeUnit) {
       count++;
       offset++;
     }

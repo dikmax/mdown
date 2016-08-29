@@ -1,8 +1,10 @@
 part of md_proc.src.parsers;
 
-final RegExp LINE_REGEXP = new RegExp('(.*)(?:\r\n|\n|\r)');
+final RegExp _lineRegExp = new RegExp('(.*)(?:\r\n|\n|\r)');
 
+/// Parser for any line.
 class LineParser extends AbstractParser<String> {
+  /// Constructor.
   LineParser(ParsersContainer container) : super(container);
 
   @override
@@ -12,7 +14,7 @@ class LineParser extends AbstractParser<String> {
       return const ParseResult<String>.failure();
     }
 
-    Match match = LINE_REGEXP.matchAsPrefix(text, offset);
+    Match match = _lineRegExp.matchAsPrefix(text, offset);
     String line;
     int newOffset;
     if (match == null) {
@@ -23,6 +25,6 @@ class LineParser extends AbstractParser<String> {
       line = match[1];
     }
 
-    return new ParseResult.success(line, newOffset);
+    return new ParseResult<String>.success(line, newOffset);
   }
 }

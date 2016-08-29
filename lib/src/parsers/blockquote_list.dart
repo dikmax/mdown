@@ -28,7 +28,8 @@ class _StackItem {
     bool endsWithBlankline = blocks.last == null;
 
     while (blocks.length > 0 && blocks.last == null) {
-      (blocks as List<Block>).removeLast();
+      List<Block> b = blocks;
+      b.removeLast();
     }
 
     if (!marker.isBlockquote && blocks.length > 0 && block is ListBlock) {
@@ -84,9 +85,9 @@ class _StackItem {
     parse();
     Block last = block.last;
     if (last != null && last is Para) {
-      if (_THEMATIC_BREAK_TEST.hasMatch(line) ||
-          _ATX_HEADING_TEST.hasMatch(line) ||
-          _FENCED_CODE_START_TEST.hasMatch(line)) {
+      if (_thematicBreakTest.hasMatch(line) ||
+          _atxHeadingText.hasMatch(line) ||
+          _fencedCodeStartTest.hasMatch(line)) {
         // TODO add html block and link reference test
         return false;
       }
@@ -107,7 +108,7 @@ class _StackItem {
 }
 
 class _Stack extends ListBase<_StackItem> {
-  final List<_StackItem> _stack = [];
+  final List<_StackItem> _stack = <_StackItem>[];
 
   @override
   int get length => _stack.length;
@@ -212,7 +213,7 @@ class _ExtendedBlockquote extends Blockquote implements _ExtendedBlock {
   _ExtendedBlockquote(Iterable<Block> contents) : super(contents);
 
   @override
-  addToEnd(Iterable<Block> blocks) {
+  void addToEnd(Iterable<Block> blocks) {
     List<Block> c = contents;
 
     c.addAll(blocks);
@@ -244,7 +245,7 @@ class _ExtendedOrderedList extends OrderedList implements _ExtendedBlock {
 
     ListItem item = items.last;
 
-    List<Block> c = item.contents as List<Block>;
+    List<Block> c = item.contents;
     c.addAll(blocks);
   }
 
@@ -285,7 +286,7 @@ class _ExtendedUnorderedList extends UnorderedList implements _ExtendedBlock {
 
     ListItem item = items.last;
 
-    List<Block> c = item.contents as List<Block>;
+    List<Block> c = item.contents;
 
     c.addAll(blocks);
   }
@@ -297,7 +298,7 @@ class _ExtendedUnorderedList extends UnorderedList implements _ExtendedBlock {
       return;
     }
 
-    List<ListItem> items = this.items as List<ListItem>;
+    List<ListItem> items = this.items;
 
     items.add(new ListItem(<Block>[]));
   }
@@ -398,33 +399,33 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
     <
-            int>[_STAR_CODE_UNIT, _MINUS_CODE_UNIT, _UNDERSCORE_CODE_UNIT]
+            int>[_starCodeUnit, _minusCodeUnit, _unredscoreCodeUnit]
         .forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser
       ];
     });
 
-    _blockParsers[_SHARP_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[_sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.atxHeadingParser
     ];
 
     <
-        int>[_SPACE_CODE_UNIT, _TAB_CODE_UNIT].forEach((int char) {
+        int>[_spaceCodeUnit, _tabCodeUnit].forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.indentedCodeParser
       ];
     });
 
     <
-        int>[_TILDE_CODE_UNIT, _BACKTICK_CODE_UNIT].forEach((int char) {
+        int>[_tildeCodeUnit, _backtickCodeUnit].forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.fencedCodeParser
       ];
     });
 
     if (container.options.rawHtml) {
-      _blockParsers[_LESS_THAN_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
         container.htmlBlockParser,
         container.htmlBlock7Parser
       ];
@@ -445,7 +446,7 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
         break;
       }
 
-      if (firstChar == _OPEN_BRACKET_CODE_UNIT) {
+      if (firstChar == _openBracketCodeUnit) {
         // Special treatment for link references.
         // TODO we don't need it
         ParseResult<_LinkReference> res =
@@ -458,10 +459,10 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
           offset = res.offset;
           continue;
         }
-      } else if (firstChar == _SPACE_CODE_UNIT ||
-          firstChar == _TAB_CODE_UNIT ||
-          firstChar == _NEWLINE_CODE_UNIT ||
-          firstChar == _CARRIAGE_RETURN_CODE_UNIT) {
+      } else if (firstChar == _spaceCodeUnit ||
+          firstChar == _tabCodeUnit ||
+          firstChar == _newLineCodeUnit ||
+          firstChar == _carriageReturnCodeUnit) {
         ParseResult<Iterable<Block>> res =
             container.blanklineParser.parse(text, offset);
 
@@ -501,13 +502,15 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
       offset = res.offset;
     }
 
-    return new ParseResult.success(blocks, offset);
+    return new ParseResult<Iterable<Block>>.success(blocks, offset);
   }
 }
 
+/// Parser for blockquotes and lists.
 class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
   _InnerBlocksParser _innerBlocksParser;
 
+  /// Constructor.
   BlockquoteListParser(ParsersContainer container) : super(container) {
     _innerBlocksParser = new _InnerBlocksParser(container);
   }
@@ -542,10 +545,10 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
     while (offset < length) {
       while (offset < length) {
         int codeUnit = line.codeUnitAt(offset);
-        if (codeUnit == _SPACE_CODE_UNIT) {
+        if (codeUnit == _spaceCodeUnit) {
           indent++;
           offset++;
-        } else if (codeUnit == _TAB_CODE_UNIT) {
+        } else if (codeUnit == _tabCodeUnit) {
           indent = ((indent >> 2) + 1) << 2; // (indent / 4 + 1) * 4
           offset++;
         } else {
@@ -575,10 +578,10 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
       indent += markerString.length;
       if (offset < length) {
         int codeUnit = line.codeUnitAt(offset);
-        if (codeUnit == _SPACE_CODE_UNIT || codeUnit == _TAB_CODE_UNIT) {
+        if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
           result.add(_markerFromString(
               markerString, startIndent, indent + 1, offset + 1));
-          if (codeUnit == _SPACE_CODE_UNIT) {
+          if (codeUnit == _spaceCodeUnit) {
             indent++;
             offset++;
           } else {
@@ -603,7 +606,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastListTest(text, offset)) {
+    if (!fastBlockquoteListTest(text, offset)) {
       return const ParseResult<Iterable<Block>>.failure();
     }
 
@@ -718,7 +721,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
               : lineResult.value;
 
           // Checking for thematic break;
-          Match match = _THEMATIC_BREAK_TEST.firstMatch(thematicTest);
+          Match match = _thematicBreakTest.firstMatch(thematicTest);
           if (match != null && match[1].length < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             stack.flush(stackIndex, result);
@@ -768,7 +771,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
         lineRest = markers.length > 0
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
-        isEmpty = EMPTY_LINE.hasMatch(lineRest);
+        isEmpty = _emptyLineRegExp.hasMatch(lineRest);
 
         while (stackIndex < stack.length) {
           _StackItem stackItem = stack[stackIndex];
@@ -828,7 +831,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
           }
 
           // Checking for thematic break;
-          Match match = _THEMATIC_BREAK_TEST.firstMatch(thematicTest);
+          Match match = _thematicBreakTest.firstMatch(thematicTest);
           if (match != null && match[1].length < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             break;
@@ -857,11 +860,11 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
 
         lineRest = lineResult.value.substring(stack.last.marker.offset);
         if (lineResult.value.codeUnitAt(markers.last.offset - 1) ==
-            _TAB_CODE_UNIT) {
+            _tabCodeUnit) {
           lineRest = ' ' * (4 - (markers.last.endIndent - 1) % 4) +
               lineRest; // TODO (4 - (startIndent & 3)) ???
         }
-        isEmpty = EMPTY_LINE.hasMatch(lineRest);
+        isEmpty = _emptyLineRegExp.hasMatch(lineRest);
 
         if (isEmpty) {
           if (stack.length > 0) {
@@ -872,7 +875,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
         lineRest = markers.length > 0
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
-        isEmpty = EMPTY_LINE.hasMatch(lineRest);
+        isEmpty = _emptyLineRegExp.hasMatch(lineRest);
 
         if (isEmpty) {
           if (stack.length > 0) {
@@ -884,7 +887,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
       if (!isEmpty) {
         if (lazyLineMode >= 0) {
           // Treat line as lazy, and do not parse it.
-          var lazyLine = lineRest.trimLeft();
+          String lazyLine = lineRest.trimLeft(); // TODO to not trim nbsp.
           while (stack.length - 1 >= lazyLineMode &&
               !stack.addLazyLine(lazyLine)) {
             stack.flush(stack.length - 1, result);
@@ -918,7 +921,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
         }
 
         // If contains tab for indented code line, then replace with spaces.
-        var startCodeIndent = stack.last.marker.endIndent;
+        int startCodeIndent = stack.last.marker.endIndent;
         String lineRestWithoutCodeIndend =
             _removeIndent(lineRest, 4, false, startCodeIndent);
         if (lineRestWithoutCodeIndend != null) {

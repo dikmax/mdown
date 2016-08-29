@@ -1,6 +1,8 @@
 part of md_proc.src.parsers;
 
+/// Parser for empty line.
 class BlanklineParser extends AbstractParser<Iterable<Block>> {
+  /// Constructor.
   BlanklineParser(ParsersContainer container) : super(container);
 
   @override
@@ -11,7 +13,7 @@ class BlanklineParser extends AbstractParser<Iterable<Block>> {
     String line = lineResult.value;
 
     offset = lineResult.offset;
-    if (EMPTY_LINE.hasMatch(line)) {
+    if (_emptyLineRegExp.hasMatch(line)) {
       return new ParseResult<Iterable<Block>>.success(
           <Block>[], lineResult.offset);
     }

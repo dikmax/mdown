@@ -1,36 +1,19 @@
 part of md_proc.src.parsers;
 
+/// Parser for html blocks using rules 1-6.
 class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
+  /// Constructor.
   HtmlBlockParser(ParsersContainer container) : super(container);
 
-  static const TAGNAME = '[A-Za-z][A-Za-z0-9-]*';
-  static const ATTRIBUTENAME = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
-  static const UNQUOTEDVALUE = "[^\"'=<>`\\x00-\\x20]+";
-  static const SINGLEQUOTEDVALUE = "'[^']*'";
-  static const DOUBLEQUOTEDVALUE = '"[^"]*"';
-  static const ATTRIBUTEVALUE = "(?:" +
-      UNQUOTEDVALUE +
-      "|" +
-      SINGLEQUOTEDVALUE +
-      "|" +
-      DOUBLEQUOTEDVALUE +
-      ")";
-  static const ATTRIBUTEVALUESPEC =
-      "(?:" + "\\s*=" + "\\s*" + ATTRIBUTEVALUE + ")";
-  static const ATTRIBUTE =
-      "(?:" + "\\s+" + ATTRIBUTENAME + ATTRIBUTEVALUESPEC + "?)";
-  static const OPENTAG = "<" + TAGNAME + ATTRIBUTE + "*" + "\\s*/?>";
-  static const CLOSETAG = "</" + TAGNAME + "\\s*>";
-
-  List<RegExp> starts = <RegExp>[
-    _HTML_BLOCK_1_TEST,
-    _HTML_BLOCK_2_TEST,
-    _HTML_BLOCK_3_TEST,
-    _HTML_BLOCK_4_TEST,
-    _HTML_BLOCK_5_TEST
+  List<RegExp> _starts = <RegExp>[
+    _htmlBlock1Test,
+    _htmlBlock2Test,
+    _htmlBlock3Test,
+    _htmlBlock4Test,
+    _htmlBlock5Test
   ];
 
-  List<RegExp> ends = <RegExp>[
+  List<RegExp> _ends = <RegExp>[
     new RegExp(r'</(script|pre|style)>', caseSensitive: false),
     new RegExp(r'-->'),
     new RegExp(r'\?>'),
@@ -40,13 +23,13 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockTest(text, offset, _LESS_THAN_CODE_UNIT)) {
+    if (!fastBlockTest(text, offset, _lessThanCodeUnit)) {
       return new ParseResult<Iterable<Block>>.failure();
     }
 
     int rule;
-    for (int i = 0; i < starts.length; ++i) {
-      if (starts[i].matchAsPrefix(text, offset) != null) {
+    for (int i = 0; i < _starts.length; ++i) {
+      if (_starts[i].matchAsPrefix(text, offset) != null) {
         rule = i;
         break;
       }
@@ -61,7 +44,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (ends[rule].hasMatch(lineRes.value)) {
+        if (_ends[rule].hasMatch(lineRes.value)) {
           break;
         }
       }
@@ -70,7 +53,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
           <Block>[new HtmlRawBlock(result.toString())], offset);
     }
 
-    if (_HTML_BLOCK_6_TEST.matchAsPrefix(text, offset) != null) {
+    if (_htmlBlock6Test.matchAsPrefix(text, offset) != null) {
       int length = text.length;
       StringBuffer result = new StringBuffer();
       while (offset < length) {
@@ -79,7 +62,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (EMPTY_LINE.hasMatch(lineRes.value)) {
+        if (_emptyLineRegExp.hasMatch(lineRes.value)) {
           break;
         }
       }
