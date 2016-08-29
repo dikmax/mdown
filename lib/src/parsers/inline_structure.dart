@@ -16,8 +16,8 @@ class _Delim {
     if (charCode != delim.charCode) {
       return 0;
     }
-    if (charCode == _SINGLE_QUOTE_CODE_UNIT ||
-        charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+    if (charCode == _singleQuoteCodeUnit ||
+        charCode == _doubleQuoteCodeUnit) {
       return 1; // Always closes.
     }
     if ((canClose || delim.canOpen) && (count + delim.count) % 3 == 0) {
@@ -30,8 +30,8 @@ class _Delim {
 
 /// Parsing emphasis, strongs, smartquotes, etc.
 class InlineStructureParser extends AbstractParser<Inlines> {
-  static final RegExp _SPACE_REGEXP = new RegExp(r'\s');
-  static final RegExp _PUNCTUATION_REGEXP = new RegExp(
+  static final RegExp _spaceRegExp = new RegExp(r'\s');
+  static final RegExp _punctuationRegExp = new RegExp(
       '[\u2000-\u206F\u2E00-\u2E7F\\\\\'!"#\$%&()*+,\\-./:;<=>?@\\[\\]^_`{|}~]');
 
   Set<int> _delimitersChars;
@@ -41,11 +41,11 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   /// Constructor.
   InlineStructureParser(ParsersContainer container) : super(container) {
     this._delimitersChars =
-        new Set<int>.from(<int>[_STAR_CODE_UNIT, _UNDERSCORE_CODE_UNIT]);
+        new Set<int>.from(<int>[_starCodeUnit, _unredscoreCodeUnit]);
 
     if (container.options.smartPunctuation) {
-      _delimitersChars.add(_SINGLE_QUOTE_CODE_UNIT);
-      _delimitersChars.add(_DOUBLE_QUOTE_CODE_UNIT);
+      _delimitersChars.add(_singleQuoteCodeUnit);
+      _delimitersChars.add(_doubleQuoteCodeUnit);
     }
   }
 
@@ -53,43 +53,43 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   void init() {
     _inlineParsers = new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
 
-    _inlineParsers[_SPACE_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_spaceCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_TAB_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_tabCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_SLASH_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_slashCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.escapesParser
     ];
 
-    _inlineParsers[_AMPERSAND_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.entityParser
     ];
 
-    _inlineParsers[_BACKTICK_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_backtickCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.inlineCodeParser
     ];
 
-    _inlineParsers[_OPEN_BRACKET_CODE_UNIT] =
+    _inlineParsers[_openBracketCodeUnit] =
         <AbstractParser<Iterable<Inline>>>[container.linkImageParser];
 
-    _inlineParsers[_LESS_THAN_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.autolinkParser
     ];
 
     if (container.options.rawHtml) {
-      _inlineParsers[_LESS_THAN_CODE_UNIT].add(container.inlineHtmlParser);
+      _inlineParsers[_lessThanCodeUnit].add(container.inlineHtmlParser);
     }
 
     if (container.options.smartPunctuation) {
-      _inlineParsers[_DOT_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[_dotCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.ellipsisParser
       ];
 
-      _inlineParsers[_MINUS_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[_minusCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.mnDashParser
       ];
     }
@@ -111,10 +111,10 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     String charBefore = offset == 0 ? '\n' : text[offset - 1];
     String charAfter = endOffset < length ? text[endOffset] : '\n';
 
-    bool spaceAfter = _SPACE_REGEXP.hasMatch(charAfter);
-    bool spaceBefore = _SPACE_REGEXP.hasMatch(charBefore);
-    bool punctuationAfter = _PUNCTUATION_REGEXP.hasMatch(charAfter);
-    bool punctuationBefore = _PUNCTUATION_REGEXP.hasMatch(charBefore);
+    bool spaceAfter = _spaceRegExp.hasMatch(charAfter);
+    bool spaceBefore = _spaceRegExp.hasMatch(charBefore);
+    bool punctuationAfter = _punctuationRegExp.hasMatch(charAfter);
+    bool punctuationBefore = _punctuationRegExp.hasMatch(charBefore);
     bool leftFlanking =
         !spaceAfter && (!punctuationAfter || spaceBefore || punctuationBefore);
     bool rightFlanking =
@@ -122,11 +122,11 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
     bool canOpen = leftFlanking;
     bool canClose = rightFlanking;
-    if (charCode == _UNDERSCORE_CODE_UNIT) {
+    if (charCode == _unredscoreCodeUnit) {
       canOpen = canOpen && (!rightFlanking || punctuationBefore);
       canClose = canClose && (!leftFlanking || punctuationAfter);
-    } else if (charCode == _SINGLE_QUOTE_CODE_UNIT ||
-        charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+    } else if (charCode == _singleQuoteCodeUnit ||
+        charCode == _doubleQuoteCodeUnit) {
       canOpen = canOpen && !rightFlanking;
     }
 
@@ -139,10 +139,10 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     list.forEach((_Delim delim) {
       if (delim.count > 0) {
         int charCode = delim.charCode;
-        if (charCode == _SINGLE_QUOTE_CODE_UNIT) {
+        if (charCode == _singleQuoteCodeUnit) {
           result.addAll(new List<Inline>.filled(delim.count,
               delim.matched ? new SingleOpenQuote() : new Apostrophe()));
-        } else if (charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+        } else if (charCode == _doubleQuoteCodeUnit) {
           result.addAll(
               new List<Inline>.filled(delim.count, new DoubleOpenQuote()));
         } else {
@@ -169,9 +169,9 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     if (!delim.canOpen) {
       int charCode = delim.charCode;
       List<Inline> result;
-      if (charCode == _SINGLE_QUOTE_CODE_UNIT) {
+      if (charCode == _singleQuoteCodeUnit) {
         result = new List<Inline>.filled(delim.count, new Apostrophe());
-      } else if (charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+      } else if (charCode == _doubleQuoteCodeUnit) {
         result = new List<Inline>.filled(delim.count, new DoubleCloseQuote());
       } else {
         result = <Inline>[
@@ -191,8 +191,8 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       _Delim delim = _scanDelims(text, offset);
       if (delim != null) {
         if (delim.canClose) {
-          if (delim.charCode == _SINGLE_QUOTE_CODE_UNIT ||
-              delim.charCode == _DOUBLE_QUOTE_CODE_UNIT) {
+          if (delim.charCode == _singleQuoteCodeUnit ||
+              delim.charCode == _doubleQuoteCodeUnit) {
             int openDelimIndex = stack.length - 1;
             while (openDelimIndex >= 0) {
               _Delim openDelim = stack[openDelimIndex];
@@ -205,7 +205,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
             stack.last.inlines.addAll(new List<Inline>.filled(
                 delim.count,
-                delim.charCode == _SINGLE_QUOTE_CODE_UNIT
+                delim.charCode == _singleQuoteCodeUnit
                     ? new SingleCloseQuote()
                     : new DoubleCloseQuote()));
 
@@ -227,8 +227,8 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
                 Inlines itemRes = openDelim.inlines;
 
-                if (delim.charCode == _UNDERSCORE_CODE_UNIT ||
-                    delim.charCode == _STAR_CODE_UNIT) {
+                if (delim.charCode == _unredscoreCodeUnit ||
+                    delim.charCode == _starCodeUnit) {
                   int delimsLeft = countCloses;
                   if ((delimsLeft & 1) == 1) {
                     itemRes = new Inlines.single(new Emph(itemRes));
@@ -275,9 +275,9 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       }
 
       int codeUnit = text.codeUnitAt(offset);
-      if (codeUnit == _EXCLAMATION_MARK_CODE_UNIT &&
+      if (codeUnit == _exclamationMarkCodeUnit &&
           offset + 1 < length &&
-          text.codeUnitAt(offset + 1) == _OPEN_BRACKET_CODE_UNIT) {
+          text.codeUnitAt(offset + 1) == _openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
         ParseResult<Inlines> res =
             container.linkImageParser.parse(text, offset);

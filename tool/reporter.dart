@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:convert';
 
@@ -6,7 +7,7 @@ void main() {
   stdin.lineMode = true;
   String line;
 
-  Map<int, dynamic> tests = {};
+  Map<int, dynamic> tests = new HashMap<int, dynamic>();
   while ((line = stdin.readLineSync()) != null) {
     dynamic res = JSON.decode(line);
     String type = res['type'];

@@ -7,7 +7,8 @@ part of md_proc.entities;
 // Target: final Map<String, String> htmlEntities
 // **************************************************************************
 
-final Map<String, String> _$htmlEntities = {
+final Map<String, String> _$htmlEntities =
+    new HashMap<String, String>.from(<String, String>{
   "AElig": "Æ",
   "AMP": "&",
   "Aacute": "Á",
@@ -2133,4 +2134,4 @@ final Map<String, String> _$htmlEntities = {
   "zscr": "𝓏",
   "zwj": "‍",
   "zwnj": "‌",
-};
+});

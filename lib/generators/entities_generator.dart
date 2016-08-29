@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:analyzer/src/generated/element.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -25,7 +25,7 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
     HttpClientResponse response = await request.close();
     dynamic json =
         await response.transform(UTF8.decoder).transform(JSON.decoder).first;
-    String result = 'final Map<String, String> _\$${element.displayName} = {\n';
+    String result = 'final Map<String, String> _\$${element.displayName} = new HashMap<String, String>.from(<String, String>{\n';
     json.forEach((String k, dynamic v) {
       Match match = r.firstMatch(k);
       if (match != null) {
@@ -37,7 +37,7 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
         }
       }
     });
-    result += '};';
+    result += '});';
 
     return result;
   }

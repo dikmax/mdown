@@ -136,8 +136,8 @@ class Options {
       this.texMathSingleBackslash: false,
       this.texMathDoubleBackslash: false,
       this.rawTex: false,
-      this.inlineTexMathClasses: const ['math', 'inline'],
-      this.displayTexMathClasses: const ['math', 'display'],
+      this.inlineTexMathClasses: const <String>['math', 'inline'],
+      this.displayTexMathClasses: const <String>['math', 'display'],
       this.linkResolver: defaultLinkResolver});
 
   /// Predefined version of Options. Alongside with strict also supports smart puctuation, which is declared separately

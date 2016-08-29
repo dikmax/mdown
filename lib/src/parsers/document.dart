@@ -1,10 +1,13 @@
 part of md_proc.src.parsers;
 
+
+/// Parser for whole document.
 class DocumentParser extends AbstractParser<Document> {
   Map<int, List<AbstractParser<Iterable<Block>>>> _blockParsers;
 
   Map<int, List<AbstractParser<Iterable<Inline>>>> _inlineParsers;
 
+  /// Constructor.
   DocumentParser(ParsersContainer container) : super(container);
 
   @override
@@ -13,23 +16,23 @@ class DocumentParser extends AbstractParser<Document> {
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
     <
-        int>[_STAR_CODE_UNIT, _MINUS_CODE_UNIT].forEach((int char) {
+        int>[_starCodeUnit, _minusCodeUnit].forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser,
         container.blockquoteListParser
       ];
     });
 
-    _blockParsers[_UNDERSCORE_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[_unredscoreCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.thematicBreakParser
     ];
 
-    _blockParsers[_SHARP_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[_sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.atxHeadingParser
     ];
 
     <
-        int>[_SPACE_CODE_UNIT, _TAB_CODE_UNIT].forEach((int char) {
+        int>[_spaceCodeUnit, _tabCodeUnit].forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser,
         container.indentedCodeParser
@@ -37,7 +40,7 @@ class DocumentParser extends AbstractParser<Document> {
     });
 
     <
-            int>[_NEWLINE_CODE_UNIT, _CARRIAGE_RETURN_CODE_UNIT]
+            int>[_newLineCodeUnit, _carriageReturnCodeUnit]
         .forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser
@@ -45,27 +48,27 @@ class DocumentParser extends AbstractParser<Document> {
     });
 
     <
-        int>[_TILDE_CODE_UNIT, _BACKTICK_CODE_UNIT].forEach((int char) {
+        int>[_tildeCodeUnit, _backtickCodeUnit].forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.fencedCodeParser
       ];
     });
 
     <
-        int>[_PLUS_CODE_UNIT, _GREATER_THAN_CODE_UNIT].forEach((int char) {
+        int>[_plusCodeUnit, _greaterThanCodeUnit].forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blockquoteListParser
       ];
     });
 
     if (container.options.rawHtml) {
-      _blockParsers[_LESS_THAN_CODE_UNIT] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
         container.htmlBlockParser,
         container.htmlBlock7Parser
       ];
     }
 
-    for (int char = _ZERO_CODE_UNIT; char <= _NINE_CODE_UNIT; char++) {
+    for (int char = _zeroCodeUnit; char <= _nineCodeUnit; char++) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blockquoteListParser
       ];
@@ -74,57 +77,57 @@ class DocumentParser extends AbstractParser<Document> {
     // Inline parsers
     _inlineParsers = new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
 
-    _inlineParsers[_SPACE_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_spaceCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_TAB_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_tabCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_SLASH_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_slashCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.escapesParser
     ];
 
-    _inlineParsers[_AMPERSAND_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.entityParser
     ];
 
-    _inlineParsers[_BACKTICK_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_backtickCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.inlineCodeParser
     ];
 
     <
-        int>[_STAR_CODE_UNIT, _UNDERSCORE_CODE_UNIT].forEach((int char) {
+        int>[_starCodeUnit, _unredscoreCodeUnit].forEach((int char) {
       _inlineParsers[char] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
     });
 
-    _inlineParsers[_OPEN_BRACKET_CODE_UNIT] =
+    _inlineParsers[_openBracketCodeUnit] =
         <AbstractParser<Iterable<Inline>>>[container.linkImageParser];
 
-    _inlineParsers[_LESS_THAN_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.autolinkParser
     ];
 
     if (container.options.rawHtml) {
-      _inlineParsers[_LESS_THAN_CODE_UNIT].add(container.inlineHtmlParser);
+      _inlineParsers[_lessThanCodeUnit].add(container.inlineHtmlParser);
     }
 
     if (container.options.smartPunctuation) {
-      _inlineParsers[_DOT_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[_dotCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.ellipsisParser
       ];
 
-      _inlineParsers[_MINUS_CODE_UNIT] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[_minusCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.mnDashParser
       ];
 
-      _inlineParsers[_SINGLE_QUOTE_CODE_UNIT] =
+      _inlineParsers[_singleQuoteCodeUnit] =
           <AbstractParser<Iterable<Inline>>>[container.inlineStructureParser];
 
-      _inlineParsers[_DOUBLE_QUOTE_CODE_UNIT] =
+      _inlineParsers[_doubleQuoteCodeUnit] =
           <AbstractParser<Iterable<Inline>>>[container.inlineStructureParser];
     }
   }
@@ -143,7 +146,7 @@ class DocumentParser extends AbstractParser<Document> {
         break;
       }
 
-      if (firstChar == _OPEN_BRACKET_CODE_UNIT) {
+      if (firstChar == _openBracketCodeUnit) {
         // Special treatment for link references.
         // TODO we don't need it
         ParseResult<_LinkReference> res =
@@ -217,6 +220,7 @@ class DocumentParser extends AbstractParser<Document> {
     return block;
   }
 
+  /// Parses provided string as inlines.
   Inlines parseInlines(String text) {
     int offset = 0;
     Inlines inlines = new Inlines();
@@ -225,9 +229,9 @@ class DocumentParser extends AbstractParser<Document> {
     int length = text.length;
     while (offset < length) {
       int codeUnit = text.codeUnitAt(offset);
-      if (codeUnit == _EXCLAMATION_MARK_CODE_UNIT &&
+      if (codeUnit == _exclamationMarkCodeUnit &&
           offset + 1 < length &&
-          text.codeUnitAt(offset + 1) == _OPEN_BRACKET_CODE_UNIT) {
+          text.codeUnitAt(offset + 1) == _openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
         ParseResult<Inlines> res =
             container.linkImageParser.parse(text, offset);

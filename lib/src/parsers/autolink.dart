@@ -1,12 +1,14 @@
 part of md_proc.src.parsers;
 
+/// Autolinks (`<http://example.com/>`) parser
 class AutolinkParser extends AbstractParser<Inlines> {
+  /// Constructor.
   AutolinkParser(ParsersContainer container) : super(container);
 
-  final RegExp _AUTOLINK_REGEXP =
+  final RegExp _autolinkRegExp =
       new RegExp(r'<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}:[^ \t\x00-\x20<>]*)>');
 
-  final RegExp _EMAIL_REGEXP =
+  final RegExp _emailRegExp =
       new RegExp('<([a-zA-Z0-9.!#\$%&\'*+/=?^_`{|}~\\-]+@'
           '[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?'
           '(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>');
@@ -15,11 +17,11 @@ class AutolinkParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     int codeUnit = text.codeUnitAt(offset);
 
-    if (codeUnit != _LESS_THAN_CODE_UNIT) {
+    if (codeUnit != _lessThanCodeUnit) {
       return new ParseResult<Inlines>.failure();
     }
 
-    Match autolinkMatch = _AUTOLINK_REGEXP.matchAsPrefix(text, offset);
+    Match autolinkMatch = _autolinkRegExp.matchAsPrefix(text, offset);
 
     if (autolinkMatch != null) {
       String autolink = autolinkMatch[1];
@@ -28,7 +30,7 @@ class AutolinkParser extends AbstractParser<Inlines> {
           new Inlines.single(new Autolink(autolink)), autolinkMatch.end);
     }
 
-    Match emailMatch = _EMAIL_REGEXP.matchAsPrefix(text, offset);
+    Match emailMatch = _emailRegExp.matchAsPrefix(text, offset);
 
     if (emailMatch != null) {
       String email = emailMatch[1];

@@ -15,8 +15,6 @@ class _HtmlBuilder extends StringBuffer {
 
   // Blocks
 
-  bool _firstInline = false;
-
   void writeBlocks(Iterable<Block> blocks, {bool tight: false}) {
     Iterator<Block> it = blocks.iterator;
 
@@ -32,7 +30,6 @@ class _HtmlBuilder extends StringBuffer {
         write("\n");
       }
 
-      _firstInline = true;
       if (block is Para) {
         if (tight) {
           writeInlines(block.contents);
@@ -215,8 +212,6 @@ class _HtmlBuilder extends StringBuffer {
       } else {
         throw new UnimplementedError(inline.toString());
       }
-
-      _firstInline = false;
     }
   }
 

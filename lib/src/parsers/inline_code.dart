@@ -1,11 +1,13 @@
 part of md_proc.src.parsers;
 
+/// Parser for code inlines.
 class InlineCodeParser extends AbstractParser<Inlines> {
+  /// Constructor.
   InlineCodeParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) != _BACKTICK_CODE_UNIT) {
+    if (text.codeUnitAt(offset) != _backtickCodeUnit) {
       return new ParseResult<Inlines>.failure();
     }
 
@@ -25,7 +27,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
       switch (state) {
         case 0:
           // Parsing open fence.
-          if (codeUnit == _BACKTICK_CODE_UNIT) {
+          if (codeUnit == _backtickCodeUnit) {
             fenceSize++;
           } else {
             state = 1;
@@ -35,7 +37,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
 
         case 1:
           // Parsing code
-          if (codeUnit == _BACKTICK_CODE_UNIT) {
+          if (codeUnit == _backtickCodeUnit) {
             codeEndOffset = offset;
             endFenceSize = 1;
             state = 2;
@@ -45,7 +47,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
 
         case 2:
           // Parsing end
-          if (codeUnit == _BACKTICK_CODE_UNIT) {
+          if (codeUnit == _backtickCodeUnit) {
             endFenceSize++;
           } else if (endFenceSize == fenceSize) {
             state = 3;

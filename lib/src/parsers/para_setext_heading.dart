@@ -1,29 +1,32 @@
 part of md_proc.src.parsers;
 
+/// Parser for paragraphs and setext headings.
 class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
-  static final RegExp _SETEXT_HEADING_LINE =
+  static final RegExp _setextHeadingRegExp =
       new RegExp('^ {0,3}(-+|=+)[ \t]*\$');
 
-  List<RegExp> paragraphBreaks;
+  List<RegExp> _paragraphBreaks;
 
+  /// Constructor.
   ParaSetextHeadingParser(ParsersContainer container) : super(container);
 
+  @override
   void init() {
-    paragraphBreaks = <RegExp>[
-      _THEMATIC_BREAK_TEST,
-      _FENCED_CODE_START_TEST,
-      _ATX_HEADING_TEST,
-      _BLOCKQUOTE_SIMPLE_TEST
+    _paragraphBreaks = <RegExp>[
+      _thematicBreakTest,
+      _fencedCodeStartTest,
+      _atxHeadingText,
+      _blockquoteSimpleTest
     ];
 
     if (container.options.rawHtml) {
-      paragraphBreaks.addAll(<RegExp>[
-        _HTML_BLOCK_1_TEST,
-        _HTML_BLOCK_2_TEST,
-        _HTML_BLOCK_3_TEST,
-        _HTML_BLOCK_4_TEST,
-        _HTML_BLOCK_5_TEST,
-        _HTML_BLOCK_6_TEST
+      _paragraphBreaks.addAll(<RegExp>[
+        _htmlBlock1Test,
+        _htmlBlock2Test,
+        _htmlBlock3Test,
+        _htmlBlock4Test,
+        _htmlBlock5Test,
+        _htmlBlock6Test
       ]);
     }
   }
@@ -43,11 +46,11 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
       String line = lineResult.value;
 
-      if (!EMPTY_LINE.hasMatch(line)) {
+      if (!_emptyLineRegExp.hasMatch(line)) {
         if (canBeHeading) {
           if (fastBlockTest2(
-              text, offset, _MINUS_CODE_UNIT, _EQUAL_CODE_UNIT)) {
-            Match match = _SETEXT_HEADING_LINE.firstMatch(line);
+              text, offset, _minusCodeUnit, _equalCodeUnit)) {
+            Match match = _setextHeadingRegExp.firstMatch(line);
             if (match != null) {
               level = match[1][0] == '=' ? 1 : 2;
               offset = lineResult.offset;
@@ -57,14 +60,14 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         }
 
         if (contents.length > 0 &&
-            paragraphBreaks.any((RegExp re) => re.hasMatch(lineResult.value))) {
+            _paragraphBreaks.any((RegExp re) => re.hasMatch(lineResult.value))) {
           // Paragraph stops here as we've got another block.
           break;
         }
 
         // Special check for list, as it can break paragraph only if not empty
         // Ordered lists are also required to start with 1. to allow breaking.
-        if (_LIST_SIMPLE_TEST.hasMatch(lineResult.value)) {
+        if (_listSimpleTest.hasMatch(lineResult.value)) {
           // It could be a list.
 
           ParseResult<Iterable<Block>> listResult =

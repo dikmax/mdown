@@ -3,7 +3,7 @@ library md_proc.generators.embed_tests_generator;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:analyzer/src/generated/element.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:path/path.dart' as path;
 import 'package:source_gen/source_gen.dart';
@@ -46,7 +46,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
   Future<String> generateForAnnotatedElement(
       Element element, EmbedTests annotation, BuildStep buildStep) async {
     if (path.isAbsolute(annotation.path)) {
-      throw 'must be relative path to the source file';
+      throw new Exception('must be relative path to the source file');
     }
 
     String sourcePathDir = path.dirname(buildStep.input.id.path);
@@ -54,13 +54,14 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     String filePath = path.join(sourcePathDir, annotation.path);
 
     if (!await FileSystemEntity.isFile(filePath)) {
-      throw 'Not a file! - $filePath';
+      throw new Exception('Not a file! - $filePath');
     }
 
     Map<String, String> content = _readFile(filePath);
 
     String result =
-        'final Map<String, String> _\$${element.displayName}Tests = {\n';
+        'final Map<String, String> _\$${element.displayName}Tests = '
+        '<String, String>{\n';
     content.forEach((String k, String v) {
       result += "r'''$k''': r'''$v''',\n";
     });

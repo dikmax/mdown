@@ -1,93 +1,93 @@
 part of md_proc.src.parsers;
 
-final RegExp ANY_LINE = new RegExp(r'.*$');
-final RegExp EMPTY_LINE = new RegExp(r'^[ \t]*$');
-final RegExp WHITESPACE_CHAR = new RegExp('[ \t]');
+final RegExp _anyLineRegExp = new RegExp(r'.*$');
+final RegExp _emptyLineRegExp = new RegExp(r'^[ \t]*$');
+final RegExp _whitespaceCharRegExp = new RegExp('[ \t]');
 
-const String ESCAPABLE = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-final Set<int> ESCAPABLE_CODES =
-    new Set<int>.from(ESCAPABLE.split('').map((String s) => s.codeUnitAt(0)));
+const String _escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+final Set<int> _escapableCodes =
+    new Set<int>.from(_escapable.split('').map((String s) => s.codeUnitAt(0)));
 
 // TODO move to paragraph file
-final RegExp _ATX_HEADING_TEST = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
-final RegExp _BLOCKQUOTE_SIMPLE_TEST = new RegExp(r'^ {0,3}>');
-final RegExp _LIST_SIMPLE_TEST = new RegExp(r'^ {0,3}([+\-*]|1[.)])( |$)');
-final RegExp _FENCED_CODE_START_TEST =
+final RegExp _atxHeadingText = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
+final RegExp _blockquoteSimpleTest = new RegExp(r'^ {0,3}>');
+final RegExp _listSimpleTest = new RegExp(r'^ {0,3}([+\-*]|1[.)])( |$)');
+final RegExp _fencedCodeStartTest =
     new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
-final RegExp _THEMATIC_BREAK_TEST = new RegExp(
+final RegExp _thematicBreakTest = new RegExp(
     '^( {0,3})((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$');
 
-final RegExp _HTML_BLOCK_1_TEST =
+final RegExp _htmlBlock1Test =
     new RegExp(r' {0,3}<(?:script|pre|style)(?:\s|>|$)', caseSensitive: false);
-final RegExp _HTML_BLOCK_2_TEST = new RegExp(r' {0,3}<!--');
-final RegExp _HTML_BLOCK_3_TEST = new RegExp(r' {0,3}<\?');
-final RegExp _HTML_BLOCK_4_TEST = new RegExp(r' {0,3}<!');
-final RegExp _HTML_BLOCK_5_TEST = new RegExp(r' {0,3}<!\[CDATA\[');
-final RegExp _HTML_BLOCK_6_TEST = new RegExp(
+final RegExp _htmlBlock2Test = new RegExp(r' {0,3}<!--');
+final RegExp _htmlBlock3Test = new RegExp(r' {0,3}<\?');
+final RegExp _htmlBlock4Test = new RegExp(r' {0,3}<!');
+final RegExp _htmlBlock5Test = new RegExp(r' {0,3}<!\[CDATA\[');
+final RegExp _htmlBlock6Test = new RegExp(
     r' {0,3}</?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|title|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|/?>|$)',
     caseSensitive: false);
 
-const String HTML_TAGNAME = '[A-Za-z][A-Za-z0-9-]*';
-const String HTML_ATTRIBUTENAME = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
-const String HTML_UNQUOTEDVALUE = "[^\"'=<>`\\x00-\\x20]+";
-const String HTML_SINGLEQUOTEDVALUE = "'[^']*'";
-const String HTML_DOUBLEQUOTEDVALUE = '"[^"]*"';
-const String HTML_ATTRIBUTEVALUE = "(?:" +
-    HTML_UNQUOTEDVALUE +
+const String _htmlTagName = '[A-Za-z][A-Za-z0-9-]*';
+const String _htmlAttributeName = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
+const String _htmlUnquotedValue = "[^\"'=<>`\\x00-\\x20]+";
+const String _htmlSingleQuotedValue = "'[^']*'";
+const String _htmlDoubleQuotedValue = '"[^"]*"';
+const String _htmlAttributeValue = "(?:" +
+    _htmlUnquotedValue +
     "|" +
-    HTML_SINGLEQUOTEDVALUE +
+    _htmlSingleQuotedValue +
     "|" +
-    HTML_DOUBLEQUOTEDVALUE +
+    _htmlDoubleQuotedValue +
     ")";
-const String HTML_ATTRIBUTEVALUESPEC =
-    "(?:" + "\\s*=" + "\\s*" + HTML_ATTRIBUTEVALUE + ")";
-const String HTML_ATTRIBUTE =
-    "(?:" + "\\s+" + HTML_ATTRIBUTENAME + HTML_ATTRIBUTEVALUESPEC + "?)";
-const String HTML_OPENTAG =
-    "<" + HTML_TAGNAME + HTML_ATTRIBUTE + "*" + "\\s*/?>";
-const String HTML_CLOSETAG = "</" + HTML_TAGNAME + "\\s*>";
+const String _htmlAttributeValueSpec =
+    "(?:" + "\\s*=" + "\\s*" + _htmlAttributeValue + ")";
+const String _htmlAttribute =
+    "(?:" + "\\s+" + _htmlAttributeName + _htmlAttributeValueSpec + "?)";
+const String _htmlOpenTag =
+    "<" + _htmlTagName + _htmlAttribute + "*" + "\\s*/?>";
+const String _htmlCloseTag = "</" + _htmlTagName + "\\s*>";
 
-final RegExp _CLASH_SPACE_REGEXP = new RegExp('[ \t\r\n]+');
+final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
 final RegExp _trimLeftRegExp = new RegExp('^[ \t]*');
 
 // Char codes
-const int _TAB_CODE_UNIT = 9;
-const int _NEWLINE_CODE_UNIT = 10;
-const int _CARRIAGE_RETURN_CODE_UNIT = 13;
-const int _SPACE_CODE_UNIT = 32;
-const int _EXCLAMATION_MARK_CODE_UNIT = 33;
-const int _DOUBLE_QUOTE_CODE_UNIT = 34;
-const int _SHARP_CODE_UNIT = 35;
-const int _AMPERSAND_CODE_UNIT = 38;
-const int _SINGLE_QUOTE_CODE_UNIT = 39;
-const int _OPEN_PAREN_CODE_UNIT = 40;
-const int _CLOSE_PAREN_CODE_UNIT = 41;
-const int _STAR_CODE_UNIT = 42;
-const int _PLUS_CODE_UNIT = 43;
-const int _MINUS_CODE_UNIT = 45;
-const int _DOT_CODE_UNIT = 46;
-const int _ZERO_CODE_UNIT = 48;
-const int _NINE_CODE_UNIT = 57;
-const int _LESS_THAN_CODE_UNIT = 60;
-const int _EQUAL_CODE_UNIT = 61;
-const int _GREATER_THAN_CODE_UNIT = 62;
-const int _OPEN_BRACKET_CODE_UNIT = 91;
-const int _SLASH_CODE_UNIT = 92;
-const int _CLOSE_BRACKET_CODE_UNIT = 93;
-const int _UNDERSCORE_CODE_UNIT = 95;
-const int _BACKTICK_CODE_UNIT = 96;
-const int _TILDE_CODE_UNIT = 126;
-const int _NBSP_CODE_UNIT = 160;
+const int _tabCodeUnit = 9;
+const int _newLineCodeUnit = 10;
+const int _carriageReturnCodeUnit = 13;
+const int _spaceCodeUnit = 32;
+const int _exclamationMarkCodeUnit = 33;
+const int _doubleQuoteCodeUnit = 34;
+const int _sharpCodeUnit = 35;
+const int _ampersandCodeUnit = 38;
+const int _singleQuoteCodeUnit = 39;
+const int _openParenCodeUnit = 40;
+const int _closeParenCodeUnit = 41;
+const int _starCodeUnit = 42;
+const int _plusCodeUnit = 43;
+const int _minusCodeUnit = 45;
+const int _dotCodeUnit = 46;
+const int _zeroCodeUnit = 48;
+const int _nineCodeUnit = 57;
+const int _lessThanCodeUnit = 60;
+const int _equalCodeUnit = 61;
+const int _greaterThanCodeUnit = 62;
+const int _openBracketCodeUnit = 91;
+const int _slashCodeUnit = 92;
+const int _closeBracketCodeUnit = 93;
+const int _unredscoreCodeUnit = 95;
+const int _backtickCodeUnit = 96;
+const int _tildeCodeUnit = 126;
+const int _nonBreakableSpaceCodeUnit = 160;
 
 String _removeIndent(String line, int amount, bool allowLess,
     [int startIndent = 0]) {
   int offset = 0;
   while (offset < amount && offset < line.length) {
     int code = line.codeUnitAt(offset);
-    if (code == _TAB_CODE_UNIT) {
+    if (code == _tabCodeUnit) {
       line = line.replaceFirst(
           '\t', ' ' * (4 - (startIndent & 3))); // (4 - startIndent % 4)
-    } else if (code == _SPACE_CODE_UNIT) {
+    } else if (code == _spaceCodeUnit) {
       ++offset;
       ++startIndent;
     } else {
@@ -101,23 +101,24 @@ String _removeIndent(String line, int amount, bool allowLess,
 }
 
 String _trimAndReplaceSpaces(String s) {
-  return s.trim().replaceAll(_CLASH_SPACE_REGEXP, ' ');
+  return s.trim().replaceAll(_clashSpaceRegExp, ' ');
 }
 
-final RegExp _ESCAPE_REGEXP =
+final RegExp _escapeRegExp =
     new RegExp(r'\\([!"#$%&' + "'" + r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');
 
-final RegExp _ENTITY_REGEXP = new RegExp(
+final RegExp _entityRegExp = new RegExp(
     '&(?:#[xX]([A-Fa-f0-9]{1,8})|#([0-9]{1,8})|([A-Za-z][A-Za-z0-9]{1,31}));');
 
-final RegExp _UNESCAPE_UNREFERENCE_REGEXP =
-    new RegExp(_ESCAPE_REGEXP.pattern + '|' + _ENTITY_REGEXP.pattern);
+final RegExp _unescapeUnreferenceRegExp =
+    new RegExp(_escapeRegExp.pattern + '|' + _entityRegExp.pattern);
 
-final RegExp _TEST_UNESCAPE_AND_UNREFERENCE = new RegExp(r'[\\&]');
+final RegExp _unescapeUnrefereceTest = new RegExp(r'[\\&]');
 
+/// Unescapes (`\!` -> `!`) and unreferences (`&amp;` -> `&`) string.
 String unescapeAndUnreference(String s) {
-  if (_TEST_UNESCAPE_AND_UNREFERENCE.hasMatch(s)) {
-    return s.replaceAllMapped(_UNESCAPE_UNREFERENCE_REGEXP, (Match match) {
+  if (_unescapeUnrefereceTest.hasMatch(s)) {
+    return s.replaceAllMapped(_unescapeUnreferenceRegExp, (Match match) {
       if (match[1] != null) {
         // Escape
         return match[1];
@@ -151,12 +152,14 @@ String unescapeAndUnreference(String s) {
   }
 }
 
+/// Fast checks block, if it starts with [charCodeUnit], taking indent into
+/// account.
 bool fastBlockTest(String text, int offset, int charCodeUnit) {
   // First char
   int codeUnit = text.codeUnitAt(offset);
   if (codeUnit == charCodeUnit) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -170,7 +173,7 @@ bool fastBlockTest(String text, int offset, int charCodeUnit) {
   codeUnit = text.codeUnitAt(offset);
   if (codeUnit == charCodeUnit) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -183,7 +186,7 @@ bool fastBlockTest(String text, int offset, int charCodeUnit) {
   codeUnit = text.codeUnitAt(offset);
   if (codeUnit == charCodeUnit) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -197,13 +200,15 @@ bool fastBlockTest(String text, int offset, int charCodeUnit) {
   return codeUnit == charCodeUnit;
 }
 
+/// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
+/// taking indent into account.
 bool fastBlockTest2(
     String text, int offset, int charCodeUnit1, int charCodeUnit2) {
   // First char
   int codeUnit = text.codeUnitAt(offset);
   if (codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -217,7 +222,7 @@ bool fastBlockTest2(
   codeUnit = text.codeUnitAt(offset);
   if (codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -230,7 +235,7 @@ bool fastBlockTest2(
   codeUnit = text.codeUnitAt(offset);
   if (codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -244,6 +249,8 @@ bool fastBlockTest2(
   return codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2;
 }
 
+/// Fast checks block, if it starts with [charCodeUnit1], [charCodeUnit2] or
+/// [charCodeUnit3], taking indent into account.
 bool fastBlockTest3(String text, int offset, int charCodeUnit1,
     int charCodeUnit2, int charCodeUnit3) {
   // First char
@@ -252,7 +259,7 @@ bool fastBlockTest3(String text, int offset, int charCodeUnit1,
       codeUnit == charCodeUnit2 ||
       codeUnit == charCodeUnit3) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -268,7 +275,7 @@ bool fastBlockTest3(String text, int offset, int charCodeUnit1,
       codeUnit == charCodeUnit2 ||
       codeUnit == charCodeUnit3) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -283,7 +290,7 @@ bool fastBlockTest3(String text, int offset, int charCodeUnit1,
       codeUnit == charCodeUnit2 ||
       codeUnit == charCodeUnit3) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -299,17 +306,19 @@ bool fastBlockTest3(String text, int offset, int charCodeUnit1,
       codeUnit == charCodeUnit3;
 }
 
-bool fastListTest(String text, int offset) {
+/// Fast checks block, if it starts with char possible for list or blockquote,
+/// taking indent into account.
+bool fastBlockquoteListTest(String text, int offset) {
   // First char
   int codeUnit = text.codeUnitAt(offset);
 
-  if (codeUnit == _MINUS_CODE_UNIT ||
-      codeUnit == _STAR_CODE_UNIT ||
-      codeUnit == _PLUS_CODE_UNIT ||
-      codeUnit == _GREATER_THAN_CODE_UNIT ||
-      (codeUnit >= _ZERO_CODE_UNIT && codeUnit <= _NINE_CODE_UNIT)) {
+  if (codeUnit == _minusCodeUnit ||
+      codeUnit == _starCodeUnit ||
+      codeUnit == _plusCodeUnit ||
+      codeUnit == _greaterThanCodeUnit ||
+      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit)) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -321,13 +330,13 @@ bool fastListTest(String text, int offset) {
 
   // Second char
   codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == _MINUS_CODE_UNIT ||
-      codeUnit == _STAR_CODE_UNIT ||
-      codeUnit == _PLUS_CODE_UNIT ||
-      codeUnit == _GREATER_THAN_CODE_UNIT ||
-      (codeUnit >= _ZERO_CODE_UNIT && codeUnit <= _NINE_CODE_UNIT)) {
+  if (codeUnit == _minusCodeUnit ||
+      codeUnit == _starCodeUnit ||
+      codeUnit == _plusCodeUnit ||
+      codeUnit == _greaterThanCodeUnit ||
+      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit)) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -338,13 +347,13 @@ bool fastListTest(String text, int offset) {
 
   // Third char
   codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == _MINUS_CODE_UNIT ||
-      codeUnit == _STAR_CODE_UNIT ||
-      codeUnit == _PLUS_CODE_UNIT ||
-      codeUnit == _GREATER_THAN_CODE_UNIT ||
-      (codeUnit >= _ZERO_CODE_UNIT && codeUnit <= _NINE_CODE_UNIT)) {
+  if (codeUnit == _minusCodeUnit ||
+      codeUnit == _starCodeUnit ||
+      codeUnit == _plusCodeUnit ||
+      codeUnit == _greaterThanCodeUnit ||
+      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit)) {
     return true;
-  } else if (codeUnit != _SPACE_CODE_UNIT) {
+  } else if (codeUnit != _spaceCodeUnit) {
     return false;
   }
 
@@ -355,17 +364,17 @@ bool fastListTest(String text, int offset) {
 
   // Fourth char
   codeUnit = text.codeUnitAt(offset);
-  return codeUnit == _MINUS_CODE_UNIT ||
-      codeUnit == _STAR_CODE_UNIT ||
-      codeUnit == _PLUS_CODE_UNIT ||
-      codeUnit == _GREATER_THAN_CODE_UNIT ||
-      (codeUnit >= _ZERO_CODE_UNIT && codeUnit <= _NINE_CODE_UNIT);
+  return codeUnit == _minusCodeUnit ||
+      codeUnit == _starCodeUnit ||
+      codeUnit == _plusCodeUnit ||
+      codeUnit == _greaterThanCodeUnit ||
+      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit);
 }
 
 int _getBlockFirstChar(String text, int offset) {
   // First char
   int codeUnit = text.codeUnitAt(offset);
-  if (codeUnit != _SPACE_CODE_UNIT) {
+  if (codeUnit != _spaceCodeUnit) {
     return codeUnit;
   }
 
@@ -377,7 +386,7 @@ int _getBlockFirstChar(String text, int offset) {
 
   // Second char
   codeUnit = text.codeUnitAt(offset);
-  if (codeUnit != _SPACE_CODE_UNIT) {
+  if (codeUnit != _spaceCodeUnit) {
     return codeUnit;
   }
 
@@ -388,7 +397,7 @@ int _getBlockFirstChar(String text, int offset) {
 
   // Third char
   codeUnit = text.codeUnitAt(offset);
-  if (codeUnit != _SPACE_CODE_UNIT) {
+  if (codeUnit != _spaceCodeUnit) {
     return codeUnit;
   }
 

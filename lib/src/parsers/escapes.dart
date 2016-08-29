@@ -1,18 +1,20 @@
 part of md_proc.src.parsers;
 
+/// Parser for escaped chars.
 class EscapesParser extends AbstractParser<Inlines> {
+  /// Constructor.
   EscapesParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
     if (offset + 1 < text.length &&
-        text.codeUnitAt(offset) == _SLASH_CODE_UNIT) {
+        text.codeUnitAt(offset) == _slashCodeUnit) {
       int codeUnit = text.codeUnitAt(offset + 1);
-      if (ESCAPABLE_CODES.contains(codeUnit)) {
+      if (_escapableCodes.contains(codeUnit)) {
         return new ParseResult<Inlines>.success(
             new Inlines.single(new Str(new String.fromCharCode(codeUnit))),
             offset + 2);
-      } else if (codeUnit == _NEWLINE_CODE_UNIT) {
+      } else if (codeUnit == _newLineCodeUnit) {
         return new ParseResult<Inlines>.success(
             new Inlines.single(new LineBreak()), offset + 2);
       }

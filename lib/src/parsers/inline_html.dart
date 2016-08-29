@@ -1,10 +1,12 @@
 part of md_proc.src.parsers;
 
+/// Parser for inline html.
 class InlineHtmlParser extends AbstractParser<Inlines> {
+  /// Constructor.
   InlineHtmlParser(ParsersContainer container) : super(container);
 
-  List<RegExp> tests = <RegExp>[
-    new RegExp('(?:' + HTML_OPENTAG + '|' + HTML_CLOSETAG + ')'), // Tag
+  List<RegExp> _tests = <RegExp>[
+    new RegExp('(?:' + _htmlOpenTag + '|' + _htmlCloseTag + ')'), // Tag
     new RegExp('<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->'), // Comment
     new RegExp('[<][?].*?[?][>]'), // Processing instruction
     new RegExp('<![A-Z]+\\s+[^>]*>'), // Declaration
@@ -13,11 +15,11 @@ class InlineHtmlParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) == _LESS_THAN_CODE_UNIT) {
-      for (RegExp test in tests) {
+    if (text.codeUnitAt(offset) == _lessThanCodeUnit) {
+      for (RegExp test in _tests) {
         Match match = test.matchAsPrefix(text, offset);
         if (match != null) {
-          return new ParseResult.success(
+          return new ParseResult<Inlines>.success(
               new Inlines.single(
                   new HtmlRawInline(text.substring(offset, match.end))),
               match.end);
