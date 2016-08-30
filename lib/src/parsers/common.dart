@@ -74,6 +74,7 @@ const int _greaterThanCodeUnit = 62;
 const int _openBracketCodeUnit = 91;
 const int _slashCodeUnit = 92;
 const int _closeBracketCodeUnit = 93;
+const int _caretCodeUnit = 94;
 const int _underscoreCodeUnit = 95;
 const int _backtickCodeUnit = 96;
 const int _tildeCodeUnit = 126;

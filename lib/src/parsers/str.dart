@@ -29,8 +29,12 @@ class StrParser extends AbstractParser<Inlines> {
       ]);
     }
 
-    if (container.options.strikeout) {
+    if (container.options.strikeout || container.options.subscript) {
       _specialChars.add(_tildeCodeUnit);
+    }
+
+    if (container.options.superscript) {
+      _specialChars.add(_caretCodeUnit);
     }
   }
 

@@ -4390,16 +4390,16 @@ final Map<String, String> _$strikeoutAndSubscriptTests = <String, String>{
 ''': r'''<p>~<sub>No strikeout</sub>~</p>
 ''',
   r'''~~No\ strikeout~~
-''': r'''<p><del>No strikeout</del></p>
+''': r'''<p><del>No\ strikeout</del></p>
 ''',
   r'''~No strikeout~
 ''': r'''<p>~No strikeout~</p>
 ''',
   r'''~~~No\ strikeout~~~
-''': r'''<p><del><sub>No strikeout</sub></del></p>
+''': r'''<p><sub><del>No strikeout</del></sub></p>
 ''',
   r'''~~~No strikeout~~~
-''': r'''<p><del>~No strikeout~</del></p>
+''': r'''<p>~<del>No strikeout</del>~</p>
 ''',
   r'''~~ this ~~ is not one neither is ~this~
 ''': r'''<p>~~ this ~~ is not one neither is <sub>this</sub></p>
@@ -4427,6 +4427,9 @@ final Map<String, String> _$subscriptTests = <String, String>{
   r'''H*~2\ 0~*O
 ''': r'''<p>H<em><sub>2 0</sub></em>O</p>
 ''',
+  r'''H~~2~~
+''': r'''<p>H~~2~~</p>
+''',
 };
 
 // **************************************************************************
@@ -4449,6 +4452,9 @@ final Map<String, String> _$superscriptTests = <String, String>{
 ''',
   r'''H*^2\ 0^*O
 ''': r'''<p>H<em><sup>2 0</sup></em>O</p>
+''',
+  r'''2^^2^^=4
+''': r'''<p>2^^2^^=4</p>
 ''',
 };
 
