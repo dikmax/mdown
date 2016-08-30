@@ -22,10 +22,8 @@ void main() {
       mdToHtml2Test(Options.strict));
 
   // commonmark.js regression tests
-  tests("Regressions [strict]", regression,
-      mdToHtmlTest(Options.strict));
-  tests("Regressions [strict]", regression,
-      mdToHtml2Test(Options.strict));
+  tests("Regressions [strict]", regression, mdToHtmlTest(Options.strict));
+  tests("Regressions [strict]", regression, mdToHtml2Test(Options.strict));
 
   // SmartPunct
   tests("SmartPunct [commonmark]", smartPunctuation,
@@ -33,12 +31,15 @@ void main() {
   tests("SmartPunct [commonmark]", smartPunctuation,
       mdToHtml2Test(Options.commonmark));
 
-  return;
   // Strikeout
   tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
+  tests("Strikeout", strikeout, mdToHtml2Test(new Options(strikeout: true)));
   tests("Strikeout spec", specification,
       mdToHtmlTest(new Options(strikeout: true)));
+  tests("Strikeout spec", specification,
+      mdToHtml2Test(new Options(strikeout: true)));
 
+  return;
   // Subscript
   tests("Subscript", subscript, mdToHtmlTest(new Options(subscript: true)));
   tests("Subscript spec", specification,

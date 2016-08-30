@@ -5,8 +5,7 @@ class HardLineBreakParser extends AbstractParser<Inlines> {
   /// Constructor.
   HardLineBreakParser(ParsersContainer container) : super(container);
 
-  final RegExp _hardLineBreakTest =
-      new RegExp(r'(?: {2,}|\t+)(?:\r\n|\n|\r)');
+  final RegExp _hardLineBreakTest = new RegExp(r'(?: {2,}|\t+)(?:\r\n|\n|\r)');
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {

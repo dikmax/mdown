@@ -850,7 +850,6 @@ class Apostrophe extends SmartChar {
   int get hashCode => 0;
 }
 
-
 /// Code inline
 class Code extends Inline {
   /// Code contents

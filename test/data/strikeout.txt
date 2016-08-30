@@ -19,6 +19,18 @@ Ins~~e~~ide w~~a~~ord
 ````````````````````````````````
 
 ```````````````````````````````` example
+~~~Strikeout text~~~
+.
+<p>~<del>Strikeout text</del>~</p>
+````````````````````````````````
+
+```````````````````````````````` example
+~~~~Strikeout text~~~~
+.
+<p><del><del>Strikeout text</del></del></p>
+````````````````````````````````
+
+```````````````````````````````` example
 ~\~No strikeout~~
 .
 <p>~~No strikeout~~</p>

@@ -48,8 +48,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
       if (!_emptyLineRegExp.hasMatch(line)) {
         if (canBeHeading) {
-          if (fastBlockTest2(
-              text, offset, _minusCodeUnit, _equalCodeUnit)) {
+          if (fastBlockTest2(text, offset, _minusCodeUnit, _equalCodeUnit)) {
             Match match = _setextHeadingRegExp.firstMatch(line);
             if (match != null) {
               level = match[1][0] == '=' ? 1 : 2;
@@ -60,7 +59,8 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         }
 
         if (contents.length > 0 &&
-            _paragraphBreaks.any((RegExp re) => re.hasMatch(lineResult.value))) {
+            _paragraphBreaks
+                .any((RegExp re) => re.hasMatch(lineResult.value))) {
           // Paragraph stops here as we've got another block.
           break;
         }

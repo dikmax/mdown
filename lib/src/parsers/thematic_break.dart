@@ -7,8 +7,8 @@ class ThematicBreakParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockTest3(text, offset, _minusCodeUnit, _starCodeUnit,
-        _unredscoreCodeUnit)) {
+    if (!fastBlockTest3(
+        text, offset, _minusCodeUnit, _starCodeUnit, _underscoreCodeUnit)) {
       return const ParseResult<Iterable<Block>>.failure();
     }
 

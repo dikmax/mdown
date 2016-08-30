@@ -399,7 +399,7 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
     <
-            int>[_starCodeUnit, _minusCodeUnit, _unredscoreCodeUnit]
+            int>[_starCodeUnit, _minusCodeUnit, _underscoreCodeUnit]
         .forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser
