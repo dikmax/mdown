@@ -34,7 +34,8 @@ class CommonMarkParser {
     container.references =
         references == null ? new HashMap<String, Target>() : references;
 
-    Iterable<Inline> inlines = container.documentParser.parseInlines(inlinesString);
+    Iterable<Inline> inlines =
+        container.documentParser.parseInlines(inlinesString);
 
     return inlines;
   }

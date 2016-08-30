@@ -15,7 +15,7 @@ class StrParser extends AbstractParser<Inlines> {
     _spaceCodeUnit,
     _starCodeUnit,
     _tabCodeUnit,
-    _unredscoreCodeUnit
+    _underscoreCodeUnit
   ]);
 
   /// Constructor.
@@ -27,6 +27,10 @@ class StrParser extends AbstractParser<Inlines> {
         _singleQuoteCodeUnit,
         _doubleQuoteCodeUnit
       ]);
+    }
+
+    if (container.options.strikeout) {
+      _specialChars.add(_tildeCodeUnit);
     }
   }
 

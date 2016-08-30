@@ -1,6 +1,5 @@
 part of md_proc.src.parsers;
 
-
 /// Parser for whole document.
 class DocumentParser extends AbstractParser<Document> {
   Map<int, List<AbstractParser<Iterable<Block>>>> _blockParsers;
@@ -23,7 +22,7 @@ class DocumentParser extends AbstractParser<Document> {
       ];
     });
 
-    _blockParsers[_unredscoreCodeUnit] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[_underscoreCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.thematicBreakParser
     ];
 
@@ -40,8 +39,7 @@ class DocumentParser extends AbstractParser<Document> {
     });
 
     <
-            int>[_newLineCodeUnit, _carriageReturnCodeUnit]
-        .forEach((int char) {
+        int>[_newLineCodeUnit, _carriageReturnCodeUnit].forEach((int char) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser
       ];
@@ -98,14 +96,15 @@ class DocumentParser extends AbstractParser<Document> {
     ];
 
     <
-        int>[_starCodeUnit, _unredscoreCodeUnit].forEach((int char) {
+        int>[_starCodeUnit, _underscoreCodeUnit].forEach((int char) {
       _inlineParsers[char] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
     });
 
-    _inlineParsers[_openBracketCodeUnit] =
-        <AbstractParser<Iterable<Inline>>>[container.linkImageParser];
+    _inlineParsers[_openBracketCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      container.linkImageParser
+    ];
 
     _inlineParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.autolinkParser
@@ -124,11 +123,19 @@ class DocumentParser extends AbstractParser<Document> {
         container.mnDashParser
       ];
 
-      _inlineParsers[_singleQuoteCodeUnit] =
-          <AbstractParser<Iterable<Inline>>>[container.inlineStructureParser];
+      _inlineParsers[_singleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+        container.inlineStructureParser
+      ];
 
-      _inlineParsers[_doubleQuoteCodeUnit] =
-          <AbstractParser<Iterable<Inline>>>[container.inlineStructureParser];
+      _inlineParsers[_doubleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+        container.inlineStructureParser
+      ];
+    }
+
+    if (container.options.strikeout) {
+      _inlineParsers[_tildeCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+        container.inlineStructureParser
+      ];
     }
   }
 

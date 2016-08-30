@@ -10,48 +10,68 @@ class ParsersContainer {
 
   /// Line parser.
   LineParser lineParser;
+
   /// Parser for blankline.
   BlanklineParser blanklineParser;
+
   /// Parser for blockquotes and lists.
   BlockquoteListParser blockquoteListParser;
+
   /// Parser for atx-headings.
   AtxHeadingParser atxHeadingParser;
+
   /// Parser for indented code blocks.
   IndentedCodeParser indentedCodeParser;
+
   /// Parser for fenced code blocks.
   FencedCodeParser fencedCodeParser;
+
   /// Parser for paragraphs and setext-headings.
   ParaSetextHeadingParser paraSetextHeadingParser;
+
   /// Parser for thematic breaks.
   ThematicBreakParser thematicBreakParser;
+
   /// Parser for html blocks.
   HtmlBlockParser htmlBlockParser;
+
   /// Parser for html blocks using rule 7 from specification.
   HtmlBlock7Parser htmlBlock7Parser;
+
   /// Parser for link references.
   LinkReferenceParser linkReferenceParser;
 
   /// Parser for escaped chars.
   EscapesParser escapesParser;
+
   /// Parser for html-entities.
   EntityParser entityParser;
+
   /// Parser for hard line breaks.
   HardLineBreakParser hardLineBreakParser;
+
   /// Parser for inline code blocks.
   InlineCodeParser inlineCodeParser;
+
   /// Parser for emphasises, strongs and other inline structures with
   /// nested inlines.
   InlineStructureParser inlineStructureParser;
+
   /// Parser for links and images.
   LinkImageParser linkImageParser;
+
   /// Parser for autolinks.
   AutolinkParser autolinkParser;
+
   /// Parser for inline html.
   InlineHtmlParser inlineHtmlParser;
+
   /// Parser for ellipsis.
   EllipsisParser ellipsisParser;
+
   /// Parser for mdash and ndash.
   MNDashParser mnDashParser;
+
   /// Parser for arbitrary strings.
   StrParser strParser;
 

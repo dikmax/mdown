@@ -25,7 +25,8 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
     HttpClientResponse response = await request.close();
     dynamic json =
         await response.transform(UTF8.decoder).transform(JSON.decoder).first;
-    String result = 'final Map<String, String> _\$${element.displayName} = new HashMap<String, String>.from(<String, String>{\n';
+    String result =
+        'final Map<String, String> _\$${element.displayName} = new HashMap<String, String>.from(<String, String>{\n';
     json.forEach((String k, dynamic v) {
       Match match = r.firstMatch(k);
       if (match != null) {

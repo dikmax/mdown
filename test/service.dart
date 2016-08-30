@@ -271,8 +271,8 @@ void serviceTests() {
         t.expect(blockquote.toString(), t.equals('Blockquote [ThematicBreak]'));
       });
       t.test('==', () {
-        t.expect(blockquote, t.equals(new Blockquote(
-            <Block>[new ThematicBreak()])));
+        t.expect(
+            blockquote, t.equals(new Blockquote(<Block>[new ThematicBreak()])));
       });
       t.test('!=', () {
         t.expect(blockquote, t.isNot(t.equals(new Blockquote(<Block>[]))));
@@ -286,7 +286,8 @@ void serviceTests() {
         t.expect(listItem.toString(), t.equals('ListItem [ThematicBreak]'));
       });
       t.test('==', () {
-        t.expect(listItem, t.equals(new ListItem(<Block>[new ThematicBreak()])));
+        t.expect(
+            listItem, t.equals(new ListItem(<Block>[new ThematicBreak()])));
       });
       t.test('!=', () {
         t.expect(listItem, t.isNot(t.equals(new ListItem(<Block>[]))));
@@ -616,7 +617,6 @@ void serviceTests() {
         t.expect(apostrophe, t.isNot(t.equals(new MDash())));
       });
     });
-
 
     t.group('Emph', () {
       Emph emph = new Emph(<Inline>[new Str('Emph')]);

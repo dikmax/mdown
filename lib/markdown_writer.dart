@@ -347,7 +347,9 @@ class _InlineRenderer {
           write('---');
         } else if (inline is NDash) {
           write('--');
-        } else if (inline is SingleOpenQuote || inline is SingleCloseQuote || inline is Apostrophe) {
+        } else if (inline is SingleOpenQuote ||
+            inline is SingleCloseQuote ||
+            inline is Apostrophe) {
           write('\'');
         } else if (inline is DoubleOpenQuote || inline is DoubleCloseQuote) {
           write('"');

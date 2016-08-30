@@ -9,7 +9,7 @@ class MNDashParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     int length = text.length;
     int count = 0;
-    while(offset < length && text.codeUnitAt(offset) == _minusCodeUnit) {
+    while (offset < length && text.codeUnitAt(offset) == _minusCodeUnit) {
       count++;
       offset++;
     }
@@ -20,15 +20,17 @@ class MNDashParser extends AbstractParser<Inlines> {
       } else if (count % 2 == 0) {
         result = new List<Inline>.filled(count ~/ 2, new NDash());
       } else if (count % 3 == 2) {
-        result = new List<Inline>.filled(count ~/ 3, new MDash(), growable: true);
+        result =
+            new List<Inline>.filled(count ~/ 3, new MDash(), growable: true);
         result.add(new NDash());
-      } else { // count % 3 == 1
-        result = new List<Inline>.filled((count - 4) ~/ 3, new MDash(), growable: true);
+      } else {
+        // count % 3 == 1
+        result = new List<Inline>.filled((count - 4) ~/ 3, new MDash(),
+            growable: true);
         result.add(new NDash());
         result.add(new NDash());
       }
-      return new ParseResult<Inlines>.success(
-          new Inlines.from(result), offset);
+      return new ParseResult<Inlines>.success(new Inlines.from(result), offset);
     }
 
     return new ParseResult<Inlines>.failure();

@@ -4342,6 +4342,12 @@ final Map<String, String> _$strikeoutTests = <String, String>{
   r'''Ins~~e~~ide w~~a~~ord
 ''': r'''<p>Ins<del>e</del>ide w<del>a</del>ord</p>
 ''',
+  r'''~~~Strikeout text~~~
+''': r'''<p>~<del>Strikeout text</del>~</p>
+''',
+  r'''~~~~Strikeout text~~~~
+''': r'''<p><del><del>Strikeout text</del></del></p>
+''',
   r'''~\~No strikeout~~
 ''': r'''<p>~~No strikeout~~</p>
 ''',

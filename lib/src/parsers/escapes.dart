@@ -7,8 +7,7 @@ class EscapesParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    if (offset + 1 < text.length &&
-        text.codeUnitAt(offset) == _slashCodeUnit) {
+    if (offset + 1 < text.length && text.codeUnitAt(offset) == _slashCodeUnit) {
       int codeUnit = text.codeUnitAt(offset + 1);
       if (_escapableCodes.contains(codeUnit)) {
         return new ParseResult<Inlines>.success(

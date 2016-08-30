@@ -16,8 +16,7 @@ class _Delim {
     if (charCode != delim.charCode) {
       return 0;
     }
-    if (charCode == _singleQuoteCodeUnit ||
-        charCode == _doubleQuoteCodeUnit) {
+    if (charCode == _singleQuoteCodeUnit || charCode == _doubleQuoteCodeUnit) {
       return 1; // Always closes.
     }
     if ((canClose || delim.canOpen) && (count + delim.count) % 3 == 0) {
@@ -41,11 +40,15 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   /// Constructor.
   InlineStructureParser(ParsersContainer container) : super(container) {
     this._delimitersChars =
-        new Set<int>.from(<int>[_starCodeUnit, _unredscoreCodeUnit]);
+        new Set<int>.from(<int>[_starCodeUnit, _underscoreCodeUnit]);
 
     if (container.options.smartPunctuation) {
       _delimitersChars.add(_singleQuoteCodeUnit);
       _delimitersChars.add(_doubleQuoteCodeUnit);
+    }
+
+    if (container.options.strikeout) {
+      _delimitersChars.add(_tildeCodeUnit);
     }
   }
 
@@ -73,8 +76,9 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       container.inlineCodeParser
     ];
 
-    _inlineParsers[_openBracketCodeUnit] =
-        <AbstractParser<Iterable<Inline>>>[container.linkImageParser];
+    _inlineParsers[_openBracketCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      container.linkImageParser
+    ];
 
     _inlineParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.autolinkParser
@@ -122,7 +126,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
     bool canOpen = leftFlanking;
     bool canClose = rightFlanking;
-    if (charCode == _unredscoreCodeUnit) {
+    if (charCode == _underscoreCodeUnit) {
       canOpen = canOpen && (!rightFlanking || punctuationBefore);
       canClose = canClose && (!leftFlanking || punctuationAfter);
     } else if (charCode == _singleQuoteCodeUnit ||
@@ -227,7 +231,17 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
                 Inlines itemRes = openDelim.inlines;
 
-                if (delim.charCode == _unredscoreCodeUnit ||
+                if (delim.charCode == _tildeCodeUnit) {
+                  int delimsLeft = countCloses;
+                  while (delimsLeft >= 2) {
+                    itemRes = new Inlines.single(new Strikeout(itemRes));
+                    delimsLeft -= 2;
+                  }
+                  if (delimsLeft == 1) {
+                    itemRes.insert(0, new Str('~'));
+                    itemRes.add(new Str('~'));
+                  }
+                } else if (delim.charCode == _underscoreCodeUnit ||
                     delim.charCode == _starCodeUnit) {
                   int delimsLeft = countCloses;
                   if ((delimsLeft & 1) == 1) {
