@@ -49,11 +49,11 @@ Test #7
 <p>~<sub>No strikeout</sub>~</p>
 ````````````````````````````````
 
-Test #8 (non-breaking space)
+Test #8
 ```````````````````````````````` example
 ~~No\ strikeout~~
 .
-<p><del>No strikeout</del></p>
+<p><del>No\ strikeout</del></p>
 ````````````````````````````````
 
 Test #9
@@ -67,14 +67,14 @@ Test #10
 ```````````````````````````````` example
 ~~~No\ strikeout~~~
 .
-<p><del><sub>No strikeout</sub></del></p>
+<p><sub><del>No strikeout</del></sub></p>
 ````````````````````````````````
 
 Test #11
 ```````````````````````````````` example
 ~~~No strikeout~~~
 .
-<p><del>~No strikeout~</del></p>
+<p>~<del>No strikeout</del>~</p>
 ````````````````````````````````
 
 Test #12

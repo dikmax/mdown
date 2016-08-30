@@ -132,8 +132,14 @@ class DocumentParser extends AbstractParser<Document> {
       ];
     }
 
-    if (container.options.strikeout) {
+    if (container.options.strikeout || container.options.subscript) {
       _inlineParsers[_tildeCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+        container.inlineStructureParser
+      ];
+    }
+
+    if (container.options.superscript) {
+      _inlineParsers[_caretCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
     }

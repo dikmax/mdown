@@ -39,24 +39,35 @@ void main() {
   tests("Strikeout spec", specification,
       mdToHtml2Test(new Options(strikeout: true)));
 
-  return;
   // Subscript
   tests("Subscript", subscript, mdToHtmlTest(new Options(subscript: true)));
+  tests("Subscript", subscript, mdToHtml2Test(new Options(subscript: true)));
   tests("Subscript spec", specification,
       mdToHtmlTest(new Options(subscript: true)));
+  tests("Subscript spec", specification,
+      mdToHtml2Test(new Options(subscript: true)));
 
   // Superscript
   tests(
       "Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
+  tests(
+      "Superscript", superscript, mdToHtml2Test(new Options(superscript: true)));
   tests("Superscript spec", specification,
       mdToHtmlTest(new Options(superscript: true)));
+  tests("Superscript spec", specification,
+      mdToHtml2Test(new Options(superscript: true)));
 
-  // Strikeout
+  // Strikeout and subscript
   tests("Strikeout and subscript", strikeoutAndSubscript,
       mdToHtmlTest(new Options(strikeout: true, subscript: true)));
+  tests("Strikeout and subscript", strikeoutAndSubscript,
+      mdToHtml2Test(new Options(strikeout: true, subscript: true)));
   tests("Strikeout and subscript spec", specification,
       mdToHtmlTest(new Options(strikeout: true, subscript: true)));
+  tests("Strikeout and subscript spec", specification,
+      mdToHtml2Test(new Options(strikeout: true, subscript: true)));
 
+  return;
   // TeX Math between dollars
   tests("TeX math dollars", texMathDollars,
       mdToHtmlTest(new Options(texMathDollars: true)));

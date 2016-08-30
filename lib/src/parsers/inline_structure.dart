@@ -6,8 +6,11 @@ class _Delim {
   final bool canOpen;
   final bool canClose;
 
-  // Used for unmathed single quote
+  // Used for unmatched single quote
   bool matched = false;
+
+  /// Required for subscript and superscript as they cannot contain space.
+  bool containsSpace = false;
   Inlines inlines = new Inlines();
 
   _Delim(this.charCode, this.count, this.canOpen, this.canClose);
@@ -27,6 +30,48 @@ class _Delim {
   }
 }
 
+/// Space inline
+class _EscapedSpace extends Inline {
+  static final _EscapedSpace _instance = new _EscapedSpace._internal();
+
+  /// Constructor
+  factory _EscapedSpace() {
+    return _instance;
+  }
+
+  _EscapedSpace._internal();
+
+  @override
+  String toString() => "_EscapedSpace";
+
+  @override
+  bool operator ==(dynamic obj) => obj is _EscapedSpace;
+
+  @override
+  int get hashCode => 0;
+}
+
+/// Tab inline
+class _EscapedTab extends Inline {
+  static final _EscapedTab _instance = new _EscapedTab._internal();
+
+  /// Constructor
+  factory _EscapedTab() {
+    return _instance;
+  }
+
+  _EscapedTab._internal();
+
+  @override
+  String toString() => "_EscapedTab";
+
+  @override
+  bool operator ==(dynamic obj) => obj is _EscapedTab;
+
+  @override
+  int get hashCode => 0;
+}
+
 /// Parsing emphasis, strongs, smartquotes, etc.
 class InlineStructureParser extends AbstractParser<Inlines> {
   static final RegExp _spaceRegExp = new RegExp(r'\s');
@@ -35,12 +80,16 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
   Set<int> _delimitersChars;
 
+  Set<int> _intrawordDelimetersChars;
+
   Map<int, List<AbstractParser<Iterable<Inline>>>> _inlineParsers;
 
   /// Constructor.
   InlineStructureParser(ParsersContainer container) : super(container) {
     this._delimitersChars =
         new Set<int>.from(<int>[_starCodeUnit, _underscoreCodeUnit]);
+
+    this._intrawordDelimetersChars = new Set<int>.from(<int>[_starCodeUnit]);
 
     if (container.options.smartPunctuation) {
       _delimitersChars.add(_singleQuoteCodeUnit);
@@ -49,6 +98,16 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
     if (container.options.strikeout) {
       _delimitersChars.add(_tildeCodeUnit);
+    }
+
+    if (container.options.subscript) {
+      _delimitersChars.add(_tildeCodeUnit);
+      _intrawordDelimetersChars.add(_tildeCodeUnit);
+    }
+
+    if (container.options.superscript) {
+      _delimitersChars.add(_caretCodeUnit);
+      _intrawordDelimetersChars.add(_caretCodeUnit);
     }
   }
 
@@ -112,13 +171,44 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     }
 
     int count = endOffset - offset;
-    String charBefore = offset == 0 ? '\n' : text[offset - 1];
-    String charAfter = endOffset < length ? text[endOffset] : '\n';
+
+    if (count > 1 &&
+        (charCode == _tildeCodeUnit && !container.options.strikeout ||
+            charCode == _caretCodeUnit)) {
+      // Subscript and superscript can only go alone.
+      return new _Delim(charCode, count, false, false);
+    }
+
+    int codeUnitBefore = _newLineCodeUnit;
+    int i = 1;
+    while (offset - i >= 0) {
+      int codeUnit = text.codeUnitAt(offset - i);
+      if (!_intrawordDelimetersChars.contains(codeUnit)) {
+        codeUnitBefore = codeUnit;
+        break;
+      }
+      i++;
+    }
+
+    int codeUnitAfter = _newLineCodeUnit;
+    i = 0;
+    while (endOffset + i < length) {
+      int codeUnit = text.codeUnitAt(endOffset + i);
+      if (!_intrawordDelimetersChars.contains(codeUnit)) {
+        codeUnitAfter = codeUnit;
+        break;
+      }
+      i++;
+    }
+
+    String charBefore = new String.fromCharCode(codeUnitBefore);
+    String charAfter = new String.fromCharCode(codeUnitAfter);
 
     bool spaceAfter = _spaceRegExp.hasMatch(charAfter);
     bool spaceBefore = _spaceRegExp.hasMatch(charBefore);
     bool punctuationAfter = _punctuationRegExp.hasMatch(charAfter);
     bool punctuationBefore = _punctuationRegExp.hasMatch(charBefore);
+
     bool leftFlanking =
         !spaceAfter && (!punctuationAfter || spaceBefore || punctuationBefore);
     bool rightFlanking =
@@ -157,6 +247,38 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     });
     stack.length = skip;
 
+    return result;
+  }
+
+  /// Replaces _EscapedSpace and _EscapedTab with correspondent inlines.
+  Inlines unescapeSpaces(Iterable<Inline> items, bool success) {
+    Inlines result = new Inlines();
+    for (Inline item in items) {
+      if (item is _EscapedSpace) {
+        if (!success) {
+          result.add(new Str('\\'));
+        }
+        result.add(new Space());
+      } else if (item is _EscapedTab) {
+        if (!success) {
+          result.add(new Str('\\'));
+        }
+        result.add(new Tab());
+      } else {
+        if (item is Strong) {
+          item.contents = unescapeSpaces(item.contents, success);
+        } else if (item is Emph) {
+          item.contents = unescapeSpaces(item.contents, success);
+        } else if (item is Strikeout) {
+          item.contents = unescapeSpaces(item.contents, success);
+        } else if (item is Link) {
+          item.label = unescapeSpaces(item.label, success);
+        } else if (item is Image) {
+          item.label = unescapeSpaces(item.label, success);
+        }
+        result.add(item);
+      }
+    }
     return result;
   }
 
@@ -231,28 +353,52 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
                 Inlines itemRes = openDelim.inlines;
 
-                if (delim.charCode == _tildeCodeUnit) {
-                  int delimsLeft = countCloses;
-                  while (delimsLeft >= 2) {
-                    itemRes = new Inlines.single(new Strikeout(itemRes));
-                    delimsLeft -= 2;
-                  }
-                  if (delimsLeft == 1) {
-                    itemRes.insert(0, new Str('~'));
-                    itemRes.add(new Str('~'));
-                  }
-                } else if (delim.charCode == _underscoreCodeUnit ||
-                    delim.charCode == _starCodeUnit) {
-                  int delimsLeft = countCloses;
-                  if ((delimsLeft & 1) == 1) {
-                    itemRes = new Inlines.single(new Emph(itemRes));
-                    delimsLeft--;
-                  }
+                switch (delim.charCode) {
+                  case _tildeCodeUnit:
+                    int delimsLeft = countCloses;
+                    while (delimsLeft >= 2) {
+                      itemRes = new Inlines.single(new Strikeout(itemRes));
+                      delimsLeft -= 2;
+                    }
+                    if (delimsLeft == 1) {
+                      if (container.options.subscript) {
+                        if (!openDelim.containsSpace) {
+                          itemRes = unescapeSpaces(itemRes, true);
+                          itemRes = new Inlines.single(new Subscript(itemRes));
+                        } else {
+                          itemRes.insert(0, new Str('~'));
+                          itemRes.add(new Str('~'));
+                        }
+                      } else {
+                        itemRes.insert(0, new Str('~'));
+                        itemRes.add(new Str('~'));
+                      }
+                    }
+                    break;
 
-                  while (delimsLeft > 0) {
-                    itemRes = new Inlines.single(new Strong(itemRes));
-                    delimsLeft -= 2;
-                  }
+                  case _caretCodeUnit:
+                    if (!openDelim.containsSpace) {
+                      itemRes = unescapeSpaces(itemRes, true);
+                      itemRes = new Inlines.single(new Superscript(itemRes));
+                    } else {
+                      itemRes.insert(0, new Str('^'));
+                      itemRes.add(new Str('^'));
+                    }
+                    break;
+
+                  case _underscoreCodeUnit:
+                  case _starCodeUnit:
+                    int delimsLeft = countCloses;
+                    if ((delimsLeft & 1) == 1) {
+                      itemRes = new Inlines.single(new Emph(itemRes));
+                      delimsLeft--;
+                    }
+
+                    while (delimsLeft > 0) {
+                      itemRes = new Inlines.single(new Strong(itemRes));
+                      delimsLeft -= 2;
+                    }
+                    break;
                 }
                 openDelim.inlines = itemRes;
 
@@ -289,6 +435,27 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       }
 
       int codeUnit = text.codeUnitAt(offset);
+
+      // Special processing for subscript and superscript.
+      // They cannot contain unescaped spaces.
+      if (container.options.subscript || container.options.superscript) {
+        // Check for space inside subscript or superscript
+        if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
+          stack.forEach((_Delim delim) => delim.containsSpace = true);
+        } else if (codeUnit == _slashCodeUnit) {
+          if (offset + 1 < length) {
+            int codeUnit2 = text.codeUnitAt(offset + 1);
+            if (codeUnit2 == _spaceCodeUnit || codeUnit2 == _tabCodeUnit) {
+              stack.last.inlines.add(codeUnit2 == _spaceCodeUnit
+                  ? new _EscapedSpace()
+                  : new _EscapedTab());
+              offset += 2;
+              continue;
+            }
+          }
+        }
+      }
+
       if (codeUnit == _exclamationMarkCodeUnit &&
           offset + 1 < length &&
           text.codeUnitAt(offset + 1) == _openBracketCodeUnit) {
@@ -331,6 +498,10 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     }
 
     result.addAll(_buildStack(stack, 0));
+
+    if (container.options.subscript || container.options.superscript) {
+      result = unescapeSpaces(result, false);
+    }
 
     return new ParseResult<Inlines>.success(result, offset);
   }
