@@ -70,7 +70,6 @@ void main() {
   tests("Strikeout and subscript spec", specification,
       strikeoutSubscriptMHMHTestFunc);
 
-  return;
   // TeX Math between dollars
   TestFunc texDollarsMHTestFunc = mhTest(new Options(texMathDollars: true));
   TestFunc texDollarsMHMHTestFunc = mhmhTest(new Options(texMathDollars: true));

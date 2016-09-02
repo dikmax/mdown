@@ -72,6 +72,9 @@ class ParsersContainer {
   /// Parser for mdash and ndash.
   MNDashParser mnDashParser;
 
+  /// Parser for TeX Math between dollars.
+  TexMathDollarsParser texMathDollarsParser;
+
   /// Parser for arbitrary strings.
   StrParser strParser;
 
@@ -105,6 +108,7 @@ class ParsersContainer {
     inlineHtmlParser = new InlineHtmlParser(this);
     ellipsisParser = new EllipsisParser(this);
     mnDashParser = new MNDashParser(this);
+    texMathDollarsParser = new TexMathDollarsParser(this);
     strParser = new StrParser(this);
 
     // Document
@@ -138,6 +142,7 @@ class ParsersContainer {
     inlineHtmlParser.init();
     ellipsisParser.init();
     mnDashParser.init();
+    texMathDollarsParser.init();
     strParser.init();
 
     // Document

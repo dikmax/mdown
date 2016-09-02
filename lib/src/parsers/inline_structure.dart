@@ -156,6 +156,12 @@ class InlineStructureParser extends AbstractParser<Inlines> {
         container.mnDashParser
       ];
     }
+
+    if (container.options.texMathDollars) {
+      _inlineParsers[_dollarCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+        container.texMathDollarsParser
+      ];
+    }
   }
 
   _Delim _scanDelims(String text, int offset) {

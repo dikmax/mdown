@@ -1,6 +1,6 @@
 part of md_proc.src.parsers;
 
-/// Parser for arbitratry string.
+/// Parser for arbitrary string.
 class StrParser extends AbstractParser<Inlines> {
   final Set<int> _specialChars = new Set<int>.from(<int>[
     _ampersandCodeUnit,
@@ -35,6 +35,10 @@ class StrParser extends AbstractParser<Inlines> {
 
     if (container.options.superscript) {
       _specialChars.add(_caretCodeUnit);
+    }
+
+    if (container.options.texMathDollars) {
+      _specialChars.add(_dollarCodeUnit);
     }
   }
 
