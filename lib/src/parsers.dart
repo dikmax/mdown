@@ -21,6 +21,7 @@ part 'parsers/html_block_7.dart';
 part 'parsers/para_setext_heading.dart';
 part 'parsers/blockquote_list.dart';
 part 'parsers/link_reference.dart';
+part 'parsers/raw_tex.dart';
 
 part 'parsers/hard_line_break.dart';
 part 'parsers/escapes.dart';

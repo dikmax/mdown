@@ -430,6 +430,12 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
         container.htmlBlock7Parser
       ];
     }
+
+    if (container.options.rawTex) {
+      _blockParsers[_backslashCodeUnit] = <AbstractParser<Iterable<Block>>>[
+        container.rawTexParser
+      ];
+    }
   }
 
   @override

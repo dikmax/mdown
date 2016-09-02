@@ -66,6 +66,12 @@ class DocumentParser extends AbstractParser<Document> {
       ];
     }
 
+    if (container.options.rawTex) {
+      _blockParsers[_backslashCodeUnit] = <AbstractParser<Iterable<Block>>>[
+        container.rawTexParser
+      ];
+    }
+
     for (int char = _zeroCodeUnit; char <= _nineCodeUnit; char++) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blockquoteListParser

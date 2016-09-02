@@ -113,16 +113,16 @@ void main() {
   tests("TeX math double backslash spec", specification, texDoubleMHTestFunc);
   tests("TeX math double backslash spec", specification, texDoubleMHMHTestFunc);
 
-  return;
   // Raw TeX
   Set<int> rawTexContradictions = new Set<int>.from(<int>[]);
-  tests("Raw TeX", rawTex, mhTest(new Options(rawTex: true)));
-  tests(
-      "Raw TeX spec",
-      specification,
-      mhTest(new Options(rawTex: true),
-          (_, int num) => !rawTexContradictions.contains(num)));
+  TestFunc rawTexMHTestFunc = mhTest(new Options(rawTex: true));
+  TestFunc rawTexMHMHTestFunc = mhmhTest(new Options(rawTex: true));
+  tests("Raw TeX", rawTex, rawTexMHTestFunc);
+  tests("Raw TeX", rawTex, rawTexMHMHTestFunc);
+  tests("Raw TeX spec", specification, rawTexMHTestFunc);
+  tests("Raw TeX spec", specification, rawTexMHMHTestFunc);
 
+  return;
   // Markdown to markdown tests
   // tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));
 
