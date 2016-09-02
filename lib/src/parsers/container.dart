@@ -75,6 +75,9 @@ class ParsersContainer {
   /// Parser for TeX Math between dollars.
   TexMathDollarsParser texMathDollarsParser;
 
+  /// Parser for TeX Math between `\[...\]` and `\(...\)`.
+  TexMathSingleBackslashParser texMathSingleBackslashParser;
+
   /// Parser for arbitrary strings.
   StrParser strParser;
 
@@ -109,6 +112,7 @@ class ParsersContainer {
     ellipsisParser = new EllipsisParser(this);
     mnDashParser = new MNDashParser(this);
     texMathDollarsParser = new TexMathDollarsParser(this);
+    texMathSingleBackslashParser = new TexMathSingleBackslashParser(this);
     strParser = new StrParser(this);
 
     // Document
@@ -143,6 +147,7 @@ class ParsersContainer {
     ellipsisParser.init();
     mnDashParser.init();
     texMathDollarsParser.init();
+    texMathSingleBackslashParser.init();
     strParser.init();
 
     // Document

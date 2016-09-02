@@ -40,6 +40,13 @@ class LinkImageParser extends AbstractParser<Inlines> {
       container.inlineHtmlParser,
       container.autolinkParser
     ];
+
+    if (container.options.texMathDollars) {
+      _higherPriorityInlineParsers[_dollarCodeUnit] =
+        <AbstractParser<Iterable<Inline>>>[
+        container.texMathDollarsParser
+      ];
+    }
   }
 
   // TODO reorder parse to put all fallbacks in the end.
