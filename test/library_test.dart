@@ -78,18 +78,30 @@ void main() {
   tests("TeX math dollars spec", specification, texDollarsMHTestFunc);
   tests("TeX math dollars spec", specification, texDollarsMHMHTestFunc);
 
-  return;
   // TeX Math between backslashed `()` or `[]`
-  Set<int> texMathSingleBackslashContradictions =
-      new Set<int>.from(<int>[282, 475, 491]);
-  tests("TeX math single backslash", texMathSingleBackslash,
-      mhTest(new Options(texMathSingleBackslash: true)));
+  TestFunc texSingleMHTestFunc =
+      mhTest(new Options(texMathSingleBackslash: true));
+  TestFunc texSingleMHMHTestFunc =
+      mhmhTest(new Options(texMathSingleBackslash: true));
   tests(
-      "TeX math single backslash spec",
-      specification,
-      mhTest(new Options(texMathSingleBackslash: true),
-          (_, int num) => !texMathSingleBackslashContradictions.contains(num)));
+      "TeX math single backslash", texMathSingleBackslash, texSingleMHTestFunc);
+  tests("TeX math single backslash", texMathSingleBackslash,
+      texSingleMHMHTestFunc);
 
+  Set<int> texMathSingleBackslashContradictions =
+      new Set<int>.from(<int>[287, 479, 495]);
+  TestFunc texSingleSpecMHTestFunc = mhTest(
+      new Options(texMathSingleBackslash: true),
+      (_, int num) => !texMathSingleBackslashContradictions.contains(num));
+  TestFunc texSingleSpecMHMHTestFunc = mhmhTest(
+      new Options(texMathSingleBackslash: true),
+      (_, int num) => !texMathSingleBackslashContradictions.contains(num));
+  tests(
+      "TeX math single backslash spec", specification, texSingleSpecMHTestFunc);
+  tests("TeX math single backslash spec", specification,
+      texSingleSpecMHMHTestFunc);
+
+  return;
   // TeX Math between double backslashed `()` or `[]`
   Set<int> texMathDoubleBackslashContradictions = new Set<int>.from(<int>[]);
   tests("TeX math double backslash", texMathDoubleBackslash,
