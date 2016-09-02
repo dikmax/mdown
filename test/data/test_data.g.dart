@@ -3852,7 +3852,7 @@ final Map<String, String> _$markdownToMarkdownTests = <String, String>{
   r'''Paragraph
         Paragraph
 ''': r'''Paragraph
-        Paragraph
+Paragraph
 ''',
   r'''\*&nbsp;a&nbsp;*
 ''': r'''\*&nbsp;a&nbsp;\*
@@ -3864,8 +3864,8 @@ final Map<String, String> _$markdownToMarkdownTests = <String, String>{
   \-\-\-
   \_\_\_
 ''': r'''\***
-  \---
-  \___
+\---
+\___
 ''',
   r'''\*\*\*
 
@@ -3903,12 +3903,12 @@ final Map<String, String> _$markdownToMarkdownTests = <String, String>{
 \___
 
 \***
-  \---
-  \___
+\---
+\___
 
 \***
-   \---
-   \___
+\---
+\___
 
     \*\*\*
     \-\-\-

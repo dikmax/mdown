@@ -122,10 +122,10 @@ void main() {
   tests("Raw TeX spec", specification, rawTexMHTestFunc);
   tests("Raw TeX spec", specification, rawTexMHMHTestFunc);
 
-  return;
   // Markdown to markdown tests
-  // tests("md2md [strict]", markdownToMarkdown, mdToMdTest(Options.strict));
+  tests("md2md [strict]", markdownToMarkdown, mhmTest(Options.strict));
 
+  return;
   // Custom classes
   customClassesTests();
 
