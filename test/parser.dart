@@ -169,12 +169,11 @@ TestFunc mhmhTest(Options options, [FilterFunc filter = emptyFilter]) {
 }
 
 /// Generate md->html->md tests
-/*
-TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) =>
-    (int num, String md, String destMd) {
-      CommonMarkParser parser = new CommonMarkParser(options);
-      MarkdownWriter writer = new MarkdownWriter(options);
+TestFunc mhmTest(Options options, [FilterFunc filter = emptyFilter]) {
+  CommonMarkParser parser = new CommonMarkParser(options);
+  MarkdownWriter writer = new MarkdownWriter(options);
 
+  return (int num, String md, String destMd) {
       if (filter(TestType.markdown, num)) {
         t.test(num.toString(), () {
           String generatedMarkdown = writer.write(parser.parse(md));
@@ -182,7 +181,8 @@ TestFunc mdToMdTest(Options options, [FilterFunc filter = emptyFilter]) =>
               generatedMarkdown, new _ExampleDescription(t.equals(destMd), md));
         });
       }
-    };*/
+    };
+}
 
 /*
 void preprocessTest() {
