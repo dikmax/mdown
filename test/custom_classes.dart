@@ -9,7 +9,7 @@ void customClassesTests() {
   tests(
       "Tex math custom classes",
       texMathCustomClasses,
-      mdToHtmlTest(new Options(
+      mhTest(new Options(
           texMathDollars: true,
           inlineTexMathClasses: <String>['custom_inline'],
           displayTexMathClasses: <String>['custom_display'])));

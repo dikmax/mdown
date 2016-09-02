@@ -10,98 +10,104 @@ import 'data/test_data.dart';
 void main() {
   serviceTests();
 
+  TestFunc strictMHTestFunc = mhTest(Options.strict);
+  TestFunc strictMHMHTestFunc = mhmhTest(Options.strict);
+
   // CommonMark tests
-  tests("CommonMark [strict]", specification, mdToHtmlTest(Options.strict));
-  tests("CommonMark [strict]", specification, mdToHtml2Test(Options.strict));
+  tests("CommonMark [strict]", specification, strictMHTestFunc);
+  tests("CommonMark [strict]", specification, strictMHMHTestFunc);
 
   // Additional tests
   //tests("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
-  tests("Additional [strict]", additionalMarkdownToHtml,
-      mdToHtmlTest(Options.strict));
-  tests("Additional [strict]", additionalMarkdownToHtml,
-      mdToHtml2Test(Options.strict));
+  tests("Additional [strict]", additionalMarkdownToHtml, strictMHTestFunc);
+  tests("Additional [strict]", additionalMarkdownToHtml, strictMHMHTestFunc);
 
   // commonmark.js regression tests
-  tests("Regressions [strict]", regression, mdToHtmlTest(Options.strict));
-  tests("Regressions [strict]", regression, mdToHtml2Test(Options.strict));
+  tests("Regressions [strict]", regression, strictMHTestFunc);
+  tests("Regressions [strict]", regression, strictMHMHTestFunc);
 
   // SmartPunct
-  tests("SmartPunct [commonmark]", smartPunctuation,
-      mdToHtmlTest(Options.commonmark));
-  tests("SmartPunct [commonmark]", smartPunctuation,
-      mdToHtml2Test(Options.commonmark));
+  TestFunc commonmarkMHTestFunc = mhTest(Options.commonmark);
+  TestFunc commonmarkMHMHTestFunc = mhmhTest(Options.commonmark);
+  tests("SmartPunct [commonmark]", smartPunctuation, commonmarkMHTestFunc);
+  tests("SmartPunct [commonmark]", smartPunctuation, commonmarkMHMHTestFunc);
 
   // Strikeout
-  tests("Strikeout", strikeout, mdToHtmlTest(new Options(strikeout: true)));
-  tests("Strikeout", strikeout, mdToHtml2Test(new Options(strikeout: true)));
-  tests("Strikeout spec", specification,
-      mdToHtmlTest(new Options(strikeout: true)));
-  tests("Strikeout spec", specification,
-      mdToHtml2Test(new Options(strikeout: true)));
+  TestFunc strikeoutMHTestFunc = mhTest(new Options(strikeout: true));
+  TestFunc strikeoutMHMHTestFunc = mhmhTest(new Options(strikeout: true));
+  tests("Strikeout", strikeout, strikeoutMHTestFunc);
+  tests("Strikeout", strikeout, strikeoutMHMHTestFunc);
+  tests("Strikeout spec", specification, strikeoutMHTestFunc);
+  tests("Strikeout spec", specification, strikeoutMHMHTestFunc);
 
   // Subscript
-  tests("Subscript", subscript, mdToHtmlTest(new Options(subscript: true)));
-  tests("Subscript", subscript, mdToHtml2Test(new Options(subscript: true)));
-  tests("Subscript spec", specification,
-      mdToHtmlTest(new Options(subscript: true)));
-  tests("Subscript spec", specification,
-      mdToHtml2Test(new Options(subscript: true)));
+  TestFunc subscriptMHTestFunc = mhTest(new Options(subscript: true));
+  TestFunc subscriptMHMHTestFunc = mhmhTest(new Options(subscript: true));
+  tests("Subscript", subscript, subscriptMHTestFunc);
+  tests("Subscript", subscript, subscriptMHMHTestFunc);
+  tests("Subscript spec", specification, subscriptMHTestFunc);
+  tests("Subscript spec", specification, subscriptMHMHTestFunc);
 
   // Superscript
-  tests(
-      "Superscript", superscript, mdToHtmlTest(new Options(superscript: true)));
-  tests(
-      "Superscript", superscript, mdToHtml2Test(new Options(superscript: true)));
-  tests("Superscript spec", specification,
-      mdToHtmlTest(new Options(superscript: true)));
-  tests("Superscript spec", specification,
-      mdToHtml2Test(new Options(superscript: true)));
+  TestFunc superscriptMHTestFunc = mhTest(new Options(superscript: true));
+  TestFunc superscriptMHMHTestFunc = mhmhTest(new Options(superscript: true));
+  tests("Superscript", superscript, superscriptMHTestFunc);
+  tests("Superscript", superscript, superscriptMHMHTestFunc);
+  tests("Superscript spec", specification, superscriptMHTestFunc);
+  tests("Superscript spec", specification, superscriptMHMHTestFunc);
 
   // Strikeout and subscript
+  TestFunc strikeoutSubscriptMHTestFunc =
+      mhTest(new Options(strikeout: true, subscript: true));
+  TestFunc strikeoutSubscriptMHMHTestFunc =
+      mhmhTest(new Options(strikeout: true, subscript: true));
   tests("Strikeout and subscript", strikeoutAndSubscript,
-      mdToHtmlTest(new Options(strikeout: true, subscript: true)));
+      strikeoutSubscriptMHTestFunc);
   tests("Strikeout and subscript", strikeoutAndSubscript,
-      mdToHtml2Test(new Options(strikeout: true, subscript: true)));
+      strikeoutSubscriptMHMHTestFunc);
   tests("Strikeout and subscript spec", specification,
-      mdToHtmlTest(new Options(strikeout: true, subscript: true)));
+      strikeoutSubscriptMHTestFunc);
   tests("Strikeout and subscript spec", specification,
-      mdToHtml2Test(new Options(strikeout: true, subscript: true)));
+      strikeoutSubscriptMHMHTestFunc);
 
   return;
   // TeX Math between dollars
-  tests("TeX math dollars", texMathDollars,
-      mdToHtmlTest(new Options(texMathDollars: true)));
-  tests("TeX math dollars spec", specification,
-      mdToHtmlTest(new Options(texMathDollars: true)));
+  TestFunc texDollarsMHTestFunc = mhTest(new Options(texMathDollars: true));
+  TestFunc texDollarsMHMHTestFunc = mhmhTest(new Options(texMathDollars: true));
+  tests("TeX math dollars", texMathDollars, texDollarsMHTestFunc);
+  tests("TeX math dollars", texMathDollars, texDollarsMHMHTestFunc);
+  tests("TeX math dollars spec", specification, texDollarsMHTestFunc);
+  tests("TeX math dollars spec", specification, texDollarsMHMHTestFunc);
 
+  return;
   // TeX Math between backslashed `()` or `[]`
   Set<int> texMathSingleBackslashContradictions =
       new Set<int>.from(<int>[282, 475, 491]);
   tests("TeX math single backslash", texMathSingleBackslash,
-      mdToHtmlTest(new Options(texMathSingleBackslash: true)));
+      mhTest(new Options(texMathSingleBackslash: true)));
   tests(
       "TeX math single backslash spec",
       specification,
-      mdToHtmlTest(new Options(texMathSingleBackslash: true),
+      mhTest(new Options(texMathSingleBackslash: true),
           (_, int num) => !texMathSingleBackslashContradictions.contains(num)));
 
   // TeX Math between double backslashed `()` or `[]`
   Set<int> texMathDoubleBackslashContradictions = new Set<int>.from(<int>[]);
   tests("TeX math double backslash", texMathDoubleBackslash,
-      mdToHtmlTest(new Options(texMathDoubleBackslash: true)));
+      mhTest(new Options(texMathDoubleBackslash: true)));
   tests(
       "TeX math double backslash spec",
       specification,
-      mdToHtmlTest(new Options(texMathDoubleBackslash: true),
+      mhTest(new Options(texMathDoubleBackslash: true),
           (_, int num) => !texMathDoubleBackslashContradictions.contains(num)));
 
   // Raw TeX
   Set<int> rawTexContradictions = new Set<int>.from(<int>[]);
-  tests("Raw TeX", rawTex, mdToHtmlTest(new Options(rawTex: true)));
+  tests("Raw TeX", rawTex, mhTest(new Options(rawTex: true)));
   tests(
       "Raw TeX spec",
       specification,
-      mdToHtmlTest(new Options(rawTex: true),
+      mhTest(new Options(rawTex: true),
           (_, int num) => !rawTexContradictions.contains(num)));
 
   // Markdown to markdown tests
