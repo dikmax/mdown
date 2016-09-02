@@ -38,6 +38,9 @@ class ParsersContainer {
   /// Parser for html blocks using rule 7 from specification.
   HtmlBlock7Parser htmlBlock7Parser;
 
+  /// Parser for raw TeX blocks
+  RawTexParser rawTexParser;
+
   /// Parser for link references.
   LinkReferenceParser linkReferenceParser;
 
@@ -102,6 +105,7 @@ class ParsersContainer {
     thematicBreakParser = new ThematicBreakParser(this);
     htmlBlockParser = new HtmlBlockParser(this);
     htmlBlock7Parser = new HtmlBlock7Parser(this);
+    rawTexParser = new RawTexParser(this);
 
     // Inline parsers
     escapesParser = new EscapesParser(this);
@@ -138,6 +142,7 @@ class ParsersContainer {
     thematicBreakParser.init();
     htmlBlockParser.init();
     htmlBlock7Parser.init();
+    rawTexParser.init();
 
     // Inline parsers
     escapesParser.init();
