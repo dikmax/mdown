@@ -58,6 +58,7 @@ const int _spaceCodeUnit = 32;
 const int _exclamationMarkCodeUnit = 33;
 const int _doubleQuoteCodeUnit = 34;
 const int _sharpCodeUnit = 35;
+const int _dollarCodeUnit = 36;
 const int _ampersandCodeUnit = 38;
 const int _singleQuoteCodeUnit = 39;
 const int _openParenCodeUnit = 40;

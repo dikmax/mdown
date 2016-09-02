@@ -143,6 +143,12 @@ class DocumentParser extends AbstractParser<Document> {
         container.inlineStructureParser
       ];
     }
+
+    if (container.options.texMathDollars) {
+      _inlineParsers[_dollarCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+        container.texMathDollarsParser
+      ];
+    }
   }
 
   @override
