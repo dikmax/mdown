@@ -101,17 +101,19 @@ void main() {
   tests("TeX math single backslash spec", specification,
       texSingleSpecMHMHTestFunc);
 
-  return;
   // TeX Math between double backslashed `()` or `[]`
-  Set<int> texMathDoubleBackslashContradictions = new Set<int>.from(<int>[]);
-  tests("TeX math double backslash", texMathDoubleBackslash,
-      mhTest(new Options(texMathDoubleBackslash: true)));
+  TestFunc texDoubleMHTestFunc =
+      mhTest(new Options(texMathDoubleBackslash: true));
+  TestFunc texDoubleMHMHTestFunc =
+      mhmhTest(new Options(texMathDoubleBackslash: true));
   tests(
-      "TeX math double backslash spec",
-      specification,
-      mhTest(new Options(texMathDoubleBackslash: true),
-          (_, int num) => !texMathDoubleBackslashContradictions.contains(num)));
+      "TeX math double backslash", texMathDoubleBackslash, texDoubleMHTestFunc);
+  tests("TeX math double backslash", texMathDoubleBackslash,
+      texDoubleMHMHTestFunc);
+  tests("TeX math double backslash spec", specification, texDoubleMHTestFunc);
+  tests("TeX math double backslash spec", specification, texDoubleMHMHTestFunc);
 
+  return;
   // Raw TeX
   Set<int> rawTexContradictions = new Set<int>.from(<int>[]);
   tests("Raw TeX", rawTex, mhTest(new Options(rawTex: true)));

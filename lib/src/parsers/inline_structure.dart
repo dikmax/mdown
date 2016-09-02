@@ -123,12 +123,16 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_slashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
+    _inlineParsers[_backslashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
     if (container.options.texMathSingleBackslash) {
-      _inlineParsers[_slashCodeUnit]
+      _inlineParsers[_backslashCodeUnit]
           .add(container.texMathSingleBackslashParser);
     }
-    _inlineParsers[_slashCodeUnit].add(container.escapesParser);
+    if (container.options.texMathDoubleBackslash) {
+      _inlineParsers[_backslashCodeUnit]
+          .add(container.texMathDoubleBackslashParser);
+    }
+    _inlineParsers[_backslashCodeUnit].add(container.escapesParser);
 
     _inlineParsers[_ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.entityParser
@@ -451,7 +455,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
         // Check for space inside subscript or superscript
         if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
           stack.forEach((_Delim delim) => delim.containsSpace = true);
-        } else if (codeUnit == _slashCodeUnit) {
+        } else if (codeUnit == _backslashCodeUnit) {
           if (offset + 1 < length) {
             int codeUnit2 = text.codeUnitAt(offset + 1);
             if (codeUnit2 == _spaceCodeUnit || codeUnit2 == _tabCodeUnit) {

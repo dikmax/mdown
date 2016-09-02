@@ -43,9 +43,22 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
     if (container.options.texMathDollars) {
       _higherPriorityInlineParsers[_dollarCodeUnit] =
-        <AbstractParser<Iterable<Inline>>>[
-        container.texMathDollarsParser
-      ];
+          <AbstractParser<Iterable<Inline>>>[container.texMathDollarsParser];
+    }
+
+    if (container.options.texMathSingleBackslash ||
+        container.options.texMathDoubleBackslash) {
+      _higherPriorityInlineParsers[_backslashCodeUnit] =
+          <AbstractParser<Iterable<Inline>>>[];
+
+      if (container.options.texMathSingleBackslash) {
+        _higherPriorityInlineParsers[_backslashCodeUnit]
+            .add(container.texMathSingleBackslashParser);
+      }
+      if (container.options.texMathDoubleBackslash) {
+        _higherPriorityInlineParsers[_backslashCodeUnit]
+            .add(container.texMathDoubleBackslashParser);
+      }
     }
   }
 
@@ -84,7 +97,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
         offset++;
         continue;
       }
-      if (codeUnit == _slashCodeUnit) {
+      if (codeUnit == _backslashCodeUnit) {
         // Escaped char
         offset += 2;
         if (offset > length) {

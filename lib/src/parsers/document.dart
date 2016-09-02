@@ -83,13 +83,18 @@ class DocumentParser extends AbstractParser<Document> {
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_slashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
+    _inlineParsers[_backslashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
 
     if (container.options.texMathSingleBackslash) {
-      _inlineParsers[_slashCodeUnit]
+      _inlineParsers[_backslashCodeUnit]
           .add(container.texMathSingleBackslashParser);
     }
-    _inlineParsers[_slashCodeUnit].add(container.escapesParser);
+
+    if (container.options.texMathDoubleBackslash) {
+      _inlineParsers[_backslashCodeUnit]
+          .add(container.texMathDoubleBackslashParser);
+    }
+    _inlineParsers[_backslashCodeUnit].add(container.escapesParser);
 
     _inlineParsers[_ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.entityParser

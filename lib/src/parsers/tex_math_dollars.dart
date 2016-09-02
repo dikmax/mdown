@@ -41,7 +41,7 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
     bool found = false;
     while (endOffset < length) {
       int codeUnit = text.codeUnitAt(endOffset);
-      if (codeUnit == _slashCodeUnit) {
+      if (codeUnit == _backslashCodeUnit) {
         endOffset++;
         if (endOffset >= length) {
           break;

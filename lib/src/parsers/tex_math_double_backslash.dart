@@ -1,22 +1,20 @@
 part of md_proc.src.parsers;
 
-/// Parses TeX Match between `\(...\)` and `\[...\]`.
-class TexMathSingleBackslashParser extends AbstractParser<Inlines> {
+/// Parses TeX Match between `\\(...\\)` and `\\[...\\]`.
+class TexMathDoubleBackslashParser extends AbstractParser<Inlines> {
   /// Constructor.
-  TexMathSingleBackslashParser(ParsersContainer container) : super(container);
+  TexMathDoubleBackslashParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) != _backslashCodeUnit) {
+    int length = text.length;
+    if (offset + 2 >= length ||
+        text.codeUnitAt(offset) != _backslashCodeUnit ||
+        text.codeUnitAt(offset + 1) != _backslashCodeUnit) {
       return new ParseResult<Inlines>.failure();
     }
 
-    ++offset;
-    int length = text.length;
-    if (offset >= length) {
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(new Str('\\')), offset);
-    }
+    offset += 2;
     int codeUnit = text.codeUnitAt(offset);
     if (codeUnit != _openParenCodeUnit && codeUnit != _openBracketCodeUnit) {
       return new ParseResult<Inlines>.failure();
@@ -27,9 +25,10 @@ class TexMathSingleBackslashParser extends AbstractParser<Inlines> {
     offset++;
     int endOffset = offset;
     bool found = false;
-    while (endOffset < length - 1) {
+    while (endOffset < length - 2) {
       if (text.codeUnitAt(endOffset) == _backslashCodeUnit &&
-          text.codeUnitAt(endOffset + 1) == closeCodeUnit) {
+          text.codeUnitAt(endOffset + 1) == _backslashCodeUnit &&
+          text.codeUnitAt(endOffset + 2) == closeCodeUnit) {
         found = true;
         break;
       }
@@ -43,10 +42,10 @@ class TexMathSingleBackslashParser extends AbstractParser<Inlines> {
     String math = text.substring(offset, endOffset);
     if (displayMath) {
       return new ParseResult<Inlines>.success(
-          new Inlines.single(new TexMathDisplay(math)), endOffset + 2);
+          new Inlines.single(new TexMathDisplay(math)), endOffset + 3);
     } else {
       return new ParseResult<Inlines>.success(
-          new Inlines.single(new TexMathInline(math)), endOffset + 2);
+          new Inlines.single(new TexMathInline(math)), endOffset + 3);
     }
   }
 }
