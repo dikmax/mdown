@@ -126,45 +126,47 @@ String _tidy(String html) {
   return result.join('\n').trim();
 }
 
-/// Generate md->html and md->html->md->html tests
-TestFunc mdToHtmlTest(Options options, [FilterFunc filter = emptyFilter]) =>
-    (int num, String mdOrig, String html) {
-      CommonMarkParser parser = new CommonMarkParser(options);
-      HtmlWriter writer = new HtmlWriter(options);
+/// Generate md->html tests
+TestFunc mhTest(Options options, [FilterFunc filter = emptyFilter]) {
+  CommonMarkParser parser = new CommonMarkParser(options);
+  HtmlWriter writer = new HtmlWriter(options);
 
-      String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
-      html = html.replaceAll("→", "\t").replaceAll("␣", " ");
+  return (int num, String mdOrig, String html) {
+    if (filter(TestType.html, num)) {
+      t.test('html $num', () {
+        String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
+        html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-      if (filter(TestType.html, num)) {
-        t.test('html $num', () {
-          Document doc = parser.parse(md);
-          t.expect(_tidy(writer.write(doc)),
-              new _ExampleDescription(t.equals(_tidy(html)), mdOrig));
-        });
-      }
-    };
+        Document doc = parser.parse(md);
+        t.expect(_tidy(writer.write(doc)),
+            new _ExampleDescription(t.equals(_tidy(html)), mdOrig));
+      });
+    }
+  };
+}
 
 /// Generate md->html->md->html tests
-TestFunc mdToHtml2Test(Options options, [FilterFunc filter = emptyFilter]) =>
-    (int num, String mdOrig, String html) {
-      CommonMarkParser parser = new CommonMarkParser(options);
-      HtmlWriter writer = new HtmlWriter(options);
-      MarkdownWriter mdWriter = new MarkdownWriter(options);
+TestFunc mhmhTest(Options options, [FilterFunc filter = emptyFilter]) {
+  CommonMarkParser parser = new CommonMarkParser(options);
+  HtmlWriter writer = new HtmlWriter(options);
+  MarkdownWriter mdWriter = new MarkdownWriter(options);
 
-      String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
-      html = html.replaceAll("→", "\t").replaceAll("␣", " ");
+  return (int num, String mdOrig, String html) {
+    if (filter(TestType.markdown, num)) {
+      t.test('markdown $num', () {
+        String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
+        html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-      if (filter(TestType.markdown, num)) {
-        t.test('markdown $num', () {
-          String generatedMarkdown = mdWriter.write(parser.parse(md));
-          Document doc = parser.parse(generatedMarkdown);
-          t.expect(
-              _tidy(writer.write(doc)),
-              new _Example2Description(
-                  t.equals(_tidy(html)), mdOrig, generatedMarkdown));
-        });
-      }
-    };
+        String generatedMarkdown = mdWriter.write(parser.parse(md));
+        Document doc = parser.parse(generatedMarkdown);
+        t.expect(
+            _tidy(writer.write(doc)),
+            new _Example2Description(
+                t.equals(_tidy(html)), mdOrig, generatedMarkdown));
+      });
+    }
+  };
+}
 
 /// Generate md->html->md tests
 /*
