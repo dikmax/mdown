@@ -11,7 +11,7 @@ class StrParser extends AbstractParser<Inlines> {
     _nonBreakableSpaceCodeUnit,
     _newLineCodeUnit,
     _openBracketCodeUnit,
-    _slashCodeUnit,
+    _backslashCodeUnit,
     _spaceCodeUnit,
     _starCodeUnit,
     _tabCodeUnit,
