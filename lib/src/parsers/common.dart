@@ -17,14 +17,14 @@ final RegExp _fencedCodeStartTest =
 final RegExp _thematicBreakTest = new RegExp(
     '^( {0,3})((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$');
 
-final RegExp _htmlBlock1Test =
-    new RegExp(r' {0,3}<(?:script|pre|style)(?:\s|>|$)', caseSensitive: false);
-final RegExp _htmlBlock2Test = new RegExp(r' {0,3}<!--');
-final RegExp _htmlBlock3Test = new RegExp(r' {0,3}<\?');
-final RegExp _htmlBlock4Test = new RegExp(r' {0,3}<!');
-final RegExp _htmlBlock5Test = new RegExp(r' {0,3}<!\[CDATA\[');
-final RegExp _htmlBlock6Test = new RegExp(
-    r' {0,3}</?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|title|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|/?>|$)',
+final Pattern _htmlBlock1Test =
+    new RegExp(r'<(?:script|pre|style)(?:\s|>|$)', caseSensitive: false);
+final Pattern _htmlBlock2Test = '<!--';
+final Pattern _htmlBlock3Test = '<?';
+final Pattern _htmlBlock4Test = '<!';
+final Pattern _htmlBlock5Test = '<!\[CDATA\[';
+final Pattern _htmlBlock6Test = new RegExp(
+    r'</?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|title|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|/?>|$)',
     caseSensitive: false);
 
 const String _htmlTagName = '[A-Za-z][A-Za-z0-9-]*';
@@ -157,97 +157,22 @@ String unescapeAndUnreference(String s) {
 /// Fast checks block, if it starts with [charCodeUnit], taking indent into
 /// account.
 bool fastBlockTest(String text, int offset, int charCodeUnit) {
-  // First char
-  int codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
+  int nonIndentOffset = _skipIndent(text, offset);
 
-  int length = text.length;
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Second char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Third char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Fourth char
-  codeUnit = text.codeUnitAt(offset);
-  return codeUnit == charCodeUnit;
+  return nonIndentOffset != -1 && text.codeUnitAt(nonIndentOffset) == charCodeUnit;
 }
 
 /// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
 /// taking indent into account.
 bool fastBlockTest2(
     String text, int offset, int charCodeUnit1, int charCodeUnit2) {
-  // First char
-  int codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
+  int nonIndentOffset = _skipIndent(text, offset);
+
+  if (nonIndentOffset == -1) {
     return false;
   }
 
-  int length = text.length;
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Second char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Third char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Fourth char
-  codeUnit = text.codeUnitAt(offset);
+  int codeUnit = text.codeUnitAt(nonIndentOffset);
   return codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2;
 }
 
@@ -255,117 +180,26 @@ bool fastBlockTest2(
 /// [charCodeUnit3], taking indent into account.
 bool fastBlockTest3(String text, int offset, int charCodeUnit1,
     int charCodeUnit2, int charCodeUnit3) {
-  // First char
-  int codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit1 ||
-      codeUnit == charCodeUnit2 ||
-      codeUnit == charCodeUnit3) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
+  int nonIndentOffset = _skipIndent(text, offset);
+
+  if (nonIndentOffset == -1) {
     return false;
   }
 
-  int length = text.length;
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Second char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit1 ||
-      codeUnit == charCodeUnit2 ||
-      codeUnit == charCodeUnit3) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Third char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == charCodeUnit1 ||
-      codeUnit == charCodeUnit2 ||
-      codeUnit == charCodeUnit3) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Fourth char
-  codeUnit = text.codeUnitAt(offset);
-  return codeUnit == charCodeUnit1 ||
-      codeUnit == charCodeUnit2 ||
-      codeUnit == charCodeUnit3;
+  int codeUnit = text.codeUnitAt(nonIndentOffset);
+  return codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2 || codeUnit == charCodeUnit3;
 }
 
 /// Fast checks block, if it starts with char possible for list or blockquote,
 /// taking indent into account.
 bool fastBlockquoteListTest(String text, int offset) {
-  // First char
-  int codeUnit = text.codeUnitAt(offset);
+  int nonIndentOffset = _skipIndent(text, offset);
 
-  if (codeUnit == _minusCodeUnit ||
-      codeUnit == _starCodeUnit ||
-      codeUnit == _plusCodeUnit ||
-      codeUnit == _greaterThanCodeUnit ||
-      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit)) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
+  if (nonIndentOffset == -1) {
     return false;
   }
 
-  int length = text.length;
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Second char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == _minusCodeUnit ||
-      codeUnit == _starCodeUnit ||
-      codeUnit == _plusCodeUnit ||
-      codeUnit == _greaterThanCodeUnit ||
-      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit)) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Third char
-  codeUnit = text.codeUnitAt(offset);
-  if (codeUnit == _minusCodeUnit ||
-      codeUnit == _starCodeUnit ||
-      codeUnit == _plusCodeUnit ||
-      codeUnit == _greaterThanCodeUnit ||
-      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit)) {
-    return true;
-  } else if (codeUnit != _spaceCodeUnit) {
-    return false;
-  }
-
-  offset++;
-  if (offset == length) {
-    return false;
-  }
-
-  // Fourth char
-  codeUnit = text.codeUnitAt(offset);
+  int codeUnit = text.codeUnitAt(nonIndentOffset);
   return codeUnit == _minusCodeUnit ||
       codeUnit == _starCodeUnit ||
       codeUnit == _plusCodeUnit ||
@@ -373,11 +207,11 @@ bool fastBlockquoteListTest(String text, int offset) {
       (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit);
 }
 
-int _getBlockFirstChar(String text, int offset) {
+int _skipIndent(String text, int offset) {
   // First char
   int codeUnit = text.codeUnitAt(offset);
   if (codeUnit != _spaceCodeUnit) {
-    return codeUnit;
+    return offset;
   }
 
   int length = text.length;
@@ -389,7 +223,7 @@ int _getBlockFirstChar(String text, int offset) {
   // Second char
   codeUnit = text.codeUnitAt(offset);
   if (codeUnit != _spaceCodeUnit) {
-    return codeUnit;
+    return offset;
   }
 
   offset++;
@@ -400,7 +234,7 @@ int _getBlockFirstChar(String text, int offset) {
   // Third char
   codeUnit = text.codeUnitAt(offset);
   if (codeUnit != _spaceCodeUnit) {
-    return codeUnit;
+    return offset;
   }
 
   offset++;
@@ -409,7 +243,13 @@ int _getBlockFirstChar(String text, int offset) {
   }
 
   // Fourth char
-  return text.codeUnitAt(offset);
+  return offset;
+}
+
+int _getBlockFirstChar(String text, int offset) {
+  int nonIndentOffset = _skipIndent(text, offset);
+
+  return nonIndentOffset != -1 ? text.codeUnitAt(nonIndentOffset) : -1;
 }
 
 /// Inlines list

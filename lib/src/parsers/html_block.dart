@@ -5,7 +5,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
   /// Constructor.
   HtmlBlockParser(ParsersContainer container) : super(container);
 
-  List<RegExp> _starts = <RegExp>[
+  List<Pattern> _starts = <Pattern>[
     _htmlBlock1Test,
     _htmlBlock2Test,
     _htmlBlock3Test,
@@ -13,23 +13,21 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
     _htmlBlock5Test
   ];
 
-  List<RegExp> _ends = <RegExp>[
+  List<Pattern> _ends = <Pattern>[
     new RegExp(r'</(script|pre|style)>', caseSensitive: false),
-    new RegExp(r'-->'),
-    new RegExp(r'\?>'),
-    new RegExp(r'>'),
-    new RegExp(r'\]\]>')
+    '-->',
+    '?>',
+    '>',
+    ']]>'
   ];
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockTest(text, offset, _lessThanCodeUnit)) {
-      return new ParseResult<Iterable<Block>>.failure();
-    }
+    int nonIndentOffset = _skipIndent(text, offset);
 
     int rule;
     for (int i = 0; i < _starts.length; ++i) {
-      if (_starts[i].matchAsPrefix(text, offset) != null) {
+      if (_starts[i].matchAsPrefix(text, nonIndentOffset) != null) {
         rule = i;
         break;
       }
@@ -44,7 +42,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (_ends[rule].hasMatch(lineRes.value)) {
+        if (lineRes.value.contains(_ends[rule])) {
           break;
         }
       }
