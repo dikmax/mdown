@@ -5,14 +5,22 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
   static final RegExp _setextHeadingRegExp =
       new RegExp('^ {0,3}(-+|=+)[ \t]*\$');
 
-  List<RegExp> _paragraphBreaks;
+  final Pattern _atxHeadingText = new RegExp('(#{1,6})(?:[ \t]|\$)');
+  final Pattern _blockquoteSimpleTest = '>';
+  final Pattern _listSimpleTest = new RegExp(r'([+\-*]|1[.)])( |$)');
+  final Pattern _fencedCodeStartTest =
+      new RegExp('(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
+  final Pattern _thematicBreakTest =
+      new RegExp('((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$');
+
+  List<Pattern> _paragraphBreaks;
 
   /// Constructor.
   ParaSetextHeadingParser(ParsersContainer container) : super(container);
 
   @override
   void init() {
-    _paragraphBreaks = <RegExp>[
+    _paragraphBreaks = <Pattern>[
       _thematicBreakTest,
       _fencedCodeStartTest,
       _atxHeadingText,
@@ -20,7 +28,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
     ];
 
     if (container.options.rawHtml) {
-      _paragraphBreaks.addAll(<RegExp>[
+      _paragraphBreaks.addAll(<Pattern>[
         _htmlBlock1Test,
         _htmlBlock2Test,
         _htmlBlock3Test,
@@ -58,16 +66,18 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
 
-        if (contents.length > 0 &&
-            _paragraphBreaks
-                .any((RegExp re) => re.hasMatch(lineResult.value))) {
+        int indent = _skipIndent(lineResult.value, 0);
+        if (indent != -1 &&
+            contents.length > 0 &&
+            _paragraphBreaks.any((Pattern pattern) =>
+                lineResult.value.startsWith(pattern, indent))) {
           // Paragraph stops here as we've got another block.
           break;
         }
 
         // Special check for list, as it can break paragraph only if not empty
         // Ordered lists are also required to start with 1. to allow breaking.
-        if (_listSimpleTest.hasMatch(lineResult.value)) {
+        if (lineResult.value.startsWith(_listSimpleTest, indent)) {
           // It could be a list.
 
           ParseResult<Iterable<Block>> listResult =
