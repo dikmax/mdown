@@ -125,7 +125,6 @@ void main() {
   // Markdown to markdown tests
   tests("md2md [strict]", markdownToMarkdown, mhmTest(Options.strict));
 
-  return;
   // Custom classes
   customClassesTests();
 

@@ -12,7 +12,7 @@ dartanalyzer --strong --fatal-warnings \
 
 # Run the tests.
 echo "Running tests"
-pub run test:test --reporter json -p "vm,phantomjs" | dart tool/reporter.dart
+pub run test:test --reporter json -p "vm" | dart tool/reporter.dart
 
 # If the COVERALLS_TOKEN token is set on travis
 # Install dart_coveralls
