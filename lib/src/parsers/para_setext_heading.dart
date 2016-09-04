@@ -33,8 +33,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         _htmlBlock2Test,
         _htmlBlock3Test,
         _htmlBlock4Test,
-        _htmlBlock5Test,
-        _htmlBlock6Test
+        _htmlBlock5Test
       ]);
     }
   }
@@ -75,7 +74,17 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
           break;
         }
 
-        // Special check for list, as it can break paragraph only if not empty
+        // Special check for html block rule 6.
+        Match htmlBlock6Match = _htmlBlock6Test.matchAsPrefix(
+            lineResult.value, indent);
+        if (htmlBlock6Match != null) {
+          String tag = htmlBlock6Match[1];
+          if (_blockTags.contains(tag.toLowerCase())) {
+            break;
+          }
+        }
+
+          // Special check for list, as it can break paragraph only if not empty
         // Ordered lists are also required to start with 1. to allow breaking.
         if (lineResult.value.startsWith(_listSimpleTest, indent)) {
           // It could be a list.

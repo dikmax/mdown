@@ -27,7 +27,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
     int rule;
     for (int i = 0; i < _starts.length; ++i) {
-      if (_starts[i].matchAsPrefix(text, nonIndentOffset) != null) {
+      if (text.startsWith(_starts[i], nonIndentOffset)) {
         rule = i;
         break;
       }
@@ -51,7 +51,13 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
           <Block>[new HtmlRawBlock(result.toString())], offset);
     }
 
-    if (_htmlBlock6Test.matchAsPrefix(text, offset) != null) {
+    Match htmlBlock6Match = _htmlBlock6Test.matchAsPrefix(text, nonIndentOffset);
+    if (htmlBlock6Match != null) {
+      String tag = htmlBlock6Match[1];
+      if (!_blockTags.contains(tag.toLowerCase())) {
+        return new ParseResult<Iterable<Block>>.failure();
+      }
+
       int length = text.length;
       StringBuffer result = new StringBuffer();
       while (offset < length) {
