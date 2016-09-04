@@ -24,8 +24,69 @@ final Pattern _htmlBlock3Test = '<?';
 final Pattern _htmlBlock4Test = '<!';
 final Pattern _htmlBlock5Test = '<!\[CDATA\[';
 final Pattern _htmlBlock6Test = new RegExp(
-    r'</?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|title|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|/?>|$)',
-    caseSensitive: false);
+  r'</?([a-zA-Z1]+)(?:\s|/?>|$)',
+);
+final Set<String> _blockTags = new Set<String>.from(<String>[
+  'address',
+  'article',
+  'aside',
+  'base',
+  'basefont',
+  'blockquote',
+  'body',
+  'caption',
+  'center',
+  'col',
+  'colgroup',
+  'dd',
+  'details',
+  'dialog',
+  'dir',
+  'div',
+  'dl',
+  'dt',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'frame',
+  'frameset',
+  'h1',
+  'head',
+  'header',
+  'hr',
+  'html',
+  'iframe',
+  'legend',
+  'li',
+  'link',
+  'main',
+  'menu',
+  'menuitem',
+  'meta',
+  'nav',
+  'noframes',
+  'ol',
+  'optgroup',
+  'option',
+  'p',
+  'param',
+  'section',
+  'source',
+  'title',
+  'summary',
+  'table',
+  'tbody',
+  'td',
+  'tfoot',
+  'th',
+  'thead',
+  'title',
+  'tr',
+  'track',
+  'ul'
+]);
 
 const String _htmlTagName = '[A-Za-z][A-Za-z0-9-]*';
 const String _htmlAttributeName = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
@@ -159,7 +220,8 @@ String unescapeAndUnreference(String s) {
 bool fastBlockTest(String text, int offset, int charCodeUnit) {
   int nonIndentOffset = _skipIndent(text, offset);
 
-  return nonIndentOffset != -1 && text.codeUnitAt(nonIndentOffset) == charCodeUnit;
+  return nonIndentOffset != -1 &&
+      text.codeUnitAt(nonIndentOffset) == charCodeUnit;
 }
 
 /// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
@@ -187,7 +249,9 @@ bool fastBlockTest3(String text, int offset, int charCodeUnit1,
   }
 
   int codeUnit = text.codeUnitAt(nonIndentOffset);
-  return codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2 || codeUnit == charCodeUnit3;
+  return codeUnit == charCodeUnit1 ||
+      codeUnit == charCodeUnit2 ||
+      codeUnit == charCodeUnit3;
 }
 
 /// Fast checks block, if it starts with char possible for list or blockquote,
