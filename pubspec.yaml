@@ -1,5 +1,5 @@
 name: md_proc
-version: 0.9.0+alpha2
+version: 0.9.0+alpha3
 description: Fast CommonMark-compliant markdown parser
 author: Maxim Dikun <dikmax@gmail.com>
 homepage: https://github.com/dikmax/md_proc
@@ -10,7 +10,6 @@ dependencies:
   quiver: "^0.22.0"
 dev_dependencies:
   benchmark_harness: any
-  markdown: '>=0.9.0 <1.0.0'
   test: any
   linter: any
   dart_coveralls: any

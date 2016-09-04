@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:md_proc/md_proc.dart';
-import 'package:markdown/markdown.dart' as markdown;
+// import 'package:markdown/markdown.dart' as markdown;
 
 class MapEmitter implements ScoreEmitter {
   String name;
@@ -44,6 +44,7 @@ class MdProcBenchmark extends BenchmarkBase {
   }
 }
 
+/*
 class MarkdownBenchmark extends BenchmarkBase {
   String data;
 
@@ -62,14 +63,13 @@ class MarkdownBenchmark extends BenchmarkBase {
         extensionSet: markdown.ExtensionSet.commonMark);
   }
 }
-
-// TODO fix block-ref-flat inline-links-flat performance
+*/
 
 Future<dynamic> main() async {
-  Directory dir = new Directory('benchmark/texts');
+  Directory dir = new Directory('benchmark/samples');
 
   MapEmitter mdProcResults = new MapEmitter("md_proc");
-  MapEmitter markdownResults = new MapEmitter("markdown");
+  // MapEmitter markdownResults = new MapEmitter("markdown");
 
   await for (FileSystemEntity entity in dir.list()) {
     if (entity is File) {
@@ -80,20 +80,21 @@ Future<dynamic> main() async {
         String data = await entity.readAsString();
         MdProcBenchmark.main(name, data, mdProcResults);
         print('md_proc: ${mdProcResults.scores[name]}');
-        MarkdownBenchmark.main(name, data, markdownResults);
-        print('markdown: ${markdownResults.scores[name]}');
+        /*MarkdownBenchmark.main(name, data, markdownResults);
+        print('markdown: ${markdownResults.scores[name]}');*/
       }
     }
   }
 
-  double mdProcAvg = mdProcResults.report();
-  double markdownAvg = markdownResults.report();
+  // double mdProcAvg = mdProcResults.report();
+  // double markdownAvg = markdownResults.report();
 
+  /*
   if (mdProcAvg < markdownAvg) {
     print('md_proc is ${markdownAvg / mdProcAvg} times faster');
   } else {
     print('md_proc is ${mdProcAvg / markdownAvg} times slover');
-  }
+  }*/
 
   exit(0);
 }
