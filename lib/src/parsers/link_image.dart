@@ -1,24 +1,24 @@
 part of md_proc.src.parsers;
 
+class _LinkStackItem {
+  int offset;
+  int bracketLevel = 1;
+  bool containsLink = false;
+
+  _LinkStackItem(this.offset);
+}
+
 /// Parser for links and images.
 class LinkImageParser extends AbstractParser<Inlines> {
-  static final RegExp _linkRegExp = new RegExp(
-      // Space after opening paren (optional)
-      r'(?:[ \t\r\n]*)'
+  static final RegExp _hrefRegExp = new RegExp(
       // Link in <>
-      r'(<(?:[^\\> \t\r\n]|\\.|\\)*>|'
+      r'<(?:[^\\> \t\r\n]|\\.|\\)*>|'
       // Link without
-      r'(?:[^ \t\r\n\(\)\\]+|\((?:[^ \t\r\n\(\)\\]|\\.|\\)*\)|\\.|\\)*)'
-      // Space after link and title (optional)
-      r'(?:[ \t\r\n]+('
-      r'"(?:[^"]|\\")*"|'
+      r'(?:[^ \t\r\n\(\)\\]+|\((?:[^ \t\r\n\(\)\\]|\\.|\\)*\)|\\.|\\)*');
+
+  static final RegExp _titleRegExp = new RegExp(r'"(?:[^"]|\\")*"|'
       r"'(?:[^']|\\')*'|"
-      r'\((?:[^)]|\\\))*\)'
-      r'))?'
-      // Space before closing paren (optional)
-      r'(?:[ \t\r\n]*)'
-      // Closing paren
-      r'\)');
+      r'\((?:[^)]|\\\))*\)');
 
   static final RegExp _referenceRegExp = new RegExp(r'\[((?:[^\]]|\\\])+)\]');
 
@@ -62,6 +62,112 @@ class LinkImageParser extends AbstractParser<Inlines> {
     }
   }
 
+  ParseResult<Target> _parseTarget(String text, int offset) {
+    int length = text.length;
+
+    // Skip whitespace.
+    while (offset < length) {
+      int codeUnit = text.codeUnitAt(offset);
+      if (codeUnit != _spaceCodeUnit &&
+          codeUnit != _tabCodeUnit &&
+          codeUnit != _newLineCodeUnit &&
+          codeUnit != _carriageReturnCodeUnit) {
+        break;
+      }
+      offset++;
+    }
+    if (offset == length) {
+      return new ParseResult<Target>.failure();
+    }
+
+    // Parsing href
+    Match hrefMatch = _hrefRegExp.matchAsPrefix(text, offset);
+    if (hrefMatch == null) {
+      return new ParseResult<Target>.failure();
+    }
+
+    String href = hrefMatch[0];
+    href = unescapeAndUnreference(href);
+    if (href.startsWith('<') && href.endsWith('>')) {
+      href = href.substring(1, href.length - 1);
+    }
+
+    offset = hrefMatch.end;
+
+    // Skip whitespace.
+    while (offset < length) {
+      int codeUnit = text.codeUnitAt(offset);
+      if (codeUnit != _spaceCodeUnit &&
+          codeUnit != _tabCodeUnit &&
+          codeUnit != _newLineCodeUnit &&
+          codeUnit != _carriageReturnCodeUnit) {
+        break;
+      }
+      offset++;
+    }
+    if (offset == length) {
+      return new ParseResult<Target>.failure();
+    }
+
+    Target result = new Target(href, null);
+
+    // Maybe parsing title.
+    int codeUnit = text.codeUnitAt(offset);
+    if (codeUnit == _singleQuoteCodeUnit ||
+        codeUnit == _doubleQuoteCodeUnit ||
+        codeUnit == _openParenCodeUnit) {
+      int endCodeUnit =
+          codeUnit == _openParenCodeUnit ? _closeParenCodeUnit : codeUnit;
+      offset++;
+      int startOffset = offset;
+      while (offset < length) {
+        int codeUnit = text.codeUnitAt(offset);
+        offset++;
+        if (codeUnit == _backslashCodeUnit) {
+          offset++;
+          continue;
+        } else if (codeUnit == endCodeUnit) {
+          break;
+        } else if (codeUnit == _openParenCodeUnit && endCodeUnit == _closeParenCodeUnit) {
+          return new ParseResult<Target>.failure();
+        }
+      }
+
+      if (offset >= length) {
+        return new ParseResult<Target>.failure();
+      }
+
+      String title = text.substring(startOffset, offset - 1);
+      title = unescapeAndUnreference(title);
+      result.title = title;
+
+      // Skip whitespace.
+      while (offset < length) {
+        int codeUnit = text.codeUnitAt(offset);
+        if (codeUnit != _spaceCodeUnit &&
+            codeUnit != _tabCodeUnit &&
+            codeUnit != _newLineCodeUnit &&
+            codeUnit != _carriageReturnCodeUnit) {
+          break;
+        }
+        offset++;
+      }
+      if (offset == length) {
+        return new ParseResult<Target>.failure();
+      }
+
+      codeUnit = text.codeUnitAt(offset);
+    }
+
+    if (codeUnit != _closeParenCodeUnit) {
+      return new ParseResult<Target>.failure();
+    }
+
+    offset++;
+
+    return new ParseResult<Target>.success(result, offset);
+  }
+
   // TODO reorder parse to put all fallbacks in the end.
   @override
   ParseResult<Inlines> parse(String text, int offset) {
@@ -84,12 +190,26 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
     int startOffset = offset;
     int endOffset = -1;
-    int brackets = 1;
-    while (offset < length) {
+    bool containsLink = false;
+    List<_LinkStackItem> stack = <_LinkStackItem>[new _LinkStackItem(offset)];
+    while (offset < length && (isImage || !containsLink)) {
       int codeUnit = text.codeUnitAt(offset);
       if (codeUnit == _closeBracketCodeUnit) {
-        brackets--;
-        if (brackets == 0) {
+        _LinkStackItem last = stack.removeLast(); // TODO check link.
+        if (!isImage) {
+          containsLink = last.containsLink;
+          if (!containsLink && last.bracketLevel == 2) {
+            // There counld be link
+            Inlines labelInlines = container.documentParser
+                .parseInlines(text.substring(last.offset, offset));
+
+            if (labelInlines._containsLink) {
+              containsLink = true;
+            }
+          }
+        }
+
+        if (stack.length == 0) {
           endOffset = offset;
           offset++;
           break;
@@ -107,8 +227,11 @@ class LinkImageParser extends AbstractParser<Inlines> {
         continue;
       }
       if (codeUnit == _openBracketCodeUnit) {
-        brackets++;
+        for (int i = stack.length - 1, level = 2; i >= 0; i--, level++) {
+          stack[i].bracketLevel = max(stack[i].bracketLevel, level);
+        }
         offset++;
+        stack.add(new _LinkStackItem(offset));
         continue;
       }
 
@@ -117,9 +240,13 @@ class LinkImageParser extends AbstractParser<Inlines> {
         for (AbstractParser<Inlines> parser
             in _higherPriorityInlineParsers[codeUnit]) {
           // TODO optimize to only return offset.
+          // TODO check autolink
           ParseResult<Inlines> res = parser.parse(text, offset);
           if (res.isSuccess) {
             offset = res.offset;
+            if (!isImage && res.value._containsLink) {
+              containsLink = true;
+            }
             found = true;
             break;
           }
@@ -141,35 +268,22 @@ class LinkImageParser extends AbstractParser<Inlines> {
           new Inlines.single(new Str(isImage ? '![' : '[')), startOffset);
     }
 
-    Inlines labelInlines = container.documentParser
-        .parseInlines(text.substring(startOffset, endOffset));
-
-    if (isImage || !labelInlines._containsLink) {
+    if (isImage || !containsLink) {
       if (offset != length) {
         // Test link in parens.
         int codeUnit = text.codeUnitAt(offset);
         if (codeUnit == _openParenCodeUnit) {
-          Match match = _linkRegExp.matchAsPrefix(text, offset + 1);
-          if (match != null) {
-            // Normal link. It also can be dropped,
-            // if contains links inside label.
-            String link = match[1];
-            link = unescapeAndUnreference(link);
-            if (link.startsWith('<') && link.endsWith('>')) {
-              link = link.substring(1, link.length - 1);
-            }
-
-            String title = match[2];
-            if (title != null) {
-              title = title.substring(1, title.length - 1);
-              title = unescapeAndUnreference(title);
-            }
+          ParseResult<Target> targetResult = _parseTarget(text, offset + 1);
+          if (targetResult.isSuccess) {
+            // Normal link.
+            Inlines labelInlines = container.documentParser
+                .parseInlines(text.substring(startOffset, endOffset));
 
             Inline result = isImage
-                ? new InlineImage(labelInlines, new Target(link, title))
-                : new InlineLink(labelInlines, new Target(link, title));
+                ? new InlineImage(labelInlines, targetResult.value)
+                : new InlineLink(labelInlines, targetResult.value);
             return new ParseResult<Inlines>.success(
-                new Inlines.single(result), match.end);
+                new Inlines.single(result), targetResult.offset);
           }
         }
 
@@ -186,6 +300,9 @@ class LinkImageParser extends AbstractParser<Inlines> {
                   .linkResolver(normalizedReference, reference);
             }
             if (target != null) {
+              Inlines labelInlines = container.documentParser
+                  .parseInlines(text.substring(startOffset, endOffset));
+
               Inline result = isImage
                   ? new ReferenceImage(reference, labelInlines, target)
                   : new ReferenceLink(reference, labelInlines, target);
@@ -212,6 +329,9 @@ class LinkImageParser extends AbstractParser<Inlines> {
                   .linkResolver(normalizedReference, reference);
             }
             if (target != null) {
+              Inlines labelInlines = container.documentParser
+                  .parseInlines(text.substring(startOffset, endOffset));
+
               Inline result = isImage
                   ? new ReferenceImage(reference, labelInlines, target)
                   : new ReferenceLink(reference, labelInlines, target);
@@ -244,6 +364,9 @@ class LinkImageParser extends AbstractParser<Inlines> {
               container.options.linkResolver(normalizedReference, reference);
         }
         if (target != null) {
+          Inlines labelInlines = container.documentParser
+              .parseInlines(text.substring(startOffset, endOffset));
+
           Inline result = isImage
               ? new ReferenceImage(reference, labelInlines, target)
               : new ReferenceLink(reference, labelInlines, target);
