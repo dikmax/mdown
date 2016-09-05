@@ -51,11 +51,6 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
 
   @override
   ParseResult<_LinkReference> parse(String text, int offset) {
-    // DO not run heavy matching regexp every time.
-    if (!fastBlockTest(text, offset, _openBracketCodeUnit)) {
-      return new ParseResult<_LinkReference>.failure();
-    }
-
     Match match = _linkRefereceRegExp.matchAsPrefix(text, offset);
 
     if (match == null) {

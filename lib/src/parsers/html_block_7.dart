@@ -10,10 +10,6 @@ class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockTest(text, offset, _lessThanCodeUnit)) {
-      return new ParseResult<Iterable<Block>>.failure();
-    }
-
     ParseResult<String> lineRes = container.lineParser.parse(text, offset);
     assert(lineRes.isSuccess);
 
