@@ -7,9 +7,6 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) != _dollarCodeUnit) {
-      return new ParseResult<Inlines>.failure();
-    }
     int length = text.length;
     offset++;
     if (offset >= length) {

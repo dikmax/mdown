@@ -7,12 +7,6 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    // TODO remove fast check.
-    // They a performed by caller
-    if (!fastBlockTest(text, offset, _sharpCodeUnit)) {
-      return new ParseResult<Iterable<Block>>.failure();
-    }
-
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
 
     assert(lineResult.isSuccess);

@@ -17,10 +17,6 @@ class AutolinkParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     int codeUnit = text.codeUnitAt(offset);
 
-    if (codeUnit != _lessThanCodeUnit) {
-      return new ParseResult<Inlines>.failure();
-    }
-
     Match autolinkMatch = _autolinkRegExp.matchAsPrefix(text, offset);
 
     if (autolinkMatch != null) {

@@ -7,10 +7,6 @@ class TexMathSingleBackslashParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) != _backslashCodeUnit) {
-      return new ParseResult<Inlines>.failure();
-    }
-
     ++offset;
     int length = text.length;
     if (offset >= length) {

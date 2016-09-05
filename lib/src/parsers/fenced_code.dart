@@ -7,10 +7,6 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockTest2(text, offset, _backtickCodeUnit, _tildeCodeUnit)) {
-      return new ParseResult<Iterable<Block>>.failure();
-    }
-
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 

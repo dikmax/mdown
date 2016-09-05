@@ -299,10 +299,6 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     _Delim delim = _scanDelims(text, offset);
 
-    if (delim == null) {
-      return new ParseResult<Inlines>.failure();
-    }
-
     offset += delim.count;
 
     if (!delim.canOpen) {

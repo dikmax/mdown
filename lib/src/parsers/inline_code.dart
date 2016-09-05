@@ -7,10 +7,6 @@ class InlineCodeParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) != _backtickCodeUnit) {
-      return new ParseResult<Inlines>.failure();
-    }
-
     int fenceSize = 1;
     offset++;
 
