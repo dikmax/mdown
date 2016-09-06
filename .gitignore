@@ -4,3 +4,4 @@ packages
 /coverage.sh
 /.pub
 .packages
+/.dart_tool
