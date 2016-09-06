@@ -2,20 +2,16 @@ md_proc
 =======
 
 [![Build Status](https://travis-ci.org/dikmax/md_proc.svg?branch=master)](https://travis-ci.org/dikmax/md_proc)
-[![Coverage Status](https://coveralls.io/repos/dikmax/md_proc/badge.svg?branch=master)](https://coveralls.io/r/dikmax/md_proc?branch=master)
 [![Pub](https://img.shields.io/pub/v/md_proc.svg)](https://pub.dartlang.org/packages/md_proc)
 [![CommonMark spec](https://img.shields.io/badge/commonmark-0.26-green.svg)](http://spec.commonmark.org/)
 
-[CommonMark]-compliant Markdown parser.
+Fast and [CommonMark]-compliant Markdown parser.
 
 Basic usage:
 
 ```dart
 print(markdownToHtml('# Hello world!'));
 ```
-
-The main difference from other parsers is Markdown-based AST. You can parse Markdown, process resulting AST and write
-results back to markdown.
 
 Project main goal is create processing library for Markdown.
 
