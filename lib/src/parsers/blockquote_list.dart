@@ -86,7 +86,7 @@ class _StackItem {
     Block last = block.last;
     if (last != null && last is Para) {
       if (_thematicBreakTest.hasMatch(line) ||
-          _atxHeadingText.hasMatch(line) ||
+          _atxHeadingTest.hasMatch(line) ||
           _fencedCodeStartTest.hasMatch(line)) {
         // TODO add html block and link reference test
         return false;

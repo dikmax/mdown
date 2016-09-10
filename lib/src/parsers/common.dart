@@ -9,7 +9,7 @@ final Set<int> _escapableCodes =
     new Set<int>.from(_escapable.split('').map((String s) => s.codeUnitAt(0)));
 
 // TODO move to paragraph file
-final RegExp _atxHeadingText = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
+final RegExp _atxHeadingTest = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
 final RegExp _blockquoteSimpleTest = new RegExp(r'^ {0,3}>');
 final RegExp _listSimpleTest = new RegExp(r'^ {0,3}([+\-*]|1[.)])( |$)');
 final RegExp _fencedCodeStartTest =

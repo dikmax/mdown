@@ -5,14 +5,18 @@ class InlineCodeParser extends AbstractParser<Inlines> {
   /// Constructor.
   InlineCodeParser(ParsersContainer container) : super(container);
 
+  static const int _stateOpenFence = 0;
+  static const int _stateCode = 1;
+  static const int _stateCloseFence = 2;
+  static const int _stateDone = 3;
+
   @override
   ParseResult<Inlines> parse(String text, int offset) {
     int fenceSize = 1;
     offset++;
 
     // Finite Automata
-    // TODO use constants for states.
-    int state = 0;
+    int state = _stateOpenFence;
     int length = text.length;
     int codeStartOffset = -1;
     int endFenceSize = 0;
@@ -21,39 +25,39 @@ class InlineCodeParser extends AbstractParser<Inlines> {
       int codeUnit = text.codeUnitAt(offset);
 
       switch (state) {
-        case 0:
+        case _stateOpenFence:
           // Parsing open fence.
           if (codeUnit == _backtickCodeUnit) {
             fenceSize++;
           } else {
-            state = 1;
+            state = _stateCode;
             codeStartOffset = offset;
           }
           break;
 
-        case 1:
+        case _stateCode:
           // Parsing code
           if (codeUnit == _backtickCodeUnit) {
             codeEndOffset = offset;
             endFenceSize = 1;
-            state = 2;
+            state = _stateCloseFence;
           }
 
           break;
 
-        case 2:
+        case _stateCloseFence:
           // Parsing end
           if (codeUnit == _backtickCodeUnit) {
             endFenceSize++;
           } else if (endFenceSize == fenceSize) {
-            state = 3;
+            state = _stateDone;
           } else {
-            state = 1;
+            state = _stateCode;
           }
           break;
       }
 
-      if (state == 3) {
+      if (state == _stateDone) {
         // Done.
         break;
       }
@@ -61,7 +65,8 @@ class InlineCodeParser extends AbstractParser<Inlines> {
       offset++;
     }
 
-    if (state == 3 || (state == 2 && endFenceSize == fenceSize)) {
+    if (state == _stateDone ||
+        (state == _stateCloseFence && endFenceSize == fenceSize)) {
       String code =
           _trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
       return new ParseResult<Inlines>.success(
