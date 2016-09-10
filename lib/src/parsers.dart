@@ -10,6 +10,7 @@ import 'package:md_proc/options.dart';
 part 'parsers/container.dart';
 part 'parsers/abstract.dart';
 part 'parsers/common.dart';
+part 'parsers/code_units.dart';
 part 'parsers/blankline.dart';
 part 'parsers/line.dart';
 part 'parsers/thematic_break.dart';

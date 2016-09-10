@@ -54,7 +54,7 @@ class StrParser extends AbstractParser<Inlines> {
       } else if (char == _nonBreakableSpaceCodeUnit) {
         result = new NonBreakableSpace();
       } else {
-        result = new Str(new String.fromCharCode(char));
+        result = new Str(text[offset]);
       }
       return new ParseResult<Inlines>.success(
           new Inlines.single(result), offset + 1);

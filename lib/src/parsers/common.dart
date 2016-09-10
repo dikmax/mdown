@@ -111,37 +111,6 @@ const String _htmlCloseTag = "</" + _htmlTagName + "\\s*>";
 final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
 final RegExp _trimLeftRegExp = new RegExp('^[ \t]*');
 
-// Char codes
-const int _tabCodeUnit = 9;
-const int _newLineCodeUnit = 10;
-const int _carriageReturnCodeUnit = 13;
-const int _spaceCodeUnit = 32;
-const int _exclamationMarkCodeUnit = 33;
-const int _doubleQuoteCodeUnit = 34;
-const int _sharpCodeUnit = 35;
-const int _dollarCodeUnit = 36;
-const int _ampersandCodeUnit = 38;
-const int _singleQuoteCodeUnit = 39;
-const int _openParenCodeUnit = 40;
-const int _closeParenCodeUnit = 41;
-const int _starCodeUnit = 42;
-const int _plusCodeUnit = 43;
-const int _minusCodeUnit = 45;
-const int _dotCodeUnit = 46;
-const int _zeroCodeUnit = 48;
-const int _nineCodeUnit = 57;
-const int _lessThanCodeUnit = 60;
-const int _equalCodeUnit = 61;
-const int _greaterThanCodeUnit = 62;
-const int _openBracketCodeUnit = 91;
-const int _backslashCodeUnit = 92;
-const int _closeBracketCodeUnit = 93;
-const int _caretCodeUnit = 94;
-const int _underscoreCodeUnit = 95;
-const int _backtickCodeUnit = 96;
-const int _tildeCodeUnit = 126;
-const int _nonBreakableSpaceCodeUnit = 160;
-
 String _removeIndent(String line, int amount, bool allowLess,
     [int startIndent = 0]) {
   int offset = 0;

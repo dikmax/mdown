@@ -74,10 +74,6 @@ class _EscapedTab extends Inline {
 
 /// Parsing emphasis, strongs, smartquotes, etc.
 class InlineStructureParser extends AbstractParser<Inlines> {
-  static final RegExp _spaceRegExp = new RegExp(r'\s');
-  static final RegExp _punctuationRegExp = new RegExp(
-      '[\u2000-\u206F\u2E00-\u2E7F\\\\\'!"#\$%&()*+,\\-./:;<=>?@\\[\\]^_`{|}~]');
-
   Set<int> _delimitersChars;
 
   Set<int> _intrawordDelimetersChars;
@@ -214,13 +210,10 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       i++;
     }
 
-    String charBefore = new String.fromCharCode(codeUnitBefore);
-    String charAfter = new String.fromCharCode(codeUnitAfter);
-
-    bool spaceAfter = _spaceRegExp.hasMatch(charAfter);
-    bool spaceBefore = _spaceRegExp.hasMatch(charBefore);
-    bool punctuationAfter = _punctuationRegExp.hasMatch(charAfter);
-    bool punctuationBefore = _punctuationRegExp.hasMatch(charBefore);
+    bool spaceAfter = _spaces.contains(codeUnitAfter);
+    bool spaceBefore = _spaces.contains(codeUnitBefore);
+    bool punctuationAfter = _punctuation.contains(codeUnitAfter);
+    bool punctuationBefore = _punctuation.contains(codeUnitBefore);
 
     bool leftFlanking =
         !spaceAfter && (!punctuationAfter || spaceBefore || punctuationBefore);
