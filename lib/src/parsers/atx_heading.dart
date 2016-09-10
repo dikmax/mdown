@@ -5,6 +5,12 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
   /// Constructor.
   AtxHeadingParser(ParsersContainer container) : super(container);
 
+  static const int _stateOpen = 0;
+  static const int _stateSpaces = 1;
+  static const int _stateText = 2;
+  static const int _stateClose = 3;
+  static const int _stateAfterClose = 4;
+
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
@@ -12,81 +18,81 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
     assert(lineResult.isSuccess);
 
     String line = lineResult.value;
-    Match match = _atxHeadingText.firstMatch(line);
-    if (match == null) {
-      return const ParseResult<Iterable<Block>>.failure();
-    }
+    int length = line.length;
 
-    int level = match[1].length;
+    int level = 1;
+    int state = _stateOpen;
+    int startOffset = -1;
+    int endOffset = -1;
 
-    if (match.end == line.length) {
-      List<AtxHeading> result = <AtxHeading>[
-        new AtxHeading(level, new Inlines())
-      ];
-      return new ParseResult<Iterable<Block>>.success(
-          result, lineResult.offset);
-    }
+    int i = _skipIndent(line, 0) + 1;
 
-    int state = line.codeUnitAt(match.end) == _sharpCodeUnit ? 2 : 0;
-    List<int> rest = <int>[];
-    List<int> result = <int>[];
-    for (int i = match.end; i < line.length; ++i) {
+    // Finite Automata
+    while (i < length) {
       int code = line.codeUnitAt(i);
 
-      // Finite Automata
-      // TODO use constants for states
       switch (state) {
-        case 0:
-          if (code == _spaceCodeUnit || code == _tabCodeUnit) {
-            state = 1;
+        case _stateOpen:
+          if (code == _sharpCodeUnit) {
+            level++;
+            if (level > 6) {
+              return const ParseResult<Iterable<Block>>.failure();
+            }
+          } else if (code == _spaceCodeUnit || code == _tabCodeUnit) {
+            state = _stateSpaces;
+          } else {
+            return const ParseResult<Iterable<Block>>.failure();
           }
-          result.add(code);
+
           break;
 
-        case 1:
-          if (code == _sharpCodeUnit) {
-            state = 2;
-            rest.add(code);
-          } else {
-            result.add(code);
-            if (code != _spaceCodeUnit && code != _tabCodeUnit) {
-              state = 0;
+        case _stateSpaces:
+          if (code != _spaceCodeUnit && code != _tabCodeUnit) {
+            startOffset = startOffset != -1 ? startOffset : i;
+            if (code == _sharpCodeUnit) {
+              endOffset = i;
+              state = _stateClose;
+            } else {
+              state = _stateText;
             }
           }
           break;
 
-        case 2:
-          if (code == _sharpCodeUnit) {
-            rest.add(code);
-          } else if (code == _spaceCodeUnit || code == _tabCodeUnit) {
-            state = 3;
-            rest.add(code);
-          } else {
-            result.addAll(rest);
-            rest = <int>[];
-            state = 0;
+        case _stateText:
+          if (code == _spaceCodeUnit || code == _tabCodeUnit) {
+            endOffset = i;
+            state = _stateSpaces;
+          } else if (code == _backslashCodeUnit) {
+            i++;
           }
           break;
 
-        case 3:
+        case _stateClose:
           if (code == _spaceCodeUnit || code == _tabCodeUnit) {
-            rest.add(code);
-          } else if (code == _sharpCodeUnit) {
-            result.addAll(rest);
-            rest = <int>[code];
-            state = 2;
-          } else {
-            result.addAll(rest);
-            result.add(code);
-            rest = <int>[];
-            state = 0;
+            state = _stateAfterClose;
+          } else if (code != _sharpCodeUnit) {
+            state = _stateText;
+            endOffset = -1;
           }
+          break;
+
+        case _stateAfterClose:
+          if (code != _spaceCodeUnit && code != _tabCodeUnit) {
+            state = _stateText;
+            endOffset = -1;
+            continue;
+          }
+          break;
       }
+
+      i++;
     }
 
-    String str = new String.fromCharCodes(result).trim();
+    endOffset = state != _stateText ? endOffset : length;
 
-    Inlines inlines = str != '' ? new _UnparsedInlines(str) : new Inlines();
+    Inlines inlines = (startOffset != -1 && endOffset != -1)
+        ? new _UnparsedInlines(line.substring(startOffset, endOffset))
+        : new Inlines();
 
     List<AtxHeading> heading = <AtxHeading>[new AtxHeading(level, inlines)];
 

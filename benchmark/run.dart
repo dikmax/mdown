@@ -71,6 +71,8 @@ Future<dynamic> main() async {
   MapEmitter mdProcResults = new MapEmitter("md_proc");
   // MapEmitter markdownResults = new MapEmitter("markdown");
 
+  double sum = 0.0;
+
   await for (FileSystemEntity entity in dir.list()) {
     if (entity is File) {
       String name = entity.uri.pathSegments.last;
@@ -80,6 +82,7 @@ Future<dynamic> main() async {
         String data = await entity.readAsString();
         MdProcBenchmark.main(name, data, mdProcResults);
         print('md_proc: ${mdProcResults.scores[name]}');
+        sum += mdProcResults.scores[name];
         /*MarkdownBenchmark.main(name, data, markdownResults);
         print('markdown: ${markdownResults.scores[name]}');*/
       }
@@ -95,6 +98,8 @@ Future<dynamic> main() async {
   } else {
     print('md_proc is ${mdProcAvg / markdownAvg} times slover');
   }*/
+
+  print('Total: $sum');
 
   exit(0);
 }
