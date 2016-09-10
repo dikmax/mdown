@@ -132,7 +132,7 @@ class _NotCheckedPart extends _InlinePart {
       replaceChars += r"\[\]";
     }
     if (context.escapeSpace) {
-      replaceChars += " ";
+      replaceChars += " \t";
     }
     if (_options.subscript) {
       replaceChars += '~';
@@ -327,7 +327,7 @@ class _InlineRenderer {
       } else if (inline is NonBreakableSpace) {
         write('&nbsp;');
       } else if (inline is Tab) {
-        write('\t');
+        write('\t', context);
       } else if (inline is LineBreak) {
         write('\\\n');
       } else if (inline is Emph) {
