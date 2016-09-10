@@ -1,5 +1,20 @@
 part of md_proc.src.parsers;
 
+/// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
+/// taking indent into account.
+bool fastBlockTest2(String text, int offset, int charCodeUnit1,
+    int charCodeUnit2) {
+  int nonIndentOffset = _skipIndent(text, offset);
+
+  if (nonIndentOffset == -1) {
+    return false;
+  }
+
+  int codeUnit = text.codeUnitAt(nonIndentOffset);
+  return codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2;
+}
+
+
 /// Parser for paragraphs and setext headings.
 class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
   static final RegExp _setextHeadingRegExp =

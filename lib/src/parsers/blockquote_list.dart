@@ -55,10 +55,6 @@ class _StackItem {
       Para para = blocks.first;
       _UnparsedInlines inlines2 = para.contents;
       inlines.raw += '\n' + inlines2.raw;
-
-      if (blocks.length > 1) {
-        block.addToEnd(blocks.skip(1));
-      }
     } else {
       block.addToEnd(blocks);
     }
@@ -238,10 +234,7 @@ class _ExtendedOrderedList extends OrderedList implements _ExtendedBlock {
 
   @override
   void addToEnd(Iterable<Block> blocks) {
-    if (items.length == 0) {
-      items = <ListItem>[new ListItem(blocks)];
-      return;
-    }
+    assert(items.length != 0);
 
     ListItem item = items.last;
 
@@ -251,17 +244,9 @@ class _ExtendedOrderedList extends OrderedList implements _ExtendedBlock {
 
   @override
   void addItem() {
-    if (this.items.length == 0) {
-      this.items = <ListItem>[new ListItem(<Block>[])];
-      return;
-    }
+    assert(this.items.length != 0);
 
-    List<ListItem> items;
-    if (this.items is List<ListItem>) {
-      items = this.items;
-    } else {
-      items = new List<ListItem>.from(this.items);
-    }
+    List<ListItem> items = this.items;
 
     items.add(new ListItem(<Block>[]));
   }
@@ -279,10 +264,7 @@ class _ExtendedUnorderedList extends UnorderedList implements _ExtendedBlock {
 
   @override
   void addToEnd(Iterable<Block> blocks) {
-    if (items.length == 0) {
-      items = <ListItem>[new ListItem(blocks)];
-      return;
-    }
+    assert(items.length != 0);
 
     ListItem item = items.last;
 
@@ -293,10 +275,7 @@ class _ExtendedUnorderedList extends UnorderedList implements _ExtendedBlock {
 
   @override
   void addItem() {
-    if (this.items.length == 0) {
-      this.items = <ListItem>[new ListItem(<Block>[])];
-      return;
-    }
+    assert(this.items.length != 0);
 
     List<ListItem> items = this.items;
 
@@ -612,10 +591,6 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    if (!fastBlockquoteListTest(text, offset)) {
-      return const ParseResult<Iterable<Block>>.failure();
-    }
-
     _Stack stack = new _Stack();
     List<Block> result = <Block>[];
 

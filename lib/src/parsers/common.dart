@@ -182,62 +182,6 @@ String unescapeAndUnreference(String s) {
   }
 }
 
-/// Fast checks block, if it starts with [charCodeUnit], taking indent into
-/// account.
-bool fastBlockTest(String text, int offset, int charCodeUnit) {
-  int nonIndentOffset = _skipIndent(text, offset);
-
-  return nonIndentOffset != -1 &&
-      text.codeUnitAt(nonIndentOffset) == charCodeUnit;
-}
-
-/// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
-/// taking indent into account.
-bool fastBlockTest2(
-    String text, int offset, int charCodeUnit1, int charCodeUnit2) {
-  int nonIndentOffset = _skipIndent(text, offset);
-
-  if (nonIndentOffset == -1) {
-    return false;
-  }
-
-  int codeUnit = text.codeUnitAt(nonIndentOffset);
-  return codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2;
-}
-
-/// Fast checks block, if it starts with [charCodeUnit1], [charCodeUnit2] or
-/// [charCodeUnit3], taking indent into account.
-bool fastBlockTest3(String text, int offset, int charCodeUnit1,
-    int charCodeUnit2, int charCodeUnit3) {
-  int nonIndentOffset = _skipIndent(text, offset);
-
-  if (nonIndentOffset == -1) {
-    return false;
-  }
-
-  int codeUnit = text.codeUnitAt(nonIndentOffset);
-  return codeUnit == charCodeUnit1 ||
-      codeUnit == charCodeUnit2 ||
-      codeUnit == charCodeUnit3;
-}
-
-/// Fast checks block, if it starts with char possible for list or blockquote,
-/// taking indent into account.
-bool fastBlockquoteListTest(String text, int offset) {
-  int nonIndentOffset = _skipIndent(text, offset);
-
-  if (nonIndentOffset == -1) {
-    return false;
-  }
-
-  int codeUnit = text.codeUnitAt(nonIndentOffset);
-  return codeUnit == _minusCodeUnit ||
-      codeUnit == _starCodeUnit ||
-      codeUnit == _plusCodeUnit ||
-      codeUnit == _greaterThanCodeUnit ||
-      (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit);
-}
-
 int _skipIndent(String text, int offset) {
   // First char
   int codeUnit = text.codeUnitAt(offset);
