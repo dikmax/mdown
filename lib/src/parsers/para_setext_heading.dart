@@ -107,7 +107,15 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
 
-        contents.add(line.replaceFirst(_trimLeftRegExp, ''));
+        int trimOffset = 0, length = line.length;
+        while (trimOffset < length) {
+          int codeUnit = line.codeUnitAt(trimOffset);
+          if (codeUnit != _spaceCodeUnit && codeUnit != _tabCodeUnit) {
+            break;
+          }
+          trimOffset++;
+        }
+        contents.add(trimOffset > 0 ? line.substring(trimOffset) : line);
         canBeHeading = true;
       } else {
         // Empty line should be parsed by blank line parser.

@@ -2,7 +2,6 @@ part of md_proc.src.parsers;
 
 final RegExp _anyLineRegExp = new RegExp(r'.*$');
 final RegExp _emptyLineRegExp = new RegExp(r'^[ \t]*$');
-final RegExp _whitespaceCharRegExp = new RegExp('[ \t]');
 
 const String _escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 final Set<int> _escapableCodes =
@@ -109,7 +108,6 @@ const String _htmlOpenTag =
 const String _htmlCloseTag = "</" + _htmlTagName + "\\s*>";
 
 final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
-final RegExp _trimLeftRegExp = new RegExp('^[ \t]*');
 
 String _removeIndent(String line, int amount, bool allowLess,
     [int startIndent = 0]) {

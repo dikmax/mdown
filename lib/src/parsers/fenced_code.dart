@@ -47,9 +47,17 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
 
     Attr attributes;
     if (infoString != '') {
-      Match space = _whitespaceCharRegExp.firstMatch(infoString);
-      if (space != null) {
-        infoString = infoString.substring(0, space.start);
+      int infoStringEnd = 0;
+      int infoStringLength = infoString.length;
+      while (infoStringEnd < infoStringLength) {
+        int codeUnit = infoString.codeUnitAt(infoStringEnd);
+        if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
+          break;
+        }
+        infoStringEnd++;
+      }
+      if (infoStringEnd != infoStringLength) {
+        infoString = infoString.substring(0, infoStringEnd);
       }
       infoString = unescapeAndUnreference(infoString);
       attributes = new InfoString(infoString);
