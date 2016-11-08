@@ -32,6 +32,20 @@ void main() {
   tests("SmartPunct [commonmark]", smartPunctuation, commonmarkMHTestFunc);
   tests("SmartPunct [commonmark]", smartPunctuation, commonmarkMHMHTestFunc);
 
+  // Fenced code attributes
+  TestFunc fencedCodeAttributesMHTestFunc =
+      mhTest(new Options(fencedCodeAttributes: true));
+  TestFunc fencedCodeAttributesMHMHTestFunc =
+      mhmhTest(new Options(fencedCodeAttributes: true));
+  tests("Fenced code attributes", fencedCodeAttributes,
+      fencedCodeAttributesMHTestFunc);
+  tests("Fenced code attributes", fencedCodeAttributes,
+      fencedCodeAttributesMHMHTestFunc);
+  tests("Fenced code attributes spec", specification,
+      fencedCodeAttributesMHTestFunc);
+  tests("Fenced code attributes spec", specification,
+      fencedCodeAttributesMHMHTestFunc);
+
   // Strikeout
   TestFunc strikeoutMHTestFunc = mhTest(new Options(strikeout: true));
   TestFunc strikeoutMHMHTestFunc = mhmhTest(new Options(strikeout: true));
@@ -114,7 +128,6 @@ void main() {
   tests("TeX math double backslash spec", specification, texDoubleMHMHTestFunc);
 
   // Raw TeX
-  Set<int> rawTexContradictions = new Set<int>.from(<int>[]);
   TestFunc rawTexMHTestFunc = mhTest(new Options(rawTex: true));
   TestFunc rawTexMHMHTestFunc = mhmhTest(new Options(rawTex: true));
   tests("Raw TeX", rawTex, rawTexMHTestFunc);

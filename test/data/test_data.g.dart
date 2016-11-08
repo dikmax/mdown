@@ -4329,6 +4329,56 @@ bar
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
+// Target: final Map<String, String> fencedCodeAttributes
+// **************************************************************************
+
+final Map<String, String> _$fencedCodeAttributesTests = <String, String>{
+  r'''``` {#id}
+code
+```
+''': r'''<pre id="id"><code>code
+</code></pre>
+''',
+  r'''``` {.class}
+code
+```
+''': r'''<pre class="class"><code>code
+</code></pre>
+''',
+  r'''``` {width=800}
+code
+```
+''': r'''<pre width="800"><code>code
+</code></pre>
+''',
+  r'''``` {width='800'}
+code
+```
+''': r'''<pre width="800"><code>code
+</code></pre>
+''',
+  r'''``` {width="800"}
+code
+```
+''': r'''<pre width="800"><code>code
+</code></pre>
+''',
+  r'''``` {key1=value1  key2=value2}
+code
+```
+''': r'''<pre key1="value1" key2="value2"><code>code
+</code></pre>
+''',
+  r'''``` {#id.class1.class2 width="800"}
+code
+```
+''': r'''<pre id="id" class="class1 class2" width="800"><code>code
+</code></pre>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
 // Target: final Map<String, String> strikeout
 // **************************************************************************
 

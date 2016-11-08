@@ -1,6 +1,7 @@
 library md_proc.test.service;
 
 import 'package:test/test.dart' as t;
+import 'package:quiver/collection.dart';
 
 import 'package:md_proc/md_proc.dart';
 import 'package:md_proc/markdown_writer.dart';
@@ -75,6 +76,28 @@ void serviceTests() {
       });
       t.test('==', () {
         t.expect(attr, t.equals(new InfoString('dart')));
+      });
+      t.test('!=', () {
+        t.expect(attr, t.isNot(t.equals(new InfoString('html'))));
+        t.expect(attr, t.isNot(t.equals(new EmptyAttr())));
+      });
+    });
+
+    t.group('Attributes', () {
+      Multimap<String, String> attr1 = new Multimap<String, String>();
+      attr1.add('key1', 'value1');
+      attr1.add('key2', 'value2');
+      Attributes attr = new Attributes('id', <String>['class1', 'class2'],
+          attr1);
+
+      Multimap<String, String> attr2 = new Multimap<String, String>();
+      attr2.add('key1', 'value1');
+      attr2.add('key2', 'value2');
+
+      t.test('==', () {
+        t.expect(attr, t.equals(
+            new Attributes('id', <String>['class1', 'class2'],
+                attr2)));
       });
       t.test('!=', () {
         t.expect(attr, t.isNot(t.equals(new InfoString('html'))));

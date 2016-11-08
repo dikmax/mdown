@@ -2,11 +2,13 @@ library md_proc.definitions;
 
 import 'package:collection/collection.dart';
 import 'package:quiver/core.dart';
+import 'package:quiver/collection.dart';
 
 // Class system is inspired by Pandoc
 
 const IterableEquality<dynamic> _iterableEquality =
     const IterableEquality<dynamic>();
+const ListEquality<dynamic> _listEquality = const ListEquality<dynamic>();
 const MapEquality<dynamic, dynamic> _mapEquality =
     const MapEquality<dynamic, dynamic>();
 const DeepCollectionEquality _deepEquality = const DeepCollectionEquality();
@@ -56,10 +58,10 @@ class EmptyAttr extends Attr {
 
 /// Infostring attribute
 class InfoString extends Attr {
-  /// Language attribuge
+  /// Language name
   String language;
 
-  /// constructor
+  /// Constructor
   InfoString(this.language);
 
   @override
@@ -71,6 +73,47 @@ class InfoString extends Attr {
 
   @override
   int get hashCode => language.hashCode;
+}
+
+/// Extended attribute information.
+class Attributes extends Attr {
+  /// Element id.
+  String identifier;
+
+  /// List of classes.
+  Iterable<String> classes;
+
+  /// Rest of the attributes.
+  Multimap<String, String> attributes;
+
+  /// Constructor
+  Attributes(this.identifier, this.classes, this.attributes);
+
+  @override
+  String toString() {
+    List<String> res = <String>[];
+    if (identifier != null) {
+      res.add('#$identifier');
+    }
+    if (classes != null) {
+      classes.forEach((String el) {
+        res.add('.$el');
+      });
+    }
+    attributes.forEach((String key, String value) => res.add('$key=$value'));
+
+    return 'Attributes(${res.join(' ')})';
+  }
+
+  @override
+  bool operator ==(dynamic obj) =>
+      obj is Attributes &&
+      identifier == obj.identifier &&
+      _iterableEquality.equals(classes, obj.classes) &&
+          _deepEquality.equals(attributes.asMap(), obj.attributes.asMap());
+
+  @override
+  int get hashCode => hash3(identifier, classes, attributes);
 }
 
 // TODO link type: with or without <>

@@ -694,6 +694,9 @@ class _MarkdownBuilder extends StringBuffer {
       if (codeBlock.attributes is InfoString) {
         InfoString attributes = codeBlock.attributes;
         write(' ${attributes.language}');
+      } else if (codeBlock.attributes is Attributes) {
+        write(' ');
+        writeAttributes(codeBlock.attributes);
       }
       write("\n");
       write(codeBlock.contents);
@@ -793,6 +796,22 @@ class _MarkdownBuilder extends StringBuffer {
     _InlineRenderer renderer = new _InlineRenderer(_references, _options);
     renderer.writeInlines(inlines, context: context);
     write(renderer.toString());
+  }
+
+  void writeAttributes(Attributes attr) {
+    write('{');
+    List<String> res = <String>[];
+    if (attr.identifier != null) {
+      res.add('#${attr.identifier}');
+    }
+    if (attr.classes != null) {
+      attr.classes.forEach((String el) {
+        res.add('.$el');
+      });
+    }
+    attr.attributes.forEach((String key, String value) => res.add('$key=$value'));
+    write(res.join(' '));
+    write('}');
   }
 
   void writeReferences() {

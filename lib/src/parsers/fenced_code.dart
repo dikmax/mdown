@@ -47,20 +47,13 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
 
     Attr attributes;
     if (infoString != '') {
-      int infoStringEnd = 0;
-      int infoStringLength = infoString.length;
-      while (infoStringEnd < infoStringLength) {
-        int codeUnit = infoString.codeUnitAt(infoStringEnd);
-        if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
-          break;
+      if (container.options.fencedCodeAttributes) {
+        ParseResult<Attributes> parse = container.attributesParser.parse(infoString, 0);
+        if (parse.isSuccess) {
+          attributes = parse.value;
         }
-        infoStringEnd++;
       }
-      if (infoStringEnd != infoStringLength) {
-        infoString = infoString.substring(0, infoStringEnd);
-      }
-      infoString = unescapeAndUnreference(infoString);
-      attributes = new InfoString(infoString);
+      attributes = attributes ?? _parseInfoString(infoString);
     } else {
       attributes = new EmptyAttr();
     }
@@ -70,5 +63,22 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
         attributes: attributes);
     return new ParseResult<Iterable<FencedCodeBlock>>.success(
         <FencedCodeBlock>[codeBlock], offset);
+  }
+
+  InfoString _parseInfoString(String infoString) {
+    int infoStringEnd = 0;
+    int infoStringLength = infoString.length;
+    while (infoStringEnd < infoStringLength) {
+      int codeUnit = infoString.codeUnitAt(infoStringEnd);
+      if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
+        break;
+      }
+      infoStringEnd++;
+    }
+    if (infoStringEnd != infoStringLength) {
+      infoString = infoString.substring(0, infoStringEnd);
+    }
+    infoString = unescapeAndUnreference(infoString);
+    return new InfoString(infoString);
   }
 }

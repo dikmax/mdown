@@ -1,0 +1,62 @@
+```````````````````````````````` example
+``` {#id}
+code
+```
+.
+<pre id="id"><code>code
+</code></pre>
+````````````````````````````````
+
+```````````````````````````````` example
+``` {.class}
+code
+```
+.
+<pre class="class"><code>code
+</code></pre>
+````````````````````````````````
+
+```````````````````````````````` example
+``` {width=800}
+code
+```
+.
+<pre width="800"><code>code
+</code></pre>
+````````````````````````````````
+
+```````````````````````````````` example
+``` {width='800'}
+code
+```
+.
+<pre width="800"><code>code
+</code></pre>
+````````````````````````````````
+
+```````````````````````````````` example
+``` {width="800"}
+code
+```
+.
+<pre width="800"><code>code
+</code></pre>
+````````````````````````````````
+
+```````````````````````````````` example
+``` {key1=value1  key2=value2}
+code
+```
+.
+<pre key1="value1" key2="value2"><code>code
+</code></pre>
+````````````````````````````````
+
+```````````````````````````````` example
+``` {#id.class1.class2 width="800"}
+code
+```
+.
+<pre id="id" class="class1 class2" width="800"><code>code
+</code></pre>
+````````````````````````````````

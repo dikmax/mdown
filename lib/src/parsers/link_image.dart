@@ -16,10 +16,6 @@ class LinkImageParser extends AbstractParser<Inlines> {
       // Link without
       r'(?:[^ \t\r\n\(\)\\]+|\((?:[^ \t\r\n\(\)\\]|\\.|\\)*\)|\\.|\\)*');
 
-  static final RegExp _titleRegExp = new RegExp(r'"(?:[^"]|\\")*"|'
-      r"'(?:[^']|\\')*'|"
-      r'\((?:[^)]|\\\))*\)');
-
   static final RegExp _referenceRegExp = new RegExp(r'\[((?:[^\]]|\\\])+)\]');
 
   Map<int, List<AbstractParser<Iterable<Inline>>>> _higherPriorityInlineParsers;

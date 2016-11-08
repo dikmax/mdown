@@ -24,6 +24,18 @@ class Options {
   /// `–` and curly versions of quote marks accordingly. It's only official extension to date.
   final bool smartPunctuation;
 
+  /// Extended attributes for fenced code.
+  final bool fencedCodeAttributes;
+
+  /// Extended attributes for header
+  final bool headerAttributes;
+
+  /// Extended attributes for inline code.
+  final bool inlineCodeAttributes;
+
+  /// Extended attributes for links and images.
+  final bool linkAttributes;
+
   /// Enables strikeout extension. Strikeout is a text wrapped with double tilde (`~~`). Example:
   ///
   /// ```md
@@ -129,6 +141,10 @@ class Options {
   const Options(
       {this.rawHtml: true,
       this.smartPunctuation: false,
+      this.fencedCodeAttributes: false,
+      this.headerAttributes: false,
+      this.inlineCodeAttributes: false,
+      this.linkAttributes: false,
       this.strikeout: false,
       this.subscript: false,
       this.superscript: false,
@@ -147,6 +163,10 @@ class Options {
   /// Predefined version of Options. Enables lot of useful extensions.
   static const Options defaults = const Options(
       smartPunctuation: true,
+      fencedCodeAttributes: true,
+      headerAttributes: true,
+      inlineCodeAttributes: true,
+      linkAttributes: true,
       strikeout: true,
       subscript: true,
       superscript: true,

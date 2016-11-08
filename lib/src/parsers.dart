@@ -6,6 +6,7 @@ import 'parse_result.dart';
 import 'package:md_proc/definitions.dart';
 import 'package:md_proc/entities.dart';
 import 'package:md_proc/options.dart';
+import 'package:quiver/collection.dart';
 
 part 'parsers/container.dart';
 part 'parsers/abstract.dart';
@@ -24,6 +25,7 @@ part 'parsers/blockquote_list.dart';
 part 'parsers/link_reference.dart';
 part 'parsers/raw_tex.dart';
 
+part 'parsers/attributes.dart';
 part 'parsers/hard_line_break.dart';
 part 'parsers/escapes.dart';
 part 'parsers/entity.dart';
