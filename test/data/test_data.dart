@@ -26,6 +26,10 @@ final Map<String, String> additionalMarkdownToHtml =
     _$additionalMarkdownToHtmlTests;
 
 /// Strikeout extension tests
+@EmbedTests('fenced_code_attributes.txt')
+final Map<String, String> fencedCodeAttributes = _$fencedCodeAttributesTests;
+
+/// Strikeout extension tests
 @EmbedTests('strikeout.txt')
 final Map<String, String> strikeout = _$strikeoutTests;
 

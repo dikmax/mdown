@@ -7,7 +7,7 @@ environment:
   sdk: ">=1.18.0 <2.0.0"
 dependencies:
   collection: '>=1.9.0 <2.0.0'
-  quiver: "^0.22.0"
+  quiver: "^0.24.0"
 dev_dependencies:
   benchmark_harness: any
   test: any

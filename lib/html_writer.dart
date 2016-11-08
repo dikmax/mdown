@@ -83,8 +83,20 @@ class _HtmlBuilder extends StringBuffer {
   }
 
   void writeCodeBlock(CodeBlock codeBlock) {
-    write("<pre><code");
-    writeAttributes(codeBlock.attributes);
+    write("<pre");
+    if (codeBlock.attributes is Attributes) {
+      writeAttributes(codeBlock.attributes);
+    }
+    write("><code");
+    if (codeBlock.attributes is InfoString) {
+      InfoString attr = codeBlock.attributes;
+      if (attr.language == "") {
+        return;
+      }
+      write(' class="language-');
+      write(htmlEscape(attr.language));
+      write('"');
+    }
     write(">");
     write(htmlEscape(codeBlock.contents));
     write("</code></pre>");
@@ -136,19 +148,28 @@ class _HtmlBuilder extends StringBuffer {
 
   // Attributes
 
-  void writeAttributes(Attr attr) {
-    if (attr is EmptyAttr) {
-      return;
-    } else if (attr is InfoString) {
-      if (attr.language == "") {
-        return;
-      }
-      write(' class="language-');
-      write(attr.language);
+  void writeAttributes(Attributes attr) {
+    if (attr.identifier != null) {
+      write(' id="');
+      write(htmlEscape(attr.identifier));
       write('"');
-    } else {
-      throw new UnimplementedError(attr.toString());
     }
+    if (attr.classes != null && attr.classes.length > 0) {
+      write(' class="');
+      write(attr.classes.map(htmlEscape).join(' '));
+      write('"');
+    }
+    List<String> keys = attr.attributes.keys.toList(growable: false);
+    keys.sort();
+    keys.forEach((String key) {
+      attr.attributes[key].forEach((String value) {
+        write(' ');
+        write(htmlEscape(key));
+        write('="');
+        write(htmlEscape(value));
+        write('"');
+      });
+    });
   }
 
   // Inlines

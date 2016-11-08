@@ -11,6 +11,9 @@ class ParsersContainer {
   /// Line parser.
   LineParser lineParser;
 
+  /// Parser for attributes string `{#id .class}`
+  AttributesParser attributesParser;
+
   /// Parser for blankline.
   BlanklineParser blanklineParser;
 
@@ -93,6 +96,7 @@ class ParsersContainer {
   /// Constructor.
   ParsersContainer(this.options) {
     lineParser = new LineParser(this);
+    attributesParser = new AttributesParser(this);
 
     // Block parsers
     atxHeadingParser = new AtxHeadingParser(this);
@@ -130,6 +134,7 @@ class ParsersContainer {
     // There's [AbstractParser.init] for it.
 
     lineParser.init();
+    attributesParser.init();
 
     // Block parsers
     atxHeadingParser.init();

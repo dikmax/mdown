@@ -5,7 +5,7 @@ class RawTexParser extends AbstractParser<Iterable<Block>> {
   /// Constructor.
   RawTexParser(ParsersContainer container) : super(container);
 
-  static final _startRegExp =
+  static final RegExp _startRegExp =
       new RegExp(r'^ {0,3}\\begin\{([A-Za-z0-9_\-+*]+)\}');
 
   @override
