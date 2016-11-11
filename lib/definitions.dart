@@ -110,7 +110,7 @@ class Attributes extends Attr {
       obj is Attributes &&
       identifier == obj.identifier &&
       _iterableEquality.equals(classes, obj.classes) &&
-          _deepEquality.equals(attributes.asMap(), obj.attributes.asMap());
+      _deepEquality.equals(attributes.asMap(), obj.attributes.asMap());
 
   @override
   int get hashCode => hash3(identifier, classes, attributes);
@@ -176,41 +176,54 @@ abstract class Heading extends Block {
   /// Heading contents
   Iterable<Inline> contents;
 
+  /// Heading attributes
+  Attr attributes;
+
   /// constructor
-  Heading(this.level, this.contents);
+  Heading(this.level, this.contents, [Attr attributes]) {
+    this.attributes = attributes ?? new EmptyAttr();
+  }
 }
 
 /// ATX heading block
 class AtxHeading extends Heading {
   /// constructor
-  AtxHeading(int level, Iterable<Inline> contents) : super(level, contents);
+  AtxHeading(int level, Iterable<Inline> contents, [Attr attributes])
+      : super(level, contents, attributes);
 
   /// H1 constructor
-  AtxHeading.h1(Iterable<Inline> contents) : super(1, contents);
+  AtxHeading.h1(Iterable<Inline> contents, [Attr attributes])
+      : super(1, contents, attributes);
 
   /// H2 constructor
-  AtxHeading.h2(Iterable<Inline> contents) : super(2, contents);
+  AtxHeading.h2(Iterable<Inline> contents, [Attr attributes])
+      : super(2, contents, attributes);
 
   /// H3 constructor
-  AtxHeading.h3(Iterable<Inline> contents) : super(3, contents);
+  AtxHeading.h3(Iterable<Inline> contents, [Attr attributes])
+      : super(3, contents, attributes);
 
   /// H4 constructor
-  AtxHeading.h4(Iterable<Inline> contents) : super(4, contents);
+  AtxHeading.h4(Iterable<Inline> contents, [Attr attributes])
+      : super(4, contents, attributes);
 
   /// H5 constructor
-  AtxHeading.h5(Iterable<Inline> contents) : super(5, contents);
+  AtxHeading.h5(Iterable<Inline> contents, [Attr attributes])
+      : super(5, contents, attributes);
 
   /// H6 constructor
-  AtxHeading.h6(Iterable<Inline> contents) : super(6, contents);
+  AtxHeading.h6(Iterable<Inline> contents, [Attr attributes])
+      : super(6, contents, attributes);
 
   @override
-  String toString() => "AtxHeading $level $contents";
+  String toString() => "AtxHeading $level $contents $attributes";
 
   @override
   bool operator ==(dynamic obj) =>
       obj is AtxHeading &&
       level == obj.level &&
-      _iterableEquality.equals(contents, obj.contents);
+      _iterableEquality.equals(contents, obj.contents) &&
+      attributes == obj.attributes;
 
   @override
   int get hashCode => hash2(level, contents);
@@ -219,22 +232,26 @@ class AtxHeading extends Heading {
 /// Setext heading block
 class SetextHeading extends Heading {
   /// constructor
-  SetextHeading(int level, Iterable<Inline> contents) : super(level, contents);
+  SetextHeading(int level, Iterable<Inline> contents, [Attr attributes])
+      : super(level, contents, attributes);
 
   /// H1 constructor
-  SetextHeading.h1(Iterable<Inline> contents) : super(1, contents);
+  SetextHeading.h1(Iterable<Inline> contents, [Attr attributes])
+      : super(1, contents, attributes);
 
   /// H2 constructor
-  SetextHeading.h2(Iterable<Inline> contents) : super(2, contents);
+  SetextHeading.h2(Iterable<Inline> contents, [Attr attributes])
+      : super(2, contents, attributes);
 
   @override
-  String toString() => "SetextHeading $level $contents";
+  String toString() => "SetextHeading $level $contents $attributes";
 
   @override
   bool operator ==(dynamic obj) =>
       obj is SetextHeading &&
       level == obj.level &&
-      _iterableEquality.equals(contents, obj.contents);
+      _iterableEquality.equals(contents, obj.contents) &&
+      attributes == obj.attributes;
 
   @override
   int get hashCode => hash2(level, contents);

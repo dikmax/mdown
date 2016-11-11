@@ -90,11 +90,27 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
 
     endOffset = state != _stateText ? endOffset : length;
 
-    Inlines inlines = (startOffset != -1 && endOffset != -1)
-        ? new _UnparsedInlines(line.substring(startOffset, endOffset))
-        : new Inlines();
+    Inlines inlines;
+    Attr attr = new EmptyAttr();
+    if (startOffset != -1 && endOffset != -1) {
+      String content = line.substring(startOffset, endOffset);
+      if (container.options.headingAttributes) {
+        if (content.endsWith('}')) {
+          int attributesStart = content.lastIndexOf('{');
+          ParseResult<Attributes> attributesResult =
+              container.attributesParser.parse(content, attributesStart);
+          if (attributesResult.isSuccess) {
+            content = content.substring(0, attributesStart);
+            attr = attributesResult.value;
+          }
+        }
+      }
+      inlines = new _UnparsedInlines(content);
+    } else {
+      inlines = new Inlines();
+    }
 
-    List<AtxHeading> heading = <AtxHeading>[new AtxHeading(level, inlines)];
+    List<AtxHeading> heading = <AtxHeading>[new AtxHeading(level, inlines, attr)];
 
     return new ParseResult<Iterable<Block>>.success(heading, lineResult.offset);
   }

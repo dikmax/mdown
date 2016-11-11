@@ -48,7 +48,8 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
     Attr attributes;
     if (infoString != '') {
       if (container.options.fencedCodeAttributes) {
-        ParseResult<Attributes> parse = container.attributesParser.parse(infoString, 0);
+        ParseResult<Attributes> parse =
+            container.attributesParser.parse(infoString, 0);
         if (parse.isSuccess) {
           attributes = parse.value;
         }

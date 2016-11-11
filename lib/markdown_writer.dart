@@ -35,7 +35,7 @@ class _EscapeContext {
   final bool escapeParens;
   final bool escapeQuot;
   final bool escapeSpace;
-  final bool isHeader;
+  final bool isHeading;
   final bool isLabel;
 
   const _EscapeContext(
@@ -44,7 +44,7 @@ class _EscapeContext {
       this.escapeParens: false,
       this.escapeQuot: false,
       this.escapeSpace: false,
-      this.isHeader: false,
+      this.isHeading: false,
       this.isLabel: false});
 
   _EscapeContext copy(
@@ -53,7 +53,7 @@ class _EscapeContext {
       bool escapeParens,
       bool escapeQuot,
       bool escapeSpace,
-      bool isHeader,
+      bool isHeading,
       bool isLabel}) {
     return new _EscapeContext(
         escapeStar: escapeStar != null ? escapeStar : this.escapeStar,
@@ -62,7 +62,7 @@ class _EscapeContext {
         escapeParens: escapeParens != null ? escapeParens : this.escapeParens,
         escapeQuot: escapeQuot != null ? escapeQuot : this.escapeQuot,
         escapeSpace: escapeSpace != null ? escapeSpace : this.escapeSpace,
-        isHeader: isHeader != null ? isHeader : this.isHeader,
+        isHeading: isHeading != null ? isHeading : this.isHeading,
         isLabel: isLabel != null ? isLabel : this.isLabel);
   }
 
@@ -86,10 +86,10 @@ class _NotCheckedPart extends _InlinePart {
   String escapeString(String str) =>
       str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
-  RegExp _notHeaderRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
-  RegExp _notHeaderRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
-  RegExp _atxHeaderRegExp = new RegExp(r" (#+ *)$");
-  RegExp _setExtHeaderRegExp =
+  RegExp _notHeadingRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
+  RegExp _notHeadingRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
+  RegExp _atxHeadingRegExp = new RegExp(r" (#+ *)$");
+  RegExp _setExtHeadingRegExp =
       new RegExp("^(.*\n {0,3})(=+|-+)( *(\$|\n))", multiLine: true);
   RegExp _horizontalRuleRegExp = new RegExp(
       r'^( {0,3})((- *){3,}|(_ *){3,}|(\* *){3,})$',
@@ -161,19 +161,19 @@ class _NotCheckedPart extends _InlinePart {
       content = content.replaceAll("~~", r"\~~");
     }
 
-    if (!context.isHeader) {
+    if (!context.isHeading) {
       content = content.replaceAllMapped(
-          _notHeaderRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
+          _notHeadingRegExp1, (Match m) => m.group(1) + r"\" + m.group(2));
       content = content.replaceAllMapped(
-          _notHeaderRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
+          _notHeadingRegExp2, (Match m) => m.group(1) + r"\" + m.group(2));
 
       content = content.replaceAllMapped(
           _horizontalRuleRegExp, (Match m) => m.group(1) + r"\" + m.group(2));
-      content = content.replaceAllMapped(_setExtHeaderRegExp,
+      content = content.replaceAllMapped(_setExtHeadingRegExp,
           (Match m) => m.group(1) + r"\" + m.group(2) + m.group(3));
     } else {
       content = content.replaceAllMapped(
-          _atxHeaderRegExp, (Match m) => r" \" + m.group(1));
+          _atxHeadingRegExp, (Match m) => r" \" + m.group(1));
     }
 
     // Parsing inline code to detect what should be escaped
@@ -615,7 +615,7 @@ class _MarkdownBuilder extends StringBuffer {
       if (block is Para) {
         writePara(block);
       } else if (block is Heading) {
-        writeHeader(block);
+        writeHeading(block);
       } else if (block is ThematicBreak) {
         writeHorizontalRule(block, unorderedListChar);
       } else if (block is CodeBlock) {
@@ -662,19 +662,26 @@ class _MarkdownBuilder extends StringBuffer {
         "\n");
   }
 
-  void writeHeader(Heading header) {
+  void writeHeading(Heading heading) {
     // TODO throw exception in case of multiline header ? Or replace with space
-    if (header is SetextHeading && header.level <= 2) {
+    if (heading is SetextHeading && heading.level <= 2) {
       _InlineRenderer inner = new _InlineRenderer(_references, _options);
-      inner.writeInlines(header.contents);
+      inner.writeInlines(heading.contents);
       String inlines = inner.toString();
+      if (_options.headingAttributes && heading.attributes is Attributes) {
+        inlines += ' ' + writeAttributesToString(heading.attributes);
+      }
       write(inlines);
       write("\n");
-      write((header.level == 1 ? '=' : '-') * inlines.length + "\n");
+      write((heading.level == 1 ? '=' : '-') * inlines.length + "\n");
       return;
     }
-    write("#" * header.level + " ");
-    writeInlines(header.contents, context: new _EscapeContext(isHeader: true));
+    write("#" * heading.level + " ");
+    writeInlines(heading.contents, context: new _EscapeContext(isHeading: true));
+    if (_options.headingAttributes && heading.attributes is Attributes) {
+      write(' ');
+      write(writeAttributesToString(heading.attributes));
+    }
     write("\n");
   }
 
@@ -696,7 +703,7 @@ class _MarkdownBuilder extends StringBuffer {
         write(' ${attributes.language}');
       } else if (codeBlock.attributes is Attributes) {
         write(' ');
-        writeAttributes(codeBlock.attributes);
+        write(writeAttributesToString(codeBlock.attributes));
       }
       write("\n");
       write(codeBlock.contents);
@@ -798,22 +805,6 @@ class _MarkdownBuilder extends StringBuffer {
     write(renderer.toString());
   }
 
-  void writeAttributes(Attributes attr) {
-    write('{');
-    List<String> res = <String>[];
-    if (attr.identifier != null) {
-      res.add('#${attr.identifier}');
-    }
-    if (attr.classes != null) {
-      attr.classes.forEach((String el) {
-        res.add('.$el');
-      });
-    }
-    attr.attributes.forEach((String key, String value) => res.add('$key=$value'));
-    write(res.join(' '));
-    write('}');
-  }
-
   void writeReferences() {
     if (_references.length > 0) {
       write("\n\n");
@@ -829,6 +820,26 @@ class _MarkdownBuilder extends StringBuffer {
       });
     }
   }
+
+  String writeAttributesToString(Attributes attr) {
+    StringBuffer result = new StringBuffer('{');
+    List<String> res = <String>[];
+    if (attr.identifier != null) {
+      res.add('#${attr.identifier}');
+    }
+    if (attr.classes != null) {
+      attr.classes.forEach((String el) {
+        res.add('.$el');
+      });
+    }
+    attr.attributes
+        .forEach((String key, String value) => res.add('$key=$value'));
+    result.write(res.join(' '));
+    result.write('}');
+
+    return result.toString();
+  }
+
 }
 
 /// Markdown Writer class

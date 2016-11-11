@@ -2,8 +2,8 @@ part of md_proc.src.parsers;
 
 /// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
 /// taking indent into account.
-bool fastBlockTest2(String text, int offset, int charCodeUnit1,
-    int charCodeUnit2) {
+bool fastBlockTest2(
+    String text, int offset, int charCodeUnit1, int charCodeUnit2) {
   int nonIndentOffset = _skipIndent(text, offset);
 
   if (nonIndentOffset == -1) {
@@ -13,7 +13,6 @@ bool fastBlockTest2(String text, int offset, int charCodeUnit1,
   int codeUnit = text.codeUnitAt(nonIndentOffset);
   return codeUnit == charCodeUnit1 || codeUnit == charCodeUnit2;
 }
-
 
 /// Parser for paragraphs and setext headings.
 class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
@@ -90,8 +89,8 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         }
 
         // Special check for html block rule 6.
-        Match htmlBlock6Match = _htmlBlock6Test.matchAsPrefix(
-            lineResult.value, indent);
+        Match htmlBlock6Match =
+            _htmlBlock6Test.matchAsPrefix(lineResult.value, indent);
         if (htmlBlock6Match != null) {
           String tag = htmlBlock6Match[1];
           if (_blockTags.contains(tag.toLowerCase())) {
@@ -99,7 +98,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
 
-          // Special check for list, as it can break paragraph only if not empty
+        // Special check for list, as it can break paragraph only if not empty
         // Ordered lists are also required to start with 1. to allow breaking.
         if (lineResult.value.startsWith(_listSimpleTest, indent)) {
           // It could be a list.
@@ -140,11 +139,27 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
       offset = lineResult.offset;
     }
 
-    Inlines inlines = new _UnparsedInlines(contents.join('\n'));
+    String contentsString = contents.join('\n');
     if (level > 0) {
+      Attr attr = new EmptyAttr();
+      if (container.options.headingAttributes) {
+        if (contentsString.endsWith('}')) {
+          int attributesStart = contentsString.lastIndexOf('{');
+          ParseResult<Attributes> attributesResult =
+          container.attributesParser.parse(contentsString, attributesStart);
+          if (attributesResult.isSuccess) {
+            contentsString = contentsString.substring(0, attributesStart);
+            attr = attributesResult.value;
+          }
+        }
+      }
+      Inlines inlines = new _UnparsedInlines(contentsString);
+
       return new ParseResult<Iterable<SetextHeading>>.success(
-          <SetextHeading>[new SetextHeading(level, inlines)], offset);
+          <SetextHeading>[new SetextHeading(level, inlines, attr)], offset);
     }
+
+    Inlines inlines = new _UnparsedInlines(contentsString);
 
     List<Block> result = <Block>[new Para(inlines)];
     if (listAddition != null) {

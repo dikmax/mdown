@@ -18,7 +18,7 @@ void serviceTests() {
       t.expect(
           CommonMarkParser.defaults.parse('Hello world!\n===').toString(),
           t.equals(
-              'Document (SetextHeading 1 [Str "Hello", Space, Str "world", Str "!"])'));
+              'Document (SetextHeading 1 [Str "Hello", Space, Str "world", Str "!"] EmptyAttr)'));
     });
 
     t.test('Writing html', () {
@@ -87,17 +87,18 @@ void serviceTests() {
       Multimap<String, String> attr1 = new Multimap<String, String>();
       attr1.add('key1', 'value1');
       attr1.add('key2', 'value2');
-      Attributes attr = new Attributes('id', <String>['class1', 'class2'],
-          attr1);
+      Attributes attr =
+          new Attributes('id', <String>['class1', 'class2'], attr1);
 
       Multimap<String, String> attr2 = new Multimap<String, String>();
       attr2.add('key1', 'value1');
       attr2.add('key2', 'value2');
 
       t.test('==', () {
-        t.expect(attr, t.equals(
-            new Attributes('id', <String>['class1', 'class2'],
-                attr2)));
+        t.expect(
+            attr,
+            t.equals(
+                new Attributes('id', <String>['class1', 'class2'], attr2)));
       });
       t.test('!=', () {
         t.expect(attr, t.isNot(t.equals(new InfoString('html'))));
@@ -142,7 +143,7 @@ void serviceTests() {
     t.group('AtxHeading', () {
       AtxHeading heading = new AtxHeading(2, <Inline>[new Str('Heading')]);
       t.test('toString', () {
-        t.expect(heading.toString(), t.equals('AtxHeading 2 [Str "Heading"]'));
+        t.expect(heading.toString(), t.equals('AtxHeading 2 [Str "Heading"] EmptyAttr'));
       });
       t.test('Special constructors', () {
         t.expect(new AtxHeading.h1(<Inline>[new Str('Heading')]),
@@ -178,7 +179,7 @@ void serviceTests() {
           new SetextHeading(2, <Inline>[new Str('Heading')]);
       t.test('toString', () {
         t.expect(
-            heading.toString(), t.equals('SetextHeading 2 [Str "Heading"]'));
+            heading.toString(), t.equals('SetextHeading 2 [Str "Heading"] EmptyAttr'));
       });
       t.test('Special constructors', () {
         t.expect(new SetextHeading.h1(<Inline>[new Str('Heading')]),
