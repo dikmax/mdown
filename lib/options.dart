@@ -28,7 +28,7 @@ class Options {
   final bool fencedCodeAttributes;
 
   /// Extended attributes for header
-  final bool headerAttributes;
+  final bool headingAttributes;
 
   /// Extended attributes for inline code.
   final bool inlineCodeAttributes;
@@ -142,7 +142,7 @@ class Options {
       {this.rawHtml: true,
       this.smartPunctuation: false,
       this.fencedCodeAttributes: false,
-      this.headerAttributes: false,
+      this.headingAttributes: false,
       this.inlineCodeAttributes: false,
       this.linkAttributes: false,
       this.strikeout: false,
@@ -164,7 +164,7 @@ class Options {
   static const Options defaults = const Options(
       smartPunctuation: true,
       fencedCodeAttributes: true,
-      headerAttributes: true,
+      headingAttributes: true,
       inlineCodeAttributes: true,
       linkAttributes: true,
       strikeout: true,

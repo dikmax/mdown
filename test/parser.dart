@@ -174,14 +174,14 @@ TestFunc mhmTest(Options options, [FilterFunc filter = emptyFilter]) {
   MarkdownWriter writer = new MarkdownWriter(options);
 
   return (int num, String md, String destMd) {
-      if (filter(TestType.markdown, num)) {
-        t.test(num.toString(), () {
-          String generatedMarkdown = writer.write(parser.parse(md));
-          t.expect(
-              generatedMarkdown, new _ExampleDescription(t.equals(destMd), md));
-        });
-      }
-    };
+    if (filter(TestType.markdown, num)) {
+      t.test(num.toString(), () {
+        String generatedMarkdown = writer.write(parser.parse(md));
+        t.expect(
+            generatedMarkdown, new _ExampleDescription(t.equals(destMd), md));
+      });
+    }
+  };
 }
 
 /*

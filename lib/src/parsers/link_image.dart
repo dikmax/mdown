@@ -124,7 +124,8 @@ class LinkImageParser extends AbstractParser<Inlines> {
           continue;
         } else if (codeUnit == endCodeUnit) {
           break;
-        } else if (codeUnit == _openParenCodeUnit && endCodeUnit == _closeParenCodeUnit) {
+        } else if (codeUnit == _openParenCodeUnit &&
+            endCodeUnit == _closeParenCodeUnit) {
           return new ParseResult<Target>.failure();
         }
       }

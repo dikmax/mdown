@@ -46,6 +46,20 @@ void main() {
   tests("Fenced code attributes spec", specification,
       fencedCodeAttributesMHMHTestFunc);
 
+  // Heading attributes
+  TestFunc headingAttributesMHTestFunc =
+      mhTest(new Options(headingAttributes: true));
+  TestFunc headingAttributesMHMHTestFunc =
+      mhmhTest(new Options(headingAttributes: true));
+  tests("Heading attributes", headingAttributes,
+      headingAttributesMHTestFunc);
+  tests("Heading attributes", headingAttributes,
+      headingAttributesMHMHTestFunc);
+  tests("Heading attributes spec", specification,
+      headingAttributesMHTestFunc);
+  tests("Heading attributes spec", specification,
+      headingAttributesMHMHTestFunc);
+
   // Strikeout
   TestFunc strikeoutMHTestFunc = mhTest(new Options(strikeout: true));
   TestFunc strikeoutMHMHTestFunc = mhmhTest(new Options(strikeout: true));

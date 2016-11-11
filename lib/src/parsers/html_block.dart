@@ -51,7 +51,8 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
           <Block>[new HtmlRawBlock(result.toString())], offset);
     }
 
-    Match htmlBlock6Match = _htmlBlock6Test.matchAsPrefix(text, nonIndentOffset);
+    Match htmlBlock6Match =
+        _htmlBlock6Test.matchAsPrefix(text, nonIndentOffset);
     if (htmlBlock6Match != null) {
       String tag = htmlBlock6Match[1];
       if (!_blockTags.contains(tag.toLowerCase())) {

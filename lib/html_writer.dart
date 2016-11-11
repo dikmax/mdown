@@ -37,7 +37,7 @@ class _HtmlBuilder extends StringBuffer {
           writePara(block);
         }
       } else if (block is Heading) {
-        writeHeader(block);
+        writeHeading(block);
       } else if (block is ThematicBreak) {
         write('<hr/>');
       } else if (block is CodeBlock) {
@@ -72,13 +72,16 @@ class _HtmlBuilder extends StringBuffer {
     write(htmlEscape(texRawBlock.contents));
   }
 
-  void writeHeader(Heading header) {
+  void writeHeading(Heading heading) {
     write("<h");
-    write(header.level);
+    write(heading.level);
+    if (_options.headingAttributes && heading.attributes is Attributes) {
+      writeAttributes(heading.attributes);
+    }
     write(">");
-    writeInlines(header.contents);
+    writeInlines(heading.contents);
     write("</h");
-    write(header.level);
+    write(heading.level);
     write(">");
   }
 

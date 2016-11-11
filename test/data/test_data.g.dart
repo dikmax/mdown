@@ -4379,6 +4379,63 @@ code
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
+// Target: final Map<String, String> headingAttributes
+// **************************************************************************
+
+final Map<String, String> _$headingAttributesTests = <String, String>{
+  r'''# header {#id}
+''': r'''<h1 id="id">header</h1>
+''',
+  r'''# header {.class}
+''': r'''<h1 class="class">header</h1>
+''',
+  r'''# header {width=800}
+''': r'''<h1 width="800">header</h1>
+''',
+  r'''# header {width='800'}
+''': r'''<h1 width="800">header</h1>
+''',
+  r'''# header {width="800"}
+''': r'''<h1 width="800">header</h1>
+''',
+  r'''# header {key1=value1  key2=value2}
+''': r'''<h1 key1="value1" key2="value2">header</h1>
+''',
+  r'''# header {#id.class1.class2 width="800"}
+''': r'''<h1 id="id" class="class1 class2" width="800">header</h1>
+''',
+  r'''header {#id}
+============
+''': r'''<h1 id="id">header</h1>
+''',
+  r'''header {.class}
+===============
+''': r'''<h1 class="class">header</h1>
+''',
+  r'''header {width=800}
+==================
+''': r'''<h1 width="800">header</h1>
+''',
+  r'''header {width='800'}
+====================
+''': r'''<h1 width="800">header</h1>
+''',
+  r'''header {width="800"}
+====================
+''': r'''<h1 width="800">header</h1>
+''',
+  r'''header {key1=value1  key2=value2}
+=================================
+''': r'''<h1 key1="value1" key2="value2">header</h1>
+''',
+  r'''header {#id.class1.class2 width="800"}
+======================================
+''': r'''<h1 id="id" class="class1 class2" width="800">header</h1>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
 // Target: final Map<String, String> strikeout
 // **************************************************************************
 
