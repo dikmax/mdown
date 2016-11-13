@@ -43,12 +43,10 @@ class AttributesParser extends AbstractParser<Attributes> {
 
         case _spaceCodeUnit:
         case _tabCodeUnit:
-          offset++;
-          break;
-
         case _newLineCodeUnit:
         case _carriageReturnCodeUnit:
-          return new ParseResult<Attributes>.failure();
+          offset++;
+          break;
 
         default:
           int endOffset = _parseAttribute(text, offset, attributes);

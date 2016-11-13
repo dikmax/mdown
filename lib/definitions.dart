@@ -918,11 +918,16 @@ class Code extends Inline {
   /// Size of fence
   int fenceSize;
 
+  /// Code attributes
+  Attr attributes;
+
   /// Constructor
-  Code(this.contents, {this.fenceSize: 1});
+  Code(this.contents, {this.fenceSize: 1, Attr attributes}) {
+    this.attributes = attributes ?? new EmptyAttr();
+  }
 
   @override
-  String toString() => 'Code "$contents"';
+  String toString() => 'Code "$contents" $attributes';
 
   @override
   bool operator ==(dynamic obj) =>

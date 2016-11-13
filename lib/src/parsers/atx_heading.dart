@@ -110,7 +110,9 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
       inlines = new Inlines();
     }
 
-    List<AtxHeading> heading = <AtxHeading>[new AtxHeading(level, inlines, attr)];
+    List<AtxHeading> heading = <AtxHeading>[
+      new AtxHeading(level, inlines, attr)
+    ];
 
     return new ParseResult<Iterable<Block>>.success(heading, lineResult.offset);
   }

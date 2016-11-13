@@ -69,8 +69,21 @@ class InlineCodeParser extends AbstractParser<Inlines> {
         (state == _stateCloseFence && endFenceSize == fenceSize)) {
       String code =
           _trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
+      Attr attributes = new EmptyAttr();
+      if (container.options.inlineCodeAttributes) {
+        if (offset < length && text.codeUnitAt(offset) == _openBraceCodeUnit) {
+          ParseResult<Attributes> attributesResult =
+              container.attributesParser.parse(text, offset);
+          if (attributesResult.isSuccess) {
+            attributes = attributesResult.value;
+            offset = attributesResult.offset;
+          }
+        }
+      }
       return new ParseResult<Inlines>.success(
-          new Inlines.single(new Code(code, fenceSize: fenceSize)), offset);
+          new Inlines.single(
+              new Code(code, fenceSize: fenceSize, attributes: attributes)),
+          offset);
     }
 
     return new ParseResult<Inlines>.success(

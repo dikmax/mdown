@@ -34,6 +34,10 @@ final Map<String, String> fencedCodeAttributes = _$fencedCodeAttributesTests;
 final Map<String, String> headingAttributes = _$headingAttributesTests;
 
 /// Strikeout extension tests
+@EmbedTests('inline_code_attributes.txt')
+final Map<String, String> inlineCodeAttributes = _$inlineCodeAttributesTests;
+
+/// Strikeout extension tests
 @EmbedTests('strikeout.txt')
 final Map<String, String> strikeout = _$strikeoutTests;
 

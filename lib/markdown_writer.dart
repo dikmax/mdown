@@ -86,8 +86,10 @@ class _NotCheckedPart extends _InlinePart {
   String escapeString(String str) =>
       str.replaceAllMapped(escapedChars, (Match m) => r"\" + m.group(0));
 
-  RegExp _notHeadingRegExp1 = new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
-  RegExp _notHeadingRegExp2 = new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
+  RegExp _notHeadingRegExp1 =
+      new RegExp(r"^( {0,3})(#{1,6})$", multiLine: true);
+  RegExp _notHeadingRegExp2 =
+      new RegExp(r"^( {0,3})(#{1,6} )", multiLine: true);
   RegExp _atxHeadingRegExp = new RegExp(r" (#+ *)$");
   RegExp _setExtHeadingRegExp =
       new RegExp("^(.*\n {0,3})(=+|-+)( *(\$|\n))", multiLine: true);
@@ -390,6 +392,9 @@ class _InlineRenderer {
     write(fence);
     write(contents);
     write(fence);
+    if (_options.inlineCodeAttributes && code.attributes is Attributes) {
+      write(_writeAttributesToString(code.attributes));
+    }
   }
 
   void writeEmph(Emph emph,
@@ -584,6 +589,24 @@ class _InlineRenderer {
   }
 }
 
+String _writeAttributesToString(Attributes attr) {
+  StringBuffer result = new StringBuffer('{');
+  List<String> res = <String>[];
+  if (attr.identifier != null) {
+    res.add('#${attr.identifier}');
+  }
+  if (attr.classes != null) {
+    attr.classes.forEach((String el) {
+      res.add('.$el');
+    });
+  }
+  attr.attributes.forEach((String key, String value) => res.add('$key=$value'));
+  result.write(res.join(' '));
+  result.write('}');
+
+  return result.toString();
+}
+
 class _MarkdownBuilder extends StringBuffer {
   Map<String, Target> _references;
 
@@ -669,7 +692,7 @@ class _MarkdownBuilder extends StringBuffer {
       inner.writeInlines(heading.contents);
       String inlines = inner.toString();
       if (_options.headingAttributes && heading.attributes is Attributes) {
-        inlines += ' ' + writeAttributesToString(heading.attributes);
+        inlines += ' ' + _writeAttributesToString(heading.attributes);
       }
       write(inlines);
       write("\n");
@@ -677,10 +700,11 @@ class _MarkdownBuilder extends StringBuffer {
       return;
     }
     write("#" * heading.level + " ");
-    writeInlines(heading.contents, context: new _EscapeContext(isHeading: true));
+    writeInlines(heading.contents,
+        context: new _EscapeContext(isHeading: true));
     if (_options.headingAttributes && heading.attributes is Attributes) {
       write(' ');
-      write(writeAttributesToString(heading.attributes));
+      write(_writeAttributesToString(heading.attributes));
     }
     write("\n");
   }
@@ -703,7 +727,7 @@ class _MarkdownBuilder extends StringBuffer {
         write(' ${attributes.language}');
       } else if (codeBlock.attributes is Attributes) {
         write(' ');
-        write(writeAttributesToString(codeBlock.attributes));
+        write(_writeAttributesToString(codeBlock.attributes));
       }
       write("\n");
       write(codeBlock.contents);
@@ -820,26 +844,6 @@ class _MarkdownBuilder extends StringBuffer {
       });
     }
   }
-
-  String writeAttributesToString(Attributes attr) {
-    StringBuffer result = new StringBuffer('{');
-    List<String> res = <String>[];
-    if (attr.identifier != null) {
-      res.add('#${attr.identifier}');
-    }
-    if (attr.classes != null) {
-      attr.classes.forEach((String el) {
-        res.add('.$el');
-      });
-    }
-    attr.attributes
-        .forEach((String key, String value) => res.add('$key=$value'));
-    result.write(res.join(' '));
-    result.write('}');
-
-    return result.toString();
-  }
-
 }
 
 /// Markdown Writer class
