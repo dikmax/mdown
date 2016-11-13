@@ -1,0 +1,48 @@
+```````````````````````````````` example
+`code`{#id}
+.
+<p><code id="id">code</code></p>
+````````````````````````````````
+
+```````````````````````````````` example
+`code`{.class}
+.
+<p><code class="class">code</code></p>
+````````````````````````````````
+
+```````````````````````````````` example
+`code`{width=800}
+.
+<p><code width="800">code</code></p>
+````````````````````````````````
+
+```````````````````````````````` example
+`code`{width='800'}
+.
+<p><code width="800">code</code></p>
+````````````````````````````````
+
+```````````````````````````````` example
+`code`{width="800"}
+.
+<p><code width="800">code</code></p>
+````````````````````````````````
+
+```````````````````````````````` example
+`code`{key1=value1  key2=value2}
+.
+<p><code key1="value1" key2="value2">code</code></p>
+````````````````````````````````
+
+```````````````````````````````` example
+`code`{#id.class1.class2 width="800"}
+.
+<p><code id="id" class="class1 class2" width="800">code</code></p>
+````````````````````````````````
+
+```````````````````````````````` example
+`code`{#id.class1.class2
+width="800"}
+.
+<p><code id="id" class="class1 class2" width="800">code</code></p>
+````````````````````````````````

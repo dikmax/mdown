@@ -617,7 +617,7 @@ void serviceTests() {
     t.group('Code', () {
       Code code = new Code("Code");
       t.test('toString', () {
-        t.expect(code.toString(), t.equals('Code "Code"'));
+        t.expect(code.toString(), t.equals('Code "Code" EmptyAttr'));
       });
       t.test('==', () {
         t.expect(code, t.equals(new Code("Code", fenceSize: 1)));

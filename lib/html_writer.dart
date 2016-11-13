@@ -241,7 +241,11 @@ class _HtmlBuilder extends StringBuffer {
 
   void writeCodeInline(Code code, {bool stripped: false}) {
     if (!stripped) {
-      write('<code>');
+      write('<code');
+      if (_options.inlineCodeAttributes && code.attributes is Attributes) {
+        writeAttributes(code.attributes);
+      }
+      write('>');
     }
     write(htmlEscape(code.contents));
     if (!stripped) {

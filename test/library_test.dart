@@ -46,6 +46,20 @@ void main() {
   tests("Fenced code attributes spec", specification,
       fencedCodeAttributesMHMHTestFunc);
 
+  // Inline code attributes
+  TestFunc inlineCodeAttributesMHTestFunc =
+      mhTest(new Options(inlineCodeAttributes: true));
+  TestFunc inlineCodeAttributesMHMHTestFunc =
+      mhmhTest(new Options(inlineCodeAttributes: true));
+  tests("Inline code attributes", inlineCodeAttributes,
+      inlineCodeAttributesMHTestFunc);
+  tests("Inline code attributes", inlineCodeAttributes,
+      inlineCodeAttributesMHMHTestFunc);
+  tests("Inline code attributes spec", specification,
+      inlineCodeAttributesMHTestFunc);
+  tests("Inline code attributes spec", specification,
+      inlineCodeAttributesMHMHTestFunc);
+
   // Heading attributes
   TestFunc headingAttributesMHTestFunc =
       mhTest(new Options(headingAttributes: true));

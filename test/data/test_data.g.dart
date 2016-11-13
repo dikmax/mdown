@@ -4436,6 +4436,39 @@ final Map<String, String> _$headingAttributesTests = <String, String>{
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
+// Target: final Map<String, String> inlineCodeAttributes
+// **************************************************************************
+
+final Map<String, String> _$inlineCodeAttributesTests = <String, String>{
+  r'''`code`{#id}
+''': r'''<p><code id="id">code</code></p>
+''',
+  r'''`code`{.class}
+''': r'''<p><code class="class">code</code></p>
+''',
+  r'''`code`{width=800}
+''': r'''<p><code width="800">code</code></p>
+''',
+  r'''`code`{width='800'}
+''': r'''<p><code width="800">code</code></p>
+''',
+  r'''`code`{width="800"}
+''': r'''<p><code width="800">code</code></p>
+''',
+  r'''`code`{key1=value1  key2=value2}
+''': r'''<p><code key1="value1" key2="value2">code</code></p>
+''',
+  r'''`code`{#id.class1.class2 width="800"}
+''': r'''<p><code id="id" class="class1 class2" width="800">code</code></p>
+''',
+  r'''`code`{#id.class1.class2
+width="800"}
+''': r'''<p><code id="id" class="class1 class2" width="800">code</code></p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
 // Target: final Map<String, String> strikeout
 // **************************************************************************
 
