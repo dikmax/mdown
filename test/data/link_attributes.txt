@@ -1,0 +1,168 @@
+```````````````````````````````` example
+[test](http://test.com/){#id}
+.
+<p><a href="http://test.com/" id="id">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){.class}
+.
+<p><a href="http://test.com/" class="class">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){width=800}
+.
+<p><a href="http://test.com/" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){width='800'}
+.
+<p><a href="http://test.com/" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){width="800"}
+.
+<p><a href="http://test.com/" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){attr="with \" quote"}
+.
+<p><a href="http://test.com/">test</a>{attr=&quot;with &quot; quote&quot;}</p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){key1=value1  key2=value2}
+.
+<p><a href="http://test.com/" key1="value1" key2="value2">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){#id.class1.class2 width="800"}
+.
+<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test](http://test.com/){#id.class1.class2
+width="800"}
+.
+<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {#id}
+.
+<p><a href="http://test.com/" id="id">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {.class}
+.
+<p><a href="http://test.com/" class="class">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {width=800}
+.
+<p><a href="http://test.com/" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {width='800'}
+.
+<p><a href="http://test.com/" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {width="800"}
+.
+<p><a href="http://test.com/" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {key1=value1  key2=value2}
+.
+<p><a href="http://test.com/" key1="value1" key2="value2">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {#id.class1.class2 width="800"}
+.
+<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+[test][ref]
+
+[ref]: http://test.com/ {#id.class1.class2
+width="800"}
+.
+<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){#id}
+.
+<p><img src="http://test.com/" alt="test" id="id" /></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){.class}
+.
+<p><img src="http://test.com/" alt="test" class="class" /></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){width=800}
+.
+<p><img src="http://test.com/" alt="test" width="800" /></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){width='800'}
+.
+<p><img src="http://test.com/" alt="test" width="800" /></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){width="800"}
+.
+<p><img src="http://test.com/" alt="test" width="800" /></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){key1=value1  key2=value2}
+.
+<p><img src="http://test.com/" alt="test" key1="value1" key2="value2" /></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){#id.class1.class2 width="800"}
+.
+<p><img src="http://test.com/" alt="test" id="id" class="class1 class2" width="800" /></p>
+````````````````````````````````
+
+```````````````````````````````` example
+![test](http://test.com/){#id.class1.class2
+width="800"}
+.
+<p><img src="http://test.com/" alt="test" id="id" class="class1 class2" width="800" /></p>
+````````````````````````````````

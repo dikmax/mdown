@@ -65,14 +65,20 @@ void main() {
       mhTest(new Options(headingAttributes: true));
   TestFunc headingAttributesMHMHTestFunc =
       mhmhTest(new Options(headingAttributes: true));
-  tests("Heading attributes", headingAttributes,
-      headingAttributesMHTestFunc);
-  tests("Heading attributes", headingAttributes,
-      headingAttributesMHMHTestFunc);
-  tests("Heading attributes spec", specification,
-      headingAttributesMHTestFunc);
-  tests("Heading attributes spec", specification,
-      headingAttributesMHMHTestFunc);
+  tests("Heading attributes", headingAttributes, headingAttributesMHTestFunc);
+  tests("Heading attributes", headingAttributes, headingAttributesMHMHTestFunc);
+  tests("Heading attributes spec", specification, headingAttributesMHTestFunc);
+  tests(
+      "Heading attributes spec", specification, headingAttributesMHMHTestFunc);
+
+  // Link attributes
+  TestFunc linkAttributesMHTestFunc = mhTest(new Options(linkAttributes: true));
+  TestFunc linkAttributesMHMHTestFunc =
+      mhmhTest(new Options(linkAttributes: true));
+  tests("Link attributes", linkAttributes, linkAttributesMHTestFunc);
+  tests("Link attributes", linkAttributes, linkAttributesMHMHTestFunc);
+  tests("Link attributes spec", specification, linkAttributesMHTestFunc);
+  tests("Link attributes spec", specification, linkAttributesMHMHTestFunc);
 
   // Strikeout
   TestFunc strikeoutMHTestFunc = mhTest(new Options(strikeout: true));

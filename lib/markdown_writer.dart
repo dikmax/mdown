@@ -494,6 +494,9 @@ class _InlineRenderer {
       write('](');
       writeTarget(link.target);
       write(')');
+      if (_options.linkAttributes && link.target.attributes is Attributes) {
+        write(_writeAttributesToString(link.target.attributes));
+      }
       return;
     }
 
@@ -533,6 +536,10 @@ class _InlineRenderer {
     write('](');
     writeTarget(image.target);
     write(')');
+
+    if (_options.linkAttributes && image.target.attributes is Attributes) {
+      write(_writeAttributesToString(image.target.attributes));
+    }
   }
 
   RegExp htmlEntity = new RegExp(r"&[0-9a-zA-Z]+;");
@@ -840,6 +847,10 @@ class _MarkdownBuilder extends StringBuffer {
         _InlineRenderer renderer = new _InlineRenderer(_references, _options);
         renderer.writeTarget(target);
         write(renderer);
+        if (_options.linkAttributes && target.attributes is Attributes) {
+          write(' ');
+          write(_writeAttributesToString(target.attributes));
+        }
         write('\n');
       });
     }

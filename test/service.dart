@@ -111,7 +111,7 @@ void serviceTests() {
       Target target = new Target('https://www.dartlang.org/', 'Dart');
       t.test('toString', () {
         t.expect(target.toString(),
-            t.equals('Target "https://www.dartlang.org/" "Dart"'));
+            t.equals('Target "https://www.dartlang.org/" "Dart" EmptyAttr'));
       });
       t.test('==', () {
         t.expect(
@@ -143,7 +143,8 @@ void serviceTests() {
     t.group('AtxHeading', () {
       AtxHeading heading = new AtxHeading(2, <Inline>[new Str('Heading')]);
       t.test('toString', () {
-        t.expect(heading.toString(), t.equals('AtxHeading 2 [Str "Heading"] EmptyAttr'));
+        t.expect(heading.toString(),
+            t.equals('AtxHeading 2 [Str "Heading"] EmptyAttr'));
       });
       t.test('Special constructors', () {
         t.expect(new AtxHeading.h1(<Inline>[new Str('Heading')]),
@@ -178,8 +179,8 @@ void serviceTests() {
       SetextHeading heading =
           new SetextHeading(2, <Inline>[new Str('Heading')]);
       t.test('toString', () {
-        t.expect(
-            heading.toString(), t.equals('SetextHeading 2 [Str "Heading"] EmptyAttr'));
+        t.expect(heading.toString(),
+            t.equals('SetextHeading 2 [Str "Heading"] EmptyAttr'));
       });
       t.test('Special constructors', () {
         t.expect(new SetextHeading.h1(<Inline>[new Str('Heading')]),
@@ -724,7 +725,7 @@ void serviceTests() {
         t.expect(
             link.toString(),
             t.equals(
-                'InlineLink [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+                'InlineLink [Str "Dart"] (Target "https://www.dartlang.org/" null EmptyAttr)'));
       });
       t.test('==', () {
         t.expect(
@@ -752,7 +753,7 @@ void serviceTests() {
         t.expect(
             link.toString(),
             t.equals(
-                'ReferenceLink[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+                'ReferenceLink[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null EmptyAttr)'));
       });
       t.test('==', () {
         t.expect(
@@ -832,7 +833,7 @@ void serviceTests() {
         t.expect(
             image.toString(),
             t.equals(
-                'InlineImage [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+                'InlineImage [Str "Dart"] (Target "https://www.dartlang.org/" null EmptyAttr)'));
       });
       t.test('==', () {
         t.expect(
@@ -862,7 +863,7 @@ void serviceTests() {
         t.expect(
             image.toString(),
             t.equals(
-                'ReferenceImage[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null)'));
+                'ReferenceImage[dart] [Str "Dart"] (Target "https://www.dartlang.org/" null EmptyAttr)'));
       });
       t.test('==', () {
         t.expect(

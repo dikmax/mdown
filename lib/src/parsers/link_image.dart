@@ -272,15 +272,31 @@ class LinkImageParser extends AbstractParser<Inlines> {
         if (codeUnit == _openParenCodeUnit) {
           ParseResult<Target> targetResult = _parseTarget(text, offset + 1);
           if (targetResult.isSuccess) {
+            Target target = targetResult.value;
+
             // Normal link.
             Inlines labelInlines = container.documentParser
                 .parseInlines(text.substring(startOffset, endOffset));
 
+            // Attributes (linkAttributes extensions).
+            offset = targetResult.offset;
+            if (container.options.linkAttributes) {
+              if (offset < length &&
+                  text.codeUnitAt(offset) == _openBraceCodeUnit) {
+                ParseResult<Attributes> attributesResult =
+                    container.attributesParser.parse(text, offset);
+                if (attributesResult.isSuccess) {
+                  target.attributes = attributesResult.value;
+                  offset = attributesResult.offset;
+                }
+              }
+            }
+
             Inline result = isImage
-                ? new InlineImage(labelInlines, targetResult.value)
-                : new InlineLink(labelInlines, targetResult.value);
+                ? new InlineImage(labelInlines, target)
+                : new InlineLink(labelInlines, target);
             return new ParseResult<Inlines>.success(
-                new Inlines.single(result), targetResult.offset);
+                new Inlines.single(result), offset);
           }
         }
 
@@ -317,6 +333,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
           if (referenceMatch != null) {
             String reference = referenceMatch[1];
             String normalizedReference = _LinkReference.normalize(reference);
+
             Target target;
 
             if (container.references.containsKey(normalizedReference)) {
