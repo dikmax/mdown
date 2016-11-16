@@ -87,12 +87,12 @@ class AttributesParser extends AbstractParser<Attributes> {
     return endOffset;
   }
 
-  static final RegExp _attributesRegExp =
+  static final RegExp _keyValueRegExp =
       new RegExp('([a-zA-Z0-9_\-]+)=([^ "\'\t}][^ \t}]*|"[^"]*"|\'[^\']*\')');
 
   int _parseAttribute(
       String text, int offset, Multimap<String, String> attributes) {
-    Match match = _attributesRegExp.matchAsPrefix(text, offset);
+    Match match = _keyValueRegExp.matchAsPrefix(text, offset);
     if (match == null) {
       return offset;
     }

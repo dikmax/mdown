@@ -4469,6 +4469,108 @@ width="800"}
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
+// Target: final Map<String, String> linkAttributes
+// **************************************************************************
+
+final Map<String, String> _$linkAttributesTests = <String, String>{
+  r'''[test](http://test.com/){#id}
+''': r'''<p><a href="http://test.com/" id="id">test</a></p>
+''',
+  r'''[test](http://test.com/){.class}
+''': r'''<p><a href="http://test.com/" class="class">test</a></p>
+''',
+  r'''[test](http://test.com/){width=800}
+''': r'''<p><a href="http://test.com/" width="800">test</a></p>
+''',
+  r'''[test](http://test.com/){width='800'}
+''': r'''<p><a href="http://test.com/" width="800">test</a></p>
+''',
+  r'''[test](http://test.com/){width="800"}
+''': r'''<p><a href="http://test.com/" width="800">test</a></p>
+''',
+  r'''[test](http://test.com/){attr="with \" quote"}
+''': r'''<p><a href="http://test.com/">test</a>{attr=&quot;with &quot; quote&quot;}</p>
+''',
+  r'''[test](http://test.com/){key1=value1  key2=value2}
+''': r'''<p><a href="http://test.com/" key1="value1" key2="value2">test</a></p>
+''',
+  r'''[test](http://test.com/){#id.class1.class2 width="800"}
+''': r'''<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+''',
+  r'''[test](http://test.com/){#id.class1.class2
+width="800"}
+''': r'''<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {#id}
+''': r'''<p><a href="http://test.com/" id="id">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {.class}
+''': r'''<p><a href="http://test.com/" class="class">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {width=800}
+''': r'''<p><a href="http://test.com/" width="800">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {width='800'}
+''': r'''<p><a href="http://test.com/" width="800">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {width="800"}
+''': r'''<p><a href="http://test.com/" width="800">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {key1=value1  key2=value2}
+''': r'''<p><a href="http://test.com/" key1="value1" key2="value2">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {#id.class1.class2 width="800"}
+''': r'''<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+''',
+  r'''[test][ref]
+
+[ref]: http://test.com/ {#id.class1.class2
+width="800"}
+''': r'''<p><a href="http://test.com/" id="id" class="class1 class2" width="800">test</a></p>
+''',
+  r'''![test](http://test.com/){#id}
+''': r'''<p><img src="http://test.com/" alt="test" id="id" /></p>
+''',
+  r'''![test](http://test.com/){.class}
+''': r'''<p><img src="http://test.com/" alt="test" class="class" /></p>
+''',
+  r'''![test](http://test.com/){width=800}
+''': r'''<p><img src="http://test.com/" alt="test" width="800" /></p>
+''',
+  r'''![test](http://test.com/){width='800'}
+''': r'''<p><img src="http://test.com/" alt="test" width="800" /></p>
+''',
+  r'''![test](http://test.com/){width="800"}
+''': r'''<p><img src="http://test.com/" alt="test" width="800" /></p>
+''',
+  r'''![test](http://test.com/){key1=value1  key2=value2}
+''': r'''<p><img src="http://test.com/" alt="test" key1="value1" key2="value2" /></p>
+''',
+  r'''![test](http://test.com/){#id.class1.class2 width="800"}
+''': r'''<p><img src="http://test.com/" alt="test" id="id" class="class1 class2" width="800" /></p>
+''',
+  r'''![test](http://test.com/){#id.class1.class2
+width="800"}
+''': r'''<p><img src="http://test.com/" alt="test" id="id" class="class1 class2" width="800" /></p>
+''',
+};
+
+// **************************************************************************
+// Generator: EmbedTestsGenerator
 // Target: final Map<String, String> strikeout
 // **************************************************************************
 

@@ -342,6 +342,9 @@ class _HtmlBuilder extends StringBuffer {
         write(htmlEscape(link.target.title));
         write('"');
       }
+      if (_options.linkAttributes && link.target.attributes is Attributes) {
+        writeAttributes(link.target.attributes);
+      }
       write('>');
     }
     writeInlines(link.label, stripped: stripped);
@@ -363,6 +366,9 @@ class _HtmlBuilder extends StringBuffer {
         write(' title="');
         write(htmlEscape(image.target.title));
         write('"');
+      }
+      if (_options.linkAttributes && image.target.attributes is Attributes) {
+        writeAttributes(image.target.attributes);
       }
       write(" />");
     } else {

@@ -126,12 +126,17 @@ class Target {
   /// Target link title
   String title;
 
+  /// Attributes
+  Attr attributes;
+
   /// Constructor
-  Target(this.link, this.title);
+  Target(this.link, this.title, [Attr attributes]) {
+    this.attributes = attributes ?? new EmptyAttr();
+  }
 
   @override
   String toString() =>
-      'Target "$link" ${title == null ? "null" : "\"$title\""}';
+      'Target "$link" ${title == null ? "null" : "\"$title\""} $attributes';
 
   @override
   bool operator ==(dynamic obj) =>
