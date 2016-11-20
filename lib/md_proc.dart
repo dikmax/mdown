@@ -11,7 +11,7 @@ export 'package:md_proc/options.dart';
 
 /// Converts markdown string to html string.
 String markdownToHtml(String markdown) {
-  String result =
+  final String result =
       HtmlWriter.defaults.write(CommonMarkParser.defaults.parse(markdown));
 
   return result;

@@ -18,9 +18,9 @@ class MapEmitter implements ScoreEmitter {
 
   double report() {
     print("$name: ");
-    double sum = scores.values.reduce((double v1, double v2) => v1 + v2);
+    final double sum = scores.values.reduce((double v1, double v2) => v1 + v2);
     print(" - sum: $sum");
-    double avg = sum / scores.length;
+    final double avg = sum / scores.length;
     print(" - avg: $avg");
     return avg;
   }
@@ -66,9 +66,9 @@ class MarkdownBenchmark extends BenchmarkBase {
 */
 
 Future<dynamic> main() async {
-  Directory dir = new Directory('benchmark/samples');
+  final Directory dir = new Directory('benchmark/samples');
 
-  MapEmitter mdProcResults = new MapEmitter("md_proc");
+  final MapEmitter mdProcResults = new MapEmitter("md_proc");
   // MapEmitter markdownResults = new MapEmitter("markdown");
 
   double sum = 0.0;
@@ -79,7 +79,7 @@ Future<dynamic> main() async {
       if (name.endsWith('.md')) {
         name = name.replaceAll(new RegExp(r'\.md$'), '');
         print('Benchmarking: $name...');
-        String data = await entity.readAsString();
+        final String data = await entity.readAsString();
         MdProcBenchmark.main(name, data, mdProcResults);
         print('md_proc: ${mdProcResults.scores[name]}');
         sum += mdProcResults.scores[name];

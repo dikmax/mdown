@@ -18,19 +18,19 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
   @override
   Future<String> generateForAnnotatedElement(
       Element element, Entities annotation, BuildStep buildStep) async {
-    RegExp r = new RegExp(r"^&(.*);$");
-    HttpClient client = new HttpClient();
-    HttpClientRequest request = await client
+    final RegExp r = new RegExp(r"^&(.*);$");
+    final HttpClient client = new HttpClient();
+    final HttpClientRequest request = await client
         .getUrl(Uri.parse('https://html.spec.whatwg.org/entities.json'));
-    HttpClientResponse response = await request.close();
-    dynamic json =
+    final HttpClientResponse response = await request.close();
+    final dynamic json =
         await response.transform(UTF8.decoder).transform(JSON.decoder).first;
     String result =
         'final Map<String, String> _\$${element.displayName} = new HashMap<String, String>.from(<String, String>{\n';
     json.forEach((String k, dynamic v) {
-      Match match = r.firstMatch(k);
+      final Match match = r.firstMatch(k);
       if (match != null) {
-        String entity = match.group(1);
+        final String entity = match.group(1);
         if (entity == "dollar") {
           result += '  "$entity": "\\\$",';
         } else {

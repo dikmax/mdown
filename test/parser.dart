@@ -53,7 +53,7 @@ class _ExampleDescription extends t.Matcher {
       t.Description mismatchDescription,
       Map<dynamic, dynamic> matchState,
       bool verbose) {
-    t.Description d =
+    final t.Description d =
         inner.describeMismatch(item, mismatchDescription, matchState, verbose);
     d.add("\n  Source: \n" + example);
     return d;
@@ -81,7 +81,7 @@ class _Example2Description extends t.Matcher {
       t.Description mismatchDescription,
       Map<dynamic, dynamic> matchState,
       bool verbose) {
-    t.Description d =
+    final t.Description d =
         inner.describeMismatch(item, mismatchDescription, matchState, verbose);
     d.add("\n  Source: \n" + example);
     d.add("\n  Source 2: \n" + example2);
@@ -92,12 +92,12 @@ class _Example2Description extends t.Matcher {
 RegExp _leadingSpacesRegExp = new RegExp(r'^ *');
 RegExp _trailingSpacesRegExp = new RegExp(r' *$');
 RegExp _consecutiveSpacesRegExp = new RegExp(r' +');
-RegExp _spaceBeforeTagCloseRegExp = new RegExp(r' *\/>');
+RegExp _spaceBeforeTagCloseRegExp = new RegExp(r' */>');
 
 String _tidy(String html) {
-  List<String> lines = html.split('\n');
+  final List<String> lines = html.split('\n');
   bool inPre = false;
-  List<String> result = <String>[];
+  final List<String> result = <String>[];
   for (String line in lines) {
     if (line.contains("<pre")) {
       inPre = true;
@@ -128,16 +128,16 @@ String _tidy(String html) {
 
 /// Generate md->html tests
 TestFunc mhTest(Options options, [FilterFunc filter = emptyFilter]) {
-  CommonMarkParser parser = new CommonMarkParser(options);
-  HtmlWriter writer = new HtmlWriter(options);
+  final CommonMarkParser parser = new CommonMarkParser(options);
+  final HtmlWriter writer = new HtmlWriter(options);
 
   return (int num, String mdOrig, String html) {
     if (filter(TestType.html, num)) {
       t.test('html $num', () {
-        String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
+        final String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
         html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-        Document doc = parser.parse(md);
+        final Document doc = parser.parse(md);
         t.expect(_tidy(writer.write(doc)),
             new _ExampleDescription(t.equals(_tidy(html)), mdOrig));
       });
@@ -147,18 +147,18 @@ TestFunc mhTest(Options options, [FilterFunc filter = emptyFilter]) {
 
 /// Generate md->html->md->html tests
 TestFunc mhmhTest(Options options, [FilterFunc filter = emptyFilter]) {
-  CommonMarkParser parser = new CommonMarkParser(options);
-  HtmlWriter writer = new HtmlWriter(options);
-  MarkdownWriter mdWriter = new MarkdownWriter(options);
+  final CommonMarkParser parser = new CommonMarkParser(options);
+  final HtmlWriter writer = new HtmlWriter(options);
+  final MarkdownWriter mdWriter = new MarkdownWriter(options);
 
   return (int num, String mdOrig, String html) {
     if (filter(TestType.markdown, num)) {
       t.test('markdown $num', () {
-        String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
+        final String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
         html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 
-        String generatedMarkdown = mdWriter.write(parser.parse(md));
-        Document doc = parser.parse(generatedMarkdown);
+        final String generatedMarkdown = mdWriter.write(parser.parse(md));
+        final Document doc = parser.parse(generatedMarkdown);
         t.expect(
             _tidy(writer.write(doc)),
             new _Example2Description(
@@ -170,29 +170,16 @@ TestFunc mhmhTest(Options options, [FilterFunc filter = emptyFilter]) {
 
 /// Generate md->html->md tests
 TestFunc mhmTest(Options options, [FilterFunc filter = emptyFilter]) {
-  CommonMarkParser parser = new CommonMarkParser(options);
-  MarkdownWriter writer = new MarkdownWriter(options);
+  final CommonMarkParser parser = new CommonMarkParser(options);
+  final MarkdownWriter writer = new MarkdownWriter(options);
 
   return (int num, String md, String destMd) {
     if (filter(TestType.markdown, num)) {
       t.test(num.toString(), () {
-        String generatedMarkdown = writer.write(parser.parse(md));
+        final String generatedMarkdown = writer.write(parser.parse(md));
         t.expect(
             generatedMarkdown, new _ExampleDescription(t.equals(destMd), md));
       });
     }
   };
 }
-
-/*
-void preprocessTest() {
-  t.group('Markdown preprocess', () {
-    CommonMarkParser parser = new CommonMarkParser(options);
-    HtmlWriter writer = new HtmlWriter(options);
-
-    t.test('Line endings', () {
-
-    });
-  });
-}
-*/
