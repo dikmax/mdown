@@ -12,3 +12,6 @@ before_script:
   - export PATH=$PWD/travis-phantomjs:$PATH
 
 script: ./tool/travis.sh
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
