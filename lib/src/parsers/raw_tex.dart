@@ -10,10 +10,11 @@ class RawTexParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    ParseResult<String> lineRes = container.lineParser.parse(text, offset);
+    final ParseResult<String> lineRes =
+        container.lineParser.parse(text, offset);
     assert(lineRes.isSuccess);
 
-    Match startMatch = _startRegExp.firstMatch(lineRes.value);
+    final Match startMatch = _startRegExp.firstMatch(lineRes.value);
     if (startMatch == null) {
       return new ParseResult<Iterable<Block>>.failure();
     }
@@ -21,16 +22,18 @@ class RawTexParser extends AbstractParser<Iterable<Block>> {
     String enviroment = startMatch[1];
     enviroment = enviroment.replaceAllMapped(
         new RegExp(r'[+*]'), (Match match) => r'\' + match[0]);
-    RegExp endTest = new RegExp(r'^ {0,3}\\end\{' + enviroment + r'\}[ \t]*$');
+    final RegExp endTest =
+        new RegExp(r'^ {0,3}\\end\{' + enviroment + r'\}[ \t]*$');
 
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.writeln(lineRes.value);
 
     offset = lineRes.offset;
-    int length = text.length;
+    final int length = text.length;
     bool found = false;
     while (offset < length) {
-      ParseResult<String> lineRes = container.lineParser.parse(text, offset);
+      final ParseResult<String> lineRes =
+          container.lineParser.parse(text, offset);
       assert(lineRes.isSuccess);
 
       offset = lineRes.offset;

@@ -7,15 +7,15 @@ class EntityParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    Match match = _entityRegExp.matchAsPrefix(text, offset);
+    final Match match = _entityRegExp.matchAsPrefix(text, offset);
     if (match != null) {
       if (match[3] != null) {
-        String code = match[3];
+        final String code = match[3];
         if (code == 'nbsp') {
           return new ParseResult<Inlines>.success(
               new Inlines.single(new NonBreakableSpace()), match.end);
         }
-        String str = htmlEntities[match[3]];
+        final String str = htmlEntities[match[3]];
         if (str != null) {
           return new ParseResult<Inlines>.success(
               new Inlines.single(new Str(str)), match.end);

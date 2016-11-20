@@ -5,7 +5,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
   /// Constructor.
   HtmlBlockParser(ParsersContainer container) : super(container);
 
-  List<Pattern> _starts = <Pattern>[
+  static final List<Pattern> _starts = <Pattern>[
     _htmlBlock1Test,
     _htmlBlock2Test,
     _htmlBlock3Test,
@@ -13,7 +13,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
     _htmlBlock5Test
   ];
 
-  List<Pattern> _ends = <Pattern>[
+  static final List<Pattern> _ends = <Pattern>[
     new RegExp(r'</(script|pre|style)>', caseSensitive: false),
     '-->',
     '?>',
@@ -23,7 +23,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    int nonIndentOffset = _skipIndent(text, offset);
+    final int nonIndentOffset = _skipIndent(text, offset);
 
     int rule;
     for (int i = 0; i < _starts.length; ++i) {
@@ -34,10 +34,11 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
     }
 
     if (rule != null) {
-      int length = text.length;
-      StringBuffer result = new StringBuffer();
+      final int length = text.length;
+      final StringBuffer result = new StringBuffer();
       while (offset < length) {
-        ParseResult<String> lineRes = container.lineParser.parse(text, offset);
+        final ParseResult<String> lineRes =
+            container.lineParser.parse(text, offset);
         assert(lineRes.isSuccess);
 
         offset = lineRes.offset;
@@ -51,18 +52,19 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
           <Block>[new HtmlRawBlock(result.toString())], offset);
     }
 
-    Match htmlBlock6Match =
+    final Match htmlBlock6Match =
         _htmlBlock6Test.matchAsPrefix(text, nonIndentOffset);
     if (htmlBlock6Match != null) {
-      String tag = htmlBlock6Match[1];
+      final String tag = htmlBlock6Match[1];
       if (!_blockTags.contains(tag.toLowerCase())) {
         return new ParseResult<Iterable<Block>>.failure();
       }
 
-      int length = text.length;
-      StringBuffer result = new StringBuffer();
+      final int length = text.length;
+      final StringBuffer result = new StringBuffer();
       while (offset < length) {
-        ParseResult<String> lineRes = container.lineParser.parse(text, offset);
+        final ParseResult<String> lineRes =
+            container.lineParser.parse(text, offset);
         assert(lineRes.isSuccess);
 
         offset = lineRes.offset;

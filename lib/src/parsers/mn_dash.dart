@@ -7,7 +7,7 @@ class MNDashParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    int length = text.length;
+    final int length = text.length;
     int count = 0;
     while (offset < length && text.codeUnitAt(offset) == _minusCodeUnit) {
       count++;

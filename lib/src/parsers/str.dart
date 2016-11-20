@@ -44,7 +44,7 @@ class StrParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    int char = text.codeUnitAt(offset);
+    final int char = text.codeUnitAt(offset);
     if (_specialChars.contains(char)) {
       Inline result;
       if (char == _spaceCodeUnit) {
@@ -60,7 +60,7 @@ class StrParser extends AbstractParser<Inlines> {
           new Inlines.single(result), offset + 1);
     } else {
       int endOffset = offset + 1;
-      int length = text.length;
+      final int length = text.length;
       while (endOffset < length &&
           !_specialChars.contains(text.codeUnitAt(endOffset))) {
         endOffset++;

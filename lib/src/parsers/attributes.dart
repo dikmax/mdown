@@ -14,12 +14,12 @@ class AttributesParser extends AbstractParser<Attributes> {
     offset++;
 
     String id;
-    List<String> classes = <String>[];
-    Multimap<String, String> attributes = new Multimap<String, String>();
+    final List<String> classes = <String>[];
+    final Multimap<String, String> attributes = new Multimap<String, String>();
 
-    int length = text.length;
+    final int length = text.length;
     while (offset < length) {
-      int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(offset);
 
       if (codeUnit == _closeBraceCodeUnit) {
         offset++;
@@ -29,14 +29,14 @@ class AttributesParser extends AbstractParser<Attributes> {
       switch (codeUnit) {
         case _sharpCodeUnit:
           // Id
-          int endOffset = _parseIdentifier(text, offset);
+          final int endOffset = _parseIdentifier(text, offset);
           id = text.substring(offset + 1, endOffset);
           offset = endOffset;
           break;
 
         case _dotCodeUnit:
           // Id
-          int endOffset = _parseIdentifier(text, offset);
+          final int endOffset = _parseIdentifier(text, offset);
           classes.add(text.substring(offset + 1, endOffset));
           offset = endOffset;
           break;
@@ -49,7 +49,7 @@ class AttributesParser extends AbstractParser<Attributes> {
           break;
 
         default:
-          int endOffset = _parseAttribute(text, offset, attributes);
+          final int endOffset = _parseAttribute(text, offset, attributes);
           if (endOffset == offset) {
             return new ParseResult<Attributes>.failure();
           }
@@ -65,10 +65,10 @@ class AttributesParser extends AbstractParser<Attributes> {
 
   int _parseIdentifier(String text, int offset) {
     int endOffset = offset + 1;
-    int length = text.length;
+    final int length = text.length;
 
     while (endOffset < length) {
-      int codeUnit = text.codeUnitAt(endOffset);
+      final int codeUnit = text.codeUnitAt(endOffset);
 
       if (codeUnit == _spaceCodeUnit ||
           codeUnit == _tabCodeUnit ||
@@ -92,14 +92,14 @@ class AttributesParser extends AbstractParser<Attributes> {
 
   int _parseAttribute(
       String text, int offset, Multimap<String, String> attributes) {
-    Match match = _keyValueRegExp.matchAsPrefix(text, offset);
+    final Match match = _keyValueRegExp.matchAsPrefix(text, offset);
     if (match == null) {
       return offset;
     }
 
-    String key = match[1];
+    final String key = match[1];
     String value = match[2];
-    int startCodeUnit = value.codeUnitAt(0);
+    final int startCodeUnit = value.codeUnitAt(0);
     if (startCodeUnit == _singleQuoteCodeUnit ||
         startCodeUnit == _doubleQuoteCodeUnit) {
       value = value.substring(1, value.length - 1);

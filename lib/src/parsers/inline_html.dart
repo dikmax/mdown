@@ -5,7 +5,7 @@ class InlineHtmlParser extends AbstractParser<Inlines> {
   /// Constructor.
   InlineHtmlParser(ParsersContainer container) : super(container);
 
-  List<RegExp> _tests = <RegExp>[
+  static final List<RegExp> _tests = <RegExp>[
     new RegExp('(?:' + _htmlOpenTag + '|' + _htmlCloseTag + ')'), // Tag
     new RegExp('<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->'), // Comment
     new RegExp('[<][?].*?[?][>]'), // Processing instruction
@@ -17,7 +17,7 @@ class InlineHtmlParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     if (text.codeUnitAt(offset) == _lessThanCodeUnit) {
       for (RegExp test in _tests) {
-        Match match = test.matchAsPrefix(text, offset);
+        final Match match = test.matchAsPrefix(text, offset);
         if (match != null) {
           return new ParseResult<Inlines>.success(
               new Inlines.single(

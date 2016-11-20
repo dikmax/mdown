@@ -16,13 +16,13 @@ class InlineCodeParser extends AbstractParser<Inlines> {
     offset++;
 
     // Finite Automata
+    final int length = text.length;
     int state = _stateOpenFence;
-    int length = text.length;
     int codeStartOffset = -1;
     int endFenceSize = 0;
     int codeEndOffset = -1;
     while (offset < length) {
-      int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(offset);
 
       switch (state) {
         case _stateOpenFence:
@@ -67,12 +67,12 @@ class InlineCodeParser extends AbstractParser<Inlines> {
 
     if (state == _stateDone ||
         (state == _stateCloseFence && endFenceSize == fenceSize)) {
-      String code =
+      final String code =
           _trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
       Attr attributes = new EmptyAttr();
       if (container.options.inlineCodeAttributes) {
         if (offset < length && text.codeUnitAt(offset) == _openBraceCodeUnit) {
-          ParseResult<Attributes> attributesResult =
+          final ParseResult<Attributes> attributesResult =
               container.attributesParser.parse(text, offset);
           if (attributesResult.isSuccess) {
             attributes = attributesResult.value;

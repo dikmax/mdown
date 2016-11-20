@@ -7,10 +7,11 @@ class BlanklineParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    ParseResult<String> lineResult = container.lineParser.parse(text, offset);
+    final ParseResult<String> lineResult =
+        container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    String line = lineResult.value;
+    final String line = lineResult.value;
 
     offset = lineResult.offset;
     if (_emptyLineRegExp.hasMatch(line)) {

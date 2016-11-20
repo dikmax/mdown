@@ -169,11 +169,11 @@ class DocumentParser extends AbstractParser<Document> {
   @override
   ParseResult<Document> parse(String text, int offset) {
     int offset = 0;
-    List<Block> blocks = <Block>[];
+    final List<Block> blocks = <Block>[];
 
-    int length = text.length;
+    final int length = text.length;
     while (offset < length) {
-      int firstChar = _getBlockFirstChar(text, offset);
+      final int firstChar = _getBlockFirstChar(text, offset);
 
       if (firstChar == -1) {
         // End of input
@@ -183,7 +183,7 @@ class DocumentParser extends AbstractParser<Document> {
       if (firstChar == _openBracketCodeUnit) {
         // Special treatment for link references.
         // TODO we don't need it
-        ParseResult<_LinkReference> res =
+        final ParseResult<_LinkReference> res =
             container.linkReferenceParser.parse(text, offset);
         if (res.isSuccess) {
           if (!container.references.containsKey(res.value.reference)) {
@@ -196,7 +196,7 @@ class DocumentParser extends AbstractParser<Document> {
         bool found = false;
         for (AbstractParser<Iterable<Block>> parser
             in _blockParsers[firstChar]) {
-          ParseResult<Iterable<Block>> res = parser.parse(text, offset);
+          final ParseResult<Iterable<Block>> res = parser.parse(text, offset);
           if (res.isSuccess) {
             if (res.value.length > 0) {
               blocks.addAll(res.value);
@@ -212,7 +212,7 @@ class DocumentParser extends AbstractParser<Document> {
         }
       }
 
-      ParseResult<Iterable<Block>> res =
+      final ParseResult<Iterable<Block>> res =
           container.paraSetextHeadingParser.parse(text, offset);
       assert(res.isSuccess);
 
@@ -222,22 +222,22 @@ class DocumentParser extends AbstractParser<Document> {
       offset = res.offset;
     }
 
-    Iterable<Block> blocksWithInlines =
+    final Iterable<Block> blocksWithInlines =
         blocks.map((Block block) => _replaceInlinesInBlock(block));
 
-    Document result = new Document(blocksWithInlines);
+    final Document result = new Document(blocksWithInlines);
 
     return new ParseResult<Document>.success(result, offset);
   }
 
   Block _replaceInlinesInBlock(Block block) {
     if (block is Heading) {
-      Inlines contents = block.contents;
+      final Inlines contents = block.contents;
       if (contents is _UnparsedInlines) {
         block.contents = parseInlines(contents.raw);
       }
     } else if (block is Para) {
-      Inlines contents = block.contents;
+      final Inlines contents = block.contents;
       if (contents is _UnparsedInlines) {
         block.contents = parseInlines(contents.raw);
       }
@@ -257,17 +257,17 @@ class DocumentParser extends AbstractParser<Document> {
   /// Parses provided string as inlines.
   Inlines parseInlines(String text) {
     int offset = 0;
-    Inlines inlines = new Inlines();
+    final Inlines inlines = new Inlines();
 
     text = text.trimRight();
-    int length = text.length;
+    final int length = text.length;
     while (offset < length) {
-      int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(offset);
       if (codeUnit == _exclamationMarkCodeUnit &&
           offset + 1 < length &&
           text.codeUnitAt(offset + 1) == _openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
-        ParseResult<Inlines> res =
+        final ParseResult<Inlines> res =
             container.linkImageParser.parse(text, offset);
         if (res.isSuccess) {
           if (res.value.length > 0) {
@@ -279,7 +279,7 @@ class DocumentParser extends AbstractParser<Document> {
       } else if (_inlineParsers.containsKey(codeUnit)) {
         bool found = false;
         for (AbstractParser<Inlines> parser in _inlineParsers[codeUnit]) {
-          ParseResult<Inlines> res = parser.parse(text, offset);
+          final ParseResult<Inlines> res = parser.parse(text, offset);
           if (res.isSuccess) {
             if (res.value.length > 0) {
               inlines.addAll(res.value);
@@ -295,7 +295,7 @@ class DocumentParser extends AbstractParser<Document> {
         }
       }
 
-      ParseResult<Inlines> res = container.strParser.parse(text, offset);
+      final ParseResult<Inlines> res = container.strParser.parse(text, offset);
       assert(res.isSuccess);
 
       if (res.value.length > 0) {

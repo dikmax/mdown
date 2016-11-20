@@ -7,7 +7,7 @@ class TexMathDoubleBackslashParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    int length = text.length;
+    final int length = text.length;
     if (offset + 2 >= length ||
         text.codeUnitAt(offset) != _backslashCodeUnit ||
         text.codeUnitAt(offset + 1) != _backslashCodeUnit) {
@@ -15,12 +15,12 @@ class TexMathDoubleBackslashParser extends AbstractParser<Inlines> {
     }
 
     offset += 2;
-    int codeUnit = text.codeUnitAt(offset);
+    final int codeUnit = text.codeUnitAt(offset);
     if (codeUnit != _openParenCodeUnit && codeUnit != _openBracketCodeUnit) {
       return new ParseResult<Inlines>.failure();
     }
-    bool displayMath = codeUnit == _openBracketCodeUnit;
-    int closeCodeUnit =
+    final bool displayMath = codeUnit == _openBracketCodeUnit;
+    final int closeCodeUnit =
         displayMath ? _closeBracketCodeUnit : _closeParenCodeUnit;
     offset++;
     int endOffset = offset;
@@ -39,7 +39,7 @@ class TexMathDoubleBackslashParser extends AbstractParser<Inlines> {
       return new ParseResult<Inlines>.failure();
     }
 
-    String math = text.substring(offset, endOffset);
+    final String math = text.substring(offset, endOffset);
     if (displayMath) {
       return new ParseResult<Inlines>.success(
           new Inlines.single(new TexMathDisplay(math)), endOffset + 3);
