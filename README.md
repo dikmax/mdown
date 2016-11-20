@@ -95,6 +95,73 @@ quote marks accordingly. It's only official extension to date.
 **NOTE:** This extension uses Unicode chars. Make sure that your code supports it.
 
 
+Extended attributes for fenced code (`Options.fencedCodeAttributes`)
+--------------------------------------------------------------------
+
+Allows fenced code block to have arbitrary extended attributes.
+
+``````md
+``` {#someId .class1 .class2 key=value}
+code
+```
+``````
+
+This will be rendered in HTML as
+
+```html
+<pre id="someId" class="class1 class2" key="value"><code>code
+</code></pre>
+```
+
+
+Extended attributes for headings (`Options.headingAttributes`)
+--------------------------------------------------------------
+
+Allows headings to have arbitrary extended attributes.
+
+``````md
+# Heading 1 {#someId}
+
+Heading 2 {.someClass}
+-------------------
+``````
+
+This will be rendered in html as
+
+```html
+<h1 id="someId">Heading 1</h1>
+<h2 class="someClass">Heading 2</h2>
+```
+
+
+Extended attributes for inline code (`Options.inlineCodeAttributes`)
+--------------------------------------------------------------------
+
+Adds extended attributes support to inline code.
+ 
+``````md
+`code`{#id .class key='value'}
+``````
+
+Extended attributes for links and images (`Options.linkAttributes`)
+-------------------------------------------------------------------
+
+Extended attributes for links and images. Both inline and reference links are 
+supported.
+ 
+``````md
+![](image.jpg){width="800" height="600"}
+
+[test][ref]
+``````
+
+This will be transformed into:
+
+``````html
+<p><img src="image.jpg" width="800" height="600"/></p>
+<p><a href="http://test.com/" id="id">test</a></p>
+``````
+
 Strikeout (`Options.strikeout`)
 -------------------------------
 

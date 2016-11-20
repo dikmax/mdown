@@ -27,7 +27,7 @@ class Options {
   /// Extended attributes for fenced code.
   final bool fencedCodeAttributes;
 
-  /// Extended attributes for header
+  /// Extended attributes for heading
   final bool headingAttributes;
 
   /// Extended attributes for inline code.
