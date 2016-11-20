@@ -2,6 +2,7 @@ md_proc
 =======
 
 [![Build Status](https://travis-ci.org/dikmax/md_proc.svg?branch=master)](https://travis-ci.org/dikmax/md_proc)
+[![codecov](https://codecov.io/gh/dikmax/md_proc/branch/master/graph/badge.svg)](https://codecov.io/gh/dikmax/md_proc)
 [![Pub](https://img.shields.io/pub/v/md_proc.svg)](https://pub.dartlang.org/packages/md_proc)
 [![CommonMark spec](https://img.shields.io/badge/commonmark-0.26-green.svg)](http://spec.commonmark.org/)
 
