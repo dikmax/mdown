@@ -4,25 +4,20 @@
 set -e
 
 # Verify that the libraries are error free.
-dartanalyzer --strong --fatal-warnings \
-  lib/md_proc.dart \
-  test/library_test.dart \
-  tool/build.dart \
-  tool/reporter.dart
+#dartanalyzer --strong --fatal-warnings \
+#  lib/md_proc.dart \
+#  test/library_test.dart \
+#  tool/build.dart \
+#  tool/reporter.dart
 
 # Run the tests.
 echo "Running tests"
 pub run test --reporter json -p "vm" | dart tool/reporter.dart
 
-# If the COVERALLS_TOKEN token is set on travis
-# Install dart_coveralls
-# Rerun tests with coverage and send to coveralls
-if [ "$COVERALLS_TOKEN" ]; then
-  echo "Gathering tests coverage"
-  pub run dart_coveralls report \
-    --token $COVERALLS_TOKEN \
-    --retry 2 \
-    test/library_test.dart > /dev/null
-fi
+dart --observe=8111 --checked test/library_test.dart & # start in background
+sleep 1
+pub run coverage:collect_coverage --port=8111 -o coverage.json --resume-isolates
+wait %1
+pub run coverage:format_coverage --report-on lib --in coverage.json --out lcov.info --lcov
 
 echo "Done"
