@@ -10,7 +10,7 @@ dependencies:
   quiver: "^0.24.0"
 dev_dependencies:
   benchmark_harness: any
+  coverage: any
   test: any
   linter: ">=0.1.29"
-  dart_coveralls: any
   source_gen: '>=0.5.0 <0.6.0'
