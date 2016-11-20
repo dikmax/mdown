@@ -101,7 +101,7 @@ class _NotCheckedPart extends _InlinePart {
   RegExp _unorderedListRegExp =
       new RegExp(r"^( {0,3})([+\-*])( |$)", multiLine: true);
   RegExp _orderedListRegExp =
-      new RegExp(r"^( {0,3}\d+)([.\)])( |$)", multiLine: true);
+      new RegExp(r"^( {0,3}\d+)([.)])( |$)", multiLine: true);
   RegExp _fencedTildeCodeRegExp =
       new RegExp(r"^( {0,3})(~{3,})", multiLine: true);
   RegExp _linkReferenceRegExp =
@@ -149,7 +149,7 @@ class _NotCheckedPart extends _InlinePart {
     if (_options.smartPunctuation) {
       content =
           content.replaceAllMapped(new RegExp(r"(\.\.\.|-{2,3})"), (Match m) {
-        String val = m.group(0);
+        final String val = m.group(0);
         if (val == '...' || val == '--') {
           return r"\" + val;
         } else if (val == '---') {
@@ -184,8 +184,8 @@ class _NotCheckedPart extends _InlinePart {
     while (test) {
       test = false;
 
-      Iterable<Inline> parsed = _parser.parseInlines(content);
-      _InlineTypes types = new _InlineTypes();
+      final Iterable<Inline> parsed = _parser.parseInlines(content);
+      final _InlineTypes types = new _InlineTypes();
       detectInlines(parsed, types);
 
       // TODO add tests for inner escaping
@@ -213,7 +213,8 @@ class _NotCheckedPart extends _InlinePart {
       }
     }
 
-    // If ! followed by checked part starting with [, then ! should be escaped, or we'll get image instead of link
+    // If ! followed by checked part starting with [, then ! should be escaped,
+    // or we'll get image instead of link
     if (after is _CheckedPart &&
         after.content.startsWith("[") &&
         content.endsWith("!")) {
@@ -292,7 +293,7 @@ class _InlineRenderer {
       parts.last.content += str;
       return;
     } else if (context != null && parts.last is _NotCheckedPart) {
-      _NotCheckedPart last = parts.last;
+      final _NotCheckedPart last = parts.last;
       if (context == last.context) {
         last.content += str;
         return;
@@ -318,11 +319,11 @@ class _InlineRenderer {
       }
     }
 
-    Iterator<Inline> it = inlines.iterator;
+    final Iterator<Inline> it = inlines.iterator;
     while (it.moveNext()) {
-      Inline inline = it.current;
+      final Inline inline = it.current;
       if (inline is Str) {
-        String contents = inline.contents;
+        final String contents = inline.contents;
         write(contents, context);
       } else if (inline is Space) {
         write(' ', context);
@@ -377,7 +378,7 @@ class _InlineRenderer {
   }
 
   void writeCodeInline(Code code) {
-    String fence = '`' * code.fenceSize;
+    final String fence = '`' * code.fenceSize;
     String contents = code.contents;
     if (contents == '') {
       contents = ' ';
@@ -399,28 +400,30 @@ class _InlineRenderer {
 
   void writeEmph(Emph emph,
       {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
+    _EscapeContext newContext = context;
     if (delimiter == "*" && !context.escapeStar) {
-      context = context.copy(escapeStar: true);
+      newContext = context.copy(escapeStar: true);
     } else if (delimiter == "_" && !context.escapeUnderscore) {
-      context = context.copy(escapeUnderscore: true);
+      newContext = context.copy(escapeUnderscore: true);
     }
 
     write(delimiter);
-    writeInlines(emph.contents, prevEmph: delimiter, context: context);
+    writeInlines(emph.contents, prevEmph: delimiter, context: newContext);
     write(delimiter);
   }
 
   void writeStrong(Strong strong,
       {String delimiter: "*", _EscapeContext context: _EscapeContext.empty}) {
+    _EscapeContext newContext = context;
     if (delimiter == "*" && !context.escapeStar) {
-      context = context.copy(escapeStar: true);
+      newContext = context.copy(escapeStar: true);
     } else if (delimiter == "_" && !context.escapeUnderscore) {
-      context = context.copy(escapeUnderscore: true);
+      newContext = context.copy(escapeUnderscore: true);
     }
 
-    String delimiterString = delimiter * 2;
+    final String delimiterString = delimiter * 2;
     write(delimiterString);
-    writeInlines(strong.contents, context: context);
+    writeInlines(strong.contents, context: newContext);
     write(delimiterString);
   }
 
@@ -487,7 +490,8 @@ class _InlineRenderer {
   void writeLink(Link link) {
     if (link is InlineLink) {
       write('[');
-      _InlineRenderer renderer = new _InlineRenderer(_references, _options);
+      final _InlineRenderer renderer =
+          new _InlineRenderer(_references, _options);
       renderer.writeInlines(link.label,
           context: new _EscapeContext(isLabel: true));
       write(renderer.toString());
@@ -502,11 +506,12 @@ class _InlineRenderer {
 
     if (link is ReferenceLink) {
       _references[link.reference] = link.target;
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
+      final _MarkdownBuilder builder =
+          new _MarkdownBuilder(_references, _options);
 
       builder.writeInlines(link.label,
           context: new _EscapeContext(isLabel: true));
-      String inlines = builder.toString();
+      final String inlines = builder.toString();
       write('[');
       write(inlines);
       write(']');
@@ -521,7 +526,7 @@ class _InlineRenderer {
     // Autolink
     write('<');
     if (link.label.length > 0 && link.label.first is Str) {
-      Str labelContents = link.label.first;
+      final Str labelContents = link.label.first;
       write(labelContents.contents);
     } else {
       write(link.target.link);
@@ -564,8 +569,8 @@ class _InlineRenderer {
 
   @override
   String toString() {
-    StringBuffer buffer = new StringBuffer();
-    Iterator<_InlinePart> it = parts.iterator;
+    final StringBuffer buffer = new StringBuffer();
+    final Iterator<_InlinePart> it = parts.iterator;
     _InlinePart prev;
     if (!it.moveNext()) {
       return '';
@@ -597,8 +602,8 @@ class _InlineRenderer {
 }
 
 String _writeAttributesToString(Attributes attr) {
-  StringBuffer result = new StringBuffer('{');
-  List<String> res = <String>[];
+  final StringBuffer result = new StringBuffer('{');
+  final List<String> res = <String>[];
   if (attr.identifier != null) {
     res.add('#${attr.identifier}');
   }
@@ -629,7 +634,7 @@ class _MarkdownBuilder extends StringBuffer {
   void writeBlocks(Iterable<Block> blocks,
       {bool tight: false, String unorderedListChar: "*"}) {
     Block prevBlock;
-    Iterator<Block> it = blocks.iterator;
+    final Iterator<Block> it = blocks.iterator;
     bool first = true;
     while (it.moveNext()) {
       if (first) {
@@ -638,8 +643,8 @@ class _MarkdownBuilder extends StringBuffer {
         write("\n");
       }
 
-      Block block = it.current;
-      Block _b = prevBlock;
+      final Block block = it.current;
+      final Block _b = prevBlock;
       prevBlock = block;
 
       if (block is Para) {
@@ -682,7 +687,7 @@ class _MarkdownBuilder extends StringBuffer {
   }
 
   void writeBlockquote(Blockquote blockquote) {
-    _MarkdownBuilder inner = new _MarkdownBuilder(_references, _options);
+    final _MarkdownBuilder inner = new _MarkdownBuilder(_references, _options);
     inner.writeBlocks(blockquote.contents);
     String contents = inner.toString();
     if (contents.endsWith('\n')) {
@@ -695,7 +700,7 @@ class _MarkdownBuilder extends StringBuffer {
   void writeHeading(Heading heading) {
     // TODO throw exception in case of multiline header ? Or replace with space
     if (heading is SetextHeading && heading.level <= 2) {
-      _InlineRenderer inner = new _InlineRenderer(_references, _options);
+      final _InlineRenderer inner = new _InlineRenderer(_references, _options);
       inner.writeInlines(heading.contents);
       String inlines = inner.toString();
       if (_options.headingAttributes && heading.attributes is Attributes) {
@@ -717,34 +722,38 @@ class _MarkdownBuilder extends StringBuffer {
   }
 
   void writeCodeBlock(CodeBlock codeBlock, Block prevBlock) {
+    CodeBlock codeBlockFix;
     if (codeBlock is IndentedCodeBlock && prevBlock is ListBlock) {
       // We can't write indented code block, because it will be treated as
       // part of list.
       // Replacing it with fenced code block.
 
-      codeBlock = new FencedCodeBlock(codeBlock.contents);
+      codeBlockFix = new FencedCodeBlock(codeBlock.contents);
+    } else {
+      codeBlockFix = codeBlock;
     }
 
-    if (codeBlock is FencedCodeBlock) {
-      String fence = (codeBlock.fenceType == FenceType.backtick ? '`' : '~') *
-          codeBlock.fenceSize;
+    if (codeBlockFix is FencedCodeBlock) {
+      final String fence =
+          (codeBlockFix.fenceType == FenceType.backtick ? '`' : '~') *
+              codeBlockFix.fenceSize;
       write(fence);
-      if (codeBlock.attributes is InfoString) {
-        InfoString attributes = codeBlock.attributes;
+      if (codeBlockFix.attributes is InfoString) {
+        final InfoString attributes = codeBlockFix.attributes;
         write(' ${attributes.language}');
-      } else if (codeBlock.attributes is Attributes) {
+      } else if (codeBlockFix.attributes is Attributes) {
         write(' ');
-        write(_writeAttributesToString(codeBlock.attributes));
+        write(_writeAttributesToString(codeBlockFix.attributes));
       }
       write("\n");
-      write(codeBlock.contents);
+      write(codeBlockFix.contents);
       write(fence);
       write('\n');
       return;
     }
 
     // Indented code block
-    write(codeBlock.contents.splitMapJoin("\n",
+    write(codeBlockFix.contents.splitMapJoin("\n",
         onNonMatch: (String str) => str == "" ? str : "    " + str));
   }
 
@@ -754,7 +763,7 @@ class _MarkdownBuilder extends StringBuffer {
     }
 
     bool first = true;
-    bool tight = list.tight;
+    final bool tight = list.tight;
     for (ListItem listItem in list.items) {
       if (first) {
         first = false;
@@ -762,11 +771,12 @@ class _MarkdownBuilder extends StringBuffer {
         write("\n");
       }
 
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
+      final _MarkdownBuilder builder =
+          new _MarkdownBuilder(_references, _options);
       builder.writeBlocks(listItem.contents,
           tight: list.tight, unorderedListChar: list.bulletType.char);
-      String contents = builder.toString();
-      String marker = list.bulletType.char;
+      final String contents = builder.toString();
+      final String marker = list.bulletType.char;
       String pad;
 
       write(marker);
@@ -797,7 +807,7 @@ class _MarkdownBuilder extends StringBuffer {
     }
     int index = list.startIndex;
     bool first = true;
-    bool tight = list.tight;
+    final bool tight = list.tight;
     for (ListItem listItem in list.items) {
       if (first) {
         first = false;
@@ -805,9 +815,10 @@ class _MarkdownBuilder extends StringBuffer {
         write("\n");
       }
 
-      _MarkdownBuilder builder = new _MarkdownBuilder(_references, _options);
+      final _MarkdownBuilder builder =
+          new _MarkdownBuilder(_references, _options);
       builder.writeBlocks(listItem.contents, tight: list.tight);
-      String contents = builder.toString();
+      final String contents = builder.toString();
 
       if (contents.length == 0) {
         write(index.toString() + list.indexSeparator.char);
@@ -816,7 +827,8 @@ class _MarkdownBuilder extends StringBuffer {
         String pad;
         write(contents.splitMapJoin("\n", onNonMatch: (String str) {
           if (pad == null) {
-            String marker = index.toString() + list.indexSeparator.char + " ";
+            final String marker =
+                index.toString() + list.indexSeparator.char + " ";
             pad = " " * marker.length;
             return marker + str;
           } else if (str != "") {
@@ -831,7 +843,7 @@ class _MarkdownBuilder extends StringBuffer {
 
   void writeInlines(Iterable<Inline> inlines,
       {_EscapeContext context: _EscapeContext.empty}) {
-    _InlineRenderer renderer = new _InlineRenderer(_references, _options);
+    final _InlineRenderer renderer = new _InlineRenderer(_references, _options);
     renderer.writeInlines(inlines, context: context);
     write(renderer.toString());
   }
@@ -844,7 +856,8 @@ class _MarkdownBuilder extends StringBuffer {
         write('[');
         write(ref);
         write(']: ');
-        _InlineRenderer renderer = new _InlineRenderer(_references, _options);
+        final _InlineRenderer renderer =
+            new _InlineRenderer(_references, _options);
         renderer.writeTarget(target);
         write(renderer);
         if (_options.linkAttributes && target.attributes is Attributes) {
@@ -866,7 +879,7 @@ class MarkdownWriter {
 
   /// Converts document to markdown string
   String write(Document document) {
-    _MarkdownBuilder builder =
+    final _MarkdownBuilder builder =
         new _MarkdownBuilder(<String, Target>{}, _options);
     builder.writeDocument(document);
 

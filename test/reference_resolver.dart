@@ -45,24 +45,24 @@ This is a [link].
 
 /// Link resolver tests
 void referenceResolverTests() {
-  CommonMarkParser parser =
+  final CommonMarkParser parser =
       new CommonMarkParser(new Options(linkResolver: _linkResolver));
-  CommonMarkParser defaultParser = CommonMarkParser.defaults;
+  final CommonMarkParser defaultParser = CommonMarkParser.defaults;
 
   t.group("Custom reference resolver test", () {
     t.test("Should leave defined links as is", () {
-      Document d1 = parser.parse(_md1Test);
-      Document d2 = defaultParser.parse(_md1Pattern);
+      final Document d1 = parser.parse(_md1Test);
+      final Document d2 = defaultParser.parse(_md1Pattern);
       t.expect(d1, t.equals(d2));
     });
     t.test("May resolve undefined links", () {
-      Document d1 = parser.parse(_md2Test);
-      Document d2 = defaultParser.parse(_md2Pattern);
+      final Document d1 = parser.parse(_md2Test);
+      final Document d2 = defaultParser.parse(_md2Pattern);
       t.expect(d1, t.equals(d2));
     });
     t.test("May not resolve undefined links", () {
-      Document d1 = parser.parse(_md3Test);
-      Document d2 = defaultParser.parse(_md3Pattern);
+      final Document d1 = parser.parse(_md3Test);
+      final Document d2 = defaultParser.parse(_md3Pattern);
       t.expect(d1, t.equals(d2));
     });
   });

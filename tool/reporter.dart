@@ -7,15 +7,15 @@ void main() {
   stdin.lineMode = true;
   String line;
 
-  Map<int, dynamic> tests = new HashMap<int, dynamic>();
+  final Map<int, dynamic> tests = new HashMap<int, dynamic>();
   while ((line = stdin.readLineSync()) != null) {
-    dynamic res = JSON.decode(line);
-    String type = res['type'];
+    final dynamic res = JSON.decode(line);
+    final String type = res['type'];
     if (type == 'done') {
       break;
     }
     if (type == 'testStart') {
-      int id = res['test']['id'];
+      final int id = res['test']['id'];
       tests[id] = res['test'];
       if (id % 1000 == 999) {
         print('Running test ${id + 1}');
@@ -25,7 +25,7 @@ void main() {
       tests.remove(res['testID']);
     }
     if (type == 'error') {
-      dynamic test = tests[res['testID']];
+      final dynamic test = tests[res['testID']];
       print('Test ${test['id']} failed: ${test['name']}');
       print(res['error']);
     }

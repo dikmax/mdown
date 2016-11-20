@@ -16,11 +16,11 @@ class _HtmlBuilder extends StringBuffer {
   // Blocks
 
   void writeBlocks(Iterable<Block> blocks, {bool tight: false}) {
-    Iterator<Block> it = blocks.iterator;
+    final Iterator<Block> it = blocks.iterator;
 
     bool first = true;
     while (it.moveNext()) {
-      Block block = it.current;
+      final Block block = it.current;
       if (first) {
         first = false;
         if (tight && block is! Para) {
@@ -92,7 +92,7 @@ class _HtmlBuilder extends StringBuffer {
     }
     write("><code");
     if (codeBlock.attributes is InfoString) {
-      InfoString attr = codeBlock.attributes;
+      final InfoString attr = codeBlock.attributes;
       if (attr.language == "") {
         return;
       }
@@ -162,7 +162,7 @@ class _HtmlBuilder extends StringBuffer {
       write(attr.classes.map(htmlEscape).join(' '));
       write('"');
     }
-    List<String> keys = attr.attributes.keys.toList(growable: false);
+    final List<String> keys = attr.attributes.keys.toList(growable: false);
     keys.sort();
     keys.forEach((String key) {
       attr.attributes[key].forEach((String value) {
@@ -358,7 +358,7 @@ class _HtmlBuilder extends StringBuffer {
       write('<img src="');
       write(urlEncode(image.target.link));
       write('" alt="');
-      _HtmlBuilder builder = new _HtmlBuilder(_options);
+      final _HtmlBuilder builder = new _HtmlBuilder(_options);
       builder.writeInlines(image.label, stripped: true);
       write(htmlEscape(builder.toString()));
       write('"');
@@ -378,9 +378,9 @@ class _HtmlBuilder extends StringBuffer {
 
   // Escaping
 
-  RegExp _escapedChars = new RegExp(r'[<>&"]');
+  final RegExp _escapedChars = new RegExp(r'[<>&"]');
   // TODO HashMap.
-  Map<String, String> _escape = <String, String>{
+  final Map<String, String> _escape = <String, String>{
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
@@ -390,32 +390,32 @@ class _HtmlBuilder extends StringBuffer {
   String htmlEscape(String str) => str.replaceAllMapped(
       _escapedChars, (Match match) => _escape[match.group(0)]);
 
-  RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
-  RegExp _htmlEntity = new RegExp(
+  final RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
+  final RegExp _htmlEntity = new RegExp(
       r'&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});',
       caseSensitive: false);
 
   String urlEncode(String url) {
-    url = url.splitMapJoin(_urlEncode,
+    String result = url.splitMapJoin(_urlEncode,
         onMatch: (Match m) => m.group(0),
         onNonMatch: (String s) => Uri.encodeFull(s));
-    url = url.splitMapJoin(_htmlEntity,
+    result = result.splitMapJoin(_htmlEntity,
         onMatch: (Match m) => m.group(0),
         onNonMatch: (String s) => htmlEscape(s));
-    return url;
+    return result;
   }
 }
 
 /// Html writer
 class HtmlWriter {
-  Options _options;
+  final Options _options;
 
   /// Constructor
   HtmlWriter(this._options);
 
   /// Renders document to string
   String write(Document document) {
-    _HtmlBuilder builder = new _HtmlBuilder(_options);
+    final _HtmlBuilder builder = new _HtmlBuilder(_options);
     builder.writeDocument(document);
     return builder.toString();
   }

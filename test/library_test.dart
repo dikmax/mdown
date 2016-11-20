@@ -10,8 +10,8 @@ import 'data/test_data.dart';
 void main() {
   serviceTests();
 
-  TestFunc strictMHTestFunc = mhTest(Options.strict);
-  TestFunc strictMHMHTestFunc = mhmhTest(Options.strict);
+  final TestFunc strictMHTestFunc = mhTest(Options.strict);
+  final TestFunc strictMHMHTestFunc = mhmhTest(Options.strict);
 
   // CommonMark tests
   tests("CommonMark [strict]", specification, strictMHTestFunc);
@@ -27,15 +27,15 @@ void main() {
   tests("Regressions [strict]", regression, strictMHMHTestFunc);
 
   // SmartPunct
-  TestFunc commonmarkMHTestFunc = mhTest(Options.commonmark);
-  TestFunc commonmarkMHMHTestFunc = mhmhTest(Options.commonmark);
+  final TestFunc commonmarkMHTestFunc = mhTest(Options.commonmark);
+  final TestFunc commonmarkMHMHTestFunc = mhmhTest(Options.commonmark);
   tests("SmartPunct [commonmark]", smartPunctuation, commonmarkMHTestFunc);
   tests("SmartPunct [commonmark]", smartPunctuation, commonmarkMHMHTestFunc);
 
   // Fenced code attributes
-  TestFunc fencedCodeAttributesMHTestFunc =
+  final TestFunc fencedCodeAttributesMHTestFunc =
       mhTest(new Options(fencedCodeAttributes: true));
-  TestFunc fencedCodeAttributesMHMHTestFunc =
+  final TestFunc fencedCodeAttributesMHMHTestFunc =
       mhmhTest(new Options(fencedCodeAttributes: true));
   tests("Fenced code attributes", fencedCodeAttributes,
       fencedCodeAttributesMHTestFunc);
@@ -47,9 +47,9 @@ void main() {
       fencedCodeAttributesMHMHTestFunc);
 
   // Inline code attributes
-  TestFunc inlineCodeAttributesMHTestFunc =
+  final TestFunc inlineCodeAttributesMHTestFunc =
       mhTest(new Options(inlineCodeAttributes: true));
-  TestFunc inlineCodeAttributesMHMHTestFunc =
+  final TestFunc inlineCodeAttributesMHMHTestFunc =
       mhmhTest(new Options(inlineCodeAttributes: true));
   tests("Inline code attributes", inlineCodeAttributes,
       inlineCodeAttributesMHTestFunc);
@@ -61,9 +61,9 @@ void main() {
       inlineCodeAttributesMHMHTestFunc);
 
   // Heading attributes
-  TestFunc headingAttributesMHTestFunc =
+  final TestFunc headingAttributesMHTestFunc =
       mhTest(new Options(headingAttributes: true));
-  TestFunc headingAttributesMHMHTestFunc =
+  final TestFunc headingAttributesMHMHTestFunc =
       mhmhTest(new Options(headingAttributes: true));
   tests("Heading attributes", headingAttributes, headingAttributesMHTestFunc);
   tests("Heading attributes", headingAttributes, headingAttributesMHMHTestFunc);
@@ -72,8 +72,9 @@ void main() {
       "Heading attributes spec", specification, headingAttributesMHMHTestFunc);
 
   // Link attributes
-  TestFunc linkAttributesMHTestFunc = mhTest(new Options(linkAttributes: true));
-  TestFunc linkAttributesMHMHTestFunc =
+  final TestFunc linkAttributesMHTestFunc =
+      mhTest(new Options(linkAttributes: true));
+  final TestFunc linkAttributesMHMHTestFunc =
       mhmhTest(new Options(linkAttributes: true));
   tests("Link attributes", linkAttributes, linkAttributesMHTestFunc);
   tests("Link attributes", linkAttributes, linkAttributesMHMHTestFunc);
@@ -81,33 +82,34 @@ void main() {
   tests("Link attributes spec", specification, linkAttributesMHMHTestFunc);
 
   // Strikeout
-  TestFunc strikeoutMHTestFunc = mhTest(new Options(strikeout: true));
-  TestFunc strikeoutMHMHTestFunc = mhmhTest(new Options(strikeout: true));
+  final TestFunc strikeoutMHTestFunc = mhTest(new Options(strikeout: true));
+  final TestFunc strikeoutMHMHTestFunc = mhmhTest(new Options(strikeout: true));
   tests("Strikeout", strikeout, strikeoutMHTestFunc);
   tests("Strikeout", strikeout, strikeoutMHMHTestFunc);
   tests("Strikeout spec", specification, strikeoutMHTestFunc);
   tests("Strikeout spec", specification, strikeoutMHMHTestFunc);
 
   // Subscript
-  TestFunc subscriptMHTestFunc = mhTest(new Options(subscript: true));
-  TestFunc subscriptMHMHTestFunc = mhmhTest(new Options(subscript: true));
+  final TestFunc subscriptMHTestFunc = mhTest(new Options(subscript: true));
+  final TestFunc subscriptMHMHTestFunc = mhmhTest(new Options(subscript: true));
   tests("Subscript", subscript, subscriptMHTestFunc);
   tests("Subscript", subscript, subscriptMHMHTestFunc);
   tests("Subscript spec", specification, subscriptMHTestFunc);
   tests("Subscript spec", specification, subscriptMHMHTestFunc);
 
   // Superscript
-  TestFunc superscriptMHTestFunc = mhTest(new Options(superscript: true));
-  TestFunc superscriptMHMHTestFunc = mhmhTest(new Options(superscript: true));
+  final TestFunc superscriptMHTestFunc = mhTest(new Options(superscript: true));
+  final TestFunc superscriptMHMHTestFunc =
+      mhmhTest(new Options(superscript: true));
   tests("Superscript", superscript, superscriptMHTestFunc);
   tests("Superscript", superscript, superscriptMHMHTestFunc);
   tests("Superscript spec", specification, superscriptMHTestFunc);
   tests("Superscript spec", specification, superscriptMHMHTestFunc);
 
   // Strikeout and subscript
-  TestFunc strikeoutSubscriptMHTestFunc =
+  final TestFunc strikeoutSubscriptMHTestFunc =
       mhTest(new Options(strikeout: true, subscript: true));
-  TestFunc strikeoutSubscriptMHMHTestFunc =
+  final TestFunc strikeoutSubscriptMHMHTestFunc =
       mhmhTest(new Options(strikeout: true, subscript: true));
   tests("Strikeout and subscript", strikeoutAndSubscript,
       strikeoutSubscriptMHTestFunc);
@@ -119,29 +121,31 @@ void main() {
       strikeoutSubscriptMHMHTestFunc);
 
   // TeX Math between dollars
-  TestFunc texDollarsMHTestFunc = mhTest(new Options(texMathDollars: true));
-  TestFunc texDollarsMHMHTestFunc = mhmhTest(new Options(texMathDollars: true));
+  final TestFunc texDollarsMHTestFunc =
+      mhTest(new Options(texMathDollars: true));
+  final TestFunc texDollarsMHMHTestFunc =
+      mhmhTest(new Options(texMathDollars: true));
   tests("TeX math dollars", texMathDollars, texDollarsMHTestFunc);
   tests("TeX math dollars", texMathDollars, texDollarsMHMHTestFunc);
   tests("TeX math dollars spec", specification, texDollarsMHTestFunc);
   tests("TeX math dollars spec", specification, texDollarsMHMHTestFunc);
 
   // TeX Math between backslashed `()` or `[]`
-  TestFunc texSingleMHTestFunc =
+  final TestFunc texSingleMHTestFunc =
       mhTest(new Options(texMathSingleBackslash: true));
-  TestFunc texSingleMHMHTestFunc =
+  final TestFunc texSingleMHMHTestFunc =
       mhmhTest(new Options(texMathSingleBackslash: true));
   tests(
       "TeX math single backslash", texMathSingleBackslash, texSingleMHTestFunc);
   tests("TeX math single backslash", texMathSingleBackslash,
       texSingleMHMHTestFunc);
 
-  Set<int> texMathSingleBackslashContradictions =
+  final Set<int> texMathSingleBackslashContradictions =
       new Set<int>.from(<int>[287, 479, 495]);
-  TestFunc texSingleSpecMHTestFunc = mhTest(
+  final TestFunc texSingleSpecMHTestFunc = mhTest(
       new Options(texMathSingleBackslash: true),
       (_, int num) => !texMathSingleBackslashContradictions.contains(num));
-  TestFunc texSingleSpecMHMHTestFunc = mhmhTest(
+  final TestFunc texSingleSpecMHMHTestFunc = mhmhTest(
       new Options(texMathSingleBackslash: true),
       (_, int num) => !texMathSingleBackslashContradictions.contains(num));
   tests(
@@ -150,9 +154,9 @@ void main() {
       texSingleSpecMHMHTestFunc);
 
   // TeX Math between double backslashed `()` or `[]`
-  TestFunc texDoubleMHTestFunc =
+  final TestFunc texDoubleMHTestFunc =
       mhTest(new Options(texMathDoubleBackslash: true));
-  TestFunc texDoubleMHMHTestFunc =
+  final TestFunc texDoubleMHMHTestFunc =
       mhmhTest(new Options(texMathDoubleBackslash: true));
   tests(
       "TeX math double backslash", texMathDoubleBackslash, texDoubleMHTestFunc);
@@ -162,8 +166,8 @@ void main() {
   tests("TeX math double backslash spec", specification, texDoubleMHMHTestFunc);
 
   // Raw TeX
-  TestFunc rawTexMHTestFunc = mhTest(new Options(rawTex: true));
-  TestFunc rawTexMHMHTestFunc = mhmhTest(new Options(rawTex: true));
+  final TestFunc rawTexMHTestFunc = mhTest(new Options(rawTex: true));
+  final TestFunc rawTexMHMHTestFunc = mhmhTest(new Options(rawTex: true));
   tests("Raw TeX", rawTex, rawTexMHTestFunc);
   tests("Raw TeX", rawTex, rawTexMHMHTestFunc);
   tests("Raw TeX spec", specification, rawTexMHTestFunc);

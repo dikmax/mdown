@@ -22,20 +22,20 @@ void serviceTests() {
     });
 
     t.test('Writing html', () {
-      Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
-      String res = HtmlWriter.defaults.write(doc);
+      final Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
+      final String res = HtmlWriter.defaults.write(doc);
       t.expect(res, t.equals('<h1>Hello world!</h1>\n'));
     });
 
     t.test('Writing markdown', () {
-      Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
-      String res = MarkdownWriter.defaults.write(doc);
+      final Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
+      final String res = MarkdownWriter.defaults.write(doc);
       t.expect(res, t.equals('Hello world!\n============\n'));
     });
 
     t.test('Smart punctuation', () {
-      Document doc = CommonMarkParser.strict.parse('...');
-      String res = HtmlWriter.strict.write(doc);
+      final Document doc = CommonMarkParser.strict.parse('...');
+      final String res = HtmlWriter.strict.write(doc);
       t.expect(res, t.equals('<p>...</p>\n'));
     });
   });
@@ -43,7 +43,7 @@ void serviceTests() {
   t.group('Definitions', () {
     // Document
     t.group('Document', () {
-      Document doc = new Document(<Block>[new ThematicBreak()]);
+      final Document doc = new Document(<Block>[new ThematicBreak()]);
       t.test('toString', () {
         t.expect(doc.toString(), t.equals('Document [ThematicBreak]'));
       });
@@ -57,7 +57,7 @@ void serviceTests() {
 
     // Attributes
     t.group('EmptyAttr', () {
-      EmptyAttr attr = new EmptyAttr();
+      final EmptyAttr attr = new EmptyAttr();
       t.test('toString', () {
         t.expect(attr.toString(), t.equals('EmptyAttr'));
       });
@@ -70,7 +70,7 @@ void serviceTests() {
     });
 
     t.group('InfoString', () {
-      InfoString attr = new InfoString('dart');
+      final InfoString attr = new InfoString('dart');
       t.test('toString', () {
         t.expect(attr.toString(), t.equals('InfoString(dart)'));
       });
@@ -84,13 +84,13 @@ void serviceTests() {
     });
 
     t.group('Attributes', () {
-      Multimap<String, String> attr1 = new Multimap<String, String>();
+      final Multimap<String, String> attr1 = new Multimap<String, String>();
       attr1.add('key1', 'value1');
       attr1.add('key2', 'value2');
-      Attributes attr =
+      final Attributes attr =
           new Attributes('id', <String>['class1', 'class2'], attr1);
 
-      Multimap<String, String> attr2 = new Multimap<String, String>();
+      final Multimap<String, String> attr2 = new Multimap<String, String>();
       attr2.add('key1', 'value1');
       attr2.add('key2', 'value2');
 
@@ -108,7 +108,7 @@ void serviceTests() {
 
     // Target
     t.group('Target', () {
-      Target target = new Target('https://www.dartlang.org/', 'Dart');
+      final Target target = new Target('https://www.dartlang.org/', 'Dart');
       t.test('toString', () {
         t.expect(target.toString(),
             t.equals('Target "https://www.dartlang.org/" "Dart" EmptyAttr'));
@@ -128,7 +128,7 @@ void serviceTests() {
 
     //Blocks
     t.group('ThematicBreak', () {
-      ThematicBreak thematicBreak = new ThematicBreak();
+      final ThematicBreak thematicBreak = new ThematicBreak();
       t.test('toString', () {
         t.expect(thematicBreak.toString(), t.equals('ThematicBreak'));
       });
@@ -141,7 +141,8 @@ void serviceTests() {
     });
 
     t.group('AtxHeading', () {
-      AtxHeading heading = new AtxHeading(2, <Inline>[new Str('Heading')]);
+      final AtxHeading heading =
+          new AtxHeading(2, <Inline>[new Str('Heading')]);
       t.test('toString', () {
         t.expect(heading.toString(),
             t.equals('AtxHeading 2 [Str "Heading"] EmptyAttr'));
@@ -176,7 +177,7 @@ void serviceTests() {
     });
 
     t.group('SetextHeading', () {
-      SetextHeading heading =
+      final SetextHeading heading =
           new SetextHeading(2, <Inline>[new Str('Heading')]);
       t.test('toString', () {
         t.expect(heading.toString(),
@@ -218,7 +219,7 @@ void serviceTests() {
     });
 
     t.group('IndentedCodeBlock', () {
-      IndentedCodeBlock code = new IndentedCodeBlock("Code");
+      final IndentedCodeBlock code = new IndentedCodeBlock("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('IndentedCodeBlock Code'));
       });
@@ -232,7 +233,7 @@ void serviceTests() {
     });
 
     t.group('FencedCodeBlock', () {
-      FencedCodeBlock code = new FencedCodeBlock("Code");
+      final FencedCodeBlock code = new FencedCodeBlock("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('FencedCodeBlock EmptyAttr Code'));
       });
@@ -261,7 +262,7 @@ void serviceTests() {
     });
 
     t.group('HtmlRawBlock', () {
-      HtmlRawBlock raw = new HtmlRawBlock("<html>");
+      final HtmlRawBlock raw = new HtmlRawBlock("<html>");
       t.test('toString', () {
         t.expect(raw.toString(), t.equals('HtmlRawBlock <html>'));
       });
@@ -275,7 +276,7 @@ void serviceTests() {
     });
 
     t.group('TexRawBlock', () {
-      TexRawBlock raw = new TexRawBlock("\\begin{env}\n\\end{env}");
+      final TexRawBlock raw = new TexRawBlock("\\begin{env}\n\\end{env}");
       t.test('toString', () {
         t.expect(
             raw.toString(), t.equals('TexRawBlock \\begin{env}\n\\end{env}'));
@@ -291,7 +292,8 @@ void serviceTests() {
     });
 
     t.group('Blockquote', () {
-      Blockquote blockquote = new Blockquote(<Block>[new ThematicBreak()]);
+      final Blockquote blockquote =
+          new Blockquote(<Block>[new ThematicBreak()]);
       t.test('toString', () {
         t.expect(blockquote.toString(), t.equals('Blockquote [ThematicBreak]'));
       });
@@ -306,7 +308,7 @@ void serviceTests() {
     });
 
     t.group('ListItem', () {
-      ListItem listItem = new ListItem(<Block>[new ThematicBreak()]);
+      final ListItem listItem = new ListItem(<Block>[new ThematicBreak()]);
       t.test('toString', () {
         t.expect(listItem.toString(), t.equals('ListItem [ThematicBreak]'));
       });
@@ -365,7 +367,7 @@ void serviceTests() {
     });
 
     t.group('UnorderedList', () {
-      UnorderedList list = new UnorderedList(<ListItem>[
+      final UnorderedList list = new UnorderedList(<ListItem>[
         new ListItem(<Block>[new ThematicBreak()])
       ]);
       t.test('toString', () {
@@ -400,7 +402,7 @@ void serviceTests() {
     });
 
     t.group('OrderedList', () {
-      OrderedList list = new OrderedList(<ListItem>[
+      final OrderedList list = new OrderedList(<ListItem>[
         new ListItem(<Block>[new ThematicBreak()])
       ]);
       t.test('toString', () {
@@ -443,7 +445,7 @@ void serviceTests() {
     });
 
     t.group('Para', () {
-      Para para = new Para(<Inline>[new Str('Para.')]);
+      final Para para = new Para(<Inline>[new Str('Para.')]);
       t.test('toString', () {
         t.expect(para.toString(), t.equals('Para [Str "Para."]'));
       });
@@ -459,7 +461,7 @@ void serviceTests() {
     // Inlines
 
     t.group('Str', () {
-      Str str = new Str('Str');
+      final Str str = new Str('Str');
       t.test('toString', () {
         t.expect(str.toString(), t.equals('Str "Str"'));
       });
@@ -473,7 +475,7 @@ void serviceTests() {
     });
 
     t.group('Space', () {
-      Space space = new Space();
+      final Space space = new Space();
       t.test('toString', () {
         t.expect(space.toString(), t.equals('Space'));
       });
@@ -486,7 +488,7 @@ void serviceTests() {
     });
 
     t.group('NonBreakableSpace', () {
-      NonBreakableSpace nbsp = new NonBreakableSpace();
+      final NonBreakableSpace nbsp = new NonBreakableSpace();
       t.test('toString', () {
         t.expect(nbsp.toString(), t.equals('NonBreakableSpace'));
       });
@@ -499,7 +501,7 @@ void serviceTests() {
     });
 
     t.group('Tab', () {
-      Tab tab = new Tab();
+      final Tab tab = new Tab();
       t.test('toString', () {
         t.expect(tab.toString(), t.equals('Tab'));
       });
@@ -512,7 +514,7 @@ void serviceTests() {
     });
 
     t.group('LineBreak', () {
-      LineBreak lineBreak = new LineBreak();
+      final LineBreak lineBreak = new LineBreak();
       t.test('toString', () {
         t.expect(lineBreak.toString(), t.equals('LineBreak'));
       });
@@ -525,7 +527,7 @@ void serviceTests() {
     });
 
     t.group('MDash', () {
-      MDash mdash = new MDash();
+      final MDash mdash = new MDash();
       t.test('toString', () {
         t.expect(mdash.toString(), t.equals('MDash'));
       });
@@ -538,7 +540,7 @@ void serviceTests() {
     });
 
     t.group('NDash', () {
-      NDash ndash = new NDash();
+      final NDash ndash = new NDash();
       t.test('toString', () {
         t.expect(ndash.toString(), t.equals('NDash'));
       });
@@ -551,7 +553,7 @@ void serviceTests() {
     });
 
     t.group('Ellipsis', () {
-      Ellipsis ellipsis = new Ellipsis();
+      final Ellipsis ellipsis = new Ellipsis();
       t.test('toString', () {
         t.expect(ellipsis.toString(), t.equals('Ellipsis'));
       });
@@ -564,7 +566,7 @@ void serviceTests() {
     });
 
     t.group('SingleOpenQuote', () {
-      SingleOpenQuote singleOpenQuote = new SingleOpenQuote();
+      final SingleOpenQuote singleOpenQuote = new SingleOpenQuote();
       t.test('toString', () {
         t.expect(singleOpenQuote.toString(), t.equals('SingleOpenQuote'));
       });
@@ -577,7 +579,7 @@ void serviceTests() {
     });
 
     t.group('SingleCloseQuote', () {
-      SingleCloseQuote singleCloseQuote = new SingleCloseQuote();
+      final SingleCloseQuote singleCloseQuote = new SingleCloseQuote();
       t.test('toString', () {
         t.expect(singleCloseQuote.toString(), t.equals('SingleCloseQuote'));
       });
@@ -590,7 +592,7 @@ void serviceTests() {
     });
 
     t.group('DoubleOpenQuote', () {
-      DoubleOpenQuote doubleOpenQuote = new DoubleOpenQuote();
+      final DoubleOpenQuote doubleOpenQuote = new DoubleOpenQuote();
       t.test('toString', () {
         t.expect(doubleOpenQuote.toString(), t.equals('DoubleOpenQuote'));
       });
@@ -603,7 +605,7 @@ void serviceTests() {
     });
 
     t.group('DoubleCloseQuote', () {
-      DoubleCloseQuote doubleCloseQuote = new DoubleCloseQuote();
+      final DoubleCloseQuote doubleCloseQuote = new DoubleCloseQuote();
       t.test('toString', () {
         t.expect(doubleCloseQuote.toString(), t.equals('DoubleCloseQuote'));
       });
@@ -616,7 +618,7 @@ void serviceTests() {
     });
 
     t.group('Code', () {
-      Code code = new Code("Code");
+      final Code code = new Code("Code");
       t.test('toString', () {
         t.expect(code.toString(), t.equals('Code "Code" EmptyAttr'));
       });
@@ -631,7 +633,7 @@ void serviceTests() {
     });
 
     t.group('Apostrophe', () {
-      Apostrophe apostrophe = new Apostrophe();
+      final Apostrophe apostrophe = new Apostrophe();
       t.test('toString', () {
         t.expect(apostrophe.toString(), t.equals('Apostrophe'));
       });
@@ -644,7 +646,7 @@ void serviceTests() {
     });
 
     t.group('Emph', () {
-      Emph emph = new Emph(<Inline>[new Str('Emph')]);
+      final Emph emph = new Emph(<Inline>[new Str('Emph')]);
       t.test('toString', () {
         t.expect(emph.toString(), t.equals('Emph [Str "Emph"]'));
       });
@@ -658,7 +660,7 @@ void serviceTests() {
     });
 
     t.group('Strong', () {
-      Strong strong = new Strong(<Inline>[new Str('Strong')]);
+      final Strong strong = new Strong(<Inline>[new Str('Strong')]);
       t.test('toString', () {
         t.expect(strong.toString(), t.equals('Strong [Str "Strong"]'));
       });
@@ -672,7 +674,7 @@ void serviceTests() {
     });
 
     t.group('Strikeout', () {
-      Strikeout strikeout = new Strikeout(<Inline>[new Str('Strikeout')]);
+      final Strikeout strikeout = new Strikeout(<Inline>[new Str('Strikeout')]);
       t.test('toString', () {
         t.expect(strikeout.toString(), t.equals('Strikeout [Str "Strikeout"]'));
       });
@@ -687,7 +689,7 @@ void serviceTests() {
     });
 
     t.group('Subscript', () {
-      Subscript subscript = new Subscript(<Inline>[new Str('Subscript')]);
+      final Subscript subscript = new Subscript(<Inline>[new Str('Subscript')]);
       t.test('toString', () {
         t.expect(subscript.toString(), t.equals('Subscript [Str "Subscript"]'));
       });
@@ -702,7 +704,7 @@ void serviceTests() {
     });
 
     t.group('Superscript', () {
-      Superscript superscript =
+      final Superscript superscript =
           new Superscript(<Inline>[new Str('Superscript')]);
       t.test('toString', () {
         t.expect(superscript.toString(),
@@ -719,7 +721,7 @@ void serviceTests() {
     });
 
     t.group('InlineLink', () {
-      InlineLink link = new InlineLink(<Inline>[new Str('Dart')],
+      final InlineLink link = new InlineLink(<Inline>[new Str('Dart')],
           new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
         t.expect(
@@ -747,7 +749,9 @@ void serviceTests() {
     });
 
     t.group('ReferenceLink', () {
-      ReferenceLink link = new ReferenceLink('dart', <Inline>[new Str('Dart')],
+      final ReferenceLink link = new ReferenceLink(
+          'dart',
+          <Inline>[new Str('Dart')],
           new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
         t.expect(
@@ -789,7 +793,7 @@ void serviceTests() {
     });
 
     t.group('Autolink', () {
-      Autolink link = new Autolink('https://www.dartlang.org/');
+      final Autolink link = new Autolink('https://www.dartlang.org/');
       t.test('toString', () {
         t.expect(
             link.toString(), t.equals('Autolink (https://www.dartlang.org/)'));
@@ -808,7 +812,7 @@ void serviceTests() {
     });
 
     t.group('Autolink.email', () {
-      Autolink link = new Autolink.email('test@test.com');
+      final Autolink link = new Autolink.email('test@test.com');
       t.test('toString', () {
         t.expect(link.toString(), t.equals('Autolink (mailto:test@test.com)'));
       });
@@ -827,7 +831,7 @@ void serviceTests() {
     });
 
     t.group('InlineImage', () {
-      InlineImage image = new InlineImage(<Inline>[new Str('Dart')],
+      final InlineImage image = new InlineImage(<Inline>[new Str('Dart')],
           new Target('https://www.dartlang.org/', null));
       t.test('toString', () {
         t.expect(
@@ -855,7 +859,7 @@ void serviceTests() {
     });
 
     t.group('ReferenceImage', () {
-      ReferenceImage image = new ReferenceImage(
+      final ReferenceImage image = new ReferenceImage(
           'dart',
           <Inline>[new Str('Dart')],
           new Target('https://www.dartlang.org/', null));
@@ -899,7 +903,7 @@ void serviceTests() {
     });
 
     t.group('HtmlRawInline', () {
-      HtmlRawInline raw = new HtmlRawInline("<a>");
+      final HtmlRawInline raw = new HtmlRawInline("<a>");
       t.test('toString', () {
         t.expect(raw.toString(), t.equals('HtmlRawInline <a>'));
       });
@@ -913,7 +917,7 @@ void serviceTests() {
     });
 
     t.group('TexMathInline', () {
-      TexMathInline raw = new TexMathInline("a+b=c");
+      final TexMathInline raw = new TexMathInline("a+b=c");
       t.test('toString', () {
         t.expect(raw.toString(), t.equals('TexMathInline a+b=c'));
       });
@@ -928,7 +932,7 @@ void serviceTests() {
     });
 
     t.group('TexMathDisplay', () {
-      TexMathDisplay raw = new TexMathDisplay("a+b=c");
+      final TexMathDisplay raw = new TexMathDisplay("a+b=c");
       t.test('toString', () {
         t.expect(raw.toString(), t.equals('TexMathDisplay a+b=c'));
       });
