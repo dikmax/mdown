@@ -17,10 +17,13 @@ void main() {
   tests("CommonMark [strict]", specification, strictMHTestFunc);
   tests("CommonMark [strict]", specification, strictMHMHTestFunc);
 
+  final TestFunc defaultsMHTestFunc = mhTest(Options.defaults);
+  final TestFunc defaultsMHMHTestFunc = mhmhTest(Options.defaults);
+
   // Additional tests
   //tests("Additional", additionalMarkdownToHtml, mdToHtmlTest(Options.strict, (t, num) => t == TestType.html && num == 19));
-  tests("Additional [strict]", additionalMarkdownToHtml, strictMHTestFunc);
-  tests("Additional [strict]", additionalMarkdownToHtml, strictMHMHTestFunc);
+  tests("Additional [strict]", additionalMarkdownToHtml, defaultsMHTestFunc);
+  tests("Additional [strict]", additionalMarkdownToHtml, defaultsMHMHTestFunc);
 
   // commonmark.js regression tests
   tests("Regressions [strict]", regression, strictMHTestFunc);

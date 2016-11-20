@@ -100,7 +100,12 @@ class Attributes extends Attr {
         res.add('.$el');
       });
     }
-    attributes.forEach((String key, String value) => res.add('$key=$value'));
+
+    final List<String> keys = attributes.keys.toList(growable: false);
+    keys.sort();
+    keys.forEach((String key) {
+      attributes[key].forEach((String value) => res.add('$key=$value'));
+    });
 
     return 'Attributes(${res.join(' ')})';
   }
