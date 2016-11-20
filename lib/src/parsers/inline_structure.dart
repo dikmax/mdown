@@ -168,18 +168,18 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   }
 
   _Delim _scanDelims(String text, int offset) {
-    int charCode = text.codeUnitAt(offset);
+    final int charCode = text.codeUnitAt(offset);
     if (!_delimitersChars.contains(charCode)) {
       return null;
     }
 
     int endOffset = offset + 1;
-    int length = text.length;
+    final int length = text.length;
     while (endOffset < length && text.codeUnitAt(endOffset) == charCode) {
       endOffset++;
     }
 
-    int count = endOffset - offset;
+    final int count = endOffset - offset;
 
     if (count > 1 &&
         (charCode == _tildeCodeUnit && !container.options.strikeout ||
@@ -191,7 +191,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     int codeUnitBefore = _newLineCodeUnit;
     int i = 1;
     while (offset - i >= 0) {
-      int codeUnit = text.codeUnitAt(offset - i);
+      final int codeUnit = text.codeUnitAt(offset - i);
       if (!_intrawordDelimetersChars.contains(codeUnit)) {
         codeUnitBefore = codeUnit;
         break;
@@ -202,7 +202,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     int codeUnitAfter = _newLineCodeUnit;
     i = 0;
     while (endOffset + i < length) {
-      int codeUnit = text.codeUnitAt(endOffset + i);
+      final int codeUnit = text.codeUnitAt(endOffset + i);
       if (!_intrawordDelimetersChars.contains(codeUnit)) {
         codeUnitAfter = codeUnit;
         break;
@@ -210,14 +210,14 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       i++;
     }
 
-    bool spaceAfter = _spaces.contains(codeUnitAfter);
-    bool spaceBefore = _spaces.contains(codeUnitBefore);
-    bool punctuationAfter = _punctuation.contains(codeUnitAfter);
-    bool punctuationBefore = _punctuation.contains(codeUnitBefore);
+    final bool spaceAfter = _spaces.contains(codeUnitAfter);
+    final bool spaceBefore = _spaces.contains(codeUnitBefore);
+    final bool punctuationAfter = _punctuation.contains(codeUnitAfter);
+    final bool punctuationBefore = _punctuation.contains(codeUnitBefore);
 
-    bool leftFlanking =
+    final bool leftFlanking =
         !spaceAfter && (!punctuationAfter || spaceBefore || punctuationBefore);
-    bool rightFlanking =
+    final bool rightFlanking =
         !spaceBefore && (!punctuationBefore || spaceAfter || punctuationAfter);
 
     bool canOpen = leftFlanking;
@@ -234,11 +234,11 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   }
 
   Inlines _buildStack(List<_Delim> stack, int skip) {
-    Inlines result = new Inlines();
-    Iterable<_Delim> list = skip > 0 ? stack.skip(skip) : stack;
+    final Inlines result = new Inlines();
+    final Iterable<_Delim> list = skip > 0 ? stack.skip(skip) : stack;
     list.forEach((_Delim delim) {
       if (delim.count > 0) {
-        int charCode = delim.charCode;
+        final int charCode = delim.charCode;
         if (charCode == _singleQuoteCodeUnit) {
           result.addAll(new List<Inline>.filled(delim.count,
               delim.matched ? new SingleOpenQuote() : new Apostrophe()));
@@ -258,7 +258,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
   /// Replaces _EscapedSpace and _EscapedTab with correspondent inlines.
   Inlines unescapeSpaces(Iterable<Inline> items, bool success) {
-    Inlines result = new Inlines();
+    final Inlines result = new Inlines();
     for (Inline item in items) {
       if (item is _EscapedSpace) {
         if (!success) {
@@ -290,12 +290,12 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    _Delim delim = _scanDelims(text, offset);
+    final _Delim delim = _scanDelims(text, offset);
 
     offset += delim.count;
 
     if (!delim.canOpen) {
-      int charCode = delim.charCode;
+      final int charCode = delim.charCode;
       List<Inline> result;
       if (charCode == _singleQuoteCodeUnit) {
         result = new List<Inline>.filled(delim.count, new Apostrophe());
@@ -310,20 +310,20 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       return new ParseResult<Inlines>.success(new Inlines.from(result), offset);
     }
 
-    List<_Delim> stack = <_Delim>[delim];
+    final List<_Delim> stack = <_Delim>[delim];
 
     Inlines result = new Inlines();
 
-    int length = text.length;
+    final int length = text.length;
     while (offset < length && stack.length > 0) {
-      _Delim delim = _scanDelims(text, offset);
+      final _Delim delim = _scanDelims(text, offset);
       if (delim != null) {
         if (delim.canClose) {
           if (delim.charCode == _singleQuoteCodeUnit ||
               delim.charCode == _doubleQuoteCodeUnit) {
             int openDelimIndex = stack.length - 1;
             while (openDelimIndex >= 0) {
-              _Delim openDelim = stack[openDelimIndex];
+              final _Delim openDelim = stack[openDelimIndex];
               if (openDelim.charCode == delim.charCode) {
                 openDelim.matched = true;
                 break;
@@ -344,12 +344,12 @@ class InlineStructureParser extends AbstractParser<Inlines> {
             int countCloses = 0;
             int openDelimIndex = stack.length - 1;
             while (openDelimIndex >= 0 && delim.count > 0) {
-              _Delim openDelim = stack[openDelimIndex];
+              final _Delim openDelim = stack[openDelimIndex];
               countCloses = openDelim.countCloses(delim);
               if (countCloses > 0) {
-                _Delim openDelim = stack[openDelimIndex];
+                final _Delim openDelim = stack[openDelimIndex];
                 if (openDelimIndex < stack.length - 1) {
-                  Inlines inner = _buildStack(stack, openDelimIndex + 1);
+                  final Inlines inner = _buildStack(stack, openDelimIndex + 1);
                   openDelim.inlines.addAll(inner);
                 }
 
@@ -406,7 +406,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
                 openDelim.count -= countCloses;
                 if (openDelim.count == 0) {
-                  Inlines itemRes = _buildStack(stack, stack.length - 1);
+                  final Inlines itemRes = _buildStack(stack, stack.length - 1);
                   if (stack.length == 0) {
                     result.addAll(itemRes);
                   } else {
@@ -426,7 +426,8 @@ class InlineStructureParser extends AbstractParser<Inlines> {
           if (delim.canOpen) {
             stack.add(delim);
           } else {
-            Inlines inlines = stack.length == 0 ? result : stack.last.inlines;
+            final Inlines inlines =
+                stack.length == 0 ? result : stack.last.inlines;
             inlines.add(
                 new Str(new String.fromCharCode(delim.charCode) * delim.count));
           }
@@ -436,7 +437,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
         continue;
       }
 
-      int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(offset);
 
       // Special processing for subscript and superscript.
       // They cannot contain unescaped spaces.
@@ -446,7 +447,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
           stack.forEach((_Delim delim) => delim.containsSpace = true);
         } else if (codeUnit == _backslashCodeUnit) {
           if (offset + 1 < length) {
-            int codeUnit2 = text.codeUnitAt(offset + 1);
+            final int codeUnit2 = text.codeUnitAt(offset + 1);
             if (codeUnit2 == _spaceCodeUnit || codeUnit2 == _tabCodeUnit) {
               stack.last.inlines.add(codeUnit2 == _spaceCodeUnit
                   ? new _EscapedSpace()
@@ -462,7 +463,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
           offset + 1 < length &&
           text.codeUnitAt(offset + 1) == _openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
-        ParseResult<Inlines> res =
+        final ParseResult<Inlines> res =
             container.linkImageParser.parse(text, offset);
         if (res.isSuccess) {
           if (res.value.length > 0) {
@@ -474,7 +475,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       } else if (_inlineParsers.containsKey(codeUnit)) {
         bool found = false;
         for (AbstractParser<Inlines> parser in _inlineParsers[codeUnit]) {
-          ParseResult<Inlines> res = parser.parse(text, offset);
+          final ParseResult<Inlines> res = parser.parse(text, offset);
           if (res.isSuccess) {
             if (res.value.length > 0) {
               stack.last.inlines.addAll(res.value);
@@ -490,7 +491,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
         }
       }
 
-      ParseResult<Inlines> res = container.strParser.parse(text, offset);
+      final ParseResult<Inlines> res = container.strParser.parse(text, offset);
       assert(res.isSuccess);
 
       if (res.value.length > 0) {

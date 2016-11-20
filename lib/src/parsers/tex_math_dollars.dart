@@ -7,17 +7,17 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    int length = text.length;
+    final int length = text.length;
     offset++;
     if (offset >= length) {
       // Just a `$` at the end of string.
       return new ParseResult<Inlines>.success(
           new Inlines.single(new Str(r'$')), offset);
     }
-    int codeUnit = text.codeUnitAt(offset);
-    bool displayMath = codeUnit == _dollarCodeUnit;
+    final int codeUnit = text.codeUnitAt(offset);
+    final bool displayMath = codeUnit == _dollarCodeUnit;
     if (displayMath) {
-      offset++;
+      offset += 1;
       if (offset >= length) {
         // Just a `$` at the end of string.
         return new ParseResult<Inlines>.success(
@@ -37,7 +37,7 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
     int endOffset = offset;
     bool found = false;
     while (endOffset < length) {
-      int codeUnit = text.codeUnitAt(endOffset);
+      final int codeUnit = text.codeUnitAt(endOffset);
       if (codeUnit == _backslashCodeUnit) {
         endOffset++;
         if (endOffset >= length) {
@@ -68,7 +68,7 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
       return new ParseResult<Inlines>.success(
           new Inlines.single(new TexMathDisplay(math)), endOffset + 2);
     } else {
-      int lastCodeUnit = math.codeUnitAt(math.length - 1);
+      final int lastCodeUnit = math.codeUnitAt(math.length - 1);
       if (lastCodeUnit == _newLineCodeUnit ||
           lastCodeUnit == _carriageReturnCodeUnit ||
           lastCodeUnit == _spaceCodeUnit ||

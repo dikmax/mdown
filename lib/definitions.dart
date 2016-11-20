@@ -91,7 +91,7 @@ class Attributes extends Attr {
 
   @override
   String toString() {
-    List<String> res = <String>[];
+    final List<String> res = <String>[];
     if (identifier != null) {
       res.add('#$identifier');
     }

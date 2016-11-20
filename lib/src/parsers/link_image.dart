@@ -59,11 +59,11 @@ class LinkImageParser extends AbstractParser<Inlines> {
   }
 
   ParseResult<Target> _parseTarget(String text, int offset) {
-    int length = text.length;
+    final int length = text.length;
 
     // Skip whitespace.
     while (offset < length) {
-      int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(offset);
       if (codeUnit != _spaceCodeUnit &&
           codeUnit != _tabCodeUnit &&
           codeUnit != _newLineCodeUnit &&
@@ -77,7 +77,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
     }
 
     // Parsing href
-    Match hrefMatch = _hrefRegExp.matchAsPrefix(text, offset);
+    final Match hrefMatch = _hrefRegExp.matchAsPrefix(text, offset);
     if (hrefMatch == null) {
       return new ParseResult<Target>.failure();
     }
@@ -92,7 +92,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
     // Skip whitespace.
     while (offset < length) {
-      int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(offset);
       if (codeUnit != _spaceCodeUnit &&
           codeUnit != _tabCodeUnit &&
           codeUnit != _newLineCodeUnit &&
@@ -105,19 +105,19 @@ class LinkImageParser extends AbstractParser<Inlines> {
       return new ParseResult<Target>.failure();
     }
 
-    Target result = new Target(href, null);
+    final Target result = new Target(href, null);
 
     // Maybe parsing title.
     int codeUnit = text.codeUnitAt(offset);
     if (codeUnit == _singleQuoteCodeUnit ||
         codeUnit == _doubleQuoteCodeUnit ||
         codeUnit == _openParenCodeUnit) {
-      int endCodeUnit =
+      final int endCodeUnit =
           codeUnit == _openParenCodeUnit ? _closeParenCodeUnit : codeUnit;
       offset++;
-      int startOffset = offset;
+      final int startOffset = offset;
       while (offset < length) {
-        int codeUnit = text.codeUnitAt(offset);
+        final int codeUnit = text.codeUnitAt(offset);
         offset++;
         if (codeUnit == _backslashCodeUnit) {
           offset++;
@@ -140,7 +140,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
       // Skip whitespace.
       while (offset < length) {
-        int codeUnit = text.codeUnitAt(offset);
+        final int codeUnit = text.codeUnitAt(offset);
         if (codeUnit != _spaceCodeUnit &&
             codeUnit != _tabCodeUnit &&
             codeUnit != _newLineCodeUnit &&
@@ -168,7 +168,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
   // TODO reorder parse to put all fallbacks in the end.
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    int length = text.length;
+    final int length = text.length;
     bool isImage = false;
     if (text.codeUnitAt(offset) == _exclamationMarkCodeUnit) {
       offset++;
@@ -185,19 +185,21 @@ class LinkImageParser extends AbstractParser<Inlines> {
       return new ParseResult<Inlines>.failure();
     }
 
-    int startOffset = offset;
+    final int startOffset = offset;
     int endOffset = -1;
     bool containsLink = false;
-    List<_LinkStackItem> stack = <_LinkStackItem>[new _LinkStackItem(offset)];
+    final List<_LinkStackItem> stack = <_LinkStackItem>[
+      new _LinkStackItem(offset)
+    ];
     while (offset < length && (isImage || !containsLink)) {
-      int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(offset);
       if (codeUnit == _closeBracketCodeUnit) {
-        _LinkStackItem last = stack.removeLast(); // TODO check link.
+        final _LinkStackItem last = stack.removeLast(); // TODO check link.
         if (!isImage) {
           containsLink = last.containsLink;
           if (!containsLink && last.bracketLevel == 2) {
             // There counld be link
-            Inlines labelInlines = container.documentParser
+            final Inlines labelInlines = container.documentParser
                 .parseInlines(text.substring(last.offset, offset));
 
             if (labelInlines._containsLink) {
@@ -238,7 +240,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
             in _higherPriorityInlineParsers[codeUnit]) {
           // TODO optimize to only return offset.
           // TODO check autolink
-          ParseResult<Inlines> res = parser.parse(text, offset);
+          final ParseResult<Inlines> res = parser.parse(text, offset);
           if (res.isSuccess) {
             offset = res.offset;
             if (!isImage && res.value._containsLink) {
@@ -254,7 +256,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
         }
       }
 
-      ParseResult<Inlines> res = container.strParser.parse(text, offset);
+      final ParseResult<Inlines> res = container.strParser.parse(text, offset);
       assert(res.isSuccess);
 
       offset = res.offset;
@@ -268,14 +270,15 @@ class LinkImageParser extends AbstractParser<Inlines> {
     if (isImage || !containsLink) {
       if (offset != length) {
         // Test link in parens.
-        int codeUnit = text.codeUnitAt(offset);
+        final int codeUnit = text.codeUnitAt(offset);
         if (codeUnit == _openParenCodeUnit) {
-          ParseResult<Target> targetResult = _parseTarget(text, offset + 1);
+          final ParseResult<Target> targetResult =
+              _parseTarget(text, offset + 1);
           if (targetResult.isSuccess) {
-            Target target = targetResult.value;
+            final Target target = targetResult.value;
 
             // Normal link.
-            Inlines labelInlines = container.documentParser
+            final Inlines labelInlines = container.documentParser
                 .parseInlines(text.substring(startOffset, endOffset));
 
             // Attributes (linkAttributes extensions).
@@ -283,7 +286,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
             if (container.options.linkAttributes) {
               if (offset < length &&
                   text.codeUnitAt(offset) == _openBraceCodeUnit) {
-                ParseResult<Attributes> attributesResult =
+                final ParseResult<Attributes> attributesResult =
                     container.attributesParser.parse(text, offset);
                 if (attributesResult.isSuccess) {
                   target.attributes = attributesResult.value;
@@ -292,7 +295,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
               }
             }
 
-            Inline result = isImage
+            final Inline result = isImage
                 ? new InlineImage(labelInlines, target)
                 : new InlineLink(labelInlines, target);
             return new ParseResult<Inlines>.success(
@@ -303,8 +306,9 @@ class LinkImageParser extends AbstractParser<Inlines> {
         if (codeUnit == _openBracketCodeUnit) {
           if (offset + 1 < length &&
               text.codeUnitAt(offset + 1) == _closeBracketCodeUnit) {
-            String reference = text.substring(startOffset, endOffset);
-            String normalizedReference = _LinkReference.normalize(reference);
+            final String reference = text.substring(startOffset, endOffset);
+            final String normalizedReference =
+                _LinkReference.normalize(reference);
             Target target;
             if (container.references.containsKey(normalizedReference)) {
               target = container.references[normalizedReference];
@@ -313,10 +317,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
                   .linkResolver(normalizedReference, reference);
             }
             if (target != null) {
-              Inlines labelInlines = container.documentParser
+              final Inlines labelInlines = container.documentParser
                   .parseInlines(text.substring(startOffset, endOffset));
 
-              Inline result = isImage
+              final Inline result = isImage
                   ? new ReferenceImage(reference, labelInlines, target)
                   : new ReferenceLink(reference, labelInlines, target);
               return new ParseResult<Inlines>.success(
@@ -329,10 +333,12 @@ class LinkImageParser extends AbstractParser<Inlines> {
           }
 
           // Full reference parsing
-          Match referenceMatch = _referenceRegExp.matchAsPrefix(text, offset);
+          final Match referenceMatch =
+              _referenceRegExp.matchAsPrefix(text, offset);
           if (referenceMatch != null) {
-            String reference = referenceMatch[1];
-            String normalizedReference = _LinkReference.normalize(reference);
+            final String reference = referenceMatch[1];
+            final String normalizedReference =
+                _LinkReference.normalize(reference);
 
             Target target;
 
@@ -343,10 +349,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
                   .linkResolver(normalizedReference, reference);
             }
             if (target != null) {
-              Inlines labelInlines = container.documentParser
+              final Inlines labelInlines = container.documentParser
                   .parseInlines(text.substring(startOffset, endOffset));
 
-              Inline result = isImage
+              final Inline result = isImage
                   ? new ReferenceImage(reference, labelInlines, target)
                   : new ReferenceLink(reference, labelInlines, target);
 
@@ -365,8 +371,8 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
       // Found variant
 
-      String reference = text.substring(startOffset, endOffset);
-      String normalizedReference = _LinkReference.normalize(reference);
+      final String reference = text.substring(startOffset, endOffset);
+      final String normalizedReference = _LinkReference.normalize(reference);
 
       if (normalizedReference != '') {
         Target target;
@@ -378,10 +384,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
               container.options.linkResolver(normalizedReference, reference);
         }
         if (target != null) {
-          Inlines labelInlines = container.documentParser
+          final Inlines labelInlines = container.documentParser
               .parseInlines(text.substring(startOffset, endOffset));
 
-          Inline result = isImage
+          final Inline result = isImage
               ? new ReferenceImage(reference, labelInlines, target)
               : new ReferenceLink(reference, labelInlines, target);
           return new ParseResult<Inlines>.success(

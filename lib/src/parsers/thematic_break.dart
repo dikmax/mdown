@@ -7,10 +7,11 @@ class ThematicBreakParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    ParseResult<String> lineResult = container.lineParser.parse(text, offset);
+    final ParseResult<String> lineResult =
+        container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    Match match = _thematicBreakTest.firstMatch(lineResult.value);
+    final Match match = _thematicBreakTest.firstMatch(lineResult.value);
     if (match == null) {
       return const ParseResult<Iterable<Block>>.failure();
     }

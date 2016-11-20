@@ -9,7 +9,7 @@ class EscapesParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     // At this point we know that text[offset] == '\'
     if (offset + 1 < text.length) {
-      int codeUnit = text.codeUnitAt(offset + 1);
+      final int codeUnit = text.codeUnitAt(offset + 1);
       if (_escapableCodes.contains(codeUnit)) {
         return new ParseResult<Inlines>.success(
             new Inlines.single(new Str(new String.fromCharCode(codeUnit))),

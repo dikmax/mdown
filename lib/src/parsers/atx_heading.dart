@@ -13,12 +13,13 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    ParseResult<String> lineResult = container.lineParser.parse(text, offset);
+    final ParseResult<String> lineResult =
+        container.lineParser.parse(text, offset);
 
     assert(lineResult.isSuccess);
 
-    String line = lineResult.value;
-    int length = line.length;
+    final String line = lineResult.value;
+    final int length = line.length;
 
     int level = 1;
     int state = _stateOpen;
@@ -29,7 +30,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
 
     // Finite Automata
     while (i < length) {
-      int code = line.codeUnitAt(i);
+      final int code = line.codeUnitAt(i);
 
       switch (state) {
         case _stateOpen:
@@ -96,8 +97,8 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
       String content = line.substring(startOffset, endOffset);
       if (container.options.headingAttributes) {
         if (content.endsWith('}')) {
-          int attributesStart = content.lastIndexOf('{');
-          ParseResult<Attributes> attributesResult =
+          final int attributesStart = content.lastIndexOf('{');
+          final ParseResult<Attributes> attributesResult =
               container.attributesParser.parse(content, attributesStart);
           if (attributesResult.isSuccess) {
             content = content.substring(0, attributesStart);
@@ -110,7 +111,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
       inlines = new Inlines();
     }
 
-    List<AtxHeading> heading = <AtxHeading>[
+    final List<AtxHeading> heading = <AtxHeading>[
       new AtxHeading(level, inlines, attr)
     ];
 

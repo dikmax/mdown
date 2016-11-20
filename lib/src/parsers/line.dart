@@ -9,12 +9,12 @@ class LineParser extends AbstractParser<String> {
 
   @override
   ParseResult<String> parse(String text, int offset) {
-    int length = text.length;
+    final int length = text.length;
     if (offset >= length) {
       return const ParseResult<String>.failure();
     }
 
-    Match match = _lineRegExp.matchAsPrefix(text, offset);
+    final Match match = _lineRegExp.matchAsPrefix(text, offset);
     String line;
     int newOffset;
     if (match == null) {

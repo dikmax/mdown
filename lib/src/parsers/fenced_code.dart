@@ -10,22 +10,22 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    Match startRes = _fencedCodeStartTest.firstMatch(lineResult.value);
+    final Match startRes = _fencedCodeStartTest.firstMatch(lineResult.value);
     if (startRes == null) {
       return const ParseResult<Iterable<FencedCodeBlock>>.failure();
     }
 
-    int indent = startRes[1].length;
-    String line = startRes[2] ?? startRes[4];
-    String infoString = (startRes[3] ?? startRes[5]).trim();
-    String char = line[0];
+    final int indent = startRes[1].length;
+    final String line = startRes[2] ?? startRes[4];
+    final String infoString = (startRes[3] ?? startRes[5]).trim();
+    final String char = line[0];
 
-    RegExp endTest = new RegExp('^ {0,3}$char{${line.length},}[ \t]*\$');
+    final RegExp endTest = new RegExp('^ {0,3}$char{${line.length},}[ \t]*\$');
 
-    StringBuffer code = new StringBuffer();
+    final StringBuffer code = new StringBuffer();
 
     offset = lineResult.offset;
-    int length = text.length;
+    final int length = text.length;
     while (offset < length) {
       lineResult = container.lineParser.parse(text, offset);
       assert(lineResult.isSuccess);
@@ -33,7 +33,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
       String line = lineResult.value;
       offset = lineResult.offset;
 
-      Match endResult = endTest.firstMatch(line);
+      final Match endResult = endTest.firstMatch(line);
       if (endResult != null) {
         break;
       }
@@ -48,7 +48,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
     Attr attributes;
     if (infoString != '') {
       if (container.options.fencedCodeAttributes) {
-        ParseResult<Attributes> parse =
+        final ParseResult<Attributes> parse =
             container.attributesParser.parse(infoString, 0);
         if (parse.isSuccess) {
           attributes = parse.value;
@@ -58,7 +58,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
     } else {
       attributes = new EmptyAttr();
     }
-    FencedCodeBlock codeBlock = new FencedCodeBlock(code.toString(),
+    final FencedCodeBlock codeBlock = new FencedCodeBlock(code.toString(),
         fenceType: FenceType.fromChar(char),
         fenceSize: line.length,
         attributes: attributes);
@@ -68,9 +68,9 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
 
   InfoString _parseInfoString(String infoString) {
     int infoStringEnd = 0;
-    int infoStringLength = infoString.length;
+    final int infoStringLength = infoString.length;
     while (infoStringEnd < infoStringLength) {
-      int codeUnit = infoString.codeUnitAt(infoStringEnd);
+      final int codeUnit = infoString.codeUnitAt(infoStringEnd);
       if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
         break;
       }

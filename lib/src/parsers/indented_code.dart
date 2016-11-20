@@ -10,36 +10,37 @@ class IndentedCodeParser extends AbstractParser<Iterable<Block>> {
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
     // Simple test, that we have indent
-    int codeUnit = text.codeUnitAt(offset);
+    final int codeUnit = text.codeUnitAt(offset);
     if (codeUnit != _spaceCodeUnit && codeUnit != _tabCodeUnit) {
       return const ParseResult<Iterable<Block>>.failure();
     }
 
     // Main code
 
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     StringBuffer rest = new StringBuffer();
     bool firstLine = true;
-    int length = text.length;
+    final int length = text.length;
     while (offset < length) {
-      ParseResult<String> lineResult = container.lineParser.parse(text, offset);
+      final ParseResult<String> lineResult =
+          container.lineParser.parse(text, offset);
       assert(lineResult.isSuccess);
 
-      String line = lineResult.value;
-      Match emptyLine = _emptyLineRegExp.firstMatch(line);
+      final String line = lineResult.value;
+      final Match emptyLine = _emptyLineRegExp.firstMatch(line);
       if (emptyLine != null) {
         if (firstLine) {
           break;
         }
 
-        Match codeLine = _codeLineRegExp.firstMatch(line);
+        final Match codeLine = _codeLineRegExp.firstMatch(line);
         if (codeLine != null) {
           rest.writeln(codeLine[1]);
         } else {
           rest.writeln();
         }
       } else {
-        Match codeLine = _codeLineRegExp.firstMatch(line);
+        final Match codeLine = _codeLineRegExp.firstMatch(line);
         if (codeLine == null) {
           break;
         }

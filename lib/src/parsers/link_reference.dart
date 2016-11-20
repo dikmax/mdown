@@ -49,12 +49,13 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
   static final RegExp _lineEndRegExp = new RegExp(r'[ \t]*(\r\n|\n|\r|$)');
   @override
   ParseResult<_LinkReference> parse(String text, int offset) {
-    Match labelAndLinkMatch = _labelAndLinkRegExp.matchAsPrefix(text, offset);
+    final Match labelAndLinkMatch =
+        _labelAndLinkRegExp.matchAsPrefix(text, offset);
     if (labelAndLinkMatch == null) {
       return new ParseResult<_LinkReference>.failure();
     }
 
-    String label = _LinkReference.normalize(labelAndLinkMatch[1]);
+    final String label = _LinkReference.normalize(labelAndLinkMatch[1]);
     if (label.length == 0) {
       // Label cannot be empty
       return new ParseResult<_LinkReference>.failure();
@@ -74,11 +75,11 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
 
     Match lineEndMatch = _lineEndRegExp.matchAsPrefix(text, offset);
 
-    int offsetAfterLink = lineEndMatch != null ? lineEndMatch.end : -1;
+    final int offsetAfterLink = lineEndMatch != null ? lineEndMatch.end : -1;
 
     // Trying title
 
-    Match titleMatch = _titleRegExp.matchAsPrefix(text, offset);
+    final Match titleMatch = _titleRegExp.matchAsPrefix(text, offset);
 
     String title;
 
@@ -104,7 +105,7 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
 
     if (container.options.linkAttributes) {
       while (offset < text.length) {
-        int codeUnit = text.codeUnitAt(offset);
+        final int codeUnit = text.codeUnitAt(offset);
         if (codeUnit != _spaceCodeUnit && codeUnit != _tabCodeUnit) {
           break;
         }
@@ -112,7 +113,7 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
       }
       if (offset < text.length &&
           text.codeUnitAt(offset) == _openBraceCodeUnit) {
-        ParseResult<Attributes> attributesResult =
+        final ParseResult<Attributes> attributesResult =
             container.attributesParser.parse(text, offset);
         if (attributesResult.isSuccess) {
           offset = attributesResult.offset;

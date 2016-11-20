@@ -113,7 +113,7 @@ String _removeIndent(String line, int amount, bool allowLess,
     [int startIndent = 0]) {
   int offset = 0;
   while (offset < amount && offset < line.length) {
-    int code = line.codeUnitAt(offset);
+    final int code = line.codeUnitAt(offset);
     if (code == _tabCodeUnit) {
       line = line.replaceFirst(
           '\t', ' ' * (4 - (startIndent & 3))); // (4 - startIndent % 4)
@@ -155,7 +155,7 @@ String unescapeAndUnreference(String s) {
       }
       if (match[4] != null) {
         // Named entity
-        String str = htmlEntities[match[4]];
+        final String str = htmlEntities[match[4]];
         if (str != null) {
           return str;
         }
@@ -189,7 +189,7 @@ int _skipIndent(String text, int offset) {
     return offset;
   }
 
-  int length = text.length;
+  final int length = text.length;
   offset++;
   if (offset == length) {
     return -1;
@@ -222,7 +222,7 @@ int _skipIndent(String text, int offset) {
 }
 
 int _getBlockFirstChar(String text, int offset) {
-  int nonIndentOffset = _skipIndent(text, offset);
+  final int nonIndentOffset = _skipIndent(text, offset);
 
   return nonIndentOffset != -1 ? text.codeUnitAt(nonIndentOffset) : -1;
 }
@@ -274,27 +274,27 @@ class Inlines extends ListBase<Inline> {
       _cachedContainsLink = any((Inline inline) {
         if (inline is Emph) {
           assert(inline.contents is Inlines);
-          Inlines contents = inline.contents;
+          final Inlines contents = inline.contents;
           return contents._containsLink;
         } else if (inline is Strong) {
           assert(inline.contents is Inlines);
-          Inlines contents = inline.contents;
+          final Inlines contents = inline.contents;
           return contents._containsLink;
         } else if (inline is Strikeout) {
           assert(inline.contents is Inlines);
-          Inlines contents = inline.contents;
+          final Inlines contents = inline.contents;
           return contents._containsLink;
         } else if (inline is Subscript) {
           assert(inline.contents is Inlines);
-          Inlines contents = inline.contents;
+          final Inlines contents = inline.contents;
           return contents._containsLink;
         } else if (inline is Superscript) {
           assert(inline.contents is Inlines);
-          Inlines contents = inline.contents;
+          final Inlines contents = inline.contents;
           return contents._containsLink;
         } else if (inline is Image) {
           assert(inline.label is Inlines);
-          Inlines label = inline.label;
+          final Inlines label = inline.label;
           return label._containsLink;
         } else if (inline is Link) {
           return true;
