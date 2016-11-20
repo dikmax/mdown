@@ -4325,6 +4325,30 @@ bar
 </li>
 </ul>
 ''',
+  r'''[foo](/f&#246;&#246; "f&#246;&#246;")
+''': r'''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>
+''',
+  r'''[foo](/f&#xf6;&#xf6; "f&#xf6;&#xf6;")
+''': r'''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>
+''',
+  r'''[foo](/f&zzzz;&zzzz; "f&zzzz;&zzzz;")
+''': r'''<p><a href="/f&zzzz;&zzzz;" title="f&amp;zzzz;&amp;zzzz;">foo</a></p>
+''',
+  r'''&#160;
+''': r'''<p> </p>
+''',
+  r'''[foo **[bar]**](/uri)
+''': r'''<p><a href="/uri">foo <strong>[bar]</strong></a></p>
+''',
+  r'''[foo ~~[bar]~~](/uri)
+''': r'''<p><a href="/uri">foo <del>[bar]</del></a></p>
+''',
+  r'''[foo ^[bar]^](/uri)
+''': r'''<p><a href="/uri">foo <sup>[bar]</sup></a></p>
+''',
+  r'''[foo ~[bar]~](/uri)
+''': r'''<p><a href="/uri">foo <sub>[bar]</sub></a></p>
+''',
 };
 
 // **************************************************************************
