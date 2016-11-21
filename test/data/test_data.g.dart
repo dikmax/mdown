@@ -2627,6 +2627,9 @@ foo
   baz`
 ''': r'''<p><code>foo bar baz</code></p>
 ''',
+  r'''`a  b`
+''': r'''<p><code>a  b</code></p>
+''',
   r'''`foo `` bar`
 ''': r'''<p><code>foo `` bar</code></p>
 ''',
@@ -3127,6 +3130,9 @@ bar>)</p>
   r'''[link](/url "title \"&quot;")
 ''': r'''<p><a href="/url" title="title &quot;&quot;">link</a></p>
 ''',
+  r'''[link](/url "title")
+''': r'''<p><a href="/url%C2%A0%22title%22">link</a></p>
+''',
   r'''[link](/url "title "and" title")
 ''': r'''<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>
 ''',
@@ -3396,6 +3402,21 @@ bar>)</p>
 [foo]: /url1
 [bar]: /url2
 ''': r'''<p><a href="/url2">foo</a></p>
+''',
+  r'''[foo][]
+
+[foo]: /url1
+''': r'''<p><a href="/url1">foo</a></p>
+''',
+  r'''[foo]()
+
+[foo]: /url1
+''': r'''<p><a href="">foo</a></p>
+''',
+  r'''[foo](not a link)
+
+[foo]: /url1
+''': r'''<p><a href="/url1">foo</a>(not a link)</p>
 ''',
   r'''[foo][bar][baz]
 
