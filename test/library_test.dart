@@ -144,7 +144,7 @@ void main() {
       texSingleMHMHTestFunc);
 
   final Set<int> texMathSingleBackslashContradictions =
-      new Set<int>.from(<int>[287, 479, 495]);
+      new Set<int>.from(<int>[287, 481, 497]);
   final TestFunc texSingleSpecMHTestFunc = mhTest(
       new Options(texMathSingleBackslash: true),
       (_, int num) => !texMathSingleBackslashContradictions.contains(num));
