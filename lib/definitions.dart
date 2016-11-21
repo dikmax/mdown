@@ -353,7 +353,7 @@ class FencedCodeBlock extends CodeBlock {
   /// Constructor
   FencedCodeBlock(String contents,
       {this.fenceType: FenceType.backtick, this.fenceSize: 3, Attr attributes})
-      : super(contents, attributes == null ? new EmptyAttr() : attributes);
+      : super(contents, attributes ?? new EmptyAttr());
 
   @override
   String toString() => "FencedCodeBlock $attributes $contents";

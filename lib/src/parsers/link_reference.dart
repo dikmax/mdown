@@ -75,7 +75,7 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
 
     Match lineEndMatch = _lineEndRegExp.matchAsPrefix(text, offset);
 
-    final int offsetAfterLink = lineEndMatch != null ? lineEndMatch.end : -1;
+    final int offsetAfterLink = lineEndMatch?.end ?? -1;
 
     // Trying title
 
@@ -95,7 +95,7 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
 
       lineEndMatch = _lineEndRegExp.matchAsPrefix(text, offset);
 
-      offsetAfterTitle = lineEndMatch != null ? lineEndMatch.end : -1;
+      offsetAfterTitle = lineEndMatch?.end ?? -1;
     }
 
     // Trying attributes
@@ -120,7 +120,7 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
 
           lineEndMatch = _lineEndRegExp.matchAsPrefix(text, offset);
 
-          offsetAfterAttributes = lineEndMatch != null ? lineEndMatch.end : -1;
+          offsetAfterAttributes = lineEndMatch?.end ?? -1;
           if (lineEndMatch != null) {
             attributes = attributesResult.value;
           }

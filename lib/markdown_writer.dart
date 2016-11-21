@@ -56,14 +56,13 @@ class _EscapeContext {
       bool isHeading,
       bool isLabel}) {
     return new _EscapeContext(
-        escapeStar: escapeStar != null ? escapeStar : this.escapeStar,
-        escapeUnderscore:
-            escapeUnderscore != null ? escapeUnderscore : this.escapeUnderscore,
-        escapeParens: escapeParens != null ? escapeParens : this.escapeParens,
-        escapeQuot: escapeQuot != null ? escapeQuot : this.escapeQuot,
-        escapeSpace: escapeSpace != null ? escapeSpace : this.escapeSpace,
-        isHeading: isHeading != null ? isHeading : this.isHeading,
-        isLabel: isLabel != null ? isLabel : this.isLabel);
+        escapeStar: escapeStar ?? this.escapeStar,
+        escapeUnderscore: escapeUnderscore ?? this.escapeUnderscore,
+        escapeParens: escapeParens ?? this.escapeParens,
+        escapeQuot: escapeQuot ?? this.escapeQuot,
+        escapeSpace: escapeSpace ?? this.escapeSpace,
+        isHeading: isHeading ?? this.isHeading,
+        isLabel: isLabel ?? this.isLabel);
   }
 
   static const _EscapeContext empty = const _EscapeContext();

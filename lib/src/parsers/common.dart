@@ -270,39 +270,38 @@ class Inlines extends ListBase<Inline> {
 
   // Used in parsing.
   bool get _containsLink {
-    if (_cachedContainsLink == null) {
-      _cachedContainsLink = any((Inline inline) {
-        if (inline is Emph) {
-          assert(inline.contents is Inlines);
-          final Inlines contents = inline.contents;
-          return contents._containsLink;
-        } else if (inline is Strong) {
-          assert(inline.contents is Inlines);
-          final Inlines contents = inline.contents;
-          return contents._containsLink;
-        } else if (inline is Strikeout) {
-          assert(inline.contents is Inlines);
-          final Inlines contents = inline.contents;
-          return contents._containsLink;
-        } else if (inline is Subscript) {
-          assert(inline.contents is Inlines);
-          final Inlines contents = inline.contents;
-          return contents._containsLink;
-        } else if (inline is Superscript) {
-          assert(inline.contents is Inlines);
-          final Inlines contents = inline.contents;
-          return contents._containsLink;
-        } else if (inline is Image) {
-          assert(inline.label is Inlines);
-          final Inlines label = inline.label;
-          return label._containsLink;
-        } else if (inline is Link) {
-          return true;
-        }
+    _cachedContainsLink = _cachedContainsLink ??
+        any((Inline inline) {
+          if (inline is Emph) {
+            assert(inline.contents is Inlines);
+            final Inlines contents = inline.contents;
+            return contents._containsLink;
+          } else if (inline is Strong) {
+            assert(inline.contents is Inlines);
+            final Inlines contents = inline.contents;
+            return contents._containsLink;
+          } else if (inline is Strikeout) {
+            assert(inline.contents is Inlines);
+            final Inlines contents = inline.contents;
+            return contents._containsLink;
+          } else if (inline is Subscript) {
+            assert(inline.contents is Inlines);
+            final Inlines contents = inline.contents;
+            return contents._containsLink;
+          } else if (inline is Superscript) {
+            assert(inline.contents is Inlines);
+            final Inlines contents = inline.contents;
+            return contents._containsLink;
+          } else if (inline is Image) {
+            assert(inline.label is Inlines);
+            final Inlines label = inline.label;
+            return label._containsLink;
+          } else if (inline is Link) {
+            return true;
+          }
 
-        return false;
-      });
-    }
+          return false;
+        });
 
     return _cachedContainsLink;
   }

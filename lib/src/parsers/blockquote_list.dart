@@ -310,10 +310,7 @@ class _BlockquoteMarker extends _Marker {
 
   @override
   _ExtendedBlock createBlock([Iterable<Block> contents]) {
-    if (contents == null) {
-      contents = <Block>[];
-    }
-    return new _ExtendedBlockquote(contents);
+    return new _ExtendedBlockquote(contents ?? <Block>[]);
   }
 
   @override
@@ -328,10 +325,9 @@ class _UnorderedListMarker extends _Marker {
 
   @override
   _ExtendedBlock createBlock([Iterable<Block> contents]) {
-    if (contents == null) {
-      contents = <Block>[];
-    }
-    final List<ListItem> items = <ListItem>[new ListItem(contents)];
+    final List<ListItem> items = <ListItem>[
+      new ListItem(contents ?? <Block>[])
+    ];
     return new _ExtendedUnorderedList(items, bulletType: bullet, tight: true);
   }
 
@@ -350,10 +346,9 @@ class _OrderedListMarker extends _Marker {
 
   @override
   _ExtendedBlock createBlock([Iterable<Block> contents]) {
-    if (contents == null) {
-      contents = <Block>[];
-    }
-    final List<ListItem> items = <ListItem>[new ListItem(contents)];
+    final List<ListItem> items = <ListItem>[
+      new ListItem(contents ?? <Block>[])
+    ];
 
     return new _ExtendedOrderedList(items,
         indexSeparator: indexSeparator, startIndex: startIndex, tight: true);
