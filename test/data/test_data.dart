@@ -17,11 +17,11 @@ final Map<String, String> smartPunctuation = _$smartPunctuationTests;
 final Map<String, String> regression = _$regressionTests;
 
 /// Additional md->md tests
-@EmbedTests('markdownToMarkdown.txt')
+@EmbedTests('markdown_markdown.txt')
 final Map<String, String> markdownToMarkdown = _$markdownToMarkdownTests;
 
 /// Additional md->html tests
-@EmbedTests('additionalMarkdownToHtml.txt')
+@EmbedTests('additional.txt')
 final Map<String, String> additionalMarkdownToHtml =
     _$additionalMarkdownToHtmlTests;
 

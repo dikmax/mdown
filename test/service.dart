@@ -95,7 +95,10 @@ void serviceTests() {
       attr2.add('key2', 'value2');
 
       t.test('toString', () {
-        t.expect(attr.toString(), t.equals('Attributes(#id .class1 .class2 key1=value1 key2=value2)'));
+        t.expect(
+            attr.toString(),
+            t.equals(
+                'Attributes(#id .class1 .class2 key1=value1 key2=value2)'));
       });
       t.test('==', () {
         t.expect(
