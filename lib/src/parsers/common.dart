@@ -23,7 +23,7 @@ final Pattern _htmlBlock3Test = '<?';
 final Pattern _htmlBlock4Test = '<!';
 final Pattern _htmlBlock5Test = '<!\[CDATA\[';
 final Pattern _htmlBlock6Test = new RegExp(
-  r'</?([a-zA-Z1]+)(?:\s|/?>|$)',
+  r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 );
 final Set<String> _blockTags = new Set<String>.from(<String>[
   'address',
@@ -52,6 +52,11 @@ final Set<String> _blockTags = new Set<String>.from(<String>[
   'frame',
   'frameset',
   'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
   'head',
   'header',
   'hr',
