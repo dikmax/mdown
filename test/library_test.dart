@@ -37,9 +37,9 @@ void main() {
 
   // Fenced code attributes
   final TestFunc fencedCodeAttributesMHTestFunc =
-      mhTest(new Options(fencedCodeAttributes: true));
+      mhTest(const Options(fencedCodeAttributes: true));
   final TestFunc fencedCodeAttributesMHMHTestFunc =
-      mhmhTest(new Options(fencedCodeAttributes: true));
+      mhmhTest(const Options(fencedCodeAttributes: true));
   tests("Fenced code attributes", fencedCodeAttributes,
       fencedCodeAttributesMHTestFunc);
   tests("Fenced code attributes", fencedCodeAttributes,
@@ -51,9 +51,9 @@ void main() {
 
   // Inline code attributes
   final TestFunc inlineCodeAttributesMHTestFunc =
-      mhTest(new Options(inlineCodeAttributes: true));
+      mhTest(const Options(inlineCodeAttributes: true));
   final TestFunc inlineCodeAttributesMHMHTestFunc =
-      mhmhTest(new Options(inlineCodeAttributes: true));
+      mhmhTest(const Options(inlineCodeAttributes: true));
   tests("Inline code attributes", inlineCodeAttributes,
       inlineCodeAttributesMHTestFunc);
   tests("Inline code attributes", inlineCodeAttributes,
@@ -65,9 +65,9 @@ void main() {
 
   // Heading attributes
   final TestFunc headingAttributesMHTestFunc =
-      mhTest(new Options(headingAttributes: true));
+      mhTest(const Options(headingAttributes: true));
   final TestFunc headingAttributesMHMHTestFunc =
-      mhmhTest(new Options(headingAttributes: true));
+      mhmhTest(const Options(headingAttributes: true));
   tests("Heading attributes", headingAttributes, headingAttributesMHTestFunc);
   tests("Heading attributes", headingAttributes, headingAttributesMHMHTestFunc);
   tests("Heading attributes spec", specification, headingAttributesMHTestFunc);
@@ -76,34 +76,37 @@ void main() {
 
   // Link attributes
   final TestFunc linkAttributesMHTestFunc =
-      mhTest(new Options(linkAttributes: true));
+      mhTest(const Options(linkAttributes: true));
   final TestFunc linkAttributesMHMHTestFunc =
-      mhmhTest(new Options(linkAttributes: true));
+      mhmhTest(const Options(linkAttributes: true));
   tests("Link attributes", linkAttributes, linkAttributesMHTestFunc);
   tests("Link attributes", linkAttributes, linkAttributesMHMHTestFunc);
   tests("Link attributes spec", specification, linkAttributesMHTestFunc);
   tests("Link attributes spec", specification, linkAttributesMHMHTestFunc);
 
   // Strikeout
-  final TestFunc strikeoutMHTestFunc = mhTest(new Options(strikeout: true));
-  final TestFunc strikeoutMHMHTestFunc = mhmhTest(new Options(strikeout: true));
+  final TestFunc strikeoutMHTestFunc = mhTest(const Options(strikeout: true));
+  final TestFunc strikeoutMHMHTestFunc =
+      mhmhTest(const Options(strikeout: true));
   tests("Strikeout", strikeout, strikeoutMHTestFunc);
   tests("Strikeout", strikeout, strikeoutMHMHTestFunc);
   tests("Strikeout spec", specification, strikeoutMHTestFunc);
   tests("Strikeout spec", specification, strikeoutMHMHTestFunc);
 
   // Subscript
-  final TestFunc subscriptMHTestFunc = mhTest(new Options(subscript: true));
-  final TestFunc subscriptMHMHTestFunc = mhmhTest(new Options(subscript: true));
+  final TestFunc subscriptMHTestFunc = mhTest(const Options(subscript: true));
+  final TestFunc subscriptMHMHTestFunc =
+      mhmhTest(const Options(subscript: true));
   tests("Subscript", subscript, subscriptMHTestFunc);
   tests("Subscript", subscript, subscriptMHMHTestFunc);
   tests("Subscript spec", specification, subscriptMHTestFunc);
   tests("Subscript spec", specification, subscriptMHMHTestFunc);
 
   // Superscript
-  final TestFunc superscriptMHTestFunc = mhTest(new Options(superscript: true));
+  final TestFunc superscriptMHTestFunc =
+      mhTest(const Options(superscript: true));
   final TestFunc superscriptMHMHTestFunc =
-      mhmhTest(new Options(superscript: true));
+      mhmhTest(const Options(superscript: true));
   tests("Superscript", superscript, superscriptMHTestFunc);
   tests("Superscript", superscript, superscriptMHMHTestFunc);
   tests("Superscript spec", specification, superscriptMHTestFunc);
@@ -111,9 +114,9 @@ void main() {
 
   // Strikeout and subscript
   final TestFunc strikeoutSubscriptMHTestFunc =
-      mhTest(new Options(strikeout: true, subscript: true));
+      mhTest(const Options(strikeout: true, subscript: true));
   final TestFunc strikeoutSubscriptMHMHTestFunc =
-      mhmhTest(new Options(strikeout: true, subscript: true));
+      mhmhTest(const Options(strikeout: true, subscript: true));
   tests("Strikeout and subscript", strikeoutAndSubscript,
       strikeoutSubscriptMHTestFunc);
   tests("Strikeout and subscript", strikeoutAndSubscript,
@@ -125,9 +128,9 @@ void main() {
 
   // TeX Math between dollars
   final TestFunc texDollarsMHTestFunc =
-      mhTest(new Options(texMathDollars: true));
+      mhTest(const Options(texMathDollars: true));
   final TestFunc texDollarsMHMHTestFunc =
-      mhmhTest(new Options(texMathDollars: true));
+      mhmhTest(const Options(texMathDollars: true));
   tests("TeX math dollars", texMathDollars, texDollarsMHTestFunc);
   tests("TeX math dollars", texMathDollars, texDollarsMHMHTestFunc);
   tests("TeX math dollars spec", specification, texDollarsMHTestFunc);
@@ -135,9 +138,9 @@ void main() {
 
   // TeX Math between backslashed `()` or `[]`
   final TestFunc texSingleMHTestFunc =
-      mhTest(new Options(texMathSingleBackslash: true));
+      mhTest(const Options(texMathSingleBackslash: true));
   final TestFunc texSingleMHMHTestFunc =
-      mhmhTest(new Options(texMathSingleBackslash: true));
+      mhmhTest(const Options(texMathSingleBackslash: true));
   tests(
       "TeX math single backslash", texMathSingleBackslash, texSingleMHTestFunc);
   tests("TeX math single backslash", texMathSingleBackslash,
@@ -146,10 +149,10 @@ void main() {
   final Set<int> texMathSingleBackslashContradictions =
       new Set<int>.from(<int>[287, 481, 497]);
   final TestFunc texSingleSpecMHTestFunc = mhTest(
-      new Options(texMathSingleBackslash: true),
+      const Options(texMathSingleBackslash: true),
       (_, int num) => !texMathSingleBackslashContradictions.contains(num));
   final TestFunc texSingleSpecMHMHTestFunc = mhmhTest(
-      new Options(texMathSingleBackslash: true),
+      const Options(texMathSingleBackslash: true),
       (_, int num) => !texMathSingleBackslashContradictions.contains(num));
   tests(
       "TeX math single backslash spec", specification, texSingleSpecMHTestFunc);
@@ -158,9 +161,9 @@ void main() {
 
   // TeX Math between double backslashed `()` or `[]`
   final TestFunc texDoubleMHTestFunc =
-      mhTest(new Options(texMathDoubleBackslash: true));
+      mhTest(const Options(texMathDoubleBackslash: true));
   final TestFunc texDoubleMHMHTestFunc =
-      mhmhTest(new Options(texMathDoubleBackslash: true));
+      mhmhTest(const Options(texMathDoubleBackslash: true));
   tests(
       "TeX math double backslash", texMathDoubleBackslash, texDoubleMHTestFunc);
   tests("TeX math double backslash", texMathDoubleBackslash,
@@ -169,8 +172,8 @@ void main() {
   tests("TeX math double backslash spec", specification, texDoubleMHMHTestFunc);
 
   // Raw TeX
-  final TestFunc rawTexMHTestFunc = mhTest(new Options(rawTex: true));
-  final TestFunc rawTexMHMHTestFunc = mhmhTest(new Options(rawTex: true));
+  final TestFunc rawTexMHTestFunc = mhTest(const Options(rawTex: true));
+  final TestFunc rawTexMHMHTestFunc = mhmhTest(const Options(rawTex: true));
   tests("Raw TeX", rawTex, rawTexMHTestFunc);
   tests("Raw TeX", rawTex, rawTexMHMHTestFunc);
   tests("Raw TeX spec", specification, rawTexMHTestFunc);

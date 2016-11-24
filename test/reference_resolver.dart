@@ -46,7 +46,7 @@ This is a [link].
 /// Link resolver tests
 void referenceResolverTests() {
   final CommonMarkParser parser =
-      new CommonMarkParser(new Options(linkResolver: _linkResolver));
+      new CommonMarkParser(const Options(linkResolver: _linkResolver));
   final CommonMarkParser defaultParser = CommonMarkParser.defaults;
 
   t.group("Custom reference resolver test", () {

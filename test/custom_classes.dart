@@ -9,8 +9,8 @@ void customClassesTests() {
   tests(
       "Tex math custom classes",
       texMathCustomClasses,
-      mhTest(new Options(
+      mhTest(const Options(
           texMathDollars: true,
-          inlineTexMathClasses: <String>['custom_inline'],
-          displayTexMathClasses: <String>['custom_display'])));
+          inlineTexMathClasses: const <String>['custom_inline'],
+          displayTexMathClasses: const <String>['custom_display'])));
 }

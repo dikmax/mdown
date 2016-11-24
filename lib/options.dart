@@ -176,7 +176,7 @@ class Options {
   ///   }
   /// }
   ///
-  /// CommonMarkParser parser = new CommonMarkParser(new Options(linkResolver: linkResolver));
+  /// CommonMarkParser parser = new CommonMarkParser(const Options(linkResolver: linkResolver));
   /// Document doc = parser.parse('Hello world!\n===');
   /// String res = HtmlWriter.defaults.write(doc);
   /// ```

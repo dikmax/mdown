@@ -66,7 +66,7 @@ md_proc supports some language extensions. You can specify enabled extensions us
 renderer.
 
 ```dart
-Options options = new Options(superscript: true);
+Options options = const Options(superscript: true);
 CommonMarkParser parser = new CommonMarkParser(options);
 Document doc = parser.parse('Hello world!\n===');
 HtmlWriter writer = new HtmlWriter(options);
@@ -274,7 +274,7 @@ Target linkResolver(String normalizedReference, String reference) {
   }
 }
 
-CommonMarkParser parser = new CommonMarkParser(new Options(linkResolver: linkResolver));
+CommonMarkParser parser = new CommonMarkParser(const Options(linkResolver: linkResolver));
 Document doc = parser.parse('Hello world!\n===');
 String res = HtmlWriter.defaults.write(doc);
 ```
