@@ -24,16 +24,61 @@ class Options {
   /// `–` and curly versions of quote marks accordingly. It's only official extension to date.
   final bool smartPunctuation;
 
-  /// Extended attributes for fenced code.
+  /// Allows fenced code block to have arbitrary extended attributes.
+  ///
+  /// ``````md
+  /// ``` {#someId .class1 .class2 key=value}
+  /// code
+  /// ```
+  /// ``````
+  ///
+  /// This will be rendered in HTML as
+  ///
+  /// ```html
+  /// <pre id="someId" class="class1 class2" key="value"><code>code
+  /// </code></pre>
+  /// ```
   final bool fencedCodeAttributes;
 
-  /// Extended attributes for heading
+  /// Allows headings to have arbitrary extended attributes.
+  ///
+  /// ``````md
+  /// # Heading 1 {#someId}
+  ///
+  /// Heading 2 {.someClass}
+  /// -------------------
+  /// ``````
+  ///
+  /// This will be rendered in html as
+  ///
+  /// ```html
+  /// <h1 id="someId">Heading 1</h1>
+  /// <h2 class="someClass">Heading 2</h2>
+  /// ```
   final bool headingAttributes;
 
-  /// Extended attributes for inline code.
+  /// Adds extended attributes support to inline code.
+  ///
+  /// ``````md
+  /// `code`{#id .class key='value'}
+  /// ``````
   final bool inlineCodeAttributes;
 
-  /// Extended attributes for links and images.
+  /// Extended attributes for links and images. Both inline and reference links are
+  /// supported.
+  ///
+  /// ``````md
+  /// ![](image.jpg){width="800" height="600"}
+  ///
+  /// [test][ref]
+  /// ``````
+  ///
+  /// This will be transformed into:
+  ///
+  /// ``````html
+  /// <p><img src="image.jpg" width="800" height="600"/></p>
+  /// <p><a href="http://test.com/" id="id">test</a></p>
+  /// ``````
   final bool linkAttributes;
 
   /// Enables strikeout extension. Strikeout is a text wrapped with double tilde (`~~`). Example:
