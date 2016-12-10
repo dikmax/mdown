@@ -2,7 +2,7 @@ library md_proc.tool.build_file;
 
 import 'dart:async';
 import 'package:source_gen/source_gen.dart';
-import 'package:build/build.dart';
+import 'package:build_runner/build_runner.dart';
 import 'package:md_proc/generators/embed_tests_generator.dart';
 import 'package:md_proc/generators/entities_generator.dart';
 
