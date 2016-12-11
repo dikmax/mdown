@@ -96,16 +96,18 @@ class Attributes extends Attr {
       res.add('#$identifier');
     }
     if (classes != null) {
-      classes.forEach((String el) {
+      for (String el in classes) {
         res.add('.$el');
-      });
+      }
     }
 
     final List<String> keys = attributes.keys.toList(growable: false);
     keys.sort();
-    keys.forEach((String key) {
-      attributes[key].forEach((String value) => res.add('$key=$value'));
-    });
+    for (String key in keys) {
+      for (String value in attributes[key]) {
+        res.add('$key=$value');
+      }
+    }
 
     return 'Attributes(${res.join(' ')})';
   }

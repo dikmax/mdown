@@ -23,7 +23,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     final String md = file.readAsStringSync();
 
     final Document doc = CommonMarkParser.strict.parse(md);
-    doc.contents.forEach((Block block) {
+    for (Block block in doc.contents) {
       if (block is FencedCodeBlock) {
         if (block.attributes is InfoString) {
           final InfoString attr = block.attributes;
@@ -37,7 +37,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
           }
         }
       }
-    });
+    }
 
     return result;
   }

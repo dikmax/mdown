@@ -53,9 +53,9 @@ class _ExampleDescription extends t.Matcher {
       t.Description mismatchDescription,
       Map<dynamic, dynamic> matchState,
       bool verbose) {
-    final t.Description d =
-        inner.describeMismatch(item, mismatchDescription, matchState, verbose);
-    d.add("\n  Source: \n" + example);
+    final t.Description d = inner.describeMismatch(
+        item, mismatchDescription, matchState, verbose)
+      ..add("\n  Source: \n" + example);
     return d;
   }
 }
@@ -81,10 +81,10 @@ class _Example2Description extends t.Matcher {
       t.Description mismatchDescription,
       Map<dynamic, dynamic> matchState,
       bool verbose) {
-    final t.Description d =
-        inner.describeMismatch(item, mismatchDescription, matchState, verbose);
-    d.add("\n  Source: \n" + example);
-    d.add("\n  Source 2: \n" + example2);
+    final t.Description d = inner.describeMismatch(
+        item, mismatchDescription, matchState, verbose)
+      ..add("\n  Source: \n" + example)
+      ..add("\n  Source 2: \n" + example2);
     return d;
   }
 }

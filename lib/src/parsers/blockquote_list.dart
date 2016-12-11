@@ -185,9 +185,9 @@ class _Stack extends ListBase<_StackItem> {
     if (skip > 0) {
       stack = _stack.skip(skip);
     }
-    stack.forEach((_StackItem stackItem) {
+    for (_StackItem stackItem in stack) {
       stackItem.afterEmpty = afterEmpty;
-    });
+    }
   }
 
   void setTight(bool tight) {
@@ -372,31 +372,31 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
   void init() {
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
-    <
-            int>[_starCodeUnit, _minusCodeUnit, _underscoreCodeUnit]
-        .forEach((int char) {
+    for (int char in <int>[
+      _starCodeUnit,
+      _minusCodeUnit,
+      _underscoreCodeUnit
+    ]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser
       ];
-    });
+    }
 
     _blockParsers[_sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.atxHeadingParser
     ];
 
-    <
-        int>[_spaceCodeUnit, _tabCodeUnit].forEach((int char) {
+    for (int char in <int>[_spaceCodeUnit, _tabCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.indentedCodeParser
       ];
-    });
+    }
 
-    <
-        int>[_tildeCodeUnit, _backtickCodeUnit].forEach((int char) {
+    for (int char in <int>[_tildeCodeUnit, _backtickCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.fencedCodeParser
       ];
-    });
+    }
 
     if (container.options.rawHtml) {
       _blockParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[

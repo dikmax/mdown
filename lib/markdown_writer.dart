@@ -236,7 +236,7 @@ class _NotCheckedPart extends _InlinePart {
   }
 
   void detectInlines(Iterable<Inline> inlines, _InlineTypes types) {
-    inlines.forEach((Inline inline) {
+    for (Inline inline in inlines) {
       if (inline is Code) {
         types.code = true;
       } else if (inline is Emph) {
@@ -254,17 +254,19 @@ class _NotCheckedPart extends _InlinePart {
       } else if (inline is Autolink) {
         types.autoLink = true;
       } else if (inline is InlineImage) {
-        types.image = true;
-        types.inlineLink = true;
+        types
+          ..image = true
+          ..inlineLink = true;
         detectInlines(inline.label, types);
       } else if (inline is ReferenceImage) {
-        types.image = true;
-        types.referenceLink = true;
+        types
+          ..image = true
+          ..referenceLink = true;
         detectInlines(inline.label, types);
       } else if (inline is HtmlRawInline) {
         types.rawHtml = true;
       }
-    });
+    }
   }
 
   @override
@@ -489,10 +491,9 @@ class _InlineRenderer {
   void writeLink(Link link) {
     if (link is InlineLink) {
       write('[');
-      final _InlineRenderer renderer =
-          new _InlineRenderer(_references, _options);
-      renderer.writeInlines(link.label,
-          context: new _EscapeContext(isLabel: true));
+      final _InlineRenderer renderer = new _InlineRenderer(
+          _references, _options)
+        ..writeInlines(link.label, context: new _EscapeContext(isLabel: true));
       write(renderer.toString());
       write('](');
       writeTarget(link.target);
@@ -505,11 +506,9 @@ class _InlineRenderer {
 
     if (link is ReferenceLink) {
       _references[link.reference] = link.target;
-      final _MarkdownBuilder builder =
-          new _MarkdownBuilder(_references, _options);
-
-      builder.writeInlines(link.label,
-          context: new _EscapeContext(isLabel: true));
+      final _MarkdownBuilder builder = new _MarkdownBuilder(
+          _references, _options)
+        ..writeInlines(link.label, context: new _EscapeContext(isLabel: true));
       final String inlines = builder.toString();
       write('[');
       write(inlines);
@@ -607,13 +606,12 @@ String _writeAttributesToString(Attributes attr) {
     res.add('#${attr.identifier}');
   }
   if (attr.classes != null) {
-    attr.classes.forEach((String el) {
+    for (String el in attr.classes) {
       res.add('.$el');
-    });
+    }
   }
   attr.attributes.forEach((String key, String value) => res.add('$key=$value'));
-  result.write(res.join(' '));
-  result.write('}');
+  result..write(res.join(' '))..write('}');
 
   return result.toString();
 }
@@ -686,8 +684,8 @@ class _MarkdownBuilder extends StringBuffer {
   }
 
   void writeBlockquote(Blockquote blockquote) {
-    final _MarkdownBuilder inner = new _MarkdownBuilder(_references, _options);
-    inner.writeBlocks(blockquote.contents);
+    final _MarkdownBuilder inner = new _MarkdownBuilder(_references, _options)
+      ..writeBlocks(blockquote.contents);
     String contents = inner.toString();
     if (contents.endsWith('\n')) {
       contents = contents.substring(0, contents.length - 1);
@@ -699,8 +697,8 @@ class _MarkdownBuilder extends StringBuffer {
   void writeHeading(Heading heading) {
     // TODO throw exception in case of multiline header ? Or replace with space
     if (heading is SetextHeading && heading.level <= 2) {
-      final _InlineRenderer inner = new _InlineRenderer(_references, _options);
-      inner.writeInlines(heading.contents);
+      final _InlineRenderer inner = new _InlineRenderer(_references, _options)
+        ..writeInlines(heading.contents);
       String inlines = inner.toString();
       if (_options.headingAttributes && heading.attributes is Attributes) {
         inlines += ' ' + _writeAttributesToString(heading.attributes);
@@ -771,9 +769,9 @@ class _MarkdownBuilder extends StringBuffer {
       }
 
       final _MarkdownBuilder builder =
-          new _MarkdownBuilder(_references, _options);
-      builder.writeBlocks(listItem.contents,
-          tight: list.tight, unorderedListChar: list.bulletType.char);
+          new _MarkdownBuilder(_references, _options)
+            ..writeBlocks(listItem.contents,
+                tight: list.tight, unorderedListChar: list.bulletType.char);
       final String contents = builder.toString();
       final String marker = list.bulletType.char;
       String pad;
@@ -815,8 +813,8 @@ class _MarkdownBuilder extends StringBuffer {
       }
 
       final _MarkdownBuilder builder =
-          new _MarkdownBuilder(_references, _options);
-      builder.writeBlocks(listItem.contents, tight: list.tight);
+          new _MarkdownBuilder(_references, _options)
+            ..writeBlocks(listItem.contents, tight: list.tight);
       final String contents = builder.toString();
 
       if (contents.length == 0) {
@@ -842,8 +840,8 @@ class _MarkdownBuilder extends StringBuffer {
 
   void writeInlines(Iterable<Inline> inlines,
       {_EscapeContext context: _EscapeContext.empty}) {
-    final _InlineRenderer renderer = new _InlineRenderer(_references, _options);
-    renderer.writeInlines(inlines, context: context);
+    final _InlineRenderer renderer = new _InlineRenderer(_references, _options)
+      ..writeInlines(inlines, context: context);
     write(renderer.toString());
   }
 
@@ -856,8 +854,7 @@ class _MarkdownBuilder extends StringBuffer {
         write(ref);
         write(']: ');
         final _InlineRenderer renderer =
-            new _InlineRenderer(_references, _options);
-        renderer.writeTarget(target);
+            new _InlineRenderer(_references, _options)..writeTarget(target);
         write(renderer);
         if (_options.linkAttributes && target.attributes is Attributes) {
           write(' ');
@@ -878,9 +875,8 @@ class MarkdownWriter {
 
   /// Converts document to markdown string
   String write(Document document) {
-    final _MarkdownBuilder builder =
-        new _MarkdownBuilder(<String, Target>{}, _options);
-    builder.writeDocument(document);
+    final _MarkdownBuilder builder = new _MarkdownBuilder(
+        <String, Target>{}, _options)..writeDocument(document);
 
     return builder.toString();
   }

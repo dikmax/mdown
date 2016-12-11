@@ -164,15 +164,15 @@ class _HtmlBuilder extends StringBuffer {
     }
     final List<String> keys = attr.attributes.keys.toList(growable: false);
     keys.sort();
-    keys.forEach((String key) {
-      attr.attributes[key].forEach((String value) {
+    for (String key in keys) {
+      for (String value in attr.attributes[key]) {
         write(' ');
         write(htmlEscape(key));
         write('="');
         write(htmlEscape(value));
         write('"');
-      });
-    });
+      }
+    }
   }
 
   // Inlines
@@ -358,8 +358,8 @@ class _HtmlBuilder extends StringBuffer {
       write('<img src="');
       write(urlEncode(image.target.link));
       write('" alt="');
-      final _HtmlBuilder builder = new _HtmlBuilder(_options);
-      builder.writeInlines(image.label, stripped: true);
+      final _HtmlBuilder builder = new _HtmlBuilder(_options)
+        ..writeInlines(image.label, stripped: true);
       write(htmlEscape(builder.toString()));
       write('"');
       if (image.target.title != null) {
@@ -415,8 +415,8 @@ class HtmlWriter {
 
   /// Renders document to string
   String write(Document document) {
-    final _HtmlBuilder builder = new _HtmlBuilder(_options);
-    builder.writeDocument(document);
+    final _HtmlBuilder builder = new _HtmlBuilder(_options)
+      ..writeDocument(document);
     return builder.toString();
   }
 
