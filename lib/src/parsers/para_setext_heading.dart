@@ -3,6 +3,7 @@ library md_proc.src.parsers.para_setext_heading;
 import 'package:md_proc/definitions.dart';
 import 'package:md_proc/src/code_units.dart';
 import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/lookup.dart';
 import 'package:md_proc/src/parse_result.dart';
 import 'package:md_proc/src/parsers/abstract.dart';
 import 'package:md_proc/src/parsers/common.dart';
@@ -27,35 +28,29 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
   static final RegExp _setextHeadingRegExp =
       new RegExp('^ {0,3}(-+|=+)[ \t]*\$');
 
-  static final Pattern _atxHeadingText = new RegExp('(#{1,6})(?:[ \t]|\$)');
-  static final Pattern _blockquoteSimpleTest = '>';
   static final Pattern _listSimpleTest = new RegExp(r'([+\-*]|1[.)])( |$)');
-  static final Pattern _fencedCodeStartTest =
-      new RegExp('(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
-  static final Pattern _thematicBreakTest =
-      new RegExp('((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$');
 
-  List<Pattern> _paragraphBreaks;
+  List<Lookup> _paragraphBreaks;
 
   /// Constructor.
   ParaSetextHeadingParser(ParsersContainer container) : super(container);
 
   @override
   void init() {
-    _paragraphBreaks = <Pattern>[
-      _thematicBreakTest,
-      _fencedCodeStartTest,
-      _atxHeadingText,
-      _blockquoteSimpleTest
+    _paragraphBreaks = <Lookup>[
+      thematicBreakLookup,
+      fencedCodeStartLookup,
+      atxHeadingLookup,
+      blockquoteSimpleLookup
     ];
 
     if (container.options.rawHtml) {
-      _paragraphBreaks.addAll(<Pattern>[
-        htmlBlock1Test,
-        htmlBlock2Test,
-        htmlBlock3Test,
-        htmlBlock4Test,
-        htmlBlock5Test
+      _paragraphBreaks.addAll(<Lookup>[
+        htmlBlock1Lookup,
+        htmlBlock2Lookup,
+        htmlBlock3Lookup,
+        htmlBlock4Lookup,
+        htmlBlock5Lookup
       ]);
     }
   }
@@ -91,8 +86,8 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         final int indent = skipIndent(lineResult.value, 0);
         if (indent != -1 &&
             contents.length > 0 &&
-            _paragraphBreaks.any((Pattern pattern) =>
-                lineResult.value.startsWith(pattern, indent))) {
+            _paragraphBreaks.any(
+                (Lookup lookup) => lookup.isFound(lineResult.value, indent))) {
           // Paragraph stops here as we've got another block.
           break;
         }

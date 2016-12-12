@@ -112,8 +112,7 @@ const String htmlAttributeValueSpec =
     "(?:" + "\\s*=" + "\\s*" + htmlAttributeValue + ")";
 const String htmlAttribute =
     "(?:" + "\\s+" + htmlAttributeName + htmlAttributeValueSpec + "?)";
-const String htmlOpenTag =
-    "<" + htmlTagName + htmlAttribute + "*" + "\\s*/?>";
+const String htmlOpenTag = "<" + htmlTagName + htmlAttribute + "*" + "\\s*/?>";
 const String htmlCloseTag = "</" + htmlTagName + "\\s*>";
 
 final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
@@ -157,8 +156,8 @@ final RegExp unescapeUnrefereceTest = new RegExp(r'[\\&]');
 /// Unescapes (`\!` -> `!`) and unreferences (`&amp;` -> `&`) string.
 String unescapeAndUnreference(String s) {
   if (unescapeUnrefereceTest.hasMatch(s)) {
-    return s.replaceAllMapped(unescapeUnreferenceRegExp,
-        _unescapeUnreferenceReplacement);
+    return s.replaceAllMapped(
+        unescapeUnreferenceRegExp, _unescapeUnreferenceReplacement);
   } else {
     return s;
   }

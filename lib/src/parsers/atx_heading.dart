@@ -8,7 +8,6 @@ import 'package:md_proc/src/parsers/common.dart';
 import 'package:md_proc/src/parsers/container.dart';
 import 'package:md_proc/src/parse_result.dart';
 
-
 /// Parser for ATX-headings.
 class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
   /// Constructor.

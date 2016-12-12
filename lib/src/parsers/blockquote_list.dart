@@ -384,11 +384,7 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
   void init() {
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
-    for (int char in <int>[
-      starCodeUnit,
-      minusCodeUnit,
-      underscoreCodeUnit
-    ]) {
+    for (int char in <int>[starCodeUnit, minusCodeUnit, underscoreCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser
       ];
@@ -911,10 +907,10 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
 
         // If contains tab for indented code line, then replace with spaces.
         final int startCodeIndent = stack.last.marker.endIndent;
-        final String lineRestWithoutCodeIndend =
+        final String lineRestWithoutCodeIndent =
             removeIndent(lineRest, 4, false, startCodeIndent);
-        if (lineRestWithoutCodeIndend != null) {
-          lineRest = (' ' * 4) + lineRestWithoutCodeIndend;
+        if (lineRestWithoutCodeIndent != null) {
+          lineRest = (' ' * 4) + lineRestWithoutCodeIndent;
         }
 
         // Adding line to stack

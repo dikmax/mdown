@@ -76,8 +76,8 @@ class LinkReferenceParser extends AbstractParser<LinkReference> {
     if (link.codeUnitAt(0) == lessThanCodeUnit) {
       final int linkLength = link.length;
       final int lastCodeUnit = link.codeUnitAt(linkLength - 1);
-      final int beforeLastCodeUnit = linkLength >= 2 ?
-        link.codeUnitAt(linkLength - 2) : 0;
+      final int beforeLastCodeUnit =
+          linkLength >= 2 ? link.codeUnitAt(linkLength - 2) : 0;
       if (lastCodeUnit == greaterThanCodeUnit &&
           beforeLastCodeUnit != backslashCodeUnit) {
         link = link.substring(1, link.length - 1);

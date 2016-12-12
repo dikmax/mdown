@@ -47,8 +47,7 @@ class Inlines extends ListBase<Inline> {
 
   // Used in parsing.
   bool get containsLink {
-    _cachedContainsLink = _cachedContainsLink ??
-        any(_isContainsLink);
+    _cachedContainsLink = _cachedContainsLink ?? any(_isContainsLink);
 
     return _cachedContainsLink;
   }

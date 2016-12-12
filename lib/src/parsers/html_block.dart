@@ -1,6 +1,7 @@
 library md_proc.src.parsers.html_block;
 
 import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/lookup.dart';
 import 'package:md_proc/src/parse_result.dart';
 import 'package:md_proc/src/parsers/abstract.dart';
 import 'package:md_proc/src/parsers/common.dart';
@@ -11,12 +12,12 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
   /// Constructor.
   HtmlBlockParser(ParsersContainer container) : super(container);
 
-  static final List<Pattern> _starts = <Pattern>[
-    htmlBlock1Test,
-    htmlBlock2Test,
-    htmlBlock3Test,
-    htmlBlock4Test,
-    htmlBlock5Test
+  static final List<Lookup> _starts = <Lookup>[
+    htmlBlock1Lookup,
+    htmlBlock2Lookup,
+    htmlBlock3Lookup,
+    htmlBlock4Lookup,
+    htmlBlock5Lookup
   ];
 
   static final List<Pattern> _ends = <Pattern>[
@@ -33,7 +34,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
     int rule;
     for (int i = 0; i < _starts.length; ++i) {
-      if (text.startsWith(_starts[i], nonIndentOffset)) {
+      if (_starts[i].isFound(text, nonIndentOffset)) {
         rule = i;
         break;
       }

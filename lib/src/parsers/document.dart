@@ -115,8 +115,7 @@ class DocumentParser extends AbstractParser<Document> {
       container.inlineCodeParser
     ];
 
-    for (int char in <
-        int>[starCodeUnit, underscoreCodeUnit]) {
+    for (int char in <int>[starCodeUnit, underscoreCodeUnit]) {
       _inlineParsers[char] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
