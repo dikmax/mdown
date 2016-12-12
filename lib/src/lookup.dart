@@ -1,7 +1,9 @@
 library md_proc.src.lookup;
 
+import 'package:md_proc/src/code_units.dart';
+
 abstract class Lookup {
-  Lookup();
+  const Lookup();
 
   factory Lookup.regExp(Pattern pattern) => new PatternLookup(pattern);
 
@@ -26,12 +28,147 @@ final Lookup fencedCodeStartLookup =
 final Lookup thematicBreakLookup = new Lookup.regExp(
     new RegExp('((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$'));
 
+/*
 final Lookup htmlBlock1Lookup = new Lookup.regExp(
     new RegExp(r'<(?:script|pre|style)(?:\s|>|$)', caseSensitive: false));
-final Lookup htmlBlock2Lookup = new Lookup.regExp('<!--');
-final Lookup htmlBlock3Lookup = new Lookup.regExp('<?');
-final Lookup htmlBlock4Lookup = new Lookup.regExp('<!');
+*/
 final Lookup htmlBlock5Lookup = new Lookup.regExp('<!\[CDATA\[');
 final Lookup htmlBlock6Lookup = new Lookup.regExp(new RegExp(
   r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 ));
+
+/// Lookup for HTML block type 1: <(?:script|pre|style)(?:\s|>|$)
+class HtmlBlock1Lookup extends Lookup {
+  const HtmlBlock1Lookup();
+
+  @override
+  bool isFound(String text, int offset) {
+    int length = text.length;
+
+    if (offset + 4 > length || text.codeUnitAt(offset) != lessThanCodeUnit) {
+      // Check for minimal length `<pre`
+      return false;
+    }
+
+    offset += 1;
+
+    int codeUnit = text.codeUnitAt(offset);
+    if (codeUnit == smallPCharCode || codeUnit == bigPCharCode) {
+      // Could be <pre
+      codeUnit = text.codeUnitAt(offset + 1);
+      if (codeUnit != smallRCharCode && codeUnit != bigRCharCode) {
+        return false;
+      }
+      codeUnit = text.codeUnitAt(offset + 2);
+      if (codeUnit != smallECharCode && codeUnit != bigECharCode) {
+        return false;
+      }
+      offset = offset + 3;
+    } else if (codeUnit == smallSCharCode || codeUnit == bigSCharCode) {
+      // Could be <script or <style
+      codeUnit = text.codeUnitAt(offset + 1);
+      if (codeUnit == smallCCharCode || codeUnit == bigCCharCode) {
+        // Could be <script
+        if (offset + 6 > length) {
+          return false;
+        }
+        codeUnit = text.codeUnitAt(offset + 2);
+        if (codeUnit != smallRCharCode && codeUnit != bigRCharCode) {
+          return false;
+        }
+        codeUnit = text.codeUnitAt(offset + 3);
+        if (codeUnit != smallICharCode && codeUnit != bigICharCode) {
+          return false;
+        }
+        codeUnit = text.codeUnitAt(offset + 4);
+        if (codeUnit != smallPCharCode && codeUnit != bigPCharCode) {
+          return false;
+        }
+        codeUnit = text.codeUnitAt(offset + 5);
+        if (codeUnit != smallTCharCode && codeUnit != bigTCharCode) {
+          return false;
+        }
+        offset = offset + 6;
+      } else if (codeUnit == smallTCharCode || codeUnit == bigTCharCode) {
+        // Could be <style
+        if (offset + 5 > length) {
+          return false;
+        }
+        codeUnit = text.codeUnitAt(offset + 2);
+        if (codeUnit != smallYCharCode && codeUnit != bigYCharCode) {
+          return false;
+        }
+        codeUnit = text.codeUnitAt(offset + 3);
+        if (codeUnit != smallLCharCode && codeUnit != bigLCharCode) {
+          return false;
+        }
+        codeUnit = text.codeUnitAt(offset + 4);
+        if (codeUnit != smallECharCode && codeUnit != bigECharCode) {
+          return false;
+        }
+        offset = offset + 5;
+      } else {
+        return false;
+      }
+    } else {
+      // No possible starts found
+      return false;
+    }
+
+    if (offset == length) {
+      return true;
+    }
+
+    codeUnit = text.codeUnitAt(offset);
+
+    return codeUnit == greaterThanCodeUnit || spaces.contains(codeUnit);
+  }
+}
+
+/// Lookup for HTML block type 2: <!--
+class HtmlBlock2Lookup extends Lookup {
+  const HtmlBlock2Lookup();
+
+  @override
+  bool isFound(String text, int offset) {
+    if (offset + 4 >= text.length) {
+      return false;
+    }
+
+    return text.codeUnitAt(offset) == lessThanCodeUnit &&
+      text.codeUnitAt(offset + 1) == exclamationMarkCodeUnit &&
+      text.codeUnitAt(offset + 2) == minusCodeUnit &&
+      text.codeUnitAt(offset + 3) == minusCodeUnit;
+  }
+}
+
+/// Lookup for HTML block type 3: <?
+class HtmlBlock3Lookup extends Lookup {
+  const HtmlBlock3Lookup();
+
+  @override
+  bool isFound(String text, int offset) {
+    if (offset + 2 >= text.length) {
+      return false;
+    }
+
+    return text.codeUnitAt(offset) == lessThanCodeUnit &&
+      text.codeUnitAt(offset + 1) == questionMarkCodeUnit;
+  }
+}
+
+/// Lookup for HTML block type 4: <!
+class HtmlBlock4Lookup extends Lookup {
+  const HtmlBlock4Lookup();
+
+  @override
+  bool isFound(String text, int offset) {
+    if (offset + 2 >= text.length) {
+      return false;
+    }
+
+    return text.codeUnitAt(offset) == lessThanCodeUnit &&
+        text.codeUnitAt(offset + 1) == exclamationMarkCodeUnit;
+  }
+}
+

@@ -90,6 +90,33 @@ const int questionMarkCodeUnit = 63;
 /// Code unit for `@`.
 const int atSignCodeUnit = 64;
 
+/// Character 'C'.
+const int bigCCharCode = 67;
+
+/// Character 'E'.
+const int bigECharCode = 69;
+
+/// Character 'I'.
+const int bigICharCode = 73;
+
+/// Character 'L'.
+const int bigLCharCode = 76;
+
+/// Character 'P'.
+const int bigPCharCode = 80;
+
+/// Character 'R'.
+const int bigRCharCode = 82;
+
+/// Character 'S'.
+const int bigSCharCode = 83;
+
+/// Character 'T'.
+const int bigTCharCode = 84;
+
+/// Character 'Y'.
+const int bigYCharCode = 89;
+
 /// Code unit for `[`.
 const int openBracketCodeUnit = 91;
 
@@ -108,6 +135,33 @@ const int underscoreCodeUnit = 95;
 /// Code unit for `` ` ``.
 const int backtickCodeUnit = 96;
 
+/// Character 'c'.
+const int smallCCharCode = 99;
+
+/// Character 'e'.
+const int smallECharCode = 101;
+
+/// Character 'i'.
+const int smallICharCode = 105;
+
+/// Character 'l'.
+const int smallLCharCode = 108;
+
+/// Character 'p'.
+const int smallPCharCode = 112;
+
+/// Character 'r'.
+const int smallRCharCode = 114;
+
+/// Character 's'.
+const int smallSCharCode = 115;
+
+/// Character 't'.
+const int smallTCharCode = 116;
+
+/// Character 'y'.
+const int smallYCharCode = 121;
+
 /// Code unit for `{`.
 const int openBraceCodeUnit = 123;
 
@@ -122,6 +176,7 @@ const int tildeCodeUnit = 126;
 
 /// Code unit for `&nbsp;`.
 const int nonBreakableSpaceCodeUnit = 160;
+
 
 /// Unicode space chars.
 final Set<int> spaces = new Set<int>.from(<int>[

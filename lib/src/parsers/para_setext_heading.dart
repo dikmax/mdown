@@ -46,10 +46,10 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
     if (container.options.rawHtml) {
       _paragraphBreaks.addAll(<Lookup>[
-        htmlBlock1Lookup,
-        htmlBlock2Lookup,
-        htmlBlock3Lookup,
-        htmlBlock4Lookup,
+        const HtmlBlock1Lookup(),
+        const HtmlBlock2Lookup(),
+        const HtmlBlock3Lookup(),
+        const HtmlBlock4Lookup(),
         htmlBlock5Lookup
       ]);
     }

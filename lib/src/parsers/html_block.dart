@@ -13,14 +13,15 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
   HtmlBlockParser(ParsersContainer container) : super(container);
 
   static final List<Lookup> _starts = <Lookup>[
-    htmlBlock1Lookup,
-    htmlBlock2Lookup,
-    htmlBlock3Lookup,
-    htmlBlock4Lookup,
+    const HtmlBlock1Lookup(),
+    const HtmlBlock2Lookup(),
+    const HtmlBlock3Lookup(),
+    const HtmlBlock4Lookup(),
     htmlBlock5Lookup
   ];
 
   static final List<Pattern> _ends = <Pattern>[
+    // TODO replace regexp
     new RegExp(r'</(script|pre|style)>', caseSensitive: false),
     '-->',
     '?>',
