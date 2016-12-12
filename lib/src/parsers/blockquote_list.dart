@@ -45,8 +45,7 @@ class _StackItem {
       }
     }
 
-    blocks = blocks
-        .where((Block block) => block != null && block is! _LinkReference);
+    blocks = blocks.where(_isNotBlockALinkReference);
 
     final Block last = block.last;
     if (!this.afterEmpty && last is Para && blocks.first is Para) {
@@ -101,6 +100,9 @@ class _StackItem {
       listBlock.tight = tight;
     }
   }
+
+  static bool _isNotBlockALinkReference(Block block) =>
+      block != null && block is! _LinkReference;
 }
 
 class _Stack extends ListBase<_StackItem> {

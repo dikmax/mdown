@@ -8,6 +8,8 @@ class RawTexParser extends AbstractParser<Iterable<Block>> {
   static final RegExp _startRegExp =
       new RegExp(r'^ {0,3}\\begin\{([A-Za-z0-9_\-+*]+)\}');
 
+  static String _escapeReplacement(Match match) => r'\' + match[0];
+
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
     final ParseResult<String> lineRes =
@@ -20,8 +22,8 @@ class RawTexParser extends AbstractParser<Iterable<Block>> {
     }
 
     String enviroment = startMatch[1];
-    enviroment = enviroment.replaceAllMapped(
-        new RegExp(r'[+*]'), (Match match) => r'\' + match[0]);
+    enviroment =
+        enviroment.replaceAllMapped(new RegExp(r'[+*]'), _escapeReplacement);
     final RegExp endTest =
         new RegExp(r'^ {0,3}\\end\{' + enviroment + r'\}[ \t]*$');
 

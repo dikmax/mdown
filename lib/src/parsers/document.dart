@@ -14,13 +14,12 @@ class DocumentParser extends AbstractParser<Document> {
     // Block parsers
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
-    <
-        int>[_starCodeUnit, _minusCodeUnit].forEach((int char) {
+    for (int char in <int>[_starCodeUnit, _minusCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser,
         container.blockquoteListParser
       ];
-    });
+    }
 
     _blockParsers[_underscoreCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.thematicBreakParser
@@ -30,34 +29,30 @@ class DocumentParser extends AbstractParser<Document> {
       container.atxHeadingParser
     ];
 
-    <
-        int>[_spaceCodeUnit, _tabCodeUnit].forEach((int char) {
+    for (int char in <int>[_spaceCodeUnit, _tabCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser,
         container.indentedCodeParser
       ];
-    });
+    }
 
-    <
-        int>[_newLineCodeUnit, _carriageReturnCodeUnit].forEach((int char) {
+    for (int char in <int>[_newLineCodeUnit, _carriageReturnCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser
       ];
-    });
+    }
 
-    <
-        int>[_tildeCodeUnit, _backtickCodeUnit].forEach((int char) {
+    for (int char in <int>[_tildeCodeUnit, _backtickCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.fencedCodeParser
       ];
-    });
+    }
 
-    <
-        int>[_plusCodeUnit, _greaterThanCodeUnit].forEach((int char) {
+    for (int char in <int>[_plusCodeUnit, _greaterThanCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blockquoteListParser
       ];
-    });
+    }
 
     if (container.options.rawHtml) {
       _blockParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
@@ -110,12 +105,12 @@ class DocumentParser extends AbstractParser<Document> {
       container.inlineCodeParser
     ];
 
-    <
-        int>[_starCodeUnit, _underscoreCodeUnit].forEach((int char) {
+    for (int char in <
+        int>[_starCodeUnit, _underscoreCodeUnit]) {
       _inlineParsers[char] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
-    });
+    }
 
     _inlineParsers[_openBracketCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.linkImageParser
@@ -223,7 +218,7 @@ class DocumentParser extends AbstractParser<Document> {
     }
 
     final Iterable<Block> blocksWithInlines =
-        blocks.map((Block block) => _replaceInlinesInBlock(block));
+        blocks.map(_replaceInlinesInBlock);
 
     final Document result = new Document(blocksWithInlines);
 
@@ -242,16 +237,16 @@ class DocumentParser extends AbstractParser<Document> {
         block.contents = parseInlines(contents.raw);
       }
     } else if (block is Blockquote) {
-      block.contents =
-          block.contents.map((Block block) => _replaceInlinesInBlock(block));
+      block.contents = block.contents.map(_replaceInlinesInBlock);
     } else if (block is ListBlock) {
-      block.items = block.items.map((ListItem item) {
-        item.contents =
-            item.contents.map((Block block) => _replaceInlinesInBlock(block));
-        return item;
-      });
+      block.items = block.items.map(_replaceInlinesInListItem);
     }
     return block;
+  }
+
+  ListItem _replaceInlinesInListItem(ListItem item) {
+    item.contents = item.contents.map(_replaceInlinesInBlock);
+    return item;
   }
 
   /// Parses provided string as inlines.

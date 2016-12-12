@@ -236,7 +236,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
   Inlines _buildStack(List<_Delim> stack, int skip) {
     final Inlines result = new Inlines();
     final Iterable<_Delim> list = skip > 0 ? stack.skip(skip) : stack;
-    list.forEach((_Delim delim) {
+    for (_Delim delim in list) {
       if (delim.count > 0) {
         final int charCode = delim.charCode;
         if (charCode == _singleQuoteCodeUnit) {
@@ -250,7 +250,7 @@ class InlineStructureParser extends AbstractParser<Inlines> {
         }
       }
       result.addAll(delim.inlines);
-    });
+    }
     stack.length = skip;
 
     return result;
@@ -444,7 +444,9 @@ class InlineStructureParser extends AbstractParser<Inlines> {
       if (container.options.subscript || container.options.superscript) {
         // Check for space inside subscript or superscript
         if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
-          stack.forEach((_Delim delim) => delim.containsSpace = true);
+          for (_Delim delim in stack) {
+            delim.containsSpace = true;
+          }
         } else if (codeUnit == _backslashCodeUnit) {
           if (offset + 1 < length) {
             final int codeUnit2 = text.codeUnitAt(offset + 1);

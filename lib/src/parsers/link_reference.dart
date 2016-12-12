@@ -66,8 +66,15 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
       // Target cannot be empty
       return new ParseResult<_LinkReference>.failure();
     }
-    if (link.startsWith('<') && link.endsWith('>') && !link.endsWith(r'\>')) {
-      link = link.substring(1, link.length - 1);
+    if (link.codeUnitAt(0) == _lessThanCodeUnit) {
+      final int linkLength = link.length;
+      final int lastCodeUnit = link.codeUnitAt(linkLength - 1);
+      final int beforeLastCodeUnit = linkLength >= 2 ?
+        link.codeUnitAt(linkLength - 2) : 0;
+      if (lastCodeUnit == _greaterThanCodeUnit &&
+          beforeLastCodeUnit != _backslashCodeUnit) {
+        link = link.substring(1, link.length - 1);
+      }
     }
     link = unescapeAndUnreference(link);
 

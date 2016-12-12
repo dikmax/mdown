@@ -10,7 +10,6 @@ final Set<int> _escapableCodes =
 // TODO move to paragraph file
 final RegExp _atxHeadingTest = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
 final RegExp _blockquoteSimpleTest = new RegExp(r'^ {0,3}>');
-final RegExp _listSimpleTest = new RegExp(r'^ {0,3}([+\-*]|1[.)])( |$)');
 final RegExp _fencedCodeStartTest =
     new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
 final RegExp _thematicBreakTest = new RegExp(
@@ -153,38 +152,41 @@ final RegExp _unescapeUnrefereceTest = new RegExp(r'[\\&]');
 /// Unescapes (`\!` -> `!`) and unreferences (`&amp;` -> `&`) string.
 String unescapeAndUnreference(String s) {
   if (_unescapeUnrefereceTest.hasMatch(s)) {
-    return s.replaceAllMapped(_unescapeUnreferenceRegExp, (Match match) {
-      if (match[1] != null) {
-        // Escape
-        return match[1];
-      }
-      if (match[4] != null) {
-        // Named entity
-        final String str = htmlEntities[match[4]];
-        if (str != null) {
-          return str;
-        }
-      } else {
-        int code;
-        if (match[2] != null) {
-          // Hex entity
-          code = int.parse(match[2], radix: 16, onError: (_) => 0);
-        } else {
-          // Decimal entity
-          code = int.parse(match[3], radix: 10, onError: (_) => 0);
-        }
-
-        if (code > 1114111 || code == 0) {
-          code = 0xFFFD;
-        }
-        return new String.fromCharCode(code);
-      }
-
-      return match[0];
-    });
+    return s.replaceAllMapped(_unescapeUnreferenceRegExp,
+        _unescapeUnreferenceReplacement);
   } else {
     return s;
   }
+}
+
+String _unescapeUnreferenceReplacement(Match match) {
+  if (match[1] != null) {
+    // Escape
+    return match[1];
+  }
+  if (match[4] != null) {
+    // Named entity
+    final String str = htmlEntities[match[4]];
+    if (str != null) {
+      return str;
+    }
+  } else {
+    int code;
+    if (match[2] != null) {
+      // Hex entity
+      code = int.parse(match[2], radix: 16, onError: (_) => 0);
+    } else {
+      // Decimal entity
+      code = int.parse(match[3], radix: 10, onError: (_) => 0);
+    }
+
+    if (code > 1114111 || code == 0) {
+      code = 0xFFFD;
+    }
+    return new String.fromCharCode(code);
+  }
+
+  return match[0];
 }
 
 int _skipIndent(String text, int offset) {
@@ -276,38 +278,40 @@ class Inlines extends ListBase<Inline> {
   // Used in parsing.
   bool get _containsLink {
     _cachedContainsLink = _cachedContainsLink ??
-        any((Inline inline) {
-          if (inline is Emph) {
-            assert(inline.contents is Inlines);
-            final Inlines contents = inline.contents;
-            return contents._containsLink;
-          } else if (inline is Strong) {
-            assert(inline.contents is Inlines);
-            final Inlines contents = inline.contents;
-            return contents._containsLink;
-          } else if (inline is Strikeout) {
-            assert(inline.contents is Inlines);
-            final Inlines contents = inline.contents;
-            return contents._containsLink;
-          } else if (inline is Subscript) {
-            assert(inline.contents is Inlines);
-            final Inlines contents = inline.contents;
-            return contents._containsLink;
-          } else if (inline is Superscript) {
-            assert(inline.contents is Inlines);
-            final Inlines contents = inline.contents;
-            return contents._containsLink;
-          } else if (inline is Image) {
-            assert(inline.label is Inlines);
-            final Inlines label = inline.label;
-            return label._containsLink;
-          } else if (inline is Link) {
-            return true;
-          }
-
-          return false;
-        });
+        any(_isContainsLink);
 
     return _cachedContainsLink;
+  }
+
+  static bool _isContainsLink(Inline inline) {
+    if (inline is Emph) {
+      assert(inline.contents is Inlines);
+      final Inlines contents = inline.contents;
+      return contents._containsLink;
+    } else if (inline is Strong) {
+      assert(inline.contents is Inlines);
+      final Inlines contents = inline.contents;
+      return contents._containsLink;
+    } else if (inline is Strikeout) {
+      assert(inline.contents is Inlines);
+      final Inlines contents = inline.contents;
+      return contents._containsLink;
+    } else if (inline is Subscript) {
+      assert(inline.contents is Inlines);
+      final Inlines contents = inline.contents;
+      return contents._containsLink;
+    } else if (inline is Superscript) {
+      assert(inline.contents is Inlines);
+      final Inlines contents = inline.contents;
+      return contents._containsLink;
+    } else if (inline is Image) {
+      assert(inline.label is Inlines);
+      final Inlines label = inline.label;
+      return label._containsLink;
+    } else if (inline is Link) {
+      return true;
+    }
+
+    return false;
   }
 }

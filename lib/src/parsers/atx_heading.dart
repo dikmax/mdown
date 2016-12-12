@@ -96,7 +96,9 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
     if (startOffset != -1 && endOffset != -1) {
       String content = line.substring(startOffset, endOffset);
       if (container.options.headingAttributes) {
-        if (content.endsWith('}')) {
+        final int contentLength = content.length;
+        if (contentLength > 0 &&
+            content.codeUnitAt(contentLength - 1) == _closeBraceCodeUnit) {
           final int attributesStart = content.lastIndexOf('{');
           final ParseResult<Attributes> attributesResult =
               container.attributesParser.parse(content, attributesStart);

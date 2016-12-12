@@ -145,7 +145,8 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
     if (level > 0) {
       Attr attr = new EmptyAttr();
       if (container.options.headingAttributes) {
-        if (contentsString.endsWith('}')) {
+        if (contentsString.codeUnitAt(contentsString.length - 1) ==
+            _closeBraceCodeUnit) {
           final int attributesStart = contentsString.lastIndexOf('{');
           final ParseResult<Attributes> attributesResult =
               container.attributesParser.parse(contentsString, attributesStart);

@@ -83,7 +83,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
     }
 
     String href = hrefMatch[0];
-    if (href.startsWith('<') && href.endsWith('>')) {
+    final int hrefLength = href.length;
+    if (hrefLength > 0 &&
+        href.codeUnitAt(0) == _lessThanCodeUnit &&
+        href.codeUnitAt(hrefLength - 1) == _greaterThanCodeUnit) {
       href = href.substring(1, href.length - 1);
     }
     href = unescapeAndUnreference(href);
