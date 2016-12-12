@@ -1,4 +1,9 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.raw_tex;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parses raw TeX blocks.
 class RawTexParser extends AbstractParser<Iterable<Block>> {

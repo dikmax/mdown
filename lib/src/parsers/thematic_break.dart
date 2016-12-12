@@ -1,4 +1,10 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.thematic_break;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for thematic break.
 class ThematicBreakParser extends AbstractParser<Iterable<Block>> {
@@ -11,7 +17,7 @@ class ThematicBreakParser extends AbstractParser<Iterable<Block>> {
         container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    final Match match = _thematicBreakTest.firstMatch(lineResult.value);
+    final Match match = thematicBreakTest.firstMatch(lineResult.value);
     if (match == null) {
       return const ParseResult<Iterable<Block>>.failure();
     }

@@ -1,4 +1,12 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.inline_code;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for code inlines.
 class InlineCodeParser extends AbstractParser<Inlines> {
@@ -27,7 +35,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
       switch (state) {
         case _stateOpenFence:
           // Parsing open fence.
-          if (codeUnit == _backtickCodeUnit) {
+          if (codeUnit == backtickCodeUnit) {
             fenceSize++;
           } else {
             state = _stateCode;
@@ -37,7 +45,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
 
         case _stateCode:
           // Parsing code
-          if (codeUnit == _backtickCodeUnit) {
+          if (codeUnit == backtickCodeUnit) {
             codeEndOffset = offset;
             endFenceSize = 1;
             state = _stateCloseFence;
@@ -47,7 +55,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
 
         case _stateCloseFence:
           // Parsing end
-          if (codeUnit == _backtickCodeUnit) {
+          if (codeUnit == backtickCodeUnit) {
             endFenceSize++;
           } else if (endFenceSize == fenceSize) {
             state = _stateDone;
@@ -68,10 +76,10 @@ class InlineCodeParser extends AbstractParser<Inlines> {
     if (state == _stateDone ||
         (state == _stateCloseFence && endFenceSize == fenceSize)) {
       final String code =
-          _trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
+          trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
       Attr attributes = new EmptyAttr();
       if (container.options.inlineCodeAttributes) {
-        if (offset < length && text.codeUnitAt(offset) == _openBraceCodeUnit) {
+        if (offset < length && text.codeUnitAt(offset) == openBraceCodeUnit) {
           final ParseResult<Attributes> attributesResult =
               container.attributesParser.parse(text, offset);
           if (attributesResult.isSuccess) {

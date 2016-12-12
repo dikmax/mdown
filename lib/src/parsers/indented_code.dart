@@ -1,4 +1,11 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.indented_code;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for indented code blocks.
 class IndentedCodeParser extends AbstractParser<Iterable<Block>> {
@@ -11,7 +18,7 @@ class IndentedCodeParser extends AbstractParser<Iterable<Block>> {
   ParseResult<Iterable<Block>> parse(String text, int offset) {
     // Simple test, that we have indent
     final int codeUnit = text.codeUnitAt(offset);
-    if (codeUnit != _spaceCodeUnit && codeUnit != _tabCodeUnit) {
+    if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
       return const ParseResult<Iterable<Block>>.failure();
     }
 
@@ -27,7 +34,7 @@ class IndentedCodeParser extends AbstractParser<Iterable<Block>> {
       assert(lineResult.isSuccess);
 
       final String line = lineResult.value;
-      final Match emptyLine = _emptyLineRegExp.firstMatch(line);
+      final Match emptyLine = emptyLineRegExp.firstMatch(line);
       if (emptyLine != null) {
         if (firstLine) {
           break;

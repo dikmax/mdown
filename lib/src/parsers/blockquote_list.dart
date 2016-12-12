@@ -1,4 +1,14 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.blockquote_list;
+
+import 'dart:collection';
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
+import 'package:md_proc/src/parsers/link_reference.dart';
 
 // Stack
 
@@ -50,9 +60,9 @@ class _StackItem {
     final Block last = block.last;
     if (!this.afterEmpty && last is Para && blocks.first is Para) {
       // Merge paragraph.
-      final _UnparsedInlines inlines = last.contents;
+      final UnparsedInlines inlines = last.contents;
       final Para para = blocks.first;
-      final _UnparsedInlines inlines2 = para.contents;
+      final UnparsedInlines inlines2 = para.contents;
       inlines.raw += '\n' + inlines2.raw;
     } else {
       block.addToEnd(blocks);
@@ -80,13 +90,13 @@ class _StackItem {
     parse();
     final Block last = block.last;
     if (last != null && last is Para) {
-      if (_thematicBreakTest.hasMatch(line) ||
-          _atxHeadingTest.hasMatch(line) ||
-          _fencedCodeStartTest.hasMatch(line)) {
+      if (thematicBreakTest.hasMatch(line) ||
+          atxHeadingTest.hasMatch(line) ||
+          fencedCodeStartTest.hasMatch(line)) {
         // TODO add html block and link reference test
         return false;
       }
-      final _UnparsedInlines contents = last.contents;
+      final UnparsedInlines contents = last.contents;
       contents.raw += '\n' + line;
       return true;
     }
@@ -102,7 +112,7 @@ class _StackItem {
   }
 
   static bool _isNotBlockALinkReference(Block block) =>
-      block != null && block is! _LinkReference;
+      block != null && block is! LinkReference;
 }
 
 class _Stack extends ListBase<_StackItem> {
@@ -375,40 +385,40 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
     for (int char in <int>[
-      _starCodeUnit,
-      _minusCodeUnit,
-      _underscoreCodeUnit
+      starCodeUnit,
+      minusCodeUnit,
+      underscoreCodeUnit
     ]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser
       ];
     }
 
-    _blockParsers[_sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.atxHeadingParser
     ];
 
-    for (int char in <int>[_spaceCodeUnit, _tabCodeUnit]) {
+    for (int char in <int>[spaceCodeUnit, tabCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.indentedCodeParser
       ];
     }
 
-    for (int char in <int>[_tildeCodeUnit, _backtickCodeUnit]) {
+    for (int char in <int>[tildeCodeUnit, backtickCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.fencedCodeParser
       ];
     }
 
     if (container.options.rawHtml) {
-      _blockParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
         container.htmlBlockParser,
         container.htmlBlock7Parser
       ];
     }
 
     if (container.options.rawTex) {
-      _blockParsers[_backslashCodeUnit] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[backslashCodeUnit] = <AbstractParser<Iterable<Block>>>[
         container.rawTexParser
       ];
     }
@@ -421,17 +431,17 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
 
     final int length = text.length;
     while (offset < length) {
-      final int firstChar = _getBlockFirstChar(text, offset);
+      final int firstChar = getBlockFirstChar(text, offset);
 
       if (firstChar == -1) {
         // End of input
         break;
       }
 
-      if (firstChar == _openBracketCodeUnit) {
+      if (firstChar == openBracketCodeUnit) {
         // Special treatment for link references.
         // TODO we don't need it
-        final ParseResult<_LinkReference> res =
+        final ParseResult<LinkReference> res =
             container.linkReferenceParser.parse(text, offset);
         if (res.isSuccess) {
           if (!container.references.containsKey(res.value.reference)) {
@@ -441,10 +451,10 @@ class _InnerBlocksParser extends AbstractParser<Iterable<Block>> {
           offset = res.offset;
           continue;
         }
-      } else if (firstChar == _spaceCodeUnit ||
-          firstChar == _tabCodeUnit ||
-          firstChar == _newLineCodeUnit ||
-          firstChar == _carriageReturnCodeUnit) {
+      } else if (firstChar == spaceCodeUnit ||
+          firstChar == tabCodeUnit ||
+          firstChar == newLineCodeUnit ||
+          firstChar == carriageReturnCodeUnit) {
         final ParseResult<Iterable<Block>> res =
             container.blanklineParser.parse(text, offset);
 
@@ -527,10 +537,10 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
     while (offset < length) {
       while (offset < length) {
         final int codeUnit = line.codeUnitAt(offset);
-        if (codeUnit == _spaceCodeUnit) {
+        if (codeUnit == spaceCodeUnit) {
           indent++;
           offset++;
-        } else if (codeUnit == _tabCodeUnit) {
+        } else if (codeUnit == tabCodeUnit) {
           indent = ((indent >> 2) + 1) << 2; // (indent / 4 + 1) * 4
           offset++;
         } else {
@@ -560,10 +570,10 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
       indent += markerString.length;
       if (offset < length) {
         final int codeUnit = line.codeUnitAt(offset);
-        if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
+        if (codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit) {
           result.add(_markerFromString(
               markerString, startIndent, indent + 1, offset + 1));
-          if (codeUnit == _spaceCodeUnit) {
+          if (codeUnit == spaceCodeUnit) {
             indent++;
             offset++;
           } else {
@@ -700,7 +710,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
               : lineResult.value;
 
           // Checking for thematic break;
-          final Match match = _thematicBreakTest.firstMatch(thematicTest);
+          final Match match = thematicBreakTest.firstMatch(thematicTest);
           if (match != null && match[1].length < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             stack.flush(stackIndex, result);
@@ -750,7 +760,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
         lineRest = markers.length > 0
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
-        isEmpty = _emptyLineRegExp.hasMatch(lineRest);
+        isEmpty = emptyLineRegExp.hasMatch(lineRest);
 
         while (stackIndex < stack.length) {
           final _StackItem stackItem = stack[stackIndex];
@@ -780,7 +790,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
             }
 
             final String lineRestWithoutIndent =
-                _removeIndent(lineRest, stackMarkerIndent, false);
+                removeIndent(lineRest, stackMarkerIndent, false);
             if (lineRestWithoutIndent == null) {
               // Where's not enough space for strict line.
               lazyLineMode = stackIndex;
@@ -810,7 +820,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
           }
 
           // Checking for thematic break;
-          final Match match = _thematicBreakTest.firstMatch(thematicTest);
+          final Match match = thematicBreakTest.firstMatch(thematicTest);
           if (match != null && match[1].length < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             break;
@@ -839,11 +849,11 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
 
         lineRest = lineResult.value.substring(stack.last.marker.offset);
         if (lineResult.value.codeUnitAt(markers.last.offset - 1) ==
-            _tabCodeUnit) {
+            tabCodeUnit) {
           lineRest = ' ' * (4 - (markers.last.endIndent - 1) % 4) +
               lineRest; // TODO (4 - (startIndent & 3)) ???
         }
-        isEmpty = _emptyLineRegExp.hasMatch(lineRest);
+        isEmpty = emptyLineRegExp.hasMatch(lineRest);
 
         if (isEmpty) {
           if (stack.length > 0) {
@@ -854,7 +864,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
         lineRest = markers.length > 0
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
-        isEmpty = _emptyLineRegExp.hasMatch(lineRest);
+        isEmpty = emptyLineRegExp.hasMatch(lineRest);
 
         if (isEmpty) {
           if (stack.length > 0) {
@@ -902,7 +912,7 @@ class BlockquoteListParser extends AbstractParser<Iterable<Block>> {
         // If contains tab for indented code line, then replace with spaces.
         final int startCodeIndent = stack.last.marker.endIndent;
         final String lineRestWithoutCodeIndend =
-            _removeIndent(lineRest, 4, false, startCodeIndent);
+            removeIndent(lineRest, 4, false, startCodeIndent);
         if (lineRestWithoutCodeIndend != null) {
           lineRest = (' ' * 4) + lineRestWithoutCodeIndend;
         }

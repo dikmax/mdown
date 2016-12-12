@@ -1,4 +1,35 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.container;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/options.dart';
+import 'package:md_proc/src/parsers/attributes.dart';
+import 'package:md_proc/src/parsers/atx_heading.dart';
+import 'package:md_proc/src/parsers/autolink.dart';
+import 'package:md_proc/src/parsers/blankline.dart';
+import 'package:md_proc/src/parsers/blockquote_list.dart';
+import 'package:md_proc/src/parsers/document.dart';
+import 'package:md_proc/src/parsers/ellipsis.dart';
+import 'package:md_proc/src/parsers/entity.dart';
+import 'package:md_proc/src/parsers/escapes.dart';
+import 'package:md_proc/src/parsers/fenced_code.dart';
+import 'package:md_proc/src/parsers/hard_line_break.dart';
+import 'package:md_proc/src/parsers/html_block.dart';
+import 'package:md_proc/src/parsers/html_block_7.dart';
+import 'package:md_proc/src/parsers/indented_code.dart';
+import 'package:md_proc/src/parsers/inline_code.dart';
+import 'package:md_proc/src/parsers/inline_html.dart';
+import 'package:md_proc/src/parsers/inline_structure.dart';
+import 'package:md_proc/src/parsers/line.dart';
+import 'package:md_proc/src/parsers/link_image.dart';
+import 'package:md_proc/src/parsers/link_reference.dart';
+import 'package:md_proc/src/parsers/mn_dash.dart';
+import 'package:md_proc/src/parsers/para_setext_heading.dart';
+import 'package:md_proc/src/parsers/raw_tex.dart';
+import 'package:md_proc/src/parsers/str.dart';
+import 'package:md_proc/src/parsers/tex_math_dollars.dart';
+import 'package:md_proc/src/parsers/tex_math_double_backslash.dart';
+import 'package:md_proc/src/parsers/tex_math_single_backslash.dart';
+import 'package:md_proc/src/parsers/thematic_break.dart';
 
 /// Simple DI container
 class ParsersContainer {

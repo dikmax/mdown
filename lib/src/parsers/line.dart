@@ -1,4 +1,8 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.line;
+
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 final RegExp _lineRegExp = new RegExp('(.*)(?:\r\n|\n|\r)');
 

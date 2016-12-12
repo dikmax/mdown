@@ -1,4 +1,12 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.tex_math_dollars;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parses string between `$...$` and `$$...$$` as TeX Math.
 class TexMathDollarsParser extends AbstractParser<Inlines> {
@@ -15,7 +23,7 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
           new Inlines.single(new Str(r'$')), offset);
     }
     final int codeUnit = text.codeUnitAt(offset);
-    final bool displayMath = codeUnit == _dollarCodeUnit;
+    final bool displayMath = codeUnit == dollarCodeUnit;
     if (displayMath) {
       offset += 1;
       if (offset >= length) {
@@ -24,11 +32,11 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
             new Inlines.single(new Str(r'$$')), offset);
       }
     } else {
-      if (codeUnit == _spaceCodeUnit ||
-          codeUnit == _tabCodeUnit ||
-          codeUnit == _newLineCodeUnit ||
-          codeUnit == _carriageReturnCodeUnit ||
-          (codeUnit >= _zeroCodeUnit && codeUnit <= _nineCodeUnit)) {
+      if (codeUnit == spaceCodeUnit ||
+          codeUnit == tabCodeUnit ||
+          codeUnit == newLineCodeUnit ||
+          codeUnit == carriageReturnCodeUnit ||
+          (codeUnit >= zeroCodeUnit && codeUnit <= nineCodeUnit)) {
         return new ParseResult<Inlines>.success(
             new Inlines.single(new Str(r'$')), offset);
       }
@@ -38,15 +46,15 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
     bool found = false;
     while (endOffset < length) {
       final int codeUnit = text.codeUnitAt(endOffset);
-      if (codeUnit == _backslashCodeUnit) {
+      if (codeUnit == backslashCodeUnit) {
         endOffset++;
         if (endOffset >= length) {
           break;
         }
-      } else if (codeUnit == _dollarCodeUnit) {
+      } else if (codeUnit == dollarCodeUnit) {
         if (displayMath) {
           if (endOffset + 1 < length &&
-              text.codeUnitAt(endOffset + 1) == _dollarCodeUnit) {
+              text.codeUnitAt(endOffset + 1) == dollarCodeUnit) {
             found = true;
             break;
           }
@@ -69,10 +77,10 @@ class TexMathDollarsParser extends AbstractParser<Inlines> {
           new Inlines.single(new TexMathDisplay(math)), endOffset + 2);
     } else {
       final int lastCodeUnit = math.codeUnitAt(math.length - 1);
-      if (lastCodeUnit == _newLineCodeUnit ||
-          lastCodeUnit == _carriageReturnCodeUnit ||
-          lastCodeUnit == _spaceCodeUnit ||
-          lastCodeUnit == _tabCodeUnit) {
+      if (lastCodeUnit == newLineCodeUnit ||
+          lastCodeUnit == carriageReturnCodeUnit ||
+          lastCodeUnit == spaceCodeUnit ||
+          lastCodeUnit == tabCodeUnit) {
         // Inline math cannot end with space.
         return new ParseResult<Inlines>.success(
             new Inlines.single(new Str(r'$')), offset);

@@ -1,4 +1,10 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.hard_line_break;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for hard line breaks.
 class HardLineBreakParser extends AbstractParser<Inlines> {

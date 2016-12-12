@@ -1,4 +1,7 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.abstract;
+
+import 'package:md_proc/src/parsers/container.dart';
+import 'package:md_proc/src/parse_result.dart';
 
 /// Base abstract parser class.
 abstract class AbstractParser<A> {

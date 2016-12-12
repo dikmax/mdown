@@ -1,19 +1,26 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.link_reference;
 
-class _LinkReference extends Block {
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
+
+class LinkReference extends Block {
   String reference;
   String normalizedReference;
   Target target;
 
-  _LinkReference(this.reference, this.target) {
+  LinkReference(this.reference, this.target) {
     normalizedReference = normalize(reference);
   }
 
-  static String normalize(String s) => _trimAndReplaceSpaces(s).toUpperCase();
+  static String normalize(String s) => trimAndReplaceSpaces(s).toUpperCase();
 }
 
 /// Parser for link reference blocks.
-class LinkReferenceParser extends AbstractParser<_LinkReference> {
+class LinkReferenceParser extends AbstractParser<LinkReference> {
   /// Constructor.
   LinkReferenceParser(ParsersContainer container) : super(container);
 
@@ -48,31 +55,31 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
 
   static final RegExp _lineEndRegExp = new RegExp(r'[ \t]*(\r\n|\n|\r|$)');
   @override
-  ParseResult<_LinkReference> parse(String text, int offset) {
+  ParseResult<LinkReference> parse(String text, int offset) {
     final Match labelAndLinkMatch =
         _labelAndLinkRegExp.matchAsPrefix(text, offset);
     if (labelAndLinkMatch == null) {
-      return new ParseResult<_LinkReference>.failure();
+      return new ParseResult<LinkReference>.failure();
     }
 
-    final String label = _LinkReference.normalize(labelAndLinkMatch[1]);
+    final String label = LinkReference.normalize(labelAndLinkMatch[1]);
     if (label.length == 0) {
       // Label cannot be empty
-      return new ParseResult<_LinkReference>.failure();
+      return new ParseResult<LinkReference>.failure();
     }
 
     String link = labelAndLinkMatch[2];
     if (link == '') {
       // Target cannot be empty
-      return new ParseResult<_LinkReference>.failure();
+      return new ParseResult<LinkReference>.failure();
     }
-    if (link.codeUnitAt(0) == _lessThanCodeUnit) {
+    if (link.codeUnitAt(0) == lessThanCodeUnit) {
       final int linkLength = link.length;
       final int lastCodeUnit = link.codeUnitAt(linkLength - 1);
       final int beforeLastCodeUnit = linkLength >= 2 ?
         link.codeUnitAt(linkLength - 2) : 0;
-      if (lastCodeUnit == _greaterThanCodeUnit &&
-          beforeLastCodeUnit != _backslashCodeUnit) {
+      if (lastCodeUnit == greaterThanCodeUnit &&
+          beforeLastCodeUnit != backslashCodeUnit) {
         link = link.substring(1, link.length - 1);
       }
     }
@@ -113,13 +120,13 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
     if (container.options.linkAttributes) {
       while (offset < text.length) {
         final int codeUnit = text.codeUnitAt(offset);
-        if (codeUnit != _spaceCodeUnit && codeUnit != _tabCodeUnit) {
+        if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
           break;
         }
         offset++;
       }
       if (offset < text.length &&
-          text.codeUnitAt(offset) == _openBraceCodeUnit) {
+          text.codeUnitAt(offset) == openBraceCodeUnit) {
         final ParseResult<Attributes> attributesResult =
             container.attributesParser.parse(text, offset);
         if (attributesResult.isSuccess) {
@@ -136,21 +143,21 @@ class LinkReferenceParser extends AbstractParser<_LinkReference> {
     }
 
     if (offsetAfterAttributes != -1) {
-      return new ParseResult<_LinkReference>.success(
-          new _LinkReference(label, new Target(link, title, attributes)),
+      return new ParseResult<LinkReference>.success(
+          new LinkReference(label, new Target(link, title, attributes)),
           offsetAfterAttributes);
     }
     if (offsetAfterTitle != -1) {
-      return new ParseResult<_LinkReference>.success(
-          new _LinkReference(label, new Target(link, title, attributes)),
+      return new ParseResult<LinkReference>.success(
+          new LinkReference(label, new Target(link, title, attributes)),
           offsetAfterTitle);
     }
     if (offsetAfterLink != -1) {
-      return new ParseResult<_LinkReference>.success(
-          new _LinkReference(label, new Target(link, null, new EmptyAttr())),
+      return new ParseResult<LinkReference>.success(
+          new LinkReference(label, new Target(link, null, new EmptyAttr())),
           offsetAfterLink);
     }
 
-    return new ParseResult<_LinkReference>.failure();
+    return new ParseResult<LinkReference>.failure();
   }
 }

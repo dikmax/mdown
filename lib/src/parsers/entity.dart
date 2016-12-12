@@ -1,4 +1,13 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.entity;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/entities.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for entities.
 class EntityParser extends AbstractParser<Inlines> {
@@ -7,7 +16,7 @@ class EntityParser extends AbstractParser<Inlines> {
 
   @override
   ParseResult<Inlines> parse(String text, int offset) {
-    final Match match = _entityRegExp.matchAsPrefix(text, offset);
+    final Match match = entityRegExp.matchAsPrefix(text, offset);
     if (match != null) {
       if (match[3] != null) {
         final String code = match[3];
@@ -32,7 +41,7 @@ class EntityParser extends AbstractParser<Inlines> {
           code = 0xFFFD;
         }
 
-        if (code == _nonBreakableSpaceCodeUnit) {
+        if (code == nonBreakableSpaceCodeUnit) {
           return new ParseResult<Inlines>.success(
               new Inlines.single(new NonBreakableSpace()), match.end);
         }

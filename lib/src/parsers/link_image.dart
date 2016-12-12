@@ -1,4 +1,15 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.link_image;
+
+import 'dart:collection';
+import 'dart:math';
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
+import 'package:md_proc/src/parsers/link_reference.dart';
 
 class _LinkStackItem {
   int offset;
@@ -28,31 +39,31 @@ class LinkImageParser extends AbstractParser<Inlines> {
     _higherPriorityInlineParsers =
         new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
 
-    _higherPriorityInlineParsers[_backtickCodeUnit] =
+    _higherPriorityInlineParsers[backtickCodeUnit] =
         <AbstractParser<Iterable<Inline>>>[container.inlineCodeParser];
 
-    _higherPriorityInlineParsers[_lessThanCodeUnit] =
+    _higherPriorityInlineParsers[lessThanCodeUnit] =
         <AbstractParser<Iterable<Inline>>>[
       container.inlineHtmlParser,
       container.autolinkParser
     ];
 
     if (container.options.texMathDollars) {
-      _higherPriorityInlineParsers[_dollarCodeUnit] =
+      _higherPriorityInlineParsers[dollarCodeUnit] =
           <AbstractParser<Iterable<Inline>>>[container.texMathDollarsParser];
     }
 
     if (container.options.texMathSingleBackslash ||
         container.options.texMathDoubleBackslash) {
-      _higherPriorityInlineParsers[_backslashCodeUnit] =
+      _higherPriorityInlineParsers[backslashCodeUnit] =
           <AbstractParser<Iterable<Inline>>>[];
 
       if (container.options.texMathSingleBackslash) {
-        _higherPriorityInlineParsers[_backslashCodeUnit]
+        _higherPriorityInlineParsers[backslashCodeUnit]
             .add(container.texMathSingleBackslashParser);
       }
       if (container.options.texMathDoubleBackslash) {
-        _higherPriorityInlineParsers[_backslashCodeUnit]
+        _higherPriorityInlineParsers[backslashCodeUnit]
             .add(container.texMathDoubleBackslashParser);
       }
     }
@@ -64,10 +75,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
     // Skip whitespace.
     while (offset < length) {
       final int codeUnit = text.codeUnitAt(offset);
-      if (codeUnit != _spaceCodeUnit &&
-          codeUnit != _tabCodeUnit &&
-          codeUnit != _newLineCodeUnit &&
-          codeUnit != _carriageReturnCodeUnit) {
+      if (codeUnit != spaceCodeUnit &&
+          codeUnit != tabCodeUnit &&
+          codeUnit != newLineCodeUnit &&
+          codeUnit != carriageReturnCodeUnit) {
         break;
       }
       offset++;
@@ -85,8 +96,8 @@ class LinkImageParser extends AbstractParser<Inlines> {
     String href = hrefMatch[0];
     final int hrefLength = href.length;
     if (hrefLength > 0 &&
-        href.codeUnitAt(0) == _lessThanCodeUnit &&
-        href.codeUnitAt(hrefLength - 1) == _greaterThanCodeUnit) {
+        href.codeUnitAt(0) == lessThanCodeUnit &&
+        href.codeUnitAt(hrefLength - 1) == greaterThanCodeUnit) {
       href = href.substring(1, href.length - 1);
     }
     href = unescapeAndUnreference(href);
@@ -96,10 +107,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
     // Skip whitespace.
     while (offset < length) {
       final int codeUnit = text.codeUnitAt(offset);
-      if (codeUnit != _spaceCodeUnit &&
-          codeUnit != _tabCodeUnit &&
-          codeUnit != _newLineCodeUnit &&
-          codeUnit != _carriageReturnCodeUnit) {
+      if (codeUnit != spaceCodeUnit &&
+          codeUnit != tabCodeUnit &&
+          codeUnit != newLineCodeUnit &&
+          codeUnit != carriageReturnCodeUnit) {
         break;
       }
       offset++;
@@ -112,23 +123,23 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
     // Maybe parsing title.
     int codeUnit = text.codeUnitAt(offset);
-    if (codeUnit == _singleQuoteCodeUnit ||
-        codeUnit == _doubleQuoteCodeUnit ||
-        codeUnit == _openParenCodeUnit) {
+    if (codeUnit == singleQuoteCodeUnit ||
+        codeUnit == doubleQuoteCodeUnit ||
+        codeUnit == openParenCodeUnit) {
       final int endCodeUnit =
-          codeUnit == _openParenCodeUnit ? _closeParenCodeUnit : codeUnit;
+          codeUnit == openParenCodeUnit ? closeParenCodeUnit : codeUnit;
       offset++;
       final int startOffset = offset;
       while (offset < length) {
         final int codeUnit = text.codeUnitAt(offset);
         offset++;
-        if (codeUnit == _backslashCodeUnit) {
+        if (codeUnit == backslashCodeUnit) {
           offset++;
           continue;
         } else if (codeUnit == endCodeUnit) {
           break;
-        } else if (codeUnit == _openParenCodeUnit &&
-            endCodeUnit == _closeParenCodeUnit) {
+        } else if (codeUnit == openParenCodeUnit &&
+            endCodeUnit == closeParenCodeUnit) {
           return new ParseResult<Target>.failure();
         }
       }
@@ -144,10 +155,10 @@ class LinkImageParser extends AbstractParser<Inlines> {
       // Skip whitespace.
       while (offset < length) {
         final int codeUnit = text.codeUnitAt(offset);
-        if (codeUnit != _spaceCodeUnit &&
-            codeUnit != _tabCodeUnit &&
-            codeUnit != _newLineCodeUnit &&
-            codeUnit != _carriageReturnCodeUnit) {
+        if (codeUnit != spaceCodeUnit &&
+            codeUnit != tabCodeUnit &&
+            codeUnit != newLineCodeUnit &&
+            codeUnit != carriageReturnCodeUnit) {
           break;
         }
         offset++;
@@ -159,7 +170,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
       codeUnit = text.codeUnitAt(offset);
     }
 
-    if (codeUnit != _closeParenCodeUnit) {
+    if (codeUnit != closeParenCodeUnit) {
       return new ParseResult<Target>.failure();
     }
 
@@ -173,14 +184,14 @@ class LinkImageParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     final int length = text.length;
     bool isImage = false;
-    if (text.codeUnitAt(offset) == _exclamationMarkCodeUnit) {
+    if (text.codeUnitAt(offset) == exclamationMarkCodeUnit) {
       offset++;
       if (offset == length) {
         return new ParseResult<Inlines>.failure();
       }
       isImage = true;
     }
-    if (text.codeUnitAt(offset) != _openBracketCodeUnit) {
+    if (text.codeUnitAt(offset) != openBracketCodeUnit) {
       return new ParseResult<Inlines>.failure();
     }
     offset++;
@@ -196,7 +207,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
     ];
     while (offset < length && (isImage || !containsLink)) {
       final int codeUnit = text.codeUnitAt(offset);
-      if (codeUnit == _closeBracketCodeUnit) {
+      if (codeUnit == closeBracketCodeUnit) {
         final _LinkStackItem last = stack.removeLast(); // TODO check link.
         if (!isImage) {
           containsLink = last.containsLink;
@@ -205,7 +216,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
             final Inlines labelInlines = container.documentParser
                 .parseInlines(text.substring(last.offset, offset));
 
-            if (labelInlines._containsLink) {
+            if (labelInlines.containsLink) {
               containsLink = true;
             }
           }
@@ -219,7 +230,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
         offset++;
         continue;
       }
-      if (codeUnit == _backslashCodeUnit) {
+      if (codeUnit == backslashCodeUnit) {
         // Escaped char
         offset += 2;
         if (offset > length) {
@@ -228,7 +239,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
         }
         continue;
       }
-      if (codeUnit == _openBracketCodeUnit) {
+      if (codeUnit == openBracketCodeUnit) {
         for (int i = stack.length - 1, level = 2; i >= 0; i--, level++) {
           stack[i].bracketLevel = max(stack[i].bracketLevel, level);
         }
@@ -246,7 +257,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
           final ParseResult<Inlines> res = parser.parse(text, offset);
           if (res.isSuccess) {
             offset = res.offset;
-            if (!isImage && res.value._containsLink) {
+            if (!isImage && res.value.containsLink) {
               containsLink = true;
             }
             found = true;
@@ -274,7 +285,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
       if (offset != length) {
         // Test link in parens.
         final int codeUnit = text.codeUnitAt(offset);
-        if (codeUnit == _openParenCodeUnit) {
+        if (codeUnit == openParenCodeUnit) {
           final ParseResult<Target> targetResult =
               _parseTarget(text, offset + 1);
           if (targetResult.isSuccess) {
@@ -288,7 +299,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
             offset = targetResult.offset;
             if (container.options.linkAttributes) {
               if (offset < length &&
-                  text.codeUnitAt(offset) == _openBraceCodeUnit) {
+                  text.codeUnitAt(offset) == openBraceCodeUnit) {
                 final ParseResult<Attributes> attributesResult =
                     container.attributesParser.parse(text, offset);
                 if (attributesResult.isSuccess) {
@@ -306,12 +317,12 @@ class LinkImageParser extends AbstractParser<Inlines> {
           }
         }
 
-        if (codeUnit == _openBracketCodeUnit) {
+        if (codeUnit == openBracketCodeUnit) {
           if (offset + 1 < length &&
-              text.codeUnitAt(offset + 1) == _closeBracketCodeUnit) {
+              text.codeUnitAt(offset + 1) == closeBracketCodeUnit) {
             final String reference = text.substring(startOffset, endOffset);
             final String normalizedReference =
-                _LinkReference.normalize(reference);
+                LinkReference.normalize(reference);
             Target target;
             if (container.references.containsKey(normalizedReference)) {
               target = container.references[normalizedReference];
@@ -341,7 +352,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
           if (referenceMatch != null) {
             final String reference = referenceMatch[1];
             final String normalizedReference =
-                _LinkReference.normalize(reference);
+                LinkReference.normalize(reference);
 
             Target target;
 
@@ -375,7 +386,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
       // Found variant
 
       final String reference = text.substring(startOffset, endOffset);
-      final String normalizedReference = _LinkReference.normalize(reference);
+      final String normalizedReference = LinkReference.normalize(reference);
 
       if (normalizedReference != '') {
         Target target;

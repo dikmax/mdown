@@ -1,4 +1,11 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.attributes;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/container.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:quiver/collection.dart';
 
 /// Parser for extended attiributes.
 class AttributesParser extends AbstractParser<Attributes> {
@@ -7,7 +14,7 @@ class AttributesParser extends AbstractParser<Attributes> {
 
   @override
   ParseResult<Attributes> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) != _openBraceCodeUnit) {
+    if (text.codeUnitAt(offset) != openBraceCodeUnit) {
       return new ParseResult<Attributes>.failure();
     }
 
@@ -21,30 +28,30 @@ class AttributesParser extends AbstractParser<Attributes> {
     while (offset < length) {
       final int codeUnit = text.codeUnitAt(offset);
 
-      if (codeUnit == _closeBraceCodeUnit) {
+      if (codeUnit == closeBraceCodeUnit) {
         offset++;
         break;
       }
 
       switch (codeUnit) {
-        case _sharpCodeUnit:
+        case sharpCodeUnit:
           // Id
           final int endOffset = _parseIdentifier(text, offset);
           id = text.substring(offset + 1, endOffset);
           offset = endOffset;
           break;
 
-        case _dotCodeUnit:
+        case dotCodeUnit:
           // Id
           final int endOffset = _parseIdentifier(text, offset);
           classes.add(text.substring(offset + 1, endOffset));
           offset = endOffset;
           break;
 
-        case _spaceCodeUnit:
-        case _tabCodeUnit:
-        case _newLineCodeUnit:
-        case _carriageReturnCodeUnit:
+        case spaceCodeUnit:
+        case tabCodeUnit:
+        case newLineCodeUnit:
+        case carriageReturnCodeUnit:
           offset++;
           break;
 
@@ -70,14 +77,14 @@ class AttributesParser extends AbstractParser<Attributes> {
     while (endOffset < length) {
       final int codeUnit = text.codeUnitAt(endOffset);
 
-      if (codeUnit == _spaceCodeUnit ||
-          codeUnit == _tabCodeUnit ||
-          codeUnit == _newLineCodeUnit ||
-          codeUnit == _carriageReturnCodeUnit ||
-          codeUnit == _closeBraceCodeUnit ||
-          codeUnit == _equalCodeUnit ||
-          codeUnit == _sharpCodeUnit ||
-          codeUnit == _dotCodeUnit) {
+      if (codeUnit == spaceCodeUnit ||
+          codeUnit == tabCodeUnit ||
+          codeUnit == newLineCodeUnit ||
+          codeUnit == carriageReturnCodeUnit ||
+          codeUnit == closeBraceCodeUnit ||
+          codeUnit == equalCodeUnit ||
+          codeUnit == sharpCodeUnit ||
+          codeUnit == dotCodeUnit) {
         break;
       }
 
@@ -100,8 +107,8 @@ class AttributesParser extends AbstractParser<Attributes> {
     final String key = match[1];
     String value = match[2];
     final int startCodeUnit = value.codeUnitAt(0);
-    if (startCodeUnit == _singleQuoteCodeUnit ||
-        startCodeUnit == _doubleQuoteCodeUnit) {
+    if (startCodeUnit == singleQuoteCodeUnit ||
+        startCodeUnit == doubleQuoteCodeUnit) {
       value = value.substring(1, value.length - 1);
     }
 

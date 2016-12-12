@@ -1,30 +1,35 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.common;
 
-final RegExp _anyLineRegExp = new RegExp(r'.*$');
-final RegExp _emptyLineRegExp = new RegExp(r'^[ \t]*$');
+import 'dart:collection';
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/entities.dart';
+import 'package:md_proc/src/code_units.dart';
 
-const String _escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-final Set<int> _escapableCodes =
-    new Set<int>.from(_escapable.split('').map((String s) => s.codeUnitAt(0)));
+final RegExp anyLineRegExp = new RegExp(r'.*$');
+final RegExp emptyLineRegExp = new RegExp(r'^[ \t]*$');
+
+const String escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+final Set<int> escapableCodes =
+    new Set<int>.from(escapable.split('').map((String s) => s.codeUnitAt(0)));
 
 // TODO move to paragraph file
-final RegExp _atxHeadingTest = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
-final RegExp _blockquoteSimpleTest = new RegExp(r'^ {0,3}>');
-final RegExp _fencedCodeStartTest =
+final RegExp atxHeadingTest = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
+final RegExp blockquoteSimpleTest = new RegExp(r'^ {0,3}>');
+final RegExp fencedCodeStartTest =
     new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
-final RegExp _thematicBreakTest = new RegExp(
+final RegExp thematicBreakTest = new RegExp(
     '^( {0,3})((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$');
 
-final Pattern _htmlBlock1Test =
+final Pattern htmlBlock1Test =
     new RegExp(r'<(?:script|pre|style)(?:\s|>|$)', caseSensitive: false);
-final Pattern _htmlBlock2Test = '<!--';
-final Pattern _htmlBlock3Test = '<?';
-final Pattern _htmlBlock4Test = '<!';
-final Pattern _htmlBlock5Test = '<!\[CDATA\[';
-final Pattern _htmlBlock6Test = new RegExp(
+final Pattern htmlBlock2Test = '<!--';
+final Pattern htmlBlock3Test = '<?';
+final Pattern htmlBlock4Test = '<!';
+final Pattern htmlBlock5Test = '<!\[CDATA\[';
+final Pattern htmlBlock6Test = new RegExp(
   r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 );
-final Set<String> _blockTags = new Set<String>.from(<String>[
+final Set<String> blockTags = new Set<String>.from(<String>[
   'address',
   'article',
   'aside',
@@ -91,37 +96,37 @@ final Set<String> _blockTags = new Set<String>.from(<String>[
   'ul'
 ]);
 
-const String _htmlTagName = '[A-Za-z][A-Za-z0-9-]*';
-const String _htmlAttributeName = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
-const String _htmlUnquotedValue = "[^\"'=<>`\\x00-\\x20]+";
-const String _htmlSingleQuotedValue = "'[^']*'";
-const String _htmlDoubleQuotedValue = '"[^"]*"';
-const String _htmlAttributeValue = "(?:" +
-    _htmlUnquotedValue +
+const String htmlTagName = '[A-Za-z][A-Za-z0-9-]*';
+const String htmlAttributeName = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
+const String htmlUnquotedValue = "[^\"'=<>`\\x00-\\x20]+";
+const String htmlSingleQuotedValue = "'[^']*'";
+const String htmlDoubleQuotedValue = '"[^"]*"';
+const String htmlAttributeValue = "(?:" +
+    htmlUnquotedValue +
     "|" +
-    _htmlSingleQuotedValue +
+    htmlSingleQuotedValue +
     "|" +
-    _htmlDoubleQuotedValue +
+    htmlDoubleQuotedValue +
     ")";
-const String _htmlAttributeValueSpec =
-    "(?:" + "\\s*=" + "\\s*" + _htmlAttributeValue + ")";
-const String _htmlAttribute =
-    "(?:" + "\\s+" + _htmlAttributeName + _htmlAttributeValueSpec + "?)";
-const String _htmlOpenTag =
-    "<" + _htmlTagName + _htmlAttribute + "*" + "\\s*/?>";
-const String _htmlCloseTag = "</" + _htmlTagName + "\\s*>";
+const String htmlAttributeValueSpec =
+    "(?:" + "\\s*=" + "\\s*" + htmlAttributeValue + ")";
+const String htmlAttribute =
+    "(?:" + "\\s+" + htmlAttributeName + htmlAttributeValueSpec + "?)";
+const String htmlOpenTag =
+    "<" + htmlTagName + htmlAttribute + "*" + "\\s*/?>";
+const String htmlCloseTag = "</" + htmlTagName + "\\s*>";
 
 final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
 
-String _removeIndent(String line, int amount, bool allowLess,
+String removeIndent(String line, int amount, bool allowLess,
     [int startIndent = 0]) {
   int offset = 0;
   while (offset < amount && offset < line.length) {
     final int code = line.codeUnitAt(offset);
-    if (code == _tabCodeUnit) {
+    if (code == tabCodeUnit) {
       line = line.replaceFirst(
           '\t', ' ' * (4 - (startIndent & 3))); // (4 - startIndent % 4)
-    } else if (code == _spaceCodeUnit) {
+    } else if (code == spaceCodeUnit) {
       ++offset;
       ++startIndent;
     } else {
@@ -134,25 +139,25 @@ String _removeIndent(String line, int amount, bool allowLess,
   return null;
 }
 
-String _trimAndReplaceSpaces(String s) {
+String trimAndReplaceSpaces(String s) {
   return s.trim().replaceAll(_clashSpaceRegExp, ' ');
 }
 
-final RegExp _escapeRegExp =
+final RegExp escapeRegExp =
     new RegExp(r'\\([!"#$%&' + "'" + r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');
 
-final RegExp _entityRegExp = new RegExp(
+final RegExp entityRegExp = new RegExp(
     '&(?:#[xX]([A-Fa-f0-9]{1,8})|#([0-9]{1,8})|([A-Za-z][A-Za-z0-9]{1,31}));');
 
-final RegExp _unescapeUnreferenceRegExp =
-    new RegExp(_escapeRegExp.pattern + '|' + _entityRegExp.pattern);
+final RegExp unescapeUnreferenceRegExp =
+    new RegExp(escapeRegExp.pattern + '|' + entityRegExp.pattern);
 
-final RegExp _unescapeUnrefereceTest = new RegExp(r'[\\&]');
+final RegExp unescapeUnrefereceTest = new RegExp(r'[\\&]');
 
 /// Unescapes (`\!` -> `!`) and unreferences (`&amp;` -> `&`) string.
 String unescapeAndUnreference(String s) {
-  if (_unescapeUnrefereceTest.hasMatch(s)) {
-    return s.replaceAllMapped(_unescapeUnreferenceRegExp,
+  if (unescapeUnrefereceTest.hasMatch(s)) {
+    return s.replaceAllMapped(unescapeUnreferenceRegExp,
         _unescapeUnreferenceReplacement);
   } else {
     return s;
@@ -189,10 +194,10 @@ String _unescapeUnreferenceReplacement(Match match) {
   return match[0];
 }
 
-int _skipIndent(String text, int offset) {
+int skipIndent(String text, int offset) {
   // First char
   int codeUnit = text.codeUnitAt(offset);
-  if (codeUnit != _spaceCodeUnit) {
+  if (codeUnit != spaceCodeUnit) {
     return offset;
   }
 
@@ -204,7 +209,7 @@ int _skipIndent(String text, int offset) {
 
   // Second char
   codeUnit = text.codeUnitAt(offset);
-  if (codeUnit != _spaceCodeUnit) {
+  if (codeUnit != spaceCodeUnit) {
     return offset;
   }
 
@@ -215,7 +220,7 @@ int _skipIndent(String text, int offset) {
 
   // Third char
   codeUnit = text.codeUnitAt(offset);
-  if (codeUnit != _spaceCodeUnit) {
+  if (codeUnit != spaceCodeUnit) {
     return offset;
   }
 
@@ -228,90 +233,8 @@ int _skipIndent(String text, int offset) {
   return offset;
 }
 
-int _getBlockFirstChar(String text, int offset) {
-  final int nonIndentOffset = _skipIndent(text, offset);
+int getBlockFirstChar(String text, int offset) {
+  final int nonIndentOffset = skipIndent(text, offset);
 
   return nonIndentOffset != -1 ? text.codeUnitAt(nonIndentOffset) : -1;
-}
-
-/// Inlines list
-class Inlines extends ListBase<Inline> {
-  List<Inline> _inlines = new List<Inline>();
-  bool _cachedContainsLink;
-
-  /// Constructor
-  Inlines();
-
-  /// Constructor from
-  Inlines.from(Iterable<Inline> inlines)
-      : _inlines = new List<Inline>.from(inlines);
-
-  Inlines.single(Inline inline) : _inlines = <Inline>[] {
-    _inlines.add(inline);
-  }
-
-  @override
-  int get length => _inlines.length;
-
-  @override
-  set length(int length) {
-    _inlines.length = length;
-  }
-
-  @override
-  void operator []=(int index, Inline value) {
-    _inlines[index] = value;
-  }
-
-  @override
-  Inline operator [](int index) => _inlines[index];
-
-  // Though not strictly necessary, for performance reasons
-  // you should implement add and addAll.
-
-  @override
-  void add(Inline value) => _inlines.add(value);
-
-  @override
-  void addAll(Iterable<Inline> all) => _inlines.addAll(all);
-
-  // Used in parsing.
-  bool get _containsLink {
-    _cachedContainsLink = _cachedContainsLink ??
-        any(_isContainsLink);
-
-    return _cachedContainsLink;
-  }
-
-  static bool _isContainsLink(Inline inline) {
-    if (inline is Emph) {
-      assert(inline.contents is Inlines);
-      final Inlines contents = inline.contents;
-      return contents._containsLink;
-    } else if (inline is Strong) {
-      assert(inline.contents is Inlines);
-      final Inlines contents = inline.contents;
-      return contents._containsLink;
-    } else if (inline is Strikeout) {
-      assert(inline.contents is Inlines);
-      final Inlines contents = inline.contents;
-      return contents._containsLink;
-    } else if (inline is Subscript) {
-      assert(inline.contents is Inlines);
-      final Inlines contents = inline.contents;
-      return contents._containsLink;
-    } else if (inline is Superscript) {
-      assert(inline.contents is Inlines);
-      final Inlines contents = inline.contents;
-      return contents._containsLink;
-    } else if (inline is Image) {
-      assert(inline.label is Inlines);
-      final Inlines label = inline.label;
-      return label._containsLink;
-    } else if (inline is Link) {
-      return true;
-    }
-
-    return false;
-  }
 }

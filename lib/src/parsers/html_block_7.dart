@@ -1,4 +1,10 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.html_block_7;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for html blocks using rule 7.
 class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
@@ -6,7 +12,7 @@ class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
   HtmlBlock7Parser(ParsersContainer container) : super(container);
 
   static final RegExp _startRegExp =
-      new RegExp(r'^ {0,3}(?:' + _htmlOpenTag + '|' + _htmlCloseTag + r')\s*$');
+      new RegExp(r'^ {0,3}(?:' + htmlOpenTag + '|' + htmlCloseTag + r')\s*$');
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
@@ -25,7 +31,7 @@ class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (_emptyLineRegExp.hasMatch(lineRes.value)) {
+        if (emptyLineRegExp.hasMatch(lineRes.value)) {
           break;
         }
       }

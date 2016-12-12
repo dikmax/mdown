@@ -1,4 +1,13 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.atx_heading;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
+import 'package:md_proc/src/parse_result.dart';
+
 
 /// Parser for ATX-headings.
 class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
@@ -26,7 +35,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
     int startOffset = -1;
     int endOffset = -1;
 
-    int i = _skipIndent(line, 0) + 1;
+    int i = skipIndent(line, 0) + 1;
 
     // Finite Automata
     while (i < length) {
@@ -34,12 +43,12 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
 
       switch (state) {
         case _stateOpen:
-          if (code == _sharpCodeUnit) {
+          if (code == sharpCodeUnit) {
             level++;
             if (level > 6) {
               return const ParseResult<Iterable<Block>>.failure();
             }
-          } else if (code == _spaceCodeUnit || code == _tabCodeUnit) {
+          } else if (code == spaceCodeUnit || code == tabCodeUnit) {
             state = _stateSpaces;
           } else {
             return const ParseResult<Iterable<Block>>.failure();
@@ -48,9 +57,9 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
           break;
 
         case _stateSpaces:
-          if (code != _spaceCodeUnit && code != _tabCodeUnit) {
+          if (code != spaceCodeUnit && code != tabCodeUnit) {
             startOffset = startOffset != -1 ? startOffset : i;
-            if (code == _sharpCodeUnit) {
+            if (code == sharpCodeUnit) {
               endOffset = i;
               state = _stateClose;
             } else {
@@ -60,25 +69,25 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
           break;
 
         case _stateText:
-          if (code == _spaceCodeUnit || code == _tabCodeUnit) {
+          if (code == spaceCodeUnit || code == tabCodeUnit) {
             endOffset = i;
             state = _stateSpaces;
-          } else if (code == _backslashCodeUnit) {
+          } else if (code == backslashCodeUnit) {
             i++;
           }
           break;
 
         case _stateClose:
-          if (code == _spaceCodeUnit || code == _tabCodeUnit) {
+          if (code == spaceCodeUnit || code == tabCodeUnit) {
             state = _stateAfterClose;
-          } else if (code != _sharpCodeUnit) {
+          } else if (code != sharpCodeUnit) {
             state = _stateText;
             endOffset = -1;
           }
           break;
 
         case _stateAfterClose:
-          if (code != _spaceCodeUnit && code != _tabCodeUnit) {
+          if (code != spaceCodeUnit && code != tabCodeUnit) {
             state = _stateText;
             endOffset = -1;
             continue;
@@ -98,7 +107,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
       if (container.options.headingAttributes) {
         final int contentLength = content.length;
         if (contentLength > 0 &&
-            content.codeUnitAt(contentLength - 1) == _closeBraceCodeUnit) {
+            content.codeUnitAt(contentLength - 1) == closeBraceCodeUnit) {
           final int attributesStart = content.lastIndexOf('{');
           final ParseResult<Attributes> attributesResult =
               container.attributesParser.parse(content, attributesStart);
@@ -108,7 +117,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
       }
-      inlines = new _UnparsedInlines(content);
+      inlines = new UnparsedInlines(content);
     } else {
       inlines = new Inlines();
     }

@@ -1,4 +1,14 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.document;
+
+import 'dart:collection';
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
+import 'package:md_proc/src/parsers/link_reference.dart';
 
 /// Parser for whole document.
 class DocumentParser extends AbstractParser<Document> {
@@ -14,60 +24,60 @@ class DocumentParser extends AbstractParser<Document> {
     // Block parsers
     _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
 
-    for (int char in <int>[_starCodeUnit, _minusCodeUnit]) {
+    for (int char in <int>[starCodeUnit, minusCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.thematicBreakParser,
         container.blockquoteListParser
       ];
     }
 
-    _blockParsers[_underscoreCodeUnit] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[underscoreCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.thematicBreakParser
     ];
 
-    _blockParsers[_sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
       container.atxHeadingParser
     ];
 
-    for (int char in <int>[_spaceCodeUnit, _tabCodeUnit]) {
+    for (int char in <int>[spaceCodeUnit, tabCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser,
         container.indentedCodeParser
       ];
     }
 
-    for (int char in <int>[_newLineCodeUnit, _carriageReturnCodeUnit]) {
+    for (int char in <int>[newLineCodeUnit, carriageReturnCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blanklineParser
       ];
     }
 
-    for (int char in <int>[_tildeCodeUnit, _backtickCodeUnit]) {
+    for (int char in <int>[tildeCodeUnit, backtickCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.fencedCodeParser
       ];
     }
 
-    for (int char in <int>[_plusCodeUnit, _greaterThanCodeUnit]) {
+    for (int char in <int>[plusCodeUnit, greaterThanCodeUnit]) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blockquoteListParser
       ];
     }
 
     if (container.options.rawHtml) {
-      _blockParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
         container.htmlBlockParser,
         container.htmlBlock7Parser
       ];
     }
 
     if (container.options.rawTex) {
-      _blockParsers[_backslashCodeUnit] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[backslashCodeUnit] = <AbstractParser<Iterable<Block>>>[
         container.rawTexParser
       ];
     }
 
-    for (int char = _zeroCodeUnit; char <= _nineCodeUnit; char++) {
+    for (int char = zeroCodeUnit; char <= nineCodeUnit; char++) {
       _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
         container.blockquoteListParser
       ];
@@ -76,86 +86,86 @@ class DocumentParser extends AbstractParser<Document> {
     // Inline parsers
     _inlineParsers = new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
 
-    _inlineParsers[_spaceCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[spaceCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_tabCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[tabCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[_backslashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
+    _inlineParsers[backslashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
 
     if (container.options.texMathSingleBackslash) {
-      _inlineParsers[_backslashCodeUnit]
+      _inlineParsers[backslashCodeUnit]
           .add(container.texMathSingleBackslashParser);
     }
 
     if (container.options.texMathDoubleBackslash) {
-      _inlineParsers[_backslashCodeUnit]
+      _inlineParsers[backslashCodeUnit]
           .add(container.texMathDoubleBackslashParser);
     }
-    _inlineParsers[_backslashCodeUnit].add(container.escapesParser);
+    _inlineParsers[backslashCodeUnit].add(container.escapesParser);
 
-    _inlineParsers[_ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.entityParser
     ];
 
-    _inlineParsers[_backtickCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[backtickCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.inlineCodeParser
     ];
 
     for (int char in <
-        int>[_starCodeUnit, _underscoreCodeUnit]) {
+        int>[starCodeUnit, underscoreCodeUnit]) {
       _inlineParsers[char] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
     }
 
-    _inlineParsers[_openBracketCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[openBracketCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.linkImageParser
     ];
 
-    _inlineParsers[_lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
       container.autolinkParser
     ];
 
     if (container.options.rawHtml) {
-      _inlineParsers[_lessThanCodeUnit].add(container.inlineHtmlParser);
+      _inlineParsers[lessThanCodeUnit].add(container.inlineHtmlParser);
     }
 
     if (container.options.smartPunctuation) {
-      _inlineParsers[_dotCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[dotCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.ellipsisParser
       ];
 
-      _inlineParsers[_minusCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[minusCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.mnDashParser
       ];
 
-      _inlineParsers[_singleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[singleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
 
-      _inlineParsers[_doubleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[doubleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
     }
 
     if (container.options.strikeout || container.options.subscript) {
-      _inlineParsers[_tildeCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[tildeCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
     }
 
     if (container.options.superscript) {
-      _inlineParsers[_caretCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[caretCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.inlineStructureParser
       ];
     }
 
     if (container.options.texMathDollars) {
-      _inlineParsers[_dollarCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[dollarCodeUnit] = <AbstractParser<Iterable<Inline>>>[
         container.texMathDollarsParser
       ];
     }
@@ -168,17 +178,17 @@ class DocumentParser extends AbstractParser<Document> {
 
     final int length = text.length;
     while (offset < length) {
-      final int firstChar = _getBlockFirstChar(text, offset);
+      final int firstChar = getBlockFirstChar(text, offset);
 
       if (firstChar == -1) {
         // End of input
         break;
       }
 
-      if (firstChar == _openBracketCodeUnit) {
+      if (firstChar == openBracketCodeUnit) {
         // Special treatment for link references.
         // TODO we don't need it
-        final ParseResult<_LinkReference> res =
+        final ParseResult<LinkReference> res =
             container.linkReferenceParser.parse(text, offset);
         if (res.isSuccess) {
           if (!container.references.containsKey(res.value.reference)) {
@@ -228,12 +238,12 @@ class DocumentParser extends AbstractParser<Document> {
   Block _replaceInlinesInBlock(Block block) {
     if (block is Heading) {
       final Inlines contents = block.contents;
-      if (contents is _UnparsedInlines) {
+      if (contents is UnparsedInlines) {
         block.contents = parseInlines(contents.raw);
       }
     } else if (block is Para) {
       final Inlines contents = block.contents;
-      if (contents is _UnparsedInlines) {
+      if (contents is UnparsedInlines) {
         block.contents = parseInlines(contents.raw);
       }
     } else if (block is Blockquote) {
@@ -258,9 +268,9 @@ class DocumentParser extends AbstractParser<Document> {
     final int length = text.length;
     while (offset < length) {
       final int codeUnit = text.codeUnitAt(offset);
-      if (codeUnit == _exclamationMarkCodeUnit &&
+      if (codeUnit == exclamationMarkCodeUnit &&
           offset + 1 < length &&
-          text.codeUnitAt(offset + 1) == _openBracketCodeUnit) {
+          text.codeUnitAt(offset + 1) == openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
         final ParseResult<Inlines> res =
             container.linkImageParser.parse(text, offset);

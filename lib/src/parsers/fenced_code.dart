@@ -1,4 +1,11 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.fenced_code;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for fenced code blocks.
 class FencedCodeParser extends AbstractParser<Iterable<Block>> {
@@ -10,7 +17,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    final Match startRes = _fencedCodeStartTest.firstMatch(lineResult.value);
+    final Match startRes = fencedCodeStartTest.firstMatch(lineResult.value);
     if (startRes == null) {
       return const ParseResult<Iterable<FencedCodeBlock>>.failure();
     }
@@ -39,7 +46,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
       }
 
       if (indent > 0) {
-        line = _removeIndent(line, indent, true);
+        line = removeIndent(line, indent, true);
       }
 
       code.writeln(line);
@@ -71,7 +78,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
     final int infoStringLength = infoString.length;
     while (infoStringEnd < infoStringLength) {
       final int codeUnit = infoString.codeUnitAt(infoStringEnd);
-      if (codeUnit == _spaceCodeUnit || codeUnit == _tabCodeUnit) {
+      if (codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit) {
         break;
       }
       infoStringEnd++;

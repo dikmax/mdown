@@ -1,10 +1,18 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.para_setext_heading;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
 /// taking indent into account.
 bool fastBlockTest2(
     String text, int offset, int charCodeUnit1, int charCodeUnit2) {
-  final int nonIndentOffset = _skipIndent(text, offset);
+  final int nonIndentOffset = skipIndent(text, offset);
 
   if (nonIndentOffset == -1) {
     return false;
@@ -43,11 +51,11 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
     if (container.options.rawHtml) {
       _paragraphBreaks.addAll(<Pattern>[
-        _htmlBlock1Test,
-        _htmlBlock2Test,
-        _htmlBlock3Test,
-        _htmlBlock4Test,
-        _htmlBlock5Test
+        htmlBlock1Test,
+        htmlBlock2Test,
+        htmlBlock3Test,
+        htmlBlock4Test,
+        htmlBlock5Test
       ]);
     }
   }
@@ -68,9 +76,9 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
       final String line = lineResult.value;
 
-      if (!_emptyLineRegExp.hasMatch(line)) {
+      if (!emptyLineRegExp.hasMatch(line)) {
         if (canBeHeading) {
-          if (fastBlockTest2(text, offset, _minusCodeUnit, _equalCodeUnit)) {
+          if (fastBlockTest2(text, offset, minusCodeUnit, equalCodeUnit)) {
             final Match match = _setextHeadingRegExp.firstMatch(line);
             if (match != null) {
               level = match[1][0] == '=' ? 1 : 2;
@@ -80,7 +88,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
 
-        final int indent = _skipIndent(lineResult.value, 0);
+        final int indent = skipIndent(lineResult.value, 0);
         if (indent != -1 &&
             contents.length > 0 &&
             _paragraphBreaks.any((Pattern pattern) =>
@@ -91,10 +99,10 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
         // Special check for html block rule 6.
         final Match htmlBlock6Match =
-            _htmlBlock6Test.matchAsPrefix(lineResult.value, indent);
+            htmlBlock6Test.matchAsPrefix(lineResult.value, indent);
         if (htmlBlock6Match != null) {
           final String tag = htmlBlock6Match[1];
-          if (_blockTags.contains(tag.toLowerCase())) {
+          if (blockTags.contains(tag.toLowerCase())) {
             break;
           }
         }
@@ -126,7 +134,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         final int length = line.length;
         while (trimOffset < length) {
           final int codeUnit = line.codeUnitAt(trimOffset);
-          if (codeUnit != _spaceCodeUnit && codeUnit != _tabCodeUnit) {
+          if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
             break;
           }
           trimOffset++;
@@ -146,7 +154,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
       Attr attr = new EmptyAttr();
       if (container.options.headingAttributes) {
         if (contentsString.codeUnitAt(contentsString.length - 1) ==
-            _closeBraceCodeUnit) {
+            closeBraceCodeUnit) {
           final int attributesStart = contentsString.lastIndexOf('{');
           final ParseResult<Attributes> attributesResult =
               container.attributesParser.parse(contentsString, attributesStart);
@@ -156,13 +164,13 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
       }
-      final Inlines inlines = new _UnparsedInlines(contentsString);
+      final Inlines inlines = new UnparsedInlines(contentsString);
 
       return new ParseResult<Iterable<SetextHeading>>.success(
           <SetextHeading>[new SetextHeading(level, inlines, attr)], offset);
     }
 
-    final Inlines inlines = new _UnparsedInlines(contentsString);
+    final Inlines inlines = new UnparsedInlines(contentsString);
 
     final List<Block> result = <Block>[new Para(inlines)];
     if (listAddition != null) {

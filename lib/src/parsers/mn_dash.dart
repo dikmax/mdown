@@ -1,4 +1,11 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.mn_dash;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/code_units.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for mdashes and ndashes.
 class MNDashParser extends AbstractParser<Inlines> {
@@ -9,7 +16,7 @@ class MNDashParser extends AbstractParser<Inlines> {
   ParseResult<Inlines> parse(String text, int offset) {
     final int length = text.length;
     int count = 0;
-    while (offset < length && text.codeUnitAt(offset) == _minusCodeUnit) {
+    while (offset < length && text.codeUnitAt(offset) == minusCodeUnit) {
       count++;
       offset++;
     }

@@ -1,4 +1,10 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.autolink;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/inlines.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Autolinks (`<http://example.com/>`) parser
 class AutolinkParser extends AbstractParser<Inlines> {

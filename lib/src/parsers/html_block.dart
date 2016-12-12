@@ -1,4 +1,10 @@
-part of md_proc.src.parsers;
+library md_proc.src.parsers.html_block;
+
+import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/parse_result.dart';
+import 'package:md_proc/src/parsers/abstract.dart';
+import 'package:md_proc/src/parsers/common.dart';
+import 'package:md_proc/src/parsers/container.dart';
 
 /// Parser for html blocks using rules 1-6.
 class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
@@ -6,11 +12,11 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
   HtmlBlockParser(ParsersContainer container) : super(container);
 
   static final List<Pattern> _starts = <Pattern>[
-    _htmlBlock1Test,
-    _htmlBlock2Test,
-    _htmlBlock3Test,
-    _htmlBlock4Test,
-    _htmlBlock5Test
+    htmlBlock1Test,
+    htmlBlock2Test,
+    htmlBlock3Test,
+    htmlBlock4Test,
+    htmlBlock5Test
   ];
 
   static final List<Pattern> _ends = <Pattern>[
@@ -23,7 +29,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
   @override
   ParseResult<Iterable<Block>> parse(String text, int offset) {
-    final int nonIndentOffset = _skipIndent(text, offset);
+    final int nonIndentOffset = skipIndent(text, offset);
 
     int rule;
     for (int i = 0; i < _starts.length; ++i) {
@@ -53,10 +59,10 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
     }
 
     final Match htmlBlock6Match =
-        _htmlBlock6Test.matchAsPrefix(text, nonIndentOffset);
+        htmlBlock6Test.matchAsPrefix(text, nonIndentOffset);
     if (htmlBlock6Match != null) {
       final String tag = htmlBlock6Match[1];
-      if (!_blockTags.contains(tag.toLowerCase())) {
+      if (!blockTags.contains(tag.toLowerCase())) {
         return new ParseResult<Iterable<Block>>.failure();
       }
 
@@ -69,7 +75,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (_emptyLineRegExp.hasMatch(lineRes.value)) {
+        if (emptyLineRegExp.hasMatch(lineRes.value)) {
           break;
         }
       }
