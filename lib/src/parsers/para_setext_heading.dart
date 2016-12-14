@@ -1,5 +1,6 @@
 library md_proc.src.parsers.para_setext_heading;
 
+import 'dart:collection';
 import 'package:md_proc/definitions.dart';
 import 'package:md_proc/src/code_units.dart';
 import 'package:md_proc/src/inlines.dart';
@@ -30,28 +31,31 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
   static final Pattern _listSimpleTest = new RegExp(r'([+\-*]|1[.)])( |$)');
 
-  List<Lookup> _paragraphBreaks;
+  Map<int, List<Lookup>> _paragraphBreaks;
 
   /// Constructor.
   ParaSetextHeadingParser(ParsersContainer container) : super(container);
 
   @override
   void init() {
-    _paragraphBreaks = <Lookup>[
-      thematicBreakLookup,
-      fencedCodeStartLookup,
-      atxHeadingLookup,
-      blockquoteSimpleLookup
-    ];
+    _paragraphBreaks = new HashMap<int, List<Lookup>>();
+
+    _paragraphBreaks[starCodeUnit] = <Lookup>[thematicBreakLookup];
+    _paragraphBreaks[minusCodeUnit] = <Lookup>[thematicBreakLookup];
+    _paragraphBreaks[underscoreCodeUnit] = <Lookup>[thematicBreakLookup];
+
+    _paragraphBreaks[backtickCodeUnit] = <Lookup>[fencedCodeStartLookup];
+    _paragraphBreaks[sharpCodeUnit] = <Lookup>[atxHeadingLookup];
+    _paragraphBreaks[greaterThanCodeUnit] = <Lookup>[blockquoteSimpleLookup];
 
     if (container.options.rawHtml) {
-      _paragraphBreaks.addAll(<Lookup>[
+      _paragraphBreaks[lessThanCodeUnit] = <Lookup>[
         const HtmlBlock1Lookup(),
         const HtmlBlock2Lookup(),
         const HtmlBlock3Lookup(),
         const HtmlBlock4Lookup(),
         htmlBlock5Lookup
-      ]);
+      ];
     }
   }
 
@@ -85,11 +89,14 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
         final int indent = skipIndent(lineResult.value, 0);
         if (indent != -1 &&
-            contents.length > 0 &&
-            _paragraphBreaks.any(
+            contents.length > 0) {
+          final int codeUnit = lineResult.value.codeUnitAt(indent);
+          final List<Lookup> lookups = _paragraphBreaks[codeUnit];
+          if (lookups != null && lookups.any(
                 (Lookup lookup) => lookup.isFound(lineResult.value, indent))) {
-          // Paragraph stops here as we've got another block.
-          break;
+            // Paragraph stops here as we've got another block.
+            break;
+          }
         }
 
         // Special check for html block rule 6.

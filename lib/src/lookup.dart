@@ -121,7 +121,11 @@ class HtmlBlock1Lookup extends Lookup {
 
     codeUnit = text.codeUnitAt(offset);
 
-    return codeUnit == greaterThanCodeUnit || spaces.contains(codeUnit);
+    return codeUnit == greaterThanCodeUnit ||
+        codeUnit == spaceCodeUnit ||
+        codeUnit == tabCodeUnit ||
+        codeUnit == newLineCodeUnit ||
+        codeUnit == carriageReturnCodeUnit;
   }
 }
 
@@ -136,9 +140,9 @@ class HtmlBlock2Lookup extends Lookup {
     }
 
     return text.codeUnitAt(offset) == lessThanCodeUnit &&
-      text.codeUnitAt(offset + 1) == exclamationMarkCodeUnit &&
-      text.codeUnitAt(offset + 2) == minusCodeUnit &&
-      text.codeUnitAt(offset + 3) == minusCodeUnit;
+        text.codeUnitAt(offset + 1) == exclamationMarkCodeUnit &&
+        text.codeUnitAt(offset + 2) == minusCodeUnit &&
+        text.codeUnitAt(offset + 3) == minusCodeUnit;
   }
 }
 
@@ -153,7 +157,7 @@ class HtmlBlock3Lookup extends Lookup {
     }
 
     return text.codeUnitAt(offset) == lessThanCodeUnit &&
-      text.codeUnitAt(offset + 1) == questionMarkCodeUnit;
+        text.codeUnitAt(offset + 1) == questionMarkCodeUnit;
   }
 }
 
@@ -171,4 +175,3 @@ class HtmlBlock4Lookup extends Lookup {
         text.codeUnitAt(offset + 1) == exclamationMarkCodeUnit;
   }
 }
-

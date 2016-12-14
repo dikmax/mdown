@@ -3,6 +3,7 @@ library md_proc.src.parsers.inline_structure;
 import 'dart:collection';
 import 'dart:math';
 import 'package:md_proc/definitions.dart';
+import 'package:md_proc/src/bit_set.dart';
 import 'package:md_proc/src/code_units.dart';
 import 'package:md_proc/src/inlines.dart';
 import 'package:md_proc/src/parse_result.dart';
@@ -92,14 +93,14 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
   /// Constructor.
   InlineStructureParser(ParsersContainer container) : super(container) {
-    this._delimitersChars =
-        new Set<int>.from(<int>[starCodeUnit, underscoreCodeUnit]);
+    this._delimitersChars = new BitSet(256);
+    this._delimitersChars.addAll(<int>[starCodeUnit, underscoreCodeUnit]);
 
-    this._intrawordDelimetersChars = new Set<int>.from(<int>[starCodeUnit]);
+    this._intrawordDelimetersChars = new BitSet(256);
+    this._intrawordDelimetersChars.add(starCodeUnit);
 
     if (container.options.smartPunctuation) {
-      _delimitersChars.add(singleQuoteCodeUnit);
-      _delimitersChars.add(doubleQuoteCodeUnit);
+      _delimitersChars..add(singleQuoteCodeUnit)..add(doubleQuoteCodeUnit);
     }
 
     if (container.options.strikeout) {

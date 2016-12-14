@@ -3,14 +3,24 @@ library md_proc.src.parsers.common;
 import 'dart:collection';
 import 'package:md_proc/definitions.dart';
 import 'package:md_proc/entities.dart';
+import 'package:md_proc/src/bit_set.dart';
 import 'package:md_proc/src/code_units.dart';
 
 final RegExp anyLineRegExp = new RegExp(r'.*$');
 final RegExp emptyLineRegExp = new RegExp(r'^[ \t]*$');
 
 const String escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-final Set<int> escapableCodes =
-    new Set<int>.from(escapable.split('').map((String s) => s.codeUnitAt(0)));
+Set<int> _escapableCodesSet;
+
+Set<int> get escapableCodes {
+  if (_escapableCodesSet == null) {
+    _escapableCodesSet = new BitSet(256);
+    _escapableCodesSet.addAll(
+        escapable.split('').map((String s) => s.codeUnitAt(0)));
+  }
+
+  return _escapableCodesSet;
+}
 
 // TODO move to paragraph file
 final RegExp atxHeadingTest = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
@@ -29,7 +39,7 @@ final Pattern htmlBlock5Test = '<!\[CDATA\[';
 final Pattern htmlBlock6Test = new RegExp(
   r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 );
-final Set<String> blockTags = new Set<String>.from(<String>[
+final Set<String> blockTags = new HashSet<String>.from(<String>[
   'address',
   'article',
   'aside',

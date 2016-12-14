@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:md_proc/md_proc.dart';
-// import 'package:markdown/markdown.dart' as markdown;
+import 'package:markdown/markdown.dart' as markdown;
 
 class MapEmitter implements ScoreEmitter {
   String name;
@@ -44,7 +44,6 @@ class MdProcBenchmark extends BenchmarkBase {
   }
 }
 
-/*
 class MarkdownBenchmark extends BenchmarkBase {
   String data;
 
@@ -63,41 +62,39 @@ class MarkdownBenchmark extends BenchmarkBase {
         extensionSet: markdown.ExtensionSet.commonMark);
   }
 }
-*/
 
 Future<dynamic> main() async {
-  final Directory dir = new Directory('benchmark/samples');
+  final Directory dir = new Directory('benchmark/progit');
 
   final MapEmitter mdProcResults = new MapEmitter("md_proc");
-  // MapEmitter markdownResults = new MapEmitter("markdown");
+  final MapEmitter markdownResults = new MapEmitter("markdown");
 
   double sum = 0.0;
 
   await for (FileSystemEntity entity in dir.list()) {
     if (entity is File) {
       String name = entity.uri.pathSegments.last;
-      if (name.endsWith('.md')) {
-        name = name.replaceAll(new RegExp(r'\.md$'), '');
+      if (name.endsWith('.md') || name.endsWith('.markdown')) {
+        name = name.replaceAll(new RegExp(r'\.(md|markdown)$'), '');
         print('Benchmarking: $name...');
         final String data = await entity.readAsString();
         MdProcBenchmark.main(name, data, mdProcResults);
         print('md_proc: ${mdProcResults.scores[name]}');
         sum += mdProcResults.scores[name];
-        /*MarkdownBenchmark.main(name, data, markdownResults);
-        print('markdown: ${markdownResults.scores[name]}');*/
+        MarkdownBenchmark.main(name, data, markdownResults);
+        print('markdown: ${markdownResults.scores[name]}');
       }
     }
   }
 
-  // double mdProcAvg = mdProcResults.report();
-  // double markdownAvg = markdownResults.report();
+  double mdProcAvg = mdProcResults.report();
+  double markdownAvg = markdownResults.report();
 
-  /*
   if (mdProcAvg < markdownAvg) {
     print('md_proc is ${markdownAvg / mdProcAvg} times faster');
   } else {
     print('md_proc is ${mdProcAvg / markdownAvg} times slover');
-  }*/
+  }
 
   print('Total: $sum');
 

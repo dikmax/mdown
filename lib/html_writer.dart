@@ -1,7 +1,9 @@
 library md_proc.html_writer;
 
+import 'dart:collection';
 import 'package:md_proc/definitions.dart';
 import 'package:md_proc/options.dart';
+import 'package:md_proc/src/code_units.dart';
 
 class _HtmlBuilder extends StringBuffer {
   Options _options;
@@ -380,15 +382,56 @@ class _HtmlBuilder extends StringBuffer {
 
   final RegExp _escapedChars = new RegExp(r'[<>&"]');
   // TODO HashMap.
-  final Map<String, String> _escape = <String, String>{
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "&": "&amp;"
-  };
+  final Map<String, String> _escape = new HashMap<String, String>.from(
+      <String, String>{"<": "&lt;", ">": "&gt;", '"': "&quot;", "&": "&amp;"});
 
-  String htmlEscape(String str) => str.replaceAllMapped(
-      _escapedChars, (Match match) => _escape[match.group(0)]);
+  String htmlEscape(String str) {
+    final List<int> charCodes = <int>[];
+    final int length = str.length;
+    for (int i = 0; i < length; ++i) {
+      int codeUnit = str.codeUnitAt(i);
+      switch (codeUnit) {
+        case lessThanCodeUnit:
+          charCodes
+            ..add(ampersandCodeUnit)
+            ..add(smallLCharCode)
+            ..add(smallTCharCode)
+            ..add(semicolonCodeUnit);
+          break;
+
+        case greaterThanCodeUnit:
+          charCodes
+            ..add(ampersandCodeUnit)
+            ..add(smallGCharCode)
+            ..add(smallTCharCode)
+            ..add(semicolonCodeUnit);
+          break;
+
+        case doubleQuoteCodeUnit:
+          charCodes
+            ..add(ampersandCodeUnit)
+            ..add(smallQCharCode)
+            ..add(smallUCharCode)
+            ..add(smallOCharCode)
+            ..add(smallTCharCode)
+            ..add(semicolonCodeUnit);
+          break;
+
+        case ampersandCodeUnit:
+          charCodes
+            ..add(ampersandCodeUnit)
+            ..add(smallACharCode)
+            ..add(smallMCharCode)
+            ..add(smallPCharCode)
+            ..add(semicolonCodeUnit);
+          break;
+
+        default:
+          charCodes.add(codeUnit);
+      }
+    }
+    return new String.fromCharCodes(charCodes);
+  }
 
   final RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
   final RegExp _htmlEntity = new RegExp(
