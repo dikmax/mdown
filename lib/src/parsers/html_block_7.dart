@@ -1,13 +1,13 @@
-library md_proc.src.parsers.html_block_7;
+library mdown.src.parsers.html_block_7;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for html blocks using rule 7.
-class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
+class HtmlBlock7Parser extends AbstractParser<BlockNodeImpl> {
   /// Constructor.
   HtmlBlock7Parser(ParsersContainer container) : super(container);
 
@@ -15,7 +15,7 @@ class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
       new RegExp(r'^ {0,3}(?:' + htmlOpenTag + '|' + htmlCloseTag + r')\s*$');
 
   @override
-  ParseResult<Iterable<Block>> parse(String text, int offset) {
+  ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final ParseResult<String> lineRes =
         container.lineParser.parse(text, offset);
     assert(lineRes.isSuccess);
@@ -31,15 +31,15 @@ class HtmlBlock7Parser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (emptyLineRegExp.hasMatch(lineRes.value)) {
+        if (lineRes.value.trimLeft().isEmpty) {
           break;
         }
       }
 
-      return new ParseResult<Iterable<Block>>.success(
-          <Block>[new HtmlRawBlock(result.toString())], offset);
+      return new ParseResult<BlockNodeImpl>.success(
+          new HtmlRawBlockImpl(result.toString()), offset);
     }
 
-    return new ParseResult<Iterable<Block>>.failure();
+    return new ParseResult<BlockNodeImpl>.failure();
   }
 }

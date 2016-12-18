@@ -1,15 +1,14 @@
-library md_proc.src.parsers.inline_html;
+library mdown.src.parsers.inline_html;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for inline html.
-class InlineHtmlParser extends AbstractParser<Inlines> {
+class InlineHtmlParser extends AbstractParser<InlineNodeImpl> {
   /// Constructor.
   InlineHtmlParser(ParsersContainer container) : super(container);
 
@@ -22,19 +21,18 @@ class InlineHtmlParser extends AbstractParser<Inlines> {
   ];
 
   @override
-  ParseResult<Inlines> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parse(String text, int offset) {
     if (text.codeUnitAt(offset) == lessThanCodeUnit) {
       for (RegExp test in _tests) {
         final Match match = test.matchAsPrefix(text, offset);
         if (match != null) {
-          return new ParseResult<Inlines>.success(
-              new Inlines.single(
-                  new HtmlRawInline(text.substring(offset, match.end))),
+          return new ParseResult<InlineNodeImpl>.success(
+              new HtmlRawInlineImpl(text.substring(offset, match.end)),
               match.end);
         }
       }
     }
 
-    return new ParseResult<Inlines>.failure();
+    return new ParseResult<InlineNodeImpl>.failure();
   }
 }

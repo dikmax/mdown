@@ -1,28 +1,26 @@
-library md_proc.src.parsers.tex_math_single_backslash;
+library mdown.src.parsers.tex_math_single_backslash;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parses TeX Match between `\(...\)` and `\[...\]`.
-class TexMathSingleBackslashParser extends AbstractParser<Inlines> {
+class TexMathSingleBackslashParser extends AbstractParser<InlineNodeImpl> {
   /// Constructor.
   TexMathSingleBackslashParser(ParsersContainer container) : super(container);
 
   @override
-  ParseResult<Inlines> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parse(String text, int offset) {
     ++offset;
     final int length = text.length;
     if (offset >= length) {
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(new Str('\\')), offset);
+      return new ParseResult<InlineNodeImpl>.success(new StrImpl('\\'), offset);
     }
     final int codeUnit = text.codeUnitAt(offset);
     if (codeUnit != openParenCodeUnit && codeUnit != openBracketCodeUnit) {
-      return new ParseResult<Inlines>.failure();
+      return new ParseResult<InlineNodeImpl>.failure();
     }
     final bool displayMath = codeUnit == openBracketCodeUnit;
     final int closeCodeUnit =
@@ -40,16 +38,16 @@ class TexMathSingleBackslashParser extends AbstractParser<Inlines> {
     }
 
     if (!found) {
-      return new ParseResult<Inlines>.failure();
+      return new ParseResult<InlineNodeImpl>.failure();
     }
 
     final String math = text.substring(offset, endOffset);
     if (displayMath) {
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(new TexMathDisplay(math)), endOffset + 2);
+      return new ParseResult<InlineNodeImpl>.success(
+          new TexMathDisplayImpl(math), endOffset + 2);
     } else {
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(new TexMathInline(math)), endOffset + 2);
+      return new ParseResult<InlineNodeImpl>.success(
+          new TexMathInlineImpl(math), endOffset + 2);
     }
   }
 }

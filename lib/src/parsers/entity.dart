@@ -1,33 +1,32 @@
-library md_proc.src.parsers.entity;
+library mdown.src.parsers.entity;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/entities.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/entities.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for entities.
-class EntityParser extends AbstractParser<Inlines> {
+class EntityParser extends AbstractParser<InlineNodeImpl> {
   /// Constructor.
   EntityParser(ParsersContainer container) : super(container);
 
   @override
-  ParseResult<Inlines> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parse(String text, int offset) {
     final Match match = entityRegExp.matchAsPrefix(text, offset);
     if (match != null) {
       if (match[3] != null) {
         final String code = match[3];
         if (code == 'nbsp') {
-          return new ParseResult<Inlines>.success(
-              new Inlines.single(new NonBreakableSpace()), match.end);
+          return new ParseResult<InlineNodeImpl>.success(
+              new NonBreakableSpaceImpl(1), match.end);
         }
         final String str = htmlEntities[match[3]];
         if (str != null) {
-          return new ParseResult<Inlines>.success(
-              new Inlines.single(new Str(str)), match.end);
+          return new ParseResult<InlineNodeImpl>.success(
+              new StrImpl(str), match.end);
         }
       } else {
         int code;
@@ -42,15 +41,14 @@ class EntityParser extends AbstractParser<Inlines> {
         }
 
         if (code == nonBreakableSpaceCodeUnit) {
-          return new ParseResult<Inlines>.success(
-              new Inlines.single(new NonBreakableSpace()), match.end);
+          return new ParseResult<InlineNodeImpl>.success(
+              new NonBreakableSpaceImpl(1), match.end);
         }
-        return new ParseResult<Inlines>.success(
-            new Inlines.single(new Str(new String.fromCharCode(code))),
-            match.end);
+        return new ParseResult<InlineNodeImpl>.success(
+            new StrImpl(new String.fromCharCode(code)), match.end);
       }
     }
 
-    return new ParseResult<Inlines>.failure();
+    return new ParseResult<InlineNodeImpl>.failure();
   }
 }

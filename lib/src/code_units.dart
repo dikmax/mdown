@@ -1,8 +1,6 @@
-library md_proc.src.code_units;
+library mdown.src.code_units;
 
-import 'dart:collection';
-
-import 'package:md_proc/src/bit_set.dart';
+import 'package:mdown/src/bit_set.dart';
 
 /// Code unit for `\t`.
 const int tabCodeUnit = 9;

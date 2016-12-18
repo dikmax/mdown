@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'package:benchmark_harness/benchmark_harness.dart';
-import 'package:md_proc/md_proc.dart';
+import 'package:mdown/mdown.dart';
 import 'package:markdown/markdown.dart' as markdown;
 
 class MapEmitter implements ScoreEmitter {

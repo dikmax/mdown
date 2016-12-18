@@ -1,6 +1,6 @@
 library md_proc.options;
 
-import 'definitions.dart';
+import 'ast/ast.dart';
 
 /// Link resolver accepts two references and should return [Target] with correspondent link.
 /// If link doesn't exists link resolver should return `null`.

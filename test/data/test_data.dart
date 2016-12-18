@@ -1,6 +1,6 @@
 library md_proc.test.data.test_data;
 
-import 'package:md_proc/generators/embed_tests.dart';
+import 'package:mdown/generators/embed_tests.dart';
 
 part 'test_data.g.dart';
 
@@ -16,11 +16,7 @@ final Map<String, String> smartPunctuation = _$smartPunctuationTests;
 @EmbedTests('regression.txt')
 final Map<String, String> regression = _$regressionTests;
 
-/// Additional md->md tests
-@EmbedTests('markdown_markdown.txt')
-final Map<String, String> markdownToMarkdown = _$markdownToMarkdownTests;
-
-/// Additional md->html tests
+/// Additional tests
 @EmbedTests('additional.txt')
 final Map<String, String> additionalMarkdownToHtml =
     _$additionalMarkdownToHtmlTests;

@@ -1,14 +1,18 @@
-library md_proc.src.parsers.inline_structure;
+library mdown.src.parsers.inline_structure;
 
 import 'dart:collection';
 import 'dart:math';
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/bit_set.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/container.dart';
+
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/ast/combining_nodes.dart';
+import 'package:mdown/src/ast/enums.dart';
+import 'package:mdown/src/ast/replacing_visitor.dart';
+import 'package:mdown/src/bit_set.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 class _Delim {
   final int charCode;
@@ -21,7 +25,7 @@ class _Delim {
 
   /// Required for subscript and superscript as they cannot contain space.
   bool containsSpace = false;
-  Inlines inlines = new Inlines();
+  List<InlineNodeImpl> inlines = <InlineNodeImpl>[];
 
   _Delim(this.charCode, this.count, this.canOpen, this.canClose);
 
@@ -42,54 +46,76 @@ class _Delim {
 }
 
 /// Space inline
-class _EscapedSpace extends Inline {
-  static final _EscapedSpace _instance = new _EscapedSpace._internal();
+class EscapedSpace extends InlineNodeImpl {
+  @override
+  // ignore: avoid_as
+  R accept<R>(AstVisitor<R> visitor) => (visitor as ReplaceEscapedVisitor)
+      .visitEscapedSpace(this);
 
-  /// Constructor
-  factory _EscapedSpace() {
-    return _instance;
-  }
-
-  _EscapedSpace._internal();
+  // TODO: implement childEntities
+  @override
+  Iterable<AstNode> get childEntities => null;
 
   @override
-  String toString() => "_EscapedSpace";
-
-  @override
-  bool operator ==(dynamic obj) => obj is _EscapedSpace;
-
-  @override
-  int get hashCode => 0;
+  void visitChildren<R>(AstVisitor<R> visitor) {}
 }
 
 /// Tab inline
-class _EscapedTab extends Inline {
-  static final _EscapedTab _instance = new _EscapedTab._internal();
+class EscapedTab extends InlineNodeImpl {
+  @override
+  // ignore: avoid_as
+  R accept<R>(AstVisitor<R> visitor) => (visitor as ReplaceEscapedVisitor)
+      .visitEscapedTab(this);
 
-  /// Constructor
-  factory _EscapedTab() {
-    return _instance;
-  }
-
-  _EscapedTab._internal();
+  // TODO: implement childEntities
+  @override
+  Iterable<AstNode> get childEntities => null;
 
   @override
-  String toString() => "_EscapedTab";
-
-  @override
-  bool operator ==(dynamic obj) => obj is _EscapedTab;
-
-  @override
-  int get hashCode => 0;
+  void visitChildren<R>(AstVisitor<R> visitor) {}
 }
 
+/// Replaces [EscapedSpace] and [EscapedTab] with correspondent inlines.
+class ReplaceEscapedVisitor extends ListReplacingAstVisitor {
+  final bool _success;
+
+  /// Constructs new visitor. Set [_success] to true if parsing was successful.
+  ReplaceEscapedVisitor(this._success);
+
+  visitEscapedSpace(EscapedSpace node) {
+    final List<InlineNodeImpl> result = <InlineNodeImpl>[];
+    if (!_success) {
+      result.add(new StrImpl('\\'));
+    }
+    result.add(new SpaceImpl(1));
+
+    return result;
+  }
+
+  visitEscapedTab(EscapedTab node) {
+    final List<InlineNodeImpl> result = <InlineNodeImpl>[];
+    if (!_success) {
+      result.add(new StrImpl('\\'));
+    }
+    result.add(new TabImpl(1));
+
+    return result;
+  }
+}
+
+final ReplacingAstVisitor _failureVisitor =
+    new ReplacingAstVisitor(new ReplaceEscapedVisitor(false));
+
+final ReplacingAstVisitor _successVisitor =
+    new ReplacingAstVisitor(new ReplaceEscapedVisitor(true));
+
 /// Parsing emphasis, strongs, smartquotes, etc.
-class InlineStructureParser extends AbstractParser<Inlines> {
+class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
   Set<int> _delimitersChars;
 
   Set<int> _intrawordDelimetersChars;
 
-  Map<int, List<AbstractParser<Iterable<Inline>>>> _inlineParsers;
+  Map<int, List<AbstractParser<InlineNodeImpl>>> _inlineParsers;
 
   /// Constructor.
   InlineStructureParser(ParsersContainer container) : super(container) {
@@ -120,17 +146,17 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
   @override
   void init() {
-    _inlineParsers = new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
+    _inlineParsers = new HashMap<int, List<AbstractParser<InlineNodeImpl>>>();
 
-    _inlineParsers[spaceCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[spaceCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[tabCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[tabCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[backslashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
+    _inlineParsers[backslashCodeUnit] = <AbstractParser<InlineNodeImpl>>[];
     if (container.options.texMathSingleBackslash) {
       _inlineParsers[backslashCodeUnit]
           .add(container.texMathSingleBackslashParser);
@@ -141,19 +167,19 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     }
     _inlineParsers[backslashCodeUnit].add(container.escapesParser);
 
-    _inlineParsers[ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[ampersandCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.entityParser
     ];
 
-    _inlineParsers[backtickCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[backtickCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.inlineCodeParser
     ];
 
-    _inlineParsers[openBracketCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[openBracketCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.linkImageParser
     ];
 
-    _inlineParsers[lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[lessThanCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.autolinkParser
     ];
 
@@ -162,17 +188,17 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     }
 
     if (container.options.smartPunctuation) {
-      _inlineParsers[dotCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[dotCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.ellipsisParser
       ];
 
-      _inlineParsers[minusCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[minusCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.mnDashParser
       ];
     }
 
     if (container.options.texMathDollars) {
-      _inlineParsers[dollarCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[dollarCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.texMathDollarsParser
       ];
     }
@@ -226,38 +252,41 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     final bool punctuationAfter = punctuation.contains(codeUnitAfter);
     final bool punctuationBefore = punctuation.contains(codeUnitBefore);
 
-    final bool leftFlanking =
-        !spaceAfter && (!punctuationAfter || spaceBefore || punctuationBefore);
-    final bool rightFlanking =
-        !spaceBefore && (!punctuationBefore || spaceAfter || punctuationAfter);
+    final bool leftFlanking = !spaceAfter &&
+        !(punctuationAfter && !spaceBefore && !punctuationBefore);
+    final bool rightFlanking = !spaceBefore &&
+        !(punctuationBefore && !spaceAfter && !punctuationAfter);
 
     bool canOpen = leftFlanking;
     bool canClose = rightFlanking;
-    if (charCode == underscoreCodeUnit) {
+    if (charCode == underscoreCodeUnit ||
+        charCode == singleQuoteCodeUnit ||
+        charCode == doubleQuoteCodeUnit) {
       canOpen = canOpen && (!rightFlanking || punctuationBefore);
       canClose = canClose && (!leftFlanking || punctuationAfter);
-    } else if (charCode == singleQuoteCodeUnit ||
-        charCode == doubleQuoteCodeUnit) {
-      canOpen = canOpen && !rightFlanking;
     }
 
     return new _Delim(charCode, count, canOpen, canClose);
   }
 
-  Inlines _buildStack(List<_Delim> stack, int skip) {
-    final Inlines result = new Inlines();
+  List<InlineNodeImpl> _buildStack(List<_Delim> stack, int skip) {
+    final List<InlineNodeImpl> result = <InlineNodeImpl>[];
     final Iterable<_Delim> list = skip > 0 ? stack.skip(skip) : stack;
     for (_Delim delim in list) {
       if (delim.count > 0) {
         final int charCode = delim.charCode;
         if (charCode == singleQuoteCodeUnit) {
-          result.addAll(new List<Inline>.filled(delim.count,
-              delim.matched ? new SingleOpenQuote() : new Apostrophe()));
+          result.addAll(new List<InlineNodeImpl>.filled(
+              delim.count,
+              new SmartCharImpl(delim.matched
+                  ? SmartCharType.singleOpenQuote
+                  : SmartCharType.apostrophe)));
         } else if (charCode == doubleQuoteCodeUnit) {
-          result.addAll(
-              new List<Inline>.filled(delim.count, new DoubleOpenQuote()));
+          result.addAll(new List<InlineNodeImpl>.filled(
+              delim.count, new SmartCharImpl(SmartCharType.doubleOpenQuote)));
         } else {
-          result.add(new Str(new String.fromCharCode(charCode) * delim.count));
+          result.add(
+              new StrImpl(new String.fromCharCode(charCode) * delim.count));
         }
       }
       result.addAll(delim.inlines);
@@ -267,86 +296,64 @@ class InlineStructureParser extends AbstractParser<Inlines> {
     return result;
   }
 
-  /// Replaces _EscapedSpace and _EscapedTab with correspondent inlines.
-  Inlines unescapeSpaces(Iterable<Inline> items, bool success) {
-    final Inlines result = new Inlines();
-    for (Inline item in items) {
-      if (item is _EscapedSpace) {
-        if (!success) {
-          result.add(new Str('\\'));
-        }
-        result.add(new Space());
-      } else if (item is _EscapedTab) {
-        if (!success) {
-          result.add(new Str('\\'));
-        }
-        result.add(new Tab());
-      } else {
-        if (item is Strong) {
-          item.contents = unescapeSpaces(item.contents, success);
-        } else if (item is Emph) {
-          item.contents = unescapeSpaces(item.contents, success);
-        } else if (item is Strikeout) {
-          item.contents = unescapeSpaces(item.contents, success);
-        } else if (item is Link) {
-          item.label = unescapeSpaces(item.label, success);
-        } else if (item is Image) {
-          item.label = unescapeSpaces(item.label, success);
-        }
-        result.add(item);
-      }
-    }
-    return result;
-  }
-
   @override
-  ParseResult<Inlines> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parse(String text, int offset) {
     final _Delim delim = _scanDelims(text, offset);
 
     offset += delim.count;
 
     if (!delim.canOpen) {
       final int charCode = delim.charCode;
-      List<Inline> result;
-      if (charCode == singleQuoteCodeUnit) {
-        result = new List<Inline>.filled(delim.count, new Apostrophe());
-      } else if (charCode == doubleQuoteCodeUnit) {
-        result = new List<Inline>.filled(delim.count, new DoubleCloseQuote());
+      if (charCode == singleQuoteCodeUnit || charCode == doubleQuoteCodeUnit) {
+        if (delim.count == 1) {
+          return new ParseResult<InlineNodeImpl>.success(
+              new SmartCharImpl(charCode == singleQuoteCodeUnit
+                  ? SmartCharType.apostrophe
+                  : SmartCharType.doubleCloseQuote),
+              offset);
+        } else {
+          return new ParseResult<InlineNodeImpl>.success(
+              new CombiningInlineNodeImpl(new List<InlineNodeImpl>.filled(
+                  delim.count,
+                  new SmartCharImpl(charCode == singleQuoteCodeUnit
+                      ? SmartCharType.apostrophe
+                      : SmartCharType.doubleCloseQuote))),
+              offset);
+        }
       } else {
-        result = <Inline>[
-          new Str(new String.fromCharCode(charCode) * delim.count)
-        ];
+        return new ParseResult<InlineNodeImpl>.success(
+            new StrImpl(new String.fromCharCode(charCode) * delim.count),
+            offset);
       }
-
-      return new ParseResult<Inlines>.success(new Inlines.from(result), offset);
     }
 
     final List<_Delim> stack = <_Delim>[delim];
 
-    Inlines result = new Inlines();
+    List<InlineNodeImpl> result = <InlineNodeImpl>[];
 
     final int length = text.length;
     while (offset < length && stack.length > 0) {
       final _Delim delim = _scanDelims(text, offset);
       if (delim != null) {
+        final int charCode = delim.charCode;
         if (delim.canClose) {
-          if (delim.charCode == singleQuoteCodeUnit ||
-              delim.charCode == doubleQuoteCodeUnit) {
+          if (charCode == singleQuoteCodeUnit ||
+              charCode == doubleQuoteCodeUnit) {
             int openDelimIndex = stack.length - 1;
             while (openDelimIndex >= 0) {
               final _Delim openDelim = stack[openDelimIndex];
-              if (openDelim.charCode == delim.charCode) {
+              if (openDelim.charCode == charCode) {
                 openDelim.matched = true;
                 break;
               }
               openDelimIndex--;
             }
 
-            stack.last.inlines.addAll(new List<Inline>.filled(
+            stack.last.inlines.addAll(new List<InlineNodeImpl>.filled(
                 delim.count,
-                delim.charCode == singleQuoteCodeUnit
-                    ? new SingleCloseQuote()
-                    : new DoubleCloseQuote()));
+                new SmartCharImpl(charCode == singleQuoteCodeUnit
+                    ? SmartCharType.singleCloseQuote
+                    : SmartCharType.doubleCloseQuote)));
 
             offset += delim.count;
             delim.count = 0;
@@ -360,42 +367,50 @@ class InlineStructureParser extends AbstractParser<Inlines> {
               if (countCloses > 0) {
                 final _Delim openDelim = stack[openDelimIndex];
                 if (openDelimIndex < stack.length - 1) {
-                  final Inlines inner = _buildStack(stack, openDelimIndex + 1);
+                  final List<InlineNodeImpl> inner =
+                      _buildStack(stack, openDelimIndex + 1);
                   openDelim.inlines.addAll(inner);
                 }
 
-                Inlines itemRes = openDelim.inlines;
+                List<InlineNodeImpl> itemRes = openDelim.inlines;
 
-                switch (delim.charCode) {
+                switch (charCode) {
                   case tildeCodeUnit:
                     int delimsLeft = countCloses;
                     while (delimsLeft >= 2) {
-                      itemRes = new Inlines.single(new Strikeout(itemRes));
+                      itemRes = <InlineNodeImpl>[new StrikeoutImpl(itemRes)];
                       delimsLeft -= 2;
                     }
                     if (delimsLeft == 1) {
                       if (container.options.subscript) {
                         if (!openDelim.containsSpace) {
-                          itemRes = unescapeSpaces(itemRes, true);
-                          itemRes = new Inlines.single(new Subscript(itemRes));
+                          final List<InlineNodeImpl> replaced =
+                              new List<InlineNodeImpl>.from(
+                                  _successVisitor.visitInlineNodeList(itemRes));
+                          itemRes = replaced ?? itemRes;
+
+                          itemRes = <InlineNodeImpl>[
+                            new SubscriptImpl(itemRes)
+                          ];
                         } else {
-                          itemRes.insert(0, new Str('~'));
-                          itemRes.add(new Str('~'));
+                          itemRes.insert(0, new StrImpl('~'));
+                          itemRes.add(new StrImpl('~'));
                         }
                       } else {
-                        itemRes.insert(0, new Str('~'));
-                        itemRes.add(new Str('~'));
+                        itemRes.insert(0, new StrImpl('~'));
+                        itemRes.add(new StrImpl('~'));
                       }
                     }
                     break;
 
                   case caretCodeUnit:
                     if (!openDelim.containsSpace) {
-                      itemRes = unescapeSpaces(itemRes, true);
-                      itemRes = new Inlines.single(new Superscript(itemRes));
+                      final List<InlineNode> replaced =
+                          _successVisitor.visitInlineNodeList(itemRes);
+                      itemRes = <InlineNodeImpl>[new SuperscriptImpl(replaced)];
                     } else {
-                      itemRes.insert(0, new Str('^'));
-                      itemRes.add(new Str('^'));
+                      itemRes.insert(0, new StrImpl('^'));
+                      itemRes.add(new StrImpl('^'));
                     }
                     break;
 
@@ -403,12 +418,18 @@ class InlineStructureParser extends AbstractParser<Inlines> {
                   case starCodeUnit:
                     int delimsLeft = countCloses;
                     if ((delimsLeft & 1) == 1) {
-                      itemRes = new Inlines.single(new Emph(itemRes));
+                      itemRes = <InlineNodeImpl>[
+                        new EmphasisImpl(itemRes,
+                            emphasisDelimiterTypeFromCodeUnit(charCode))
+                      ];
                       delimsLeft--;
                     }
 
                     while (delimsLeft > 0) {
-                      itemRes = new Inlines.single(new Strong(itemRes));
+                      itemRes = <InlineNodeImpl>[
+                        new StrongImpl(itemRes,
+                            emphasisDelimiterTypeFromCodeUnit(charCode))
+                      ];
                       delimsLeft -= 2;
                     }
                     break;
@@ -417,7 +438,8 @@ class InlineStructureParser extends AbstractParser<Inlines> {
 
                 openDelim.count -= countCloses;
                 if (openDelim.count == 0) {
-                  final Inlines itemRes = _buildStack(stack, stack.length - 1);
+                  final List<InlineNodeImpl> itemRes =
+                      _buildStack(stack, stack.length - 1);
                   if (stack.length == 0) {
                     result.addAll(itemRes);
                   } else {
@@ -437,10 +459,21 @@ class InlineStructureParser extends AbstractParser<Inlines> {
           if (delim.canOpen) {
             stack.add(delim);
           } else {
-            final Inlines inlines =
+            final List<InlineNodeImpl> inlines =
                 stack.length == 0 ? result : stack.last.inlines;
-            inlines.add(
-                new Str(new String.fromCharCode(delim.charCode) * delim.count));
+            if (charCode == singleQuoteCodeUnit) {
+              inlines.addAll(new List<InlineNodeImpl>.filled(
+                  delim.count,
+                  new SmartCharImpl(delim.matched
+                      ? SmartCharType.singleOpenQuote
+                      : SmartCharType.apostrophe)));
+            } else if (charCode == doubleQuoteCodeUnit) {
+              inlines.addAll(new List<InlineNodeImpl>.filled(delim.count,
+                  new SmartCharImpl(SmartCharType.doubleOpenQuote)));
+            } else {
+              inlines.add(
+                  new StrImpl(new String.fromCharCode(charCode) * delim.count));
+            }
           }
         }
 
@@ -463,8 +496,8 @@ class InlineStructureParser extends AbstractParser<Inlines> {
             final int codeUnit2 = text.codeUnitAt(offset + 1);
             if (codeUnit2 == spaceCodeUnit || codeUnit2 == tabCodeUnit) {
               stack.last.inlines.add(codeUnit2 == spaceCodeUnit
-                  ? new _EscapedSpace()
-                  : new _EscapedTab());
+                  ? new EscapedSpace()
+                  : new EscapedTab());
               offset += 2;
               continue;
             }
@@ -476,22 +509,26 @@ class InlineStructureParser extends AbstractParser<Inlines> {
           offset + 1 < length &&
           text.codeUnitAt(offset + 1) == openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
-        final ParseResult<Inlines> res =
+        final ParseResult<InlineNodeImpl> res =
             container.linkImageParser.parse(text, offset);
         if (res.isSuccess) {
-          if (res.value.length > 0) {
-            stack.last.inlines.addAll(res.value);
-          }
+          stack.last.inlines.add(res.value);
           offset = res.offset;
           continue;
         }
       } else if (_inlineParsers.containsKey(codeUnit)) {
         bool found = false;
-        for (AbstractParser<Inlines> parser in _inlineParsers[codeUnit]) {
-          final ParseResult<Inlines> res = parser.parse(text, offset);
+        for (AbstractParser<InlineNodeImpl> parser
+            in _inlineParsers[codeUnit]) {
+          final ParseResult<InlineNodeImpl> res = parser.parse(text, offset);
           if (res.isSuccess) {
-            if (res.value.length > 0) {
-              stack.last.inlines.addAll(res.value);
+            if (res.value != null) {
+              if (res.value is CombiningInlineNodeImpl) {
+                final CombiningInlineNodeImpl combining = res.value;
+                stack.last.inlines.addAll(combining.list);
+              } else {
+                stack.last.inlines.add(res.value);
+              }
             }
             offset = res.offset;
             found = true;
@@ -504,21 +541,27 @@ class InlineStructureParser extends AbstractParser<Inlines> {
         }
       }
 
-      final ParseResult<Inlines> res = container.strParser.parse(text, offset);
+      final ParseResult<InlineNodeImpl> res =
+          container.strParser.parse(text, offset);
       assert(res.isSuccess);
 
-      if (res.value.length > 0) {
-        stack.last.inlines.addAll(res.value);
-      }
+      stack.last.inlines.add(res.value);
       offset = res.offset;
     }
 
     result.addAll(_buildStack(stack, 0));
 
     if (container.options.subscript || container.options.superscript) {
-      result = unescapeSpaces(result, false);
+      result = new List<InlineNodeImpl>.from(
+          _failureVisitor.visitInlineNodeList(result));
     }
 
-    return new ParseResult<Inlines>.success(result, offset);
+    if (result.isEmpty) {
+      return new ParseResult<InlineNodeImpl>.success(null, offset);
+    } else if (result.length == 1) {
+      return new ParseResult<InlineNodeImpl>.success(result.single, offset);
+    }
+    return new ParseResult<InlineNodeImpl>.success(
+        new CombiningInlineNodeImpl(result), offset);
   }
 }

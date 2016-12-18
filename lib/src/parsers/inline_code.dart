@@ -1,15 +1,15 @@
-library md_proc.src.parsers.inline_code;
+library mdown.src.parsers.inline_code;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for code inlines.
-class InlineCodeParser extends AbstractParser<Inlines> {
+class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
   /// Constructor.
   InlineCodeParser(ParsersContainer container) : super(container);
 
@@ -19,7 +19,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
   static const int _stateDone = 3;
 
   @override
-  ParseResult<Inlines> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parse(String text, int offset) {
     int fenceSize = 1;
     offset++;
 
@@ -77,7 +77,7 @@ class InlineCodeParser extends AbstractParser<Inlines> {
         (state == _stateCloseFence && endFenceSize == fenceSize)) {
       final String code =
           trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
-      Attr attributes = new EmptyAttr();
+      ExtendedAttributes attributes;
       if (container.options.inlineCodeAttributes) {
         if (offset < length && text.codeUnitAt(offset) == openBraceCodeUnit) {
           final ParseResult<Attributes> attributesResult =
@@ -88,14 +88,11 @@ class InlineCodeParser extends AbstractParser<Inlines> {
           }
         }
       }
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(
-              new Code(code, fenceSize: fenceSize, attributes: attributes)),
-          offset);
+      return new ParseResult<InlineNodeImpl>.success(
+          new CodeImpl(code, fenceSize, attributes), offset);
     }
 
-    return new ParseResult<Inlines>.success(
-        new Inlines.single(new Str('`' * fenceSize)),
+    return new ParseResult<InlineNodeImpl>.success(new StrImpl('`' * fenceSize),
         codeStartOffset == -1 ? offset : codeStartOffset);
   }
 }

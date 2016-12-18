@@ -1,14 +1,14 @@
-library md_proc.src.parsers.html_block;
+library mdown.src.parsers.html_block;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/lookup.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/lookup.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for html blocks using rules 1-6.
-class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
+class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
   /// Constructor.
   HtmlBlockParser(ParsersContainer container) : super(container);
 
@@ -30,7 +30,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
   ];
 
   @override
-  ParseResult<Iterable<Block>> parse(String text, int offset) {
+  ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final int nonIndentOffset = skipIndent(text, offset);
 
     int rule;
@@ -56,8 +56,8 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
         }
       }
 
-      return new ParseResult<Iterable<Block>>.success(
-          <Block>[new HtmlRawBlock(result.toString())], offset);
+      return new ParseResult<BlockNodeImpl>.success(
+          new HtmlRawBlockImpl(result.toString()), offset);
     }
 
     final Match htmlBlock6Match =
@@ -65,7 +65,7 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
     if (htmlBlock6Match != null) {
       final String tag = htmlBlock6Match[1];
       if (!blockTags.contains(tag.toLowerCase())) {
-        return new ParseResult<Iterable<Block>>.failure();
+        return new ParseResult<BlockNodeImpl>.failure();
       }
 
       final int length = text.length;
@@ -77,15 +77,15 @@ class HtmlBlockParser extends AbstractParser<Iterable<Block>> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (emptyLineRegExp.hasMatch(lineRes.value)) {
+        if (lineRes.value.trimLeft().isEmpty) {
           break;
         }
       }
 
-      return new ParseResult<Iterable<Block>>.success(
-          <Block>[new HtmlRawBlock(result.toString())], offset);
+      return new ParseResult<BlockNodeImpl>.success(
+          new HtmlRawBlockImpl(result.toString()), offset);
     }
 
-    return new ParseResult<Iterable<Block>>.failure();
+    return new ParseResult<BlockNodeImpl>.failure();
   }
 }

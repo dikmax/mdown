@@ -1,4 +1,4 @@
-library md_proc.src.bit_set;
+library mdown.src.bit_set;
 
 import 'dart:collection';
 import 'dart:typed_data';

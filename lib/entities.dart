@@ -1,6 +1,7 @@
 library md_proc.entities;
 
 import 'dart:collection';
+
 import './generators/entities.dart';
 
 part 'entities.g.dart';

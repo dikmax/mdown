@@ -3863,199 +3863,6 @@ x
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
-// Target: final Map<String, String> markdownToMarkdown
-// **************************************************************************
-
-final Map<String, String> _$markdownToMarkdownTests = <String, String>{
-  r'''Test!
-''': r'''Test!
-''',
-  r'''Paragraph
-        Paragraph
-''': r'''Paragraph
-Paragraph
-''',
-  r'''\*&nbsp;a&nbsp;*
-''': r'''\*&nbsp;a&nbsp;\*
-''',
-  r'''\---
-''': r'''\---
-''',
-  r'''  \*\*\*
-  \-\-\-
-  \_\_\_
-''': r'''\***
-\---
-\___
-''',
-  r'''\*\*\*
-
-\-\-\-
-
-\_\_\_
-
- \*\*\*
-
- \-\-\-
-
- \_\_\_
-
-  \*\*\*
-  \-\-\-
-  \_\_\_
-
-   \*\*\*
-   \-\-\-
-   \_\_\_
-
-    \*\*\*
-    \-\-\-
-    \_\_\_
-''': r'''\***
-
-\---
-
-\___
-
-\***
-
-\---
-
-\___
-
-\***
-\---
-\___
-
-\***
-\---
-\___
-
-    \*\*\*
-    \-\-\-
-    \_\_\_
-''',
-  r'''\### Not a header
-''': r'''\### Not a header
-''',
-  r'''    ### Not a header
-''': r'''    ### Not a header
-''',
-  r'''Paragraph
-\# Without a header
-''': r'''Paragraph
-\# Without a header
-''',
-  r'''# ## Header
-''': r'''# ## Header
-''',
-  r'''\###### Not a header
-''': r'''\###### Not a header
-''',
-  r'''####### Not a header
-''': r'''####### Not a header
-''',
-  r'''#Not a header
-''': r'''#Not a header
-''',
-  r'''# Header \#\#\#
-''': r'''# Header \###
-''',
-  r'''# Header \#
-''': r'''# Header \#
-''',
-  r'''# Header \#\# Header #
-''': r'''# Header ## Header
-''',
-  r'''Not a header
-\=\=\=\=\=\=
-''': r'''Not a header
-\======
-''',
-  r'''Not a header
-\=\=\=\=\=\= A \=\=\=\=\=\=
-''': r'''Not a header
-====== A ======
-''',
-  r'''Not a header
-\-\-\-\-\-\-
-''': r'''Not a header
-\------
-''',
-  r'''Not a header
-\-\-\-\-\-\- A \-\-\-\-\-\-
-''': r'''Not a header
------- A ------
-''',
-  r'''\    Not a code
-''': r'''\\    Not a code
-''',
-  r'''\~\~\~
-Not a code
-\~\~\~
-''': r'''\~~~
-Not a code
-\~~~
-''',
-  r'''\`\`\`
-Not a code
-\`\`\`
-''': r'''\```
-Not a code
-\```
-''',
-  r'''\<td>
-''': r'''\<td\>
-''',
-  r'''< td >
-''': r'''< td >
-''',
-  r'''\[foo]: /url "title"
-''': r'''\[foo]: /url "title"
-''',
-  r'''*a
-''': r'''*a
-''',
-  r'''- a
-
--
-- b
-''': r'''- a
-
--
-
-- b
-''',
-  r'''1. a
-2.
-
-3. b
-''': r'''1. a
-
-2.
-
-3. b
-''',
-  r'''[reference][reference]
-
-[reference]: reference
-''': r'''[reference]
-
-
-[reference]: reference
-''',
-  r'''[reference][reference][reference]
-
-[reference]: reference
-''': r'''[reference][reference]
-
-
-[reference]: reference
-''',
-};
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
 // Target: final Map<String, String> additionalMarkdownToHtml
 // **************************************************************************
 
@@ -4180,6 +3987,24 @@ b
 </ul>
 <hr />
 </li>
+</ul>
+''',
+  r'''- a
+  > b
+  >
+  ```
+  c
+  ```
+- d
+''': r'''<ul>
+<li>a
+<blockquote>
+<p>b</p>
+</blockquote>
+<pre><code>c
+</code></pre>
+</li>
+<li>d</li>
 </ul>
 ''',
   r'''```

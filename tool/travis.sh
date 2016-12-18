@@ -5,7 +5,7 @@ set -e
 
 # Verify that the libraries are error free.
 dartanalyzer --strong --fatal-warnings \
-  lib/md_proc.dart \
+  lib/mdown.dart \
   test/library_test.dart \
   tool/build.dart \
   tool/reporter.dart

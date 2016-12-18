@@ -1,15 +1,14 @@
-library md_proc.src.parsers.str;
+library mdown.src.parsers.str;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/bit_set.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/bit_set.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for arbitrary string.
-class StrParser extends AbstractParser<Inlines> {
+class StrParser extends AbstractParser<InlineNodeImpl> {
   final BitSet _specialChars = new BitSet(256);
 
   /// Constructor.
@@ -56,32 +55,43 @@ class StrParser extends AbstractParser<Inlines> {
   }
 
   @override
-  ParseResult<Inlines> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parse(String text, int offset) {
     final int char = text.codeUnitAt(offset);
+    final int length = text.length;
     if (_specialChars.contains(char)) {
-      Inline result;
+      InlineNodeImpl result;
+      int endOffset = offset + 1;
       if (char == spaceCodeUnit) {
-        result = new Space();
+        while (
+            endOffset < length && text.codeUnitAt(endOffset) == spaceCodeUnit) {
+          endOffset += 1;
+        }
+        result = new SpaceImpl(endOffset - offset);
       } else if (char == tabCodeUnit) {
-        result = new Tab();
+        while (
+            endOffset < length && text.codeUnitAt(endOffset) == tabCodeUnit) {
+          endOffset += 1;
+        }
+        result = new TabImpl(endOffset - offset);
       } else if (char == nonBreakableSpaceCodeUnit) {
-        result = new NonBreakableSpace();
+        while (endOffset < length &&
+            text.codeUnitAt(endOffset) == nonBreakableSpaceCodeUnit) {
+          endOffset += 1;
+        }
+        result = new NonBreakableSpaceImpl(endOffset - offset);
       } else {
-        result = new Str(new String.fromCharCode(char));
+        result = new StrImpl(new String.fromCharCode(char));
       }
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(result), offset + 1);
+      return new ParseResult<InlineNodeImpl>.success(result, endOffset);
     } else {
       int endOffset = offset + 1;
-      final int length = text.length;
       while (endOffset < length &&
           !_specialChars.contains(text.codeUnitAt(endOffset))) {
-        endOffset++;
+        endOffset += 1;
       }
 
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(new Str(text.substring(offset, endOffset))),
-          endOffset);
+      return new ParseResult<InlineNodeImpl>.success(
+          new StrImpl(text.substring(offset, endOffset)), endOffset);
     }
   }
 }

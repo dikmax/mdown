@@ -1,15 +1,16 @@
-library md_proc.src.parsers.link_image;
+library mdown.src.parsers.link_image;
 
 import 'dart:collection';
 import 'dart:math';
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
-import 'package:md_proc/src/parsers/link_reference.dart';
+
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 class _LinkStackItem {
   int offset;
@@ -20,7 +21,7 @@ class _LinkStackItem {
 }
 
 /// Parser for links and images.
-class LinkImageParser extends AbstractParser<Inlines> {
+class LinkImageParser extends AbstractParser<InlineNodeImpl> {
   static final RegExp _hrefRegExp = new RegExp(
       // Link in <>
       r'<(?:[^\\> \t\r\n]|\\.|\\)*>|'
@@ -29,7 +30,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
   static final RegExp _referenceRegExp = new RegExp(r'\[((?:[^\]]|\\\])+)\]');
 
-  Map<int, List<AbstractParser<Iterable<Inline>>>> _higherPriorityInlineParsers;
+  Map<int, List<AbstractParser<InlineNodeImpl>>> _higherPriorityInlineParsers;
 
   /// Constructor.
   LinkImageParser(ParsersContainer container) : super(container);
@@ -37,26 +38,26 @@ class LinkImageParser extends AbstractParser<Inlines> {
   @override
   void init() {
     _higherPriorityInlineParsers =
-        new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
+        new HashMap<int, List<AbstractParser<InlineNodeImpl>>>();
 
     _higherPriorityInlineParsers[backtickCodeUnit] =
-        <AbstractParser<Iterable<Inline>>>[container.inlineCodeParser];
+        <AbstractParser<InlineNodeImpl>>[container.inlineCodeParser];
 
     _higherPriorityInlineParsers[lessThanCodeUnit] =
-        <AbstractParser<Iterable<Inline>>>[
+        <AbstractParser<InlineNodeImpl>>[
       container.inlineHtmlParser,
       container.autolinkParser
     ];
 
     if (container.options.texMathDollars) {
       _higherPriorityInlineParsers[dollarCodeUnit] =
-          <AbstractParser<Iterable<Inline>>>[container.texMathDollarsParser];
+          <AbstractParser<InlineNodeImpl>>[container.texMathDollarsParser];
     }
 
     if (container.options.texMathSingleBackslash ||
         container.options.texMathDoubleBackslash) {
       _higherPriorityInlineParsers[backslashCodeUnit] =
-          <AbstractParser<Iterable<Inline>>>[];
+          <AbstractParser<InlineNodeImpl>>[];
 
       if (container.options.texMathSingleBackslash) {
         _higherPriorityInlineParsers[backslashCodeUnit]
@@ -119,7 +120,8 @@ class LinkImageParser extends AbstractParser<Inlines> {
       return new ParseResult<Target>.failure();
     }
 
-    final Target result = new Target(href, null);
+    final TargetImpl result =
+        astFactory.target(astFactory.targetLink(href), null);
 
     // Maybe parsing title.
     int codeUnit = text.codeUnitAt(offset);
@@ -150,7 +152,7 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
       String title = text.substring(startOffset, offset - 1);
       title = unescapeAndUnreference(title);
-      result.title = title;
+      result.title = astFactory.targetTitle(title);
 
       // Skip whitespace.
       while (offset < length) {
@@ -181,22 +183,22 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
   // TODO reorder parse to put all fallbacks in the end.
   @override
-  ParseResult<Inlines> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parse(String text, int offset) {
     final int length = text.length;
     bool isImage = false;
     if (text.codeUnitAt(offset) == exclamationMarkCodeUnit) {
       offset++;
       if (offset == length) {
-        return new ParseResult<Inlines>.failure();
+        return new ParseResult<InlineNodeImpl>.failure();
       }
       isImage = true;
     }
     if (text.codeUnitAt(offset) != openBracketCodeUnit) {
-      return new ParseResult<Inlines>.failure();
+      return new ParseResult<InlineNodeImpl>.failure();
     }
     offset++;
     if (offset == length) {
-      return new ParseResult<Inlines>.failure();
+      return new ParseResult<InlineNodeImpl>.failure();
     }
 
     final int startOffset = offset;
@@ -212,11 +214,11 @@ class LinkImageParser extends AbstractParser<Inlines> {
         if (!isImage) {
           containsLink = last.containsLink;
           if (!containsLink && last.bracketLevel == 2) {
-            // There counld be link
-            final Inlines labelInlines = container.documentParser
+            // There could be link
+            final List<InlineNodeImpl> labelInlines = container.documentParser
                 .parseInlines(text.substring(last.offset, offset));
 
-            if (labelInlines.containsLink) {
+            if (labelInlines.any((InlineNodeImpl node) => node.containsLink)) {
               containsLink = true;
             }
           }
@@ -250,11 +252,11 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
       if (_higherPriorityInlineParsers.containsKey(codeUnit)) {
         bool found = false;
-        for (AbstractParser<Inlines> parser
+        for (AbstractParser<InlineNodeImpl> parser
             in _higherPriorityInlineParsers[codeUnit]) {
           // TODO optimize to only return offset.
           // TODO check autolink
-          final ParseResult<Inlines> res = parser.parse(text, offset);
+          final ParseResult<InlineNodeImpl> res = parser.parse(text, offset);
           if (res.isSuccess) {
             offset = res.offset;
             if (!isImage && res.value.containsLink) {
@@ -270,15 +272,16 @@ class LinkImageParser extends AbstractParser<Inlines> {
         }
       }
 
-      final ParseResult<Inlines> res = container.strParser.parse(text, offset);
+      final ParseResult<InlineNodeImpl> res =
+          container.strParser.parse(text, offset);
       assert(res.isSuccess);
 
       offset = res.offset;
     }
 
     if (endOffset == -1) {
-      return new ParseResult<Inlines>.success(
-          new Inlines.single(new Str(isImage ? '![' : '[')), startOffset);
+      return new ParseResult<InlineNodeImpl>.success(
+          new StrImpl(isImage ? '![' : '['), startOffset);
     }
 
     if (isImage || !containsLink) {
@@ -292,91 +295,108 @@ class LinkImageParser extends AbstractParser<Inlines> {
             final Target target = targetResult.value;
 
             // Normal link.
-            final Inlines labelInlines = container.documentParser
+            final List<InlineNodeImpl> labelInlines = container.documentParser
                 .parseInlines(text.substring(startOffset, endOffset));
 
             // Attributes (linkAttributes extensions).
             offset = targetResult.offset;
+            ExtendedAttributes attributes;
             if (container.options.linkAttributes) {
               if (offset < length &&
                   text.codeUnitAt(offset) == openBraceCodeUnit) {
                 final ParseResult<Attributes> attributesResult =
                     container.attributesParser.parse(text, offset);
                 if (attributesResult.isSuccess) {
-                  target.attributes = attributesResult.value;
+                  attributes = attributesResult.value;
                   offset = attributesResult.offset;
                 }
               }
             }
 
-            final Inline result = isImage
-                ? new InlineImage(labelInlines, target)
-                : new InlineLink(labelInlines, target);
-            return new ParseResult<Inlines>.success(
-                new Inlines.single(result), offset);
+            final InlineNodeImpl result = isImage
+                ? astFactory.inlineImage(labelInlines, target, attributes)
+                : astFactory.inlineLink(labelInlines, target, attributes);
+            return new ParseResult<InlineNodeImpl>.success(result, offset);
           }
         }
 
         if (codeUnit == openBracketCodeUnit) {
           if (offset + 1 < length &&
               text.codeUnitAt(offset + 1) == closeBracketCodeUnit) {
-            final String reference = text.substring(startOffset, endOffset);
+            // Collapsed reference.
+            final String referenceString =
+                text.substring(startOffset, endOffset);
             final String normalizedReference =
-                LinkReference.normalize(reference);
+                normalizeReference(referenceString);
             Target target;
+            ExtendedAttributes attributes;
             if (container.references.containsKey(normalizedReference)) {
-              target = container.references[normalizedReference];
+              final LinkReference linkReference =
+                  container.references[normalizedReference];
+              target = linkReference.target;
+              attributes = linkReference.attributes;
             } else {
               target = container.options
-                  .linkResolver(normalizedReference, reference);
+                  .linkResolver(normalizedReference, referenceString);
             }
-            if (target != null) {
-              final Inlines labelInlines = container.documentParser
-                  .parseInlines(text.substring(startOffset, endOffset));
 
-              final Inline result = isImage
-                  ? new ReferenceImage(reference, labelInlines, target)
-                  : new ReferenceLink(reference, labelInlines, target);
-              return new ParseResult<Inlines>.success(
-                  new Inlines.single(result), offset + 2);
-            } else {
-              return new ParseResult<Inlines>.success(
-                  new Inlines.single(new Str(isImage ? '![' : '[')),
-                  startOffset);
+            if (target != null) {
+              final List<InlineNodeImpl> labelInlines = container.documentParser
+                  .parseInlines(text.substring(startOffset, endOffset));
+              final Reference reference =
+                  astFactory.collapsedReference(referenceString, target);
+
+              final InlineNode result = isImage
+                  ? astFactory.referenceImage(
+                      labelInlines, reference, attributes)
+                  : astFactory.referenceLink(
+                      labelInlines, reference, attributes);
+              return new ParseResult<InlineNodeImpl>.success(
+                  result, offset + 2);
             }
+            return new ParseResult<InlineNodeImpl>.success(
+                new StrImpl(isImage ? '![' : '['), startOffset);
           }
 
           // Full reference parsing
           final Match referenceMatch =
               _referenceRegExp.matchAsPrefix(text, offset);
           if (referenceMatch != null) {
-            final String reference = referenceMatch[1];
+            final String referenceString = referenceMatch[1];
             final String normalizedReference =
-                LinkReference.normalize(reference);
+                normalizeReference(referenceString);
 
             Target target;
+            ExtendedAttributes attributes;
 
             if (container.references.containsKey(normalizedReference)) {
-              target = container.references[normalizedReference];
+              final LinkReference linkReference =
+                  container.references[normalizedReference];
+              target = linkReference.target;
+              attributes = linkReference.attributes;
             } else {
               target = container.options
-                  .linkResolver(normalizedReference, reference);
+                  .linkResolver(normalizedReference, referenceString);
             }
             if (target != null) {
-              final Inlines labelInlines = container.documentParser
+              final List<InlineNodeImpl> labelInlines = container.documentParser
                   .parseInlines(text.substring(startOffset, endOffset));
 
-              final Inline result = isImage
-                  ? new ReferenceImage(reference, labelInlines, target)
-                  : new ReferenceLink(reference, labelInlines, target);
+              final Reference reference =
+                  astFactory.fullReference(referenceString, target);
+              final InlineNode result = isImage
+                  ? astFactory.referenceImage(
+                      labelInlines, reference, attributes)
+                  : astFactory.referenceLink(
+                      labelInlines, reference, attributes);
 
-              return new ParseResult<Inlines>.success(
-                  new Inlines.single(result), referenceMatch.end);
+              return new ParseResult<InlineNodeImpl>.success(
+                  result, referenceMatch.end);
             }
           }
 
-          return new ParseResult<Inlines>.success(
-              new Inlines.single(new Str(isImage ? '![' : '[')), startOffset);
+          return new ParseResult<InlineNodeImpl>.success(
+              new StrImpl(isImage ? '![' : '['), startOffset);
         }
       }
 
@@ -385,32 +405,38 @@ class LinkImageParser extends AbstractParser<Inlines> {
 
       // Found variant
 
-      final String reference = text.substring(startOffset, endOffset);
-      final String normalizedReference = LinkReference.normalize(reference);
+      final String referenceString = text.substring(startOffset, endOffset);
+      final String normalizedReference = normalizeReference(referenceString);
 
+      // Shortcut reference.
       if (normalizedReference != '') {
         Target target;
+        ExtendedAttributes attributes;
 
         if (container.references.containsKey(normalizedReference)) {
-          target = container.references[normalizedReference];
+          final LinkReference linkReference =
+              container.references[normalizedReference];
+          target = linkReference.target;
+          attributes = linkReference.attributes;
         } else {
-          target =
-              container.options.linkResolver(normalizedReference, reference);
+          target = container.options
+              .linkResolver(normalizedReference, referenceString);
         }
         if (target != null) {
-          final Inlines labelInlines = container.documentParser
+          final List<InlineNodeImpl> labelInlines = container.documentParser
               .parseInlines(text.substring(startOffset, endOffset));
+          final Reference reference =
+              astFactory.shortcutReference(referenceString, target);
 
-          final Inline result = isImage
-              ? new ReferenceImage(reference, labelInlines, target)
-              : new ReferenceLink(reference, labelInlines, target);
-          return new ParseResult<Inlines>.success(
-              new Inlines.single(result), offset);
+          final InlineNode result = isImage
+              ? astFactory.referenceImage(labelInlines, reference, attributes)
+              : astFactory.referenceLink(labelInlines, reference, attributes);
+          return new ParseResult<InlineNodeImpl>.success(result, offset);
         }
       }
     }
 
-    return new ParseResult<Inlines>.success(
-        new Inlines.single(new Str(isImage ? '![' : '[')), startOffset);
+    return new ParseResult<InlineNodeImpl>.success(
+        new StrImpl(isImage ? '![' : '['), startOffset);
   }
 }

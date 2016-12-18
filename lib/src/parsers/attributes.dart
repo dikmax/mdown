@@ -1,16 +1,16 @@
-library md_proc.src.parsers.attributes;
+library mdown.src.parsers.attributes;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/container.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:quiver/collection.dart';
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for extended attiributes.
-class AttributesParser extends AbstractParser<Attributes> {
+class ExtendedAttributesParser extends AbstractParser<Attributes> {
   /// Constructor.
-  AttributesParser(ParsersContainer container) : super(container);
+  ExtendedAttributesParser(ParsersContainer container) : super(container);
 
   @override
   ParseResult<Attributes> parse(String text, int offset) {
@@ -20,9 +20,13 @@ class AttributesParser extends AbstractParser<Attributes> {
 
     offset++;
 
+    final List<Attribute> attributes = <Attribute>[];
+
+    /*
     String id;
     final List<String> classes = <String>[];
     final Multimap<String, String> attributes = new Multimap<String, String>();
+    */
 
     final int length = text.length;
     while (offset < length) {
@@ -37,14 +41,16 @@ class AttributesParser extends AbstractParser<Attributes> {
         case sharpCodeUnit:
           // Id
           final int endOffset = _parseIdentifier(text, offset);
-          id = text.substring(offset + 1, endOffset);
+          attributes.add(astFactory
+              .identifierAttribute(text.substring(offset + 1, endOffset)));
           offset = endOffset;
           break;
 
         case dotCodeUnit:
           // Id
           final int endOffset = _parseIdentifier(text, offset);
-          classes.add(text.substring(offset + 1, endOffset));
+          attributes.add(
+              astFactory.classAttribute(text.substring(offset + 1, endOffset)));
           offset = endOffset;
           break;
 
@@ -67,7 +73,7 @@ class AttributesParser extends AbstractParser<Attributes> {
     }
 
     return new ParseResult<Attributes>.success(
-        new Attributes(id, classes, attributes), offset);
+        astFactory.extendedAttributes(attributes), offset);
   }
 
   int _parseIdentifier(String text, int offset) {
@@ -97,8 +103,7 @@ class AttributesParser extends AbstractParser<Attributes> {
   static final RegExp _keyValueRegExp =
       new RegExp('([a-zA-Z0-9_\-]+)=([^ "\'\t}][^ \t}]*|"[^"]*"|\'[^\']*\')');
 
-  int _parseAttribute(
-      String text, int offset, Multimap<String, String> attributes) {
+  int _parseAttribute(String text, int offset, List<Attribute> attributes) {
     final Match match = _keyValueRegExp.matchAsPrefix(text, offset);
     if (match == null) {
       return offset;
@@ -112,7 +117,7 @@ class AttributesParser extends AbstractParser<Attributes> {
       value = value.substring(1, value.length - 1);
     }
 
-    attributes.add(key, value);
+    attributes.add(astFactory.keyValueAttribute(key, value));
 
     return match.end;
   }

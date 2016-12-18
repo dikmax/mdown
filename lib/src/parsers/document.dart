@@ -1,20 +1,40 @@
-library md_proc.src.parsers.document;
+library mdown.src.parsers.document;
 
 import 'dart:collection';
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
-import 'package:md_proc/src/parsers/link_reference.dart';
+
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/ast/combining_nodes.dart';
+import 'package:mdown/src/ast/replacing_visitor.dart';
+import 'package:mdown/src/ast/unparsed_inlines.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
+
+class ListInlineParsingVisitor extends ListReplacingAstVisitor {}
+
+class InlineParsingVisitor extends ReplacingAstVisitor
+    implements UnparsedInlinesVisitor<AstNode> {
+  final DocumentParser _documentParser;
+
+  InlineParsingVisitor(this._documentParser);
+
+  @override
+  BaseCompositeInline visitUnparsedInlines(UnparsedInlines node) {
+    final List<InlineNodeImpl> contents =
+        _documentParser.parseInlines(node.contents);
+    return astFactory.baseCompositeInline(contents);
+  }
+}
 
 /// Parser for whole document.
 class DocumentParser extends AbstractParser<Document> {
-  Map<int, List<AbstractParser<Iterable<Block>>>> _blockParsers;
+  Map<int, List<AbstractParser<BlockNodeImpl>>> _blockParsers;
 
-  Map<int, List<AbstractParser<Iterable<Inline>>>> _inlineParsers;
+  Map<int, List<AbstractParser<InlineNodeImpl>>> _inlineParsers;
 
   /// Constructor.
   DocumentParser(ParsersContainer container) : super(container);
@@ -22,79 +42,79 @@ class DocumentParser extends AbstractParser<Document> {
   @override
   void init() {
     // Block parsers
-    _blockParsers = new HashMap<int, List<AbstractParser<Iterable<Block>>>>();
+    _blockParsers = new HashMap<int, List<AbstractParser<BlockNodeImpl>>>();
 
     for (int char in <int>[starCodeUnit, minusCodeUnit]) {
-      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.thematicBreakParser,
         container.blockquoteListParser
       ];
     }
 
-    _blockParsers[underscoreCodeUnit] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[underscoreCodeUnit] = <AbstractParser<BlockNodeImpl>>[
       container.thematicBreakParser
     ];
 
-    _blockParsers[sharpCodeUnit] = <AbstractParser<Iterable<Block>>>[
+    _blockParsers[sharpCodeUnit] = <AbstractParser<BlockNodeImpl>>[
       container.atxHeadingParser
     ];
 
     for (int char in <int>[spaceCodeUnit, tabCodeUnit]) {
-      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.blanklineParser,
         container.indentedCodeParser
       ];
     }
 
     for (int char in <int>[newLineCodeUnit, carriageReturnCodeUnit]) {
-      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.blanklineParser
       ];
     }
 
     for (int char in <int>[tildeCodeUnit, backtickCodeUnit]) {
-      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.fencedCodeParser
       ];
     }
 
     for (int char in <int>[plusCodeUnit, greaterThanCodeUnit]) {
-      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.blockquoteListParser
       ];
     }
 
     if (container.options.rawHtml) {
-      _blockParsers[lessThanCodeUnit] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[lessThanCodeUnit] = <AbstractParser<BlockNodeImpl>>[
         container.htmlBlockParser,
         container.htmlBlock7Parser
       ];
     }
 
     if (container.options.rawTex) {
-      _blockParsers[backslashCodeUnit] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[backslashCodeUnit] = <AbstractParser<BlockNodeImpl>>[
         container.rawTexParser
       ];
     }
 
     for (int char = zeroCodeUnit; char <= nineCodeUnit; char++) {
-      _blockParsers[char] = <AbstractParser<Iterable<Block>>>[
+      _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.blockquoteListParser
       ];
     }
 
     // Inline parsers
-    _inlineParsers = new HashMap<int, List<AbstractParser<Iterable<Inline>>>>();
+    _inlineParsers = new HashMap<int, List<AbstractParser<InlineNodeImpl>>>();
 
-    _inlineParsers[spaceCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[spaceCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[tabCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[tabCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.hardLineBreakParser
     ];
 
-    _inlineParsers[backslashCodeUnit] = <AbstractParser<Iterable<Inline>>>[];
+    _inlineParsers[backslashCodeUnit] = <AbstractParser<InlineNodeImpl>>[];
 
     if (container.options.texMathSingleBackslash) {
       _inlineParsers[backslashCodeUnit]
@@ -107,25 +127,25 @@ class DocumentParser extends AbstractParser<Document> {
     }
     _inlineParsers[backslashCodeUnit].add(container.escapesParser);
 
-    _inlineParsers[ampersandCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[ampersandCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.entityParser
     ];
 
-    _inlineParsers[backtickCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[backtickCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.inlineCodeParser
     ];
 
     for (int char in <int>[starCodeUnit, underscoreCodeUnit]) {
-      _inlineParsers[char] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[char] = <AbstractParser<InlineNodeImpl>>[
         container.inlineStructureParser
       ];
     }
 
-    _inlineParsers[openBracketCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[openBracketCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.linkImageParser
     ];
 
-    _inlineParsers[lessThanCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+    _inlineParsers[lessThanCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.autolinkParser
     ];
 
@@ -134,37 +154,37 @@ class DocumentParser extends AbstractParser<Document> {
     }
 
     if (container.options.smartPunctuation) {
-      _inlineParsers[dotCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[dotCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.ellipsisParser
       ];
 
-      _inlineParsers[minusCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[minusCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.mnDashParser
       ];
 
-      _inlineParsers[singleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[singleQuoteCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.inlineStructureParser
       ];
 
-      _inlineParsers[doubleQuoteCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[doubleQuoteCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.inlineStructureParser
       ];
     }
 
     if (container.options.strikeout || container.options.subscript) {
-      _inlineParsers[tildeCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[tildeCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.inlineStructureParser
       ];
     }
 
     if (container.options.superscript) {
-      _inlineParsers[caretCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[caretCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.inlineStructureParser
       ];
     }
 
     if (container.options.texMathDollars) {
-      _inlineParsers[dollarCodeUnit] = <AbstractParser<Iterable<Inline>>>[
+      _inlineParsers[dollarCodeUnit] = <AbstractParser<InlineNodeImpl>>[
         container.texMathDollarsParser
       ];
     }
@@ -173,7 +193,7 @@ class DocumentParser extends AbstractParser<Document> {
   @override
   ParseResult<Document> parse(String text, int offset) {
     int offset = 0;
-    final List<Block> blocks = <Block>[];
+    final List<BlockNodeImpl> blocks = <BlockNodeImpl>[];
 
     final int length = text.length;
     while (offset < length) {
@@ -187,23 +207,29 @@ class DocumentParser extends AbstractParser<Document> {
       if (firstChar == openBracketCodeUnit) {
         // Special treatment for link references.
         // TODO we don't need it
-        final ParseResult<LinkReference> res =
+        final ParseResult<LinkReferenceImpl> res =
             container.linkReferenceParser.parse(text, offset);
         if (res.isSuccess) {
-          if (!container.references.containsKey(res.value.reference)) {
-            container.references[res.value.reference] = res.value.target;
+          blocks.add(res.value);
+          final String referenceString = res.value.normalizedReference;
+          if (!container.references.containsKey(referenceString)) {
+            container.references[referenceString] = res.value;
           }
           offset = res.offset;
           continue;
         }
       } else if (_blockParsers.containsKey(firstChar)) {
         bool found = false;
-        for (AbstractParser<Iterable<Block>> parser
-            in _blockParsers[firstChar]) {
-          final ParseResult<Iterable<Block>> res = parser.parse(text, offset);
+        for (AbstractParser<BlockNodeImpl> parser in _blockParsers[firstChar]) {
+          final ParseResult<BlockNodeImpl> res = parser.parse(text, offset);
           if (res.isSuccess) {
-            if (res.value.length > 0) {
-              blocks.addAll(res.value);
+            if (res.value != null) {
+              if (res.value is CombiningBlockNodeImpl) {
+                final CombiningBlockNodeImpl combining = res.value;
+                blocks.addAll(combining.list);
+              } else {
+                blocks.add(res.value);
+              }
             }
             offset = res.offset;
             found = true;
@@ -216,52 +242,36 @@ class DocumentParser extends AbstractParser<Document> {
         }
       }
 
-      final ParseResult<Iterable<Block>> res =
+      final ParseResult<BlockNodeImpl> res =
           container.paraSetextHeadingParser.parse(text, offset);
       assert(res.isSuccess);
 
-      if (res.value.length > 0) {
-        blocks.addAll(res.value);
+      if (res.value is CombiningBlockNodeImpl) {
+        final CombiningBlockNodeImpl combining = res.value;
+        blocks.addAll(combining.list);
+      } else {
+        blocks.add(res.value);
       }
       offset = res.offset;
     }
 
-    final Iterable<Block> blocksWithInlines =
-        blocks.map(_replaceInlinesInBlock);
+    final InlineParsingVisitor visitor = new InlineParsingVisitor(this);
+    final int blocksLength = blocks.length;
+    final List<BlockNodeImpl> blocksWithInlines =
+        new List<BlockNodeImpl>(blocksLength);
+    for (int i = 0; i < blocksLength; ++i) {
+      blocksWithInlines[i] = blocks[i].accept<AstNode>(visitor) as BlockNode;
+    }
 
-    final Document result = new Document(blocksWithInlines);
+    final Document result = astFactory.document(blocksWithInlines);
 
     return new ParseResult<Document>.success(result, offset);
   }
 
-  Block _replaceInlinesInBlock(Block block) {
-    if (block is Heading) {
-      final Inlines contents = block.contents;
-      if (contents is UnparsedInlines) {
-        block.contents = parseInlines(contents.raw);
-      }
-    } else if (block is Para) {
-      final Inlines contents = block.contents;
-      if (contents is UnparsedInlines) {
-        block.contents = parseInlines(contents.raw);
-      }
-    } else if (block is Blockquote) {
-      block.contents = block.contents.map(_replaceInlinesInBlock);
-    } else if (block is ListBlock) {
-      block.items = block.items.map(_replaceInlinesInListItem);
-    }
-    return block;
-  }
-
-  ListItem _replaceInlinesInListItem(ListItem item) {
-    item.contents = item.contents.map(_replaceInlinesInBlock);
-    return item;
-  }
-
   /// Parses provided string as inlines.
-  Inlines parseInlines(String text) {
+  List<InlineNodeImpl> parseInlines(String text) {
     int offset = 0;
-    final Inlines inlines = new Inlines();
+    final List<InlineNodeImpl> inlines = <InlineNodeImpl>[];
 
     text = text.trimRight();
     final int length = text.length;
@@ -271,22 +281,29 @@ class DocumentParser extends AbstractParser<Document> {
           offset + 1 < length &&
           text.codeUnitAt(offset + 1) == openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
-        final ParseResult<Inlines> res =
+        final ParseResult<InlineNodeImpl> res =
             container.linkImageParser.parse(text, offset);
         if (res.isSuccess) {
-          if (res.value.length > 0) {
-            inlines.addAll(res.value);
+          if (res.value != null) {
+            // Link image parser doesn't return combining nodes.
+            inlines.add(res.value);
           }
           offset = res.offset;
           continue;
         }
       } else if (_inlineParsers.containsKey(codeUnit)) {
         bool found = false;
-        for (AbstractParser<Inlines> parser in _inlineParsers[codeUnit]) {
-          final ParseResult<Inlines> res = parser.parse(text, offset);
+        for (AbstractParser<InlineNodeImpl> parser
+            in _inlineParsers[codeUnit]) {
+          final ParseResult<InlineNodeImpl> res = parser.parse(text, offset);
           if (res.isSuccess) {
-            if (res.value.length > 0) {
-              inlines.addAll(res.value);
+            if (res.value != null) {
+              if (res.value is CombiningInlineNodeImpl) {
+                final CombiningInlineNodeImpl combining = res.value;
+                inlines.addAll(combining.list);
+              } else {
+                inlines.add(res.value);
+              }
             }
             offset = res.offset;
             found = true;
@@ -299,12 +316,11 @@ class DocumentParser extends AbstractParser<Document> {
         }
       }
 
-      final ParseResult<Inlines> res = container.strParser.parse(text, offset);
+      final ParseResult<InlineNodeImpl> res =
+          container.strParser.parse(text, offset);
       assert(res.isSuccess);
 
-      if (res.value.length > 0) {
-        inlines.addAll(res.value);
-      }
+      inlines.add(res.value);
       offset = res.offset;
     }
 

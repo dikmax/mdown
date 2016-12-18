@@ -1,13 +1,10 @@
-library md_proc.src.parsers.common;
+library mdown.src.parsers.common;
 
 import 'dart:collection';
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/entities.dart';
-import 'package:md_proc/src/bit_set.dart';
-import 'package:md_proc/src/code_units.dart';
 
-final RegExp anyLineRegExp = new RegExp(r'.*$');
-final RegExp emptyLineRegExp = new RegExp(r'^[ \t]*$');
+import 'package:mdown/entities.dart';
+import 'package:mdown/src/bit_set.dart';
+import 'package:mdown/src/code_units.dart';
 
 const String escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 Set<int> _escapableCodesSet;
@@ -15,8 +12,8 @@ Set<int> _escapableCodesSet;
 Set<int> get escapableCodes {
   if (_escapableCodesSet == null) {
     _escapableCodesSet = new BitSet(256);
-    _escapableCodesSet.addAll(
-        escapable.split('').map((String s) => s.codeUnitAt(0)));
+    _escapableCodesSet
+        .addAll(escapable.split('').map((String s) => s.codeUnitAt(0)));
   }
 
   return _escapableCodesSet;
@@ -148,9 +145,10 @@ String removeIndent(String line, int amount, bool allowLess,
   return null;
 }
 
-String trimAndReplaceSpaces(String s) {
-  return s.trim().replaceAll(_clashSpaceRegExp, ' ');
-}
+String trimAndReplaceSpaces(String s) =>
+    s.trim().replaceAll(_clashSpaceRegExp, ' ');
+
+String normalizeReference(String s) => trimAndReplaceSpaces(s).toUpperCase();
 
 final RegExp escapeRegExp =
     new RegExp(r'\\([!"#$%&' + "'" + r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');

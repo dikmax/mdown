@@ -1,4 +1,4 @@
-library md_proc.src.parse_result;
+library mdown.src.parse_result;
 
 /// Result of running parser.
 class ParseResult<A> {

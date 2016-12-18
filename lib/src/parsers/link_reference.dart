@@ -1,26 +1,16 @@
-library md_proc.src.parsers.link_reference;
+library mdown.src.parsers.link_reference;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
-
-class LinkReference extends Block {
-  String reference;
-  String normalizedReference;
-  Target target;
-
-  LinkReference(this.reference, this.target) {
-    normalizedReference = normalize(reference);
-  }
-
-  static String normalize(String s) => trimAndReplaceSpaces(s).toUpperCase();
-}
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for link reference blocks.
-class LinkReferenceParser extends AbstractParser<LinkReference> {
+class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
   /// Constructor.
   LinkReferenceParser(ParsersContainer container) : super(container);
 
@@ -55,23 +45,23 @@ class LinkReferenceParser extends AbstractParser<LinkReference> {
 
   static final RegExp _lineEndRegExp = new RegExp(r'[ \t]*(\r\n|\n|\r|$)');
   @override
-  ParseResult<LinkReference> parse(String text, int offset) {
+  ParseResult<LinkReferenceImpl> parse(String text, int offset) {
     final Match labelAndLinkMatch =
         _labelAndLinkRegExp.matchAsPrefix(text, offset);
     if (labelAndLinkMatch == null) {
-      return new ParseResult<LinkReference>.failure();
+      return new ParseResult<LinkReferenceImpl>.failure();
     }
 
-    final String label = LinkReference.normalize(labelAndLinkMatch[1]);
+    final String label = labelAndLinkMatch[1].trim();
     if (label.length == 0) {
       // Label cannot be empty
-      return new ParseResult<LinkReference>.failure();
+      return new ParseResult<LinkReferenceImpl>.failure();
     }
 
     String link = labelAndLinkMatch[2];
     if (link == '') {
       // Target cannot be empty
-      return new ParseResult<LinkReference>.failure();
+      return new ParseResult<LinkReferenceImpl>.failure();
     }
     if (link.codeUnitAt(0) == lessThanCodeUnit) {
       final int linkLength = link.length;
@@ -114,7 +104,7 @@ class LinkReferenceParser extends AbstractParser<LinkReference> {
 
     // Trying attributes
 
-    Attr attributes = new EmptyAttr();
+    ExtendedAttributes attributes;
     int offsetAfterAttributes = -1;
 
     if (container.options.linkAttributes) {
@@ -143,21 +133,30 @@ class LinkReferenceParser extends AbstractParser<LinkReference> {
     }
 
     if (offsetAfterAttributes != -1) {
-      return new ParseResult<LinkReference>.success(
-          new LinkReference(label, new Target(link, title, attributes)),
+      return new ParseResult<LinkReferenceImpl>.success(
+          new LinkReferenceImpl(
+              label,
+              astFactory.target(
+                  astFactory.targetLink(link), astFactory.targetTitle(title)),
+              attributes),
           offsetAfterAttributes);
     }
     if (offsetAfterTitle != -1) {
-      return new ParseResult<LinkReference>.success(
-          new LinkReference(label, new Target(link, title, attributes)),
+      return new ParseResult<LinkReferenceImpl>.success(
+          new LinkReferenceImpl(
+              label,
+              astFactory.target(
+                  astFactory.targetLink(link), astFactory.targetTitle(title)),
+              attributes),
           offsetAfterTitle);
     }
     if (offsetAfterLink != -1) {
-      return new ParseResult<LinkReference>.success(
-          new LinkReference(label, new Target(link, null, new EmptyAttr())),
+      return new ParseResult<LinkReferenceImpl>.success(
+          new LinkReferenceImpl(label,
+              astFactory.target(astFactory.targetLink(link), null), null),
           offsetAfterLink);
     }
 
-    return new ParseResult<LinkReference>.failure();
+    return new ParseResult<LinkReferenceImpl>.failure();
   }
 }

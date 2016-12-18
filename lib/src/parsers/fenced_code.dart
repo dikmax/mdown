@@ -1,25 +1,28 @@
-library md_proc.src.parsers.fenced_code;
+library mdown.src.parsers.fenced_code;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/ast/enums.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for fenced code blocks.
-class FencedCodeParser extends AbstractParser<Iterable<Block>> {
+class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
   /// Constructor.
   FencedCodeParser(ParsersContainer container) : super(container);
 
   @override
-  ParseResult<Iterable<Block>> parse(String text, int offset) {
+  ParseResult<BlockNodeImpl> parse(String text, int offset) {
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
     final Match startRes = fencedCodeStartTest.firstMatch(lineResult.value);
     if (startRes == null) {
-      return const ParseResult<Iterable<FencedCodeBlock>>.failure();
+      return const ParseResult<BlockNodeImpl>.failure();
     }
 
     final int indent = startRes[1].length;
@@ -29,7 +32,7 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
 
     final RegExp endTest = new RegExp('^ {0,3}$char{${line.length},}[ \t]*\$');
 
-    final StringBuffer code = new StringBuffer();
+    final List<String> code = <String>[];
 
     offset = lineResult.offset;
     final int length = text.length;
@@ -49,10 +52,10 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
         line = removeIndent(line, indent, true);
       }
 
-      code.writeln(line);
+      code.add(line);
     }
 
-    Attr attributes;
+    Attributes attributes;
     if (infoString != '') {
       if (container.options.fencedCodeAttributes) {
         final ParseResult<Attributes> parse =
@@ -62,15 +65,13 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
         }
       }
       attributes = attributes ?? _parseInfoString(infoString);
-    } else {
-      attributes = new EmptyAttr();
     }
-    final FencedCodeBlock codeBlock = new FencedCodeBlock(code.toString(),
-        fenceType: FenceType.fromChar(char),
-        fenceSize: line.length,
-        attributes: attributes);
-    return new ParseResult<Iterable<FencedCodeBlock>>.success(
-        <FencedCodeBlock>[codeBlock], offset);
+    final FencedCodeBlockImpl codeBlock = new FencedCodeBlockImpl(
+        code,
+        fencedCodeBlockTypeFromCodeUnit(char.codeUnitAt(0)),
+        line.length,
+        attributes);
+    return new ParseResult<BlockNodeImpl>.success(codeBlock, offset);
   }
 
   InfoString _parseInfoString(String infoString) {
@@ -87,6 +88,6 @@ class FencedCodeParser extends AbstractParser<Iterable<Block>> {
       infoString = infoString.substring(0, infoStringEnd);
     }
     infoString = unescapeAndUnreference(infoString);
-    return new InfoString(infoString);
+    return astFactory.infoString(infoString);
   }
 }

@@ -1,451 +1,596 @@
 library md_proc.html_writer;
 
-import 'dart:collection';
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/options.dart';
-import 'package:md_proc/src/code_units.dart';
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/visitor.dart';
+import 'package:mdown/options.dart';
+import 'package:mdown/src/code_units.dart';
 
-class _HtmlBuilder extends StringBuffer {
-  Options _options;
+final RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
+final RegExp _htmlEntity = new RegExp(
+    r'&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});',
+    caseSensitive: false);
 
-  _HtmlBuilder(this._options) : super();
+String urlEncode(String url) {
+  String result = url.splitMapJoin(_urlEncode,
+      onMatch: (Match m) => m.group(0),
+      onNonMatch: (String s) => Uri.encodeFull(s));
+  result = result.splitMapJoin(_htmlEntity,
+      onMatch: (Match m) => m.group(0),
+      onNonMatch: (String s) => htmlEscape(s));
+  return result;
+}
 
-  void writeDocument(Document document) {
-    writeBlocks(document.contents);
-    write("\n");
-  }
+// SB - 729
+// List - 666
+// String.replace - 815
 
-  // Blocks
+String htmlEscape(String str) {
+  final List<int> charCodes = <int>[];
+  final int length = str.length;
+  for (int i = 0; i < length; ++i) {
+    final int codeUnit = str.codeUnitAt(i);
+    switch (codeUnit) {
+      case lessThanCodeUnit:
+        charCodes
+          ..add(ampersandCodeUnit)
+          ..add(smallLCharCode)
+          ..add(smallTCharCode)
+          ..add(semicolonCodeUnit);
+        break;
 
-  void writeBlocks(Iterable<Block> blocks, {bool tight: false}) {
-    final Iterator<Block> it = blocks.iterator;
+      case greaterThanCodeUnit:
+        charCodes
+          ..add(ampersandCodeUnit)
+          ..add(smallGCharCode)
+          ..add(smallTCharCode)
+          ..add(semicolonCodeUnit);
+        break;
 
-    bool first = true;
-    while (it.moveNext()) {
-      final Block block = it.current;
-      if (first) {
-        first = false;
-        if (tight && block is! Para) {
-          write("\n");
-        }
-      } else {
-        write("\n");
-      }
+      case doubleQuoteCodeUnit:
+        charCodes
+          ..add(ampersandCodeUnit)
+          ..add(smallQCharCode)
+          ..add(smallUCharCode)
+          ..add(smallOCharCode)
+          ..add(smallTCharCode)
+          ..add(semicolonCodeUnit);
+        break;
 
-      if (block is Para) {
-        if (tight) {
-          writeInlines(block.contents);
-        } else {
-          writePara(block);
-        }
-      } else if (block is Heading) {
-        writeHeading(block);
-      } else if (block is ThematicBreak) {
-        write('<hr/>');
-      } else if (block is CodeBlock) {
-        writeCodeBlock(block);
-      } else if (block is Blockquote) {
-        writeBlockquote(block);
-      } else if (block is TexRawBlock) {
-        writeTexRawBlock(block);
-      } else if (block is RawBlock) {
-        write(block.contents);
-      } else if (block is UnorderedList) {
-        writeUnorderedList(block);
-      } else if (block is OrderedList) {
-        writeOrderedList(block);
-      } else {
-        throw new UnimplementedError(block.toString());
-      }
+      case ampersandCodeUnit:
+        charCodes
+          ..add(ampersandCodeUnit)
+          ..add(smallACharCode)
+          ..add(smallMCharCode)
+          ..add(smallPCharCode)
+          ..add(semicolonCodeUnit);
+        break;
+
+      default:
+        charCodes.add(codeUnit);
     }
+  }
+  return new String.fromCharCodes(charCodes);
+}
 
-    if (tight && blocks.length > 0 && blocks.last is! Para) {
-      write("\n");
+class _InfoStringVisitor extends SimpleAstVisitor<String> {
+  @override
+  String visitInfoString(InfoString node) {
+    if (node.language == "") {
+      return "";
     }
+    return ' class="language-${htmlEscape(node.language)}"';
+  }
+}
+
+final _InfoStringVisitor _infoStringVisitor = new _InfoStringVisitor();
+
+class _IdAttributesVisitor extends SimpleAstVisitor<String> {
+  @override
+  String visitIdentifierAttribute(IdentifierAttribute node) {
+    return ' id=\"${node.identifier}\"';
   }
 
-  void writeBlockquote(Blockquote blockquote) {
-    write("<blockquote>\n");
-    writeBlocks(blockquote.contents);
-    write("\n</blockquote>");
-  }
-
-  void writeTexRawBlock(TexRawBlock texRawBlock) {
-    write(htmlEscape(texRawBlock.contents));
-  }
-
-  void writeHeading(Heading heading) {
-    write("<h");
-    write(heading.level);
-    if (_options.headingAttributes && heading.attributes is Attributes) {
-      writeAttributes(heading.attributes);
-    }
-    write(">");
-    writeInlines(heading.contents);
-    write("</h");
-    write(heading.level);
-    write(">");
-  }
-
-  void writeCodeBlock(CodeBlock codeBlock) {
-    write("<pre");
-    if (codeBlock.attributes is Attributes) {
-      writeAttributes(codeBlock.attributes);
-    }
-    write("><code");
-    if (codeBlock.attributes is InfoString) {
-      final InfoString attr = codeBlock.attributes;
-      if (attr.language == "") {
-        return;
-      }
-      write(' class="language-');
-      write(htmlEscape(attr.language));
-      write('"');
-    }
-    write(">");
-    write(htmlEscape(codeBlock.contents));
-    write("</code></pre>");
-  }
-
-  void writeListItems(ListBlock list) {
-    if (list.tight) {
-      for (ListItem item in list.items) {
-        write("<li>");
-        writeBlocks(item.contents, tight: true);
-        write("</li>\n");
-      }
-    } else {
-      for (ListItem item in list.items) {
-        if (item.contents.length == 0) {
-          write('<li></li>\n');
-        } else {
-          write("<li>\n");
-          writeBlocks(item.contents, tight: false);
-          write("\n</li>\n");
-        }
+  @override
+  String visitExtendedAttributes(ExtendedAttributes node) {
+    String result = '';
+    for (Attribute attribute in node.attributes) {
+      final String id = attribute.accept(this);
+      if (id != null) {
+        result += id;
       }
     }
-  }
 
-  void writeUnorderedList(UnorderedList list) {
-    write("<ul>\n");
-    writeListItems(list);
-    write("</ul>");
-  }
-
-  void writeOrderedList(OrderedList list) {
-    write("<ol");
-    if (list.startIndex != 1) {
-      write(' start="');
-      write(list.startIndex);
-      write('"');
-    }
-    write(">\n");
-    writeListItems(list);
-    write("</ol>");
-  }
-
-  void writePara(Para para) {
-    write("<p>");
-    writeInlines(para.contents);
-    write("</p>");
-  }
-
-  // Attributes
-
-  void writeAttributes(Attributes attr) {
-    if (attr.identifier != null) {
-      write(' id="');
-      write(htmlEscape(attr.identifier));
-      write('"');
-    }
-    if (attr.classes != null && attr.classes.length > 0) {
-      write(' class="');
-      write(attr.classes.map(htmlEscape).join(' '));
-      write('"');
-    }
-    final List<String> keys = attr.attributes.keys.toList(growable: false);
-    keys.sort();
-    for (String key in keys) {
-      for (String value in attr.attributes[key]) {
-        write(' ');
-        write(htmlEscape(key));
-        write('="');
-        write(htmlEscape(value));
-        write('"');
-      }
-    }
-  }
-
-  // Inlines
-
-  void writeInlines(Iterable<Inline> inlines, {bool stripped: false}) {
-    for (Inline inline in inlines) {
-      if (inline is Str) {
-        write(htmlEscape(inline.contents));
-      } else if (inline is Space) {
-        write(' ');
-      } else if (inline is NonBreakableSpace) {
-        write('\u{a0}');
-      } else if (inline is Tab) {
-        write('\t');
-      } else if (inline is LineBreak) {
-        if (stripped) {
-          write(' ');
-        } else {
-          write('<br/>\n');
-        }
-      } else if (inline is Emph) {
-        writeEmph(inline, stripped: stripped);
-      } else if (inline is Strong) {
-        writeStrong(inline, stripped: stripped);
-      } else if (inline is Strikeout) {
-        writeStrikeout(inline, stripped: stripped);
-      } else if (inline is Subscript) {
-        writeSubscript(inline, stripped: stripped);
-      } else if (inline is Superscript) {
-        writeSuperscript(inline, stripped: stripped);
-      } else if (inline is Link) {
-        writeLink(inline, stripped: stripped);
-      } else if (inline is Image) {
-        writeImage(inline, stripped: stripped);
-      } else if (inline is Code) {
-        writeCodeInline(inline, stripped: stripped);
-      } else if (inline is SmartChar) {
-        if (inline is Ellipsis) {
-          write('\u{2026}');
-        } else if (inline is MDash) {
-          write('\u{2014}');
-        } else if (inline is NDash) {
-          write('\u{2013}');
-        } else if (inline is SingleOpenQuote) {
-          write('\u{2018}');
-        } else if (inline is SingleCloseQuote || inline is Apostrophe) {
-          write('\u{2019}');
-        } else if (inline is DoubleOpenQuote) {
-          write('\u{201c}');
-        } else if (inline is DoubleCloseQuote) {
-          write('\u{201d}');
-        } else {
-          throw new UnimplementedError(inline.toString());
-        }
-      } else if (inline is RawInline) {
-        write(inline.contents);
-      } else if (inline is TexMathInline) {
-        writeTexMathInline(inline, stripped: stripped);
-      } else if (inline is TexMathDisplay) {
-        writeTexMathDisplay(inline, stripped: stripped);
-      } else {
-        throw new UnimplementedError(inline.toString());
-      }
-    }
-  }
-
-  void writeCodeInline(Code code, {bool stripped: false}) {
-    if (!stripped) {
-      write('<code');
-      if (_options.inlineCodeAttributes && code.attributes is Attributes) {
-        writeAttributes(code.attributes);
-      }
-      write('>');
-    }
-    write(htmlEscape(code.contents));
-    if (!stripped) {
-      write('</code>');
-    }
-  }
-
-  void writeEmph(Emph emph, {bool stripped: false}) {
-    if (!stripped) {
-      write('<em>');
-    }
-    writeInlines(emph.contents, stripped: stripped);
-    if (!stripped) {
-      write('</em>');
-    }
-  }
-
-  void writeStrong(Strong strong, {bool stripped: false}) {
-    if (!stripped) {
-      write('<strong>');
-    }
-    writeInlines(strong.contents, stripped: stripped);
-    if (!stripped) {
-      write('</strong>');
-    }
-  }
-
-  void writeStrikeout(Strikeout strikeout, {bool stripped: false}) {
-    if (!stripped) {
-      write('<del>');
-    }
-    writeInlines(strikeout.contents, stripped: stripped);
-    if (!stripped) {
-      write('</del>');
-    }
-  }
-
-  void writeSubscript(Subscript subscript, {bool stripped: false}) {
-    if (!stripped) {
-      write('<sub>');
-    }
-    writeInlines(subscript.contents, stripped: stripped);
-    if (!stripped) {
-      write('</sub>');
-    }
-  }
-
-  void writeSuperscript(Superscript superscript, {bool stripped: false}) {
-    if (!stripped) {
-      write('<sup>');
-    }
-    writeInlines(superscript.contents, stripped: stripped);
-    if (!stripped) {
-      write('</sup>');
-    }
-  }
-
-  void writeTexMathInline(TexMathInline texMathInline, {bool stripped: false}) {
-    if (!stripped) {
-      write('<span class="');
-      write(_options.inlineTexMathClasses.join(' '));
-      write('">');
-    }
-    write(r'\(');
-    write(texMathInline.contents);
-    write(r'\)');
-    if (!stripped) {
-      write('</span>');
-    }
-  }
-
-  void writeTexMathDisplay(TexMathDisplay texMathDisplay,
-      {bool stripped: false}) {
-    if (!stripped) {
-      write('<span class="');
-      write(_options.displayTexMathClasses.join(' '));
-      write('">');
-    }
-    write(r'\[');
-    write(texMathDisplay.contents);
-    write(r'\]');
-    if (!stripped) {
-      write('</span>');
-    }
-  }
-
-  void writeLink(Link link, {bool stripped: false}) {
-    if (!stripped) {
-      write('<a href="');
-      write(urlEncode(link.target.link));
-      write('"');
-      if (link.target.title != null) {
-        write(' title="');
-        write(htmlEscape(link.target.title));
-        write('"');
-      }
-      if (_options.linkAttributes && link.target.attributes is Attributes) {
-        writeAttributes(link.target.attributes);
-      }
-      write('>');
-    }
-    writeInlines(link.label, stripped: stripped);
-    if (!stripped) {
-      write('</a>');
-    }
-  }
-
-  void writeImage(Image image, {bool stripped: false}) {
-    if (!stripped) {
-      write('<img src="');
-      write(urlEncode(image.target.link));
-      write('" alt="');
-      final _HtmlBuilder builder = new _HtmlBuilder(_options)
-        ..writeInlines(image.label, stripped: true);
-      write(htmlEscape(builder.toString()));
-      write('"');
-      if (image.target.title != null) {
-        write(' title="');
-        write(htmlEscape(image.target.title));
-        write('"');
-      }
-      if (_options.linkAttributes && image.target.attributes is Attributes) {
-        writeAttributes(image.target.attributes);
-      }
-      write(" />");
-    } else {
-      writeInlines(image.label, stripped: true);
-    }
-  }
-
-  // Escaping
-
-  final RegExp _escapedChars = new RegExp(r'[<>&"]');
-  // TODO HashMap.
-  final Map<String, String> _escape = new HashMap<String, String>.from(
-      <String, String>{"<": "&lt;", ">": "&gt;", '"': "&quot;", "&": "&amp;"});
-
-  String htmlEscape(String str) {
-    final List<int> charCodes = <int>[];
-    final int length = str.length;
-    for (int i = 0; i < length; ++i) {
-      int codeUnit = str.codeUnitAt(i);
-      switch (codeUnit) {
-        case lessThanCodeUnit:
-          charCodes
-            ..add(ampersandCodeUnit)
-            ..add(smallLCharCode)
-            ..add(smallTCharCode)
-            ..add(semicolonCodeUnit);
-          break;
-
-        case greaterThanCodeUnit:
-          charCodes
-            ..add(ampersandCodeUnit)
-            ..add(smallGCharCode)
-            ..add(smallTCharCode)
-            ..add(semicolonCodeUnit);
-          break;
-
-        case doubleQuoteCodeUnit:
-          charCodes
-            ..add(ampersandCodeUnit)
-            ..add(smallQCharCode)
-            ..add(smallUCharCode)
-            ..add(smallOCharCode)
-            ..add(smallTCharCode)
-            ..add(semicolonCodeUnit);
-          break;
-
-        case ampersandCodeUnit:
-          charCodes
-            ..add(ampersandCodeUnit)
-            ..add(smallACharCode)
-            ..add(smallMCharCode)
-            ..add(smallPCharCode)
-            ..add(semicolonCodeUnit);
-          break;
-
-        default:
-          charCodes.add(codeUnit);
-      }
-    }
-    return new String.fromCharCodes(charCodes);
-  }
-
-  final RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
-  final RegExp _htmlEntity = new RegExp(
-      r'&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});',
-      caseSensitive: false);
-
-  String urlEncode(String url) {
-    String result = url.splitMapJoin(_urlEncode,
-        onMatch: (Match m) => m.group(0),
-        onNonMatch: (String s) => Uri.encodeFull(s));
-    result = result.splitMapJoin(_htmlEntity,
-        onMatch: (Match m) => m.group(0),
-        onNonMatch: (String s) => htmlEscape(s));
     return result;
+  }
+}
+
+final _IdAttributesVisitor _idAttributesVisitor = new _IdAttributesVisitor();
+
+class _ClassAttributesVisitor extends SimpleAstVisitor<String> {
+  @override
+  String visitClassAttribute(ClassAttribute node) {
+    return node.className;
+  }
+
+  @override
+  String visitExtendedAttributes(ExtendedAttributes node) {
+    final List<String> result = <String>[];
+    for (Attribute attribute in node.attributes) {
+      final String className = attribute.accept(this);
+      if (className != null) {
+        result.add(className);
+      }
+    }
+
+    return result.isNotEmpty ? ' class="${result.join(' ')}"' : '';
+  }
+}
+
+_ClassAttributesVisitor _classAttributesVisitor = new _ClassAttributesVisitor();
+
+class _KeyValueAttributesVisitor extends SimpleAstVisitor<String> {
+  @override
+  String visitKeyValueAttribute(KeyValueAttribute node) {
+    return ' ${node.key}="${node.value}"';
+  }
+
+  @override
+  String visitExtendedAttributes(ExtendedAttributes node) {
+    String result = '';
+    for (Attribute attribute in node.attributes) {
+      final String id = attribute.accept(this);
+      if (id != null) {
+        result += id;
+      }
+    }
+
+    return result;
+  }
+}
+
+_KeyValueAttributesVisitor _keyValueAttributesVisitor =
+    new _KeyValueAttributesVisitor();
+
+class _ImageLabelVisitor extends GeneralizingAstVisitor<Object> {
+  final StringBuffer _sb = new StringBuffer();
+
+  String get result => _sb.toString();
+
+  @override
+  Object visitCode(Code node) {
+    _sb.write(node.contents);
+    return null;
+  }
+
+  @override
+  Object visitCompositeInline(CompositeInline node) {
+    node.contents.accept(this);
+    return null;
+  }
+
+  @override
+  Object visitHardLineBreak(HardLineBreak node) {
+    _sb.write(" ");
+    return null;
+  }
+
+  @override
+  Object visitHtmlRawInline(HtmlRawInline node) {
+    _sb.write(node.contents);
+    return null;
+  }
+
+  @override
+  Object visitImage(Image node) {
+    node.contents?.accept(this);
+    return null;
+  }
+
+  @override
+  Object visitLink(Link node) {
+    node.contents?.accept(this);
+    return null;
+  }
+
+  @override
+  Object visitNonBreakableSpace(NonBreakableSpace node) {
+    _sb.write('\u{a0}');
+    return null;
+  }
+
+  @override
+  Object visitSmartChar(SmartChar node) {
+    switch (node.type) {
+      case SmartCharType.ellipsis:
+        _sb.write('\u{2026}');
+        break;
+
+      case SmartCharType.mdash:
+        _sb.write('\u{2014}');
+        break;
+
+      case SmartCharType.ndash:
+        _sb.write('\u{2013}');
+        break;
+
+      case SmartCharType.singleOpenQuote:
+        _sb.write('\u{2018}');
+        break;
+
+      case SmartCharType.singleCloseQuote:
+      case SmartCharType.apostrophe:
+        _sb.write('\u{2019}');
+        break;
+
+      case SmartCharType.doubleOpenQuote:
+        _sb.write('\u{201c}');
+        break;
+
+      case SmartCharType.doubleCloseQuote:
+        _sb.write('\u{201d}');
+        break;
+    }
+
+    return null;
+  }
+
+  @override
+  Object visitSpace(Space node) {
+    _sb.write(" " * node.amount);
+    return null;
+  }
+
+  @override
+  Object visitStr(Str node) {
+    _sb.write(node.contents);
+    return null;
+  }
+
+  @override
+  Object visitTab(Tab node) {
+    _sb.write("\t" * node.amount);
+    return null;
+  }
+
+  @override
+  Object visitTexMath(TexMath node) {
+    _sb.write(node.contents);
+    return null;
+  }
+}
+
+class _Visitor extends GeneralizingAstVisitor<Object> {
+  final StringBuffer _sb = new StringBuffer();
+
+  final Options _options;
+
+  _Visitor(this._options);
+
+  String get result => _sb.toString();
+
+  void _writeBlocks(Iterable<BlockNode> nodes, {bool tight: false}) {
+    final Iterator<BlockNode> iterator = nodes.iterator;
+
+    if (iterator.moveNext()) {
+      final BlockNode block = iterator.current;
+      if (tight) {
+        // TODO use separate Visitor.
+        if (block is Para) {
+          block.contents.accept(this);
+        } else {
+          _sb.writeln();
+          block.accept(this);
+        }
+      } else {
+        block.accept(this);
+      }
+      while (iterator.moveNext()) {
+        _sb.writeln();
+        final BlockNode block = iterator.current;
+        if (tight && block is Para) {
+          block.contents.accept(this);
+        } else {
+          block.accept(this);
+        }
+      }
+    }
+
+    if (tight && nodes.isNotEmpty && nodes.last is! Para) {
+      _sb.writeln();
+    }
+  }
+
+  @override
+  Object visitBlockquote(Blockquote node) {
+    _sb.write('<blockquote>\n');
+    _writeBlocks(node.contents);
+    _sb.write('\n</blockquote>');
+
+    return null;
+  }
+
+  @override
+  Object visitCode(Code node) {
+    _sb.write("<code");
+    node.attributes?.accept(this);
+    _sb..write(">")..write(htmlEscape(node.contents))..write("</code>");
+    return null;
+  }
+
+  @override
+  Object visitCodeBlock(CodeBlock node) {
+    _sb.write("<pre");
+    node.attributes?.accept(this);
+    _sb
+      ..write("><code")
+      ..write(node.attributes?.accept(_infoStringVisitor) ?? '')
+      ..write(">");
+    for (String line in node.contents) {
+      _sb.writeln(htmlEscape(line));
+    }
+    _sb.write("</code></pre>");
+    return null;
+  }
+
+  @override
+  Object visitDocument(Document node) {
+    _writeBlocks(node.contents);
+    return null;
+  }
+
+  @override
+  Object visitEmphasis(Emphasis node) {
+    _sb.write("<em>");
+    node.contents.accept(this);
+    _sb.write("</em>");
+    return null;
+  }
+
+  @override
+  Object visitExtendedAttributes(ExtendedAttributes node) {
+    _sb.write(node.accept(_idAttributesVisitor));
+    _sb.write(node.accept(_classAttributesVisitor));
+    _sb.write(node.accept(_keyValueAttributesVisitor));
+    return null;
+  }
+
+  @override
+  Object visitHardLineBreak(HardLineBreak node) {
+    _sb.write("<br/>\n");
+    return null;
+  }
+
+  @override
+  Object visitHeading(Heading node) {
+    _sb..write("<h")..write(node.level);
+    node.attributes?.accept(this);
+    _sb.write(">");
+    node.contents?.accept(this);
+    _sb..write("</h")..write(node.level)..write('>');
+    return null;
+  }
+
+  @override
+  Object visitHtmlRawBlock(HtmlRawBlock node) {
+    _sb.write(node.contents);
+    return null;
+  }
+
+  @override
+  Object visitHtmlRawInline(HtmlRawInline node) {
+    _sb.write(node.contents);
+    return null;
+  }
+
+  @override
+  Object visitImage(Image node) {
+    _sb.write('<img src="');
+    _sb.write(urlEncode(node?.link));
+    _sb.write('" alt="');
+
+    final _ImageLabelVisitor innerVisitor = new _ImageLabelVisitor();
+    node.contents.accept(innerVisitor);
+
+    _sb..write(htmlEscape(innerVisitor.result))..write('"');
+    if (node.title != null) {
+      _sb..write(' title="')..write(htmlEscape(node.title))..write('"');
+    }
+    node.attributes?.accept(this);
+    _sb.write(" />");
+    return null;
+  }
+
+  @override
+  Object visitLink(Link node) {
+    _sb..write('<a href="')..write(urlEncode(node.link))..write('"');
+    if (node.title != null) {
+      _sb..write(' title="')..write(htmlEscape(node.title))..write('"');
+    }
+    node.attributes?.accept(this);
+    _sb.write('>');
+    node.contents?.accept(this);
+    _sb.write('</a>');
+
+    return null;
+  }
+
+  @override
+  Object visitLinkReference(LinkReference node) => null;
+
+  @override
+  Object visitListItem(ListItem node) {
+    final ListBlock listBlock = node.parent as ListBlock;
+    if (listBlock.tight) {
+      _sb.write("<li>");
+      _writeBlocks(node.contents, tight: true);
+      _sb.write("</li>\n");
+    } else {
+      if (node.contents.isEmpty) {
+        _sb.write('<li></li>\n');
+      } else {
+        _sb.write('<li>\n');
+        _writeBlocks(node.contents, tight: false);
+        _sb.write('\n</li>\n');
+      }
+    }
+    return null;
+  }
+
+  @override
+  Object visitNonBreakableSpace(NonBreakableSpace node) {
+    _sb.write('\u{a0}');
+    return null;
+  }
+
+  @override
+  Object visitOrderedList(OrderedList node) {
+    _sb.write("<ol");
+    if (node.startIndex != 1) {
+      _sb.write(' start="${node.startIndex}"');
+    }
+    _sb.write(">\n");
+    node.visitChildren(this);
+    _sb.write("</ol>");
+
+    return null;
+  }
+
+  @override
+  Object visitPara(Para node) {
+    _sb.write("<p>");
+    node.visitChildren(this);
+    _sb.write("</p>");
+    return null;
+  }
+
+  @override
+  Object visitSmartChar(SmartChar node) {
+    switch (node.type) {
+      case SmartCharType.ellipsis:
+        _sb.write('\u{2026}');
+        break;
+
+      case SmartCharType.mdash:
+        _sb.write('\u{2014}');
+        break;
+
+      case SmartCharType.ndash:
+        _sb.write('\u{2013}');
+        break;
+
+      case SmartCharType.singleOpenQuote:
+        _sb.write('\u{2018}');
+        break;
+
+      case SmartCharType.singleCloseQuote:
+      case SmartCharType.apostrophe:
+        _sb.write('\u{2019}');
+        break;
+
+      case SmartCharType.doubleOpenQuote:
+        _sb.write('\u{201c}');
+        break;
+
+      case SmartCharType.doubleCloseQuote:
+        _sb.write('\u{201d}');
+        break;
+    }
+
+    return null;
+  }
+
+  @override
+  Object visitSpace(Space node) {
+    _sb.write(" " * node.amount);
+    return null;
+  }
+
+  @override
+  Object visitStr(Str node) {
+    _sb.write(htmlEscape(node.contents));
+    return null;
+  }
+
+  @override
+  Object visitStrikeout(Strikeout node) {
+    _sb.write('<del>');
+    node.contents.accept(this);
+    _sb.write('</del>');
+    return null;
+  }
+
+  @override
+  Object visitSubscript(Subscript node) {
+    _sb.write("<sub>");
+    node.contents.accept(this);
+    _sb.write("</sub>");
+    return null;
+  }
+
+  @override
+  Object visitSuperscript(Superscript node) {
+    _sb.write("<sup>");
+    node.contents.accept(this);
+    _sb.write("</sup>");
+    return null;
+  }
+
+  @override
+  Object visitStrong(Strong node) {
+    _sb.write("<strong>");
+    node.contents.accept(this);
+    _sb.write("</strong>");
+    return null;
+  }
+
+  @override
+  Object visitTab(Tab node) {
+    _sb.write("\t" * node.amount);
+    return null;
+  }
+
+  @override
+  Object visitTexMathDisplay(TexMathDisplay node) {
+    _sb
+      ..write('<span class="')
+      ..write(_options.displayTexMathClasses.join(' '))
+      ..write(r'">\[')
+      ..write(htmlEscape(node.contents))
+      ..write(r'\]</span>');
+    return null;
+  }
+
+  @override
+  Object visitTexMathInline(TexMathInline node) {
+    _sb
+      ..write('<span class="')
+      ..write(_options.inlineTexMathClasses.join(' '))
+      ..write(r'">\(')
+      ..write(htmlEscape(node.contents))
+      ..write(r'\)</span>');
+
+    return null;
+  }
+
+  @override
+  Object visitTexRawBlock(TexRawBlock node) {
+    _sb.write(htmlEscape(node.contents));
+    return null;
+  }
+
+  @override
+  Object visitThematicBreak(ThematicBreak node) {
+    _sb.write("<hr/>");
+    return null;
+  }
+
+  @override
+  Object visitUnorderedList(UnorderedList node) {
+    _sb.write("<ul>\n");
+    node.visitChildren(this);
+    _sb.write("</ul>");
+
+    return null;
   }
 }
 
@@ -458,9 +603,9 @@ class HtmlWriter {
 
   /// Renders document to string
   String write(Document document) {
-    final _HtmlBuilder builder = new _HtmlBuilder(_options)
-      ..writeDocument(document);
-    return builder.toString();
+    final _Visitor visitor = new _Visitor(_options);
+    document.accept(visitor);
+    return visitor.result;
   }
 
   /// Predefined html writer with CommonMark default settings

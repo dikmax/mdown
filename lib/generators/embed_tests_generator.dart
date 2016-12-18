@@ -5,11 +5,11 @@ import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:mdown/mdown.dart';
 import 'package:path/path.dart' as path;
 import 'package:source_gen/source_gen.dart';
 
 import 'embed_tests.dart';
-import 'package:md_proc/md_proc.dart';
 
 /// Embed test into file
 class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
@@ -23,16 +23,27 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     final String md = file.readAsStringSync();
 
     final Document doc = CommonMarkParser.strict.parse(md);
-    for (Block block in doc.contents) {
+    for (BlockNode block in doc.contents) {
       if (block is FencedCodeBlock) {
         if (block.attributes is InfoString) {
           final InfoString attr = block.attributes;
           if (attr.language == 'example') {
-            final List<String> example = block.contents.split('\n.\n');
-            if (result.containsKey(example[0] + '\n')) {
-              print('Duplicate test: ${example[0]}');
+            StringBuffer testBuffer = new StringBuffer();
+            StringBuffer resBuffer = new StringBuffer();
+            bool writeTest = true;
+            for (String line in block.contents) {
+              if (line == '.') {
+                writeTest = false;
+              } else {
+                (writeTest ? testBuffer : resBuffer).writeln(line);
+              }
+            }
+
+            final String test = testBuffer.toString();
+            if (result.containsKey(test)) {
+              print('Duplicate test: ${test}');
             } else {
-              result[example[0] + '\n'] = example[1];
+              result[test] = resBuffer.toString();
             }
           }
         }

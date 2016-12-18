@@ -3,11 +3,12 @@ library md_proc.test.reference_resolver;
 @t.Skip("Not implemented")
 import 'package:test/test.dart' as t;
 
-import 'package:md_proc/md_proc.dart';
+import 'package:mdown/mdown.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
 
 Target _linkResolver(String normalizedReference, String reference) {
   if (reference == "reference") {
-    return new Target(reference, null);
+    return astFactory.target(astFactory.targetLink(reference), null);
   } else {
     return null;
   }

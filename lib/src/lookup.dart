@@ -1,6 +1,6 @@
-library md_proc.src.lookup;
+library mdown.src.lookup;
 
-import 'package:md_proc/src/code_units.dart';
+import 'package:mdown/src/code_units.dart';
 
 abstract class Lookup {
   const Lookup();

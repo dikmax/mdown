@@ -1,18 +1,17 @@
-library md_proc.src.parsers.blankline;
+library mdown.src.parsers.blankline;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for empty line.
-class BlanklineParser extends AbstractParser<Iterable<Block>> {
+class BlanklineParser extends AbstractParser<BlockNodeImpl> {
   /// Constructor.
   BlanklineParser(ParsersContainer container) : super(container);
 
   @override
-  ParseResult<Iterable<Block>> parse(String text, int offset) {
+  ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final ParseResult<String> lineResult =
         container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
@@ -20,11 +19,10 @@ class BlanklineParser extends AbstractParser<Iterable<Block>> {
     final String line = lineResult.value;
 
     offset = lineResult.offset;
-    if (emptyLineRegExp.hasMatch(line)) {
-      return new ParseResult<Iterable<Block>>.success(
-          <Block>[], lineResult.offset);
+    if (line.trimLeft().isEmpty) {
+      return new ParseResult<BlockNodeImpl>.success(null, lineResult.offset);
     }
 
-    return const ParseResult<Iterable<Block>>.failure();
+    return const ParseResult<BlockNodeImpl>.failure();
   }
 }

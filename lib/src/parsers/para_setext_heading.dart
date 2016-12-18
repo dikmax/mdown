@@ -1,14 +1,17 @@
-library md_proc.src.parsers.para_setext_heading;
+library mdown.src.parsers.para_setext_heading;
 
 import 'dart:collection';
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/lookup.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
+
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/ast/combining_nodes.dart';
+import 'package:mdown/src/ast/unparsed_inlines.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/lookup.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Fast checks block, if it starts with [charCodeUnit1] or [charCodeUnit2],
 /// taking indent into account.
@@ -25,7 +28,7 @@ bool fastBlockTest2(
 }
 
 /// Parser for paragraphs and setext headings.
-class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
+class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
   static final RegExp _setextHeadingRegExp =
       new RegExp('^ {0,3}(-+|=+)[ \t]*\$');
 
@@ -60,13 +63,13 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
   }
 
   @override
-  ParseResult<Iterable<Block>> parse(String text, int offset) {
+  ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final List<String> contents = <String>[];
     bool canBeHeading = false;
     int level = 0;
     final int length = text.length;
 
-    Iterable<Block> listAddition;
+    BlockNodeImpl listAddition;
 
     while (offset < length) {
       final ParseResult<String> lineResult =
@@ -75,7 +78,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
       final String line = lineResult.value;
 
-      if (!emptyLineRegExp.hasMatch(line)) {
+      if (line.trimLeft().isNotEmpty) {
         if (canBeHeading) {
           if (fastBlockTest2(text, offset, minusCodeUnit, equalCodeUnit)) {
             final Match match = _setextHeadingRegExp.firstMatch(line);
@@ -88,12 +91,12 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         }
 
         final int indent = skipIndent(lineResult.value, 0);
-        if (indent != -1 &&
-            contents.length > 0) {
+        if (indent != -1 && contents.length > 0) {
           final int codeUnit = lineResult.value.codeUnitAt(indent);
           final List<Lookup> lookups = _paragraphBreaks[codeUnit];
-          if (lookups != null && lookups.any(
-                (Lookup lookup) => lookup.isFound(lineResult.value, indent))) {
+          if (lookups != null &&
+              lookups.any((Lookup lookup) =>
+                  lookup.isFound(lineResult.value, indent))) {
             // Paragraph stops here as we've got another block.
             break;
           }
@@ -114,14 +117,18 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
         if (lineResult.value.startsWith(_listSimpleTest, indent)) {
           // It could be a list.
 
-          final ParseResult<Iterable<Block>> listResult =
+          final ParseResult<BlockNodeImpl> listResult =
               container.blockquoteListParser.parse(text, offset);
           if (listResult.isSuccess) {
             // It's definitely a list
-            final Block firstBlock = listResult.value.elementAt(0);
-            if (firstBlock is ListBlock) {
-              if (firstBlock.items.length > 0 &&
-                  firstBlock.items.elementAt(0).contents.length > 0) {
+            BlockNodeImpl firstBlock = listResult.value;
+            if (firstBlock is CombiningBlockNodeImpl) {
+              final CombiningBlockNodeImpl combining = firstBlock;
+              firstBlock = combining.list.first;
+            }
+            if (firstBlock is ListBlockImpl) {
+              if (firstBlock.items.isNotEmpty &&
+                  firstBlock.items.first.contents.isNotEmpty) {
                 // It's not empty list, append it in the end and stop parsing.
 
                 offset = listResult.offset;
@@ -153,7 +160,7 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
 
     String contentsString = contents.join('\n');
     if (level > 0) {
-      Attr attr = new EmptyAttr();
+      ExtendedAttributes attr;
       if (container.options.headingAttributes) {
         if (contentsString.codeUnitAt(contentsString.length - 1) ==
             closeBraceCodeUnit) {
@@ -166,18 +173,26 @@ class ParaSetextHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
       }
-      final Inlines inlines = new UnparsedInlines(contentsString);
+      final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
 
-      return new ParseResult<Iterable<SetextHeading>>.success(
-          <SetextHeading>[new SetextHeading(level, inlines, attr)], offset);
+      return new ParseResult<BlockNodeImpl>.success(
+          new SetextHeadingImpl(inlines, level, attr), offset);
     }
 
-    final Inlines inlines = new UnparsedInlines(contentsString);
+    final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
 
-    final List<Block> result = <Block>[new Para(inlines)];
     if (listAddition != null) {
-      result.addAll(listAddition);
+      final List<BlockNodeImpl> result = <BlockNodeImpl>[new ParaImpl(inlines)];
+      if (listAddition is CombiningBlockNodeImpl) {
+        final CombiningBlockNodeImpl combining = listAddition;
+        result.addAll(combining.list);
+      } else {
+        result.add(listAddition);
+      }
+      return new ParseResult<BlockNodeImpl>.success(
+          new CombiningBlockNodeImpl(result), offset);
     }
-    return new ParseResult<Iterable<Block>>.success(result, offset);
+    return new ParseResult<BlockNodeImpl>.success(
+        new ParaImpl(inlines), offset);
   }
 }

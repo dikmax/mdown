@@ -1,15 +1,17 @@
-library md_proc.src.parsers.atx_heading;
+library mdown.src.parsers.atx_heading;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/code_units.dart';
-import 'package:md_proc/src/inlines.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/common.dart';
-import 'package:md_proc/src/parsers/container.dart';
-import 'package:md_proc/src/parse_result.dart';
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/ast/unparsed_inlines.dart';
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for ATX-headings.
-class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
+class AtxHeadingParser extends AbstractParser<BlockNodeImpl> {
   /// Constructor.
   AtxHeadingParser(ParsersContainer container) : super(container);
 
@@ -20,7 +22,7 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
   static const int _stateAfterClose = 4;
 
   @override
-  ParseResult<Iterable<Block>> parse(String text, int offset) {
+  ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final ParseResult<String> lineResult =
         container.lineParser.parse(text, offset);
 
@@ -45,12 +47,12 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
           if (code == sharpCodeUnit) {
             level++;
             if (level > 6) {
-              return const ParseResult<Iterable<Block>>.failure();
+              return const ParseResult<BlockNodeImpl>.failure();
             }
           } else if (code == spaceCodeUnit || code == tabCodeUnit) {
             state = _stateSpaces;
           } else {
-            return const ParseResult<Iterable<Block>>.failure();
+            return const ParseResult<BlockNodeImpl>.failure();
           }
 
           break;
@@ -99,8 +101,8 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
 
     endOffset = state != _stateText ? endOffset : length;
 
-    Inlines inlines;
-    Attr attr = new EmptyAttr();
+    BaseInline inlines;
+    ExtendedAttributes attr;
     if (startOffset != -1 && endOffset != -1) {
       String content = line.substring(startOffset, endOffset);
       if (container.options.headingAttributes) {
@@ -116,15 +118,12 @@ class AtxHeadingParser extends AbstractParser<Iterable<Block>> {
           }
         }
       }
-      inlines = new UnparsedInlines(content);
+      inlines = new UnparsedInlinesImpl(content);
     } else {
-      inlines = new Inlines();
+      inlines = astFactory.baseCompositeInline(<InlineNodeImpl>[]);
     }
 
-    final List<AtxHeading> heading = <AtxHeading>[
-      new AtxHeading(level, inlines, attr)
-    ];
-
-    return new ParseResult<Iterable<Block>>.success(heading, lineResult.offset);
+    return new ParseResult<BlockNodeImpl>.success(
+        new AtxHeadingImpl(inlines, level, attr), lineResult.offset);
   }
 }

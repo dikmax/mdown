@@ -1,10 +1,9 @@
-library md_proc.src.parsers.line;
+library mdown.src.parsers.line;
 
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/container.dart';
-
-final RegExp _lineRegExp = new RegExp('(.*)(?:\r\n|\n|\r)');
+import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for any line.
 class LineParser extends AbstractParser<String> {
@@ -18,17 +17,26 @@ class LineParser extends AbstractParser<String> {
       return const ParseResult<String>.failure();
     }
 
-    final Match match = _lineRegExp.matchAsPrefix(text, offset);
-    String line;
-    int newOffset;
-    if (match == null) {
-      newOffset = length;
-      line = text.substring(offset, length);
-    } else {
-      newOffset = match.end;
-      line = match[1];
+    int endOffset = offset;
+    int lineEndOffset = length;
+    while (endOffset < length) {
+      final int codeUnit = text.codeUnitAt(endOffset);
+      if (codeUnit == carriageReturnCodeUnit) {
+        lineEndOffset = endOffset;
+        final int newLineCodeOffset = endOffset + 1;
+        if (newLineCodeOffset < length &&
+            text.codeUnitAt(newLineCodeOffset) == newLineCodeUnit) {
+          endOffset = newLineCodeOffset;
+        }
+        break;
+      } else if (codeUnit == newLineCodeUnit) {
+        lineEndOffset = endOffset;
+        break;
+      }
+      endOffset += 1;
     }
 
-    return new ParseResult<String>.success(line, newOffset);
+    return new ParseResult<String>.success(
+        text.substring(offset, lineEndOffset), endOffset + 1);
   }
 }

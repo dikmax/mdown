@@ -1,7 +1,7 @@
-library md_proc.src.parsers.abstract;
+library mdown.src.parsers.abstract;
 
-import 'package:md_proc/src/parsers/container.dart';
-import 'package:md_proc/src/parse_result.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Base abstract parser class.
 abstract class AbstractParser<A> {

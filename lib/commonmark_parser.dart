@@ -1,10 +1,12 @@
 library md_proc.commonmark_parser;
 
 import 'dart:collection';
-import 'package:md_proc/options.dart';
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/container.dart';
+
+import 'package:mdown/ast/ast.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+import 'package:mdown/options.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Main parser class.
 class CommonMarkParser {
@@ -20,7 +22,7 @@ class CommonMarkParser {
 
   /// Parses [markdown] and returns [Document].
   Document parse(String markdown) {
-    container.references = new HashMap<String, Target>();
+    container.references = new HashMap<String, LinkReference>();
     final ParseResult<Document> result =
         container.documentParser.parse(markdown, 0);
 
@@ -29,14 +31,17 @@ class CommonMarkParser {
   }
 
   /// Parses string as inlines.
-  Iterable<Inline> parseInlines(String inlinesString,
+  Iterable<InlineNode> parseInlines(String inlinesString,
       [Map<String, Target> references]) {
-    container.references = references ?? new HashMap<String, Target>();
+    final Map<String, LinkReference> refs = <String, LinkReference>{};
+    if (references != null) {
+      references.forEach((String key, Target target) {
+        refs[key] = astFactory.linkReference(key, target, null);
+      });
+    }
+    container.references = refs;
 
-    final Iterable<Inline> inlines =
-        container.documentParser.parseInlines(inlinesString);
-
-    return inlines;
+    return container.documentParser.parseInlines(inlinesString);
   }
 
   /// Predefined html writer with CommonMark default settings

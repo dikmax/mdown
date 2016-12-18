@@ -1,12 +1,12 @@
-library md_proc.src.parsers.raw_tex;
+library mdown.src.parsers.raw_tex;
 
-import 'package:md_proc/definitions.dart';
-import 'package:md_proc/src/parse_result.dart';
-import 'package:md_proc/src/parsers/abstract.dart';
-import 'package:md_proc/src/parsers/container.dart';
+import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/parse_result.dart';
+import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/container.dart';
 
 /// Parses raw TeX blocks.
-class RawTexParser extends AbstractParser<Iterable<Block>> {
+class RawTexParser extends AbstractParser<BlockNodeImpl> {
   /// Constructor.
   RawTexParser(ParsersContainer container) : super(container);
 
@@ -16,14 +16,14 @@ class RawTexParser extends AbstractParser<Iterable<Block>> {
   static String _escapeReplacement(Match match) => r'\' + match[0];
 
   @override
-  ParseResult<Iterable<Block>> parse(String text, int offset) {
+  ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final ParseResult<String> lineRes =
         container.lineParser.parse(text, offset);
     assert(lineRes.isSuccess);
 
     final Match startMatch = _startRegExp.firstMatch(lineRes.value);
     if (startMatch == null) {
-      return new ParseResult<Iterable<Block>>.failure();
+      return new ParseResult<BlockNodeImpl>.failure();
     }
 
     String enviroment = startMatch[1];
@@ -53,10 +53,10 @@ class RawTexParser extends AbstractParser<Iterable<Block>> {
     }
 
     if (!found) {
-      return new ParseResult<Iterable<Block>>.failure();
+      return new ParseResult<BlockNodeImpl>.failure();
     }
 
-    return new ParseResult<Iterable<Block>>.success(
-        <Block>[new TexRawBlock(result.toString())], offset);
+    return new ParseResult<BlockNodeImpl>.success(
+        new TexRawBlockImpl(result.toString()), offset);
   }
 }
