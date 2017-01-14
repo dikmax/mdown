@@ -245,3 +245,35 @@ int getBlockFirstChar(String text, int offset) {
 
   return nonIndentOffset != -1 ? text.codeUnitAt(nonIndentOffset) : -1;
 }
+
+String trimLeft(String text) {
+  int offset = 0;
+  int length = text.length;
+
+  while (offset < length) {
+    int codeUnit = text.codeUnitAt(offset);
+    if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
+      return offset == 0 ? text : text.substring(offset);
+    }
+
+    offset++;
+  }
+
+  return '';
+}
+
+bool isOnlyWhitespace(String text) {
+  int offset = 0;
+  int length = text.length;
+
+  while (offset < length) {
+    int codeUnit = text.codeUnitAt(offset);
+    if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
+      return false;
+    }
+
+    offset++;
+  }
+
+  return true;
+}

@@ -3,6 +3,7 @@ library mdown.src.parsers.blankline;
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for empty line.
@@ -19,7 +20,7 @@ class BlanklineParser extends AbstractParser<BlockNodeImpl> {
     final String line = lineResult.value;
 
     offset = lineResult.offset;
-    if (line.trimLeft().isEmpty) {
+    if (isOnlyWhitespace(line)) {
       return new ParseResult<BlockNodeImpl>.success(null, lineResult.offset);
     }
 

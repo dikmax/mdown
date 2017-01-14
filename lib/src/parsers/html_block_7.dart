@@ -31,7 +31,7 @@ class HtmlBlock7Parser extends AbstractParser<BlockNodeImpl> {
 
         offset = lineRes.offset;
         result.writeln(lineRes.value);
-        if (lineRes.value.trimLeft().isEmpty) {
+        if (isOnlyWhitespace(lineRes.value)) {
           break;
         }
       }

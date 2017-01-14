@@ -78,7 +78,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
 
       final String line = lineResult.value;
 
-      if (line.trimLeft().isNotEmpty) {
+      if (!isOnlyWhitespace(line)) {
         if (canBeHeading) {
           if (fastBlockTest2(text, offset, minusCodeUnit, equalCodeUnit)) {
             final Match match = _setextHeadingRegExp.firstMatch(line);

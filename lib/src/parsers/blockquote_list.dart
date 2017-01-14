@@ -767,7 +767,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
         lineRest = markers.length > 0
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
-        isEmpty = lineRest.trimLeft().isEmpty;
+        isEmpty = isOnlyWhitespace(lineRest);
 
         while (stackIndex < stack.length) {
           final _StackItem stackItem = stack[stackIndex];
@@ -860,7 +860,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
           lineRest = ' ' * (4 - (markers.last.endIndent - 1) % 4) +
               lineRest; // TODO (4 - (startIndent & 3)) ???
         }
-        isEmpty = lineRest.trimLeft().isEmpty;
+        isEmpty = isOnlyWhitespace(lineRest);
 
         if (isEmpty) {
           if (stack.length > 0) {
@@ -871,7 +871,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
         lineRest = markers.length > 0
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
-        isEmpty = lineRest.trimLeft().isEmpty;
+        isEmpty = isOnlyWhitespace(lineRest);
 
         if (isEmpty) {
           if (stack.length > 0) {
@@ -883,7 +883,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
       if (!isEmpty) {
         if (lazyLineMode >= 0) {
           // Treat line as lazy, and do not parse it.
-          final String lazyLine = lineRest.trimLeft(); // TODO to not trim nbsp.
+          final String lazyLine = trimLeft(lineRest);
           while (stack.length - 1 >= lazyLineMode &&
               !stack.addLazyLine(lazyLine)) {
             stack.flush(stack.length - 1, result);

@@ -4,6 +4,7 @@ import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
+import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for indented code blocks.
@@ -31,7 +32,7 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
       assert(lineResult.isSuccess);
 
       final String line = lineResult.value;
-      if (line.trimLeft().isEmpty) {
+      if (isOnlyWhitespace(line)) {
         if (firstLine) {
           break;
         }
