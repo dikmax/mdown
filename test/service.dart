@@ -1,7 +1,6 @@
 library md_proc.test.service;
 
 import 'package:test/test.dart' as t;
-import 'package:quiver/collection.dart';
 
 import 'package:mdown/mdown.dart';
 
