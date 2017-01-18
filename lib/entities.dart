@@ -1,4 +1,4 @@
-library md_proc.entities;
+library mdown.entities;
 
 import 'dart:collection';
 

@@ -1,4 +1,4 @@
-library md_proc.generators.entities;
+library mdown.generators.entities;
 
 /// Entities annotation
 class Entities {

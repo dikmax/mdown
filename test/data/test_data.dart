@@ -1,4 +1,4 @@
-library md_proc.test.data.test_data;
+library mdown.test.data.test_data;
 
 import 'package:mdown/generators/embed_tests.dart';
 

@@ -1,4 +1,4 @@
-library md_proc.tool.build_file;
+library mdown.tool.build_file;
 
 import 'dart:async';
 import 'package:source_gen/source_gen.dart';
@@ -11,7 +11,7 @@ final PhaseGroup _phases = new PhaseGroup.singleAction(
       const EmbedTestsGenerator(),
       const EntitiesGenerator()
     ]),
-    new InputSet('md_proc',
+    new InputSet('mdown',
         const <String>['lib/entities.dart', 'test/data/test_data.dart']));
 
 /// Main method for generated code builder.

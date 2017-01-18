@@ -1,4 +1,4 @@
-library md_proc.generators.entities_generator;
+library mdown.generators.entities_generator;
 
 import 'dart:async';
 import 'dart:convert';

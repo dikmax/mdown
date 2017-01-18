@@ -1,4 +1,4 @@
-library md_proc.ast.visitor;
+library mdown.ast.visitor;
 
 import 'ast.dart';
 

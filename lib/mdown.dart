@@ -1,10 +1,10 @@
-library md_proc;
+library mdown;
 
-import 'package:mdown/commonmark_parser.dart';
+import 'package:mdown/markdown_parser.dart';
 import 'package:mdown/html_writer.dart';
 
 export 'package:mdown/ast/ast.dart';
-export 'package:mdown/commonmark_parser.dart';
+export 'package:mdown/markdown_parser.dart';
 export 'package:mdown/html_writer.dart';
 export 'package:mdown/options.dart';
 

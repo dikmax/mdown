@@ -1,4 +1,4 @@
-library md_proc.generators.embed_tests;
+library mdown.generators.embed_tests;
 
 /// Embedded test annotation
 class EmbedTests {

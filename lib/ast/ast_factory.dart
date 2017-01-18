@@ -1,4 +1,4 @@
-library md_proc.ast.ast_factory;
+library mdown.ast.ast_factory;
 
 import 'dart:core';
 

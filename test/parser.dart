@@ -1,4 +1,4 @@
-library md_proc.test.parser;
+library mdown.test.parser;
 
 import 'package:test/test.dart' as t;
 import 'package:mdown/mdown.dart';

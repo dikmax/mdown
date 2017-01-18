@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of md_proc.test.data.test_data;
+part of mdown.test.data.test_data;
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator

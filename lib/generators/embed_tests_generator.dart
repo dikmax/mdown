@@ -1,4 +1,4 @@
-library md_proc.generators.embed_tests_generator;
+library mdown.generators.embed_tests_generator;
 
 import 'dart:async';
 import 'dart:io';

@@ -1,12 +1,12 @@
-md_proc
-=======
+mdown
+=====
 
 [![Build Status](https://travis-ci.org/dikmax/md_proc.svg?branch=master)](https://travis-ci.org/dikmax/md_proc)
 [![codecov](https://codecov.io/gh/dikmax/md_proc/branch/master/graph/badge.svg)](https://codecov.io/gh/dikmax/md_proc)
 [![Pub](https://img.shields.io/pub/v/md_proc.svg)](https://pub.dartlang.org/packages/md_proc)
 [![CommonMark spec](https://img.shields.io/badge/commonmark-0.27-green.svg)](http://spec.commonmark.org/)
 
-Fast and [CommonMark]-compliant Markdown parser.
+`mdown` is fast and [CommonMark][]-compliant Markdown parser.
 
 Basic usage:
 
@@ -21,7 +21,7 @@ Parsing
 -------
 
 ```dart
-import "package:md_proc/md_proc.dart";
+import "package:mdown/mdown.dart";
 
 void main() {
   Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
@@ -34,7 +34,7 @@ Writing html
 ------------
 
 ```dart
-import "package:md_proc/md_proc.dart";
+import "package:mdown/mdown.dart";
 
 void main() {
   Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
@@ -44,25 +44,10 @@ void main() {
 ```
 
 
-Writing markdown
-----------------
-
-```dart
-import "package:md_proc/md_proc.dart";
-
-void main() {
-  Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
-  String res = MarkdownWriter.defaults.write(doc);
-  print(res); // Hello world!
-              // ============
-}
-```
-
-
 Extensions
 ==========
 
-md_proc supports some language extensions. You can specify enabled extensions using options parameter in parser and 
+mdown supports some language extensions. You can specify enabled extensions using options parameter in parser and
 renderer.
 
 ```dart
@@ -77,7 +62,8 @@ There three predefined versions of parsers/writers:
 
 - `strict`: all extensions are disabled
 - `commonmark`: only `smartPunctuation` extension is enabled.
-- `defaults`: `smartPunctuation`, `strikeout`, `subscript`, `superscript`, `texMathDollars`, `rawTex` are enabled.
+- `defaults`: `smartPunctuation`, `strikeout`, `subscript`,
+  `superscript`, `texMathDollars`, `rawTex` are enabled.
 
 To get correspondent parser/writer instance use static getter on class:
 
@@ -90,10 +76,12 @@ HtmlWriter strictWriter = HtmlWriter.strict;
 Smart punctuation (`Options.smartPunctuation`)
 ----------------------------------------------
 
-Smart punctuation is automatic replacement of `...`, `---`, `--`, `"` and `'` to "…", "—", "–" and curly versions of
-quote marks accordingly. It's only official extension to date.
+Smart punctuation is automatic replacement of `...`, `---`, `--`, `"`
+and `'` to "…", "—", "–" and curly versions of quote marks accordingly.
+It's only official extension to date.
 
-**NOTE:** This extension uses Unicode chars. Make sure that your code supports it.
+**NOTE:** This extension uses Unicode chars. Make sure that your code
+supports it.
 
 
 Extended attributes for fenced code (`Options.fencedCodeAttributes`)
@@ -139,7 +127,7 @@ Extended attributes for inline code (`Options.inlineCodeAttributes`)
 --------------------------------------------------------------------
 
 Adds extended attributes support to inline code.
- 
+
 ``````md
 `code`{#id .class key='value'}
 ``````
@@ -147,9 +135,9 @@ Adds extended attributes support to inline code.
 Extended attributes for links and images (`Options.linkAttributes`)
 -------------------------------------------------------------------
 
-Extended attributes for links and images. Both inline and reference links are 
-supported.
- 
+Extended attributes for links and images. Both inline and reference
+links are supported.
+
 ``````md
 ![](image.jpg){width="800" height="600"}
 
@@ -182,7 +170,8 @@ Support for subscript (H<sub>2</sub>O). Wrap text with tildes (`~`).
 H~2~O
 ```
 
-Subscript couldn't contain spaces. If you need to insert space into the subscript, escape space (`\ `).
+Subscript couldn't contain spaces. If you need to insert space into the
+subscript, escape space (`\ `).
 
 ```md
 subscript~with\ spaces~
@@ -198,7 +187,8 @@ Support for superscript (2<sup>2</sup>=4). Wrap text with carets (`^`).
 2^2^=4
 ```
 
-Superscript couldn't contain spaces. If you need to insert space into superscript, escape space (`\ `).
+Superscript couldn't contain spaces. If you need to insert space into
+superscript, escape space (`\ `).
 
 ```md
 superscript^with\ spaces^
@@ -208,23 +198,29 @@ superscript^with\ spaces^
 TeX Math between dollars (`Options.texMathDollars`)
 ---------------------------------------------------
 
-Anything between two `$` characters will be treated as inline TeX math. The opening `$` must have a non-space character
-immediately to its right, while the closing `$` must have a non-space character immediately to its left, and must not
-be followed immediately by a digit. Thus, `$20,000 and $30,000` won’t parse as math. If for some reason you need to
-enclose text in literal `$` characters, backslash-escape them and they won’t be treated as math delimiters.
+Anything between two `$` characters will be treated as inline TeX math.
+The opening `$` must have a non-space character immediately to its
+right, while the closing `$` must have a non-space character immediately
+to its left, and must not be followed immediately by a digit. Thus,
+`$20,000 and $30,000` won’t parse as math. If for some reason you need
+to enclose text in literal `$` characters, backslash-escape them and
+they won’t be treated as math delimiters.
 
 Anything between two `$$` will be treated as display TeX math.
 
-HTML writer generates markup for MathJax library. I.e. wraps content with `\(...\)` or `\[...\]` and additionally wraps
-it with`<span class="math inline">` or `<span class="math display">`. If you need custom classes for `span` you can
-override them with `Options.inlineTexMathClasses` and `Options.displayTexMathClasses`.
+HTML writer generates markup for [MathJax][] library. I.e. wraps content
+with `\(...\)` or `\[...\]` and additionally wraps it with
+`<span class="math inline">` or `<span class="math display">`. If you
+need custom classes for `span` you can override them with
+`Options.inlineTexMathClasses` and `Options.displayTexMathClasses`.
 
 
 TeX Math between backslashed `()` or `[]` (`Options.texMathSingleBackslash`)
 ----------------------------------------------------------------------------
 
-Causes anything between `\(` and `\)` to be interpreted as inline TeX math and anything between `\[` and `\]` to be
-interpreted as display TeX math.
+Causes anything between `\(` and `\)` to be interpreted as inline TeX
+math and anything between `\[` and `\]` to be interpreted as display
+TeX math.
 
 **NOTE 1:** This extension breaks escaping of `(` and `[]`.
 
@@ -234,8 +230,9 @@ interpreted as display TeX math.
 TeX Math between double backslashed `()` or `[]` (`Options.texMathDoubleBackslash`)
 -----------------------------------------------------------------------------------
 
-Causes anything between `\\(` and `\\)` to be interpreted as inline TeX math and anything between `\\[` and `\\]` to be
-interpreted as display TeX math.
+Causes anything between `\\(` and `\\)` to be interpreted as inline TeX
+math and anything between `\\[` and `\\]` to be interpreted as display
+TeX math.
 
 **NOTE:** This extension is disabled by default.
 
@@ -243,15 +240,16 @@ interpreted as display TeX math.
 Raw TeX (`Options.rawTex`)
 --------------------------
 
-Allows to include raw TeX blocks into documents. Right now only environment blocks are supported. Everything between
-`\begin{...}` and `\end{...}` is treated as TeX and passed into resulting HTML as is.
+Allows to include raw TeX blocks into documents. Right now only
+environment blocks are supported. Everything between `\begin{...}` and
+`\end{...}` is treated as TeX and passed into resulting HTML as is.
 
 
 Custom reference resolver
 -------------------------
 
-Custom reference resolver may be required when parsing document without implicitly defined references, for example, 
-Dartdoc.
+Custom reference resolver may be required when parsing document without
+implicitly defined references, for example, Dartdoc.
 
 ```dart
 /**
@@ -260,10 +258,11 @@ Dartdoc.
  */
 ```
 
-In that case, you could supply parser with the resolver, which should provide all missing links.
-  
+In that case, you could supply parser with the resolver, which should
+provide all missing links.
+
 ```dart
-String library = "md_proc";
+String library = "mdown";
 String version = "0.4.0";
 Target linkResolver(String normalizedReference, String reference) {
   if (reference.startsWith("new ")) {
@@ -279,13 +278,5 @@ Document doc = parser.parse('Hello world!\n===');
 String res = HtmlWriter.defaults.write(doc);
 ```
 
-High-level plan for development
-===============================
-
-1. Follow CommonMark specification changes.
-2. Add Markdown-extensions from [pandoc], then change them to CommonMark extensions when they will be finally developed
-and accepted. (inline math, footnotes, etc.)
-3. AST-processing classes. Don't have much time to think about this. But this is definitely required.
-
 [CommonMark]: http://commonmark.org/
-[pandoc]: http://johnmacfarlane.net/pandoc/
+[MathJax]: https://www.mathjax.org/

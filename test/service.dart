@@ -1,4 +1,4 @@
-library md_proc.test.service;
+library mdown.test.service;
 
 import 'package:test/test.dart' as t;
 

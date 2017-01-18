@@ -1,4 +1,4 @@
-library md_proc.html_writer;
+library mdown.html_writer;
 
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/visitor.dart';

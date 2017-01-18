@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of md_proc.entities;
+part of mdown.entities;
 
 // **************************************************************************
 // Generator: EntitiesGenerator

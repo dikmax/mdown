@@ -1,4 +1,4 @@
-library md_proc.test.custom_classes;
+library mdown.test.custom_classes;
 
 import 'package:mdown/options.dart';
 import 'parser.dart';

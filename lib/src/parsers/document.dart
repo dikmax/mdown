@@ -17,13 +17,13 @@ import 'package:mdown/src/parsers/container.dart';
 class ListInlineParsingVisitor extends ListReplacingAstVisitor {}
 
 class InlineParsingVisitor extends ReplacingAstVisitor
-    implements UnparsedInlinesVisitor<AstNode> {
+    implements UnparsedInlinesVisitor<AstNodeImpl> {
   final DocumentParser _documentParser;
 
   InlineParsingVisitor(this._documentParser);
 
   @override
-  BaseCompositeInline visitUnparsedInlines(UnparsedInlines node) {
+  BaseCompositeInlineImpl visitUnparsedInlines(UnparsedInlines node) {
     final List<InlineNodeImpl> contents =
         _documentParser.parseInlines(node.contents);
     return astFactory.baseCompositeInline(contents);

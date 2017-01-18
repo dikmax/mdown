@@ -1,4 +1,4 @@
-library md_proc.ast.ast;
+library mdown.ast.ast;
 
 import 'package:mdown/src/ast/ast.dart';
 

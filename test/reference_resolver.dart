@@ -1,4 +1,4 @@
-library md_proc.test.reference_resolver;
+library mdown.test.reference_resolver;
 
 @t.Skip("Not implemented")
 import 'package:test/test.dart' as t;

@@ -1,4 +1,4 @@
-library md_proc.options;
+library mdown.options;
 
 import 'ast/ast.dart';
 
@@ -165,7 +165,7 @@ class Options {
   /// In that case you could supply parser with resolver, which should provide all missing links.
   ///
   /// ```dart
-  /// String library = "md_proc";
+  /// String library = "mdown";
   /// String version = "0.4.0";
   /// Target linkResolver(String normalizedReference, String reference) {
   ///   if (reference.startsWith("new ")) {

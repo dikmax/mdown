@@ -1,4 +1,4 @@
-library md_proc.commonmark_parser;
+library mdown.commonmark_parser;
 
 import 'dart:collection';
 
