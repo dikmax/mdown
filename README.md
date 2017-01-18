@@ -1,8 +1,8 @@
 mdown
 =====
 
-[![Build Status](https://travis-ci.org/dikmax/mdown.svg?branch=master)](https://travis-ci.org/dikmax/md_proc)
-[![codecov](https://codecov.io/gh/dikmax/mdown/branch/master/graph/badge.svg)](https://codecov.io/gh/dikmax/md_proc)
+[![Build Status](https://travis-ci.org/dikmax/mdown.svg?branch=master)](https://travis-ci.org/dikmax/mdown)
+[![codecov](https://codecov.io/gh/dikmax/mdown/branch/master/graph/badge.svg)](https://codecov.io/gh/dikmax/mdown)
 [![Pub](https://img.shields.io/pub/v/mdown.svg)](https://pub.dartlang.org/packages/mdown)
 [![CommonMark spec](https://img.shields.io/badge/commonmark-0.27-green.svg)](http://spec.commonmark.org/)
 
@@ -30,8 +30,8 @@ void main() {
 ```
 
 
-Writing html
-------------
+Writing HTML
+---------
 
 ```dart
 import "package:mdown/mdown.dart";
@@ -43,12 +43,27 @@ void main() {
 }
 ```
 
+Performance
+===========
+
+As there are not many Markdown parsers written in Dart out there,
+parsing speed is compared with markdown package. [Progit][] was used as
+a source of markdown files in different languages. ***mdown*** appears
+to be **3.21** times faster in **VM**, **12** times faster
+in **Chrome**, **2.35** times faster in **Safari** and **3.74** times
+faster in **Firefox**.
+
+[Run benchmarks yourself or see details.](https://github.com/dikmax/mdown-benchmark)
+
+***mdown*** make extensive use of `String.codeUnitAt` instead
+of `RegExp`. So you can see noticeable gain for non-latin languages
+(up to &times;40 in Chrome for Japan translation).
 
 Extensions
 ==========
 
-mdown supports some language extensions. You can specify enabled extensions using options parameter in parser and
-renderer.
+***mdown*** supports some language extensions. You can specify enabled
+extensions using options parameter in parser and renderer.
 
 ```dart
 Options options = const Options(superscript: true);
@@ -115,7 +130,7 @@ Heading 2 {.someClass}
 -------------------
 ``````
 
-This will be rendered in html as
+This will be rendered in HTML as
 
 ```html
 <h1 id="someId">Heading 1</h1>
@@ -263,7 +278,7 @@ provide all missing links.
 
 ```dart
 String library = "mdown";
-String version = "0.4.0";
+String version = "0.11.0";
 Target linkResolver(String normalizedReference, String reference) {
   if (reference.startsWith("new ")) {
     String className = reference.substring(4);
@@ -280,3 +295,4 @@ String res = HtmlWriter.defaults.write(doc);
 
 [CommonMark]: http://commonmark.org/
 [MathJax]: https://www.mathjax.org/
+[Progit]: https://github.com/progit/progit
