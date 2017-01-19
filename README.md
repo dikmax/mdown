@@ -57,7 +57,7 @@ faster in **Firefox**.
 
 ***mdown*** make extensive use of `String.codeUnitAt` instead
 of `RegExp`. So you can see noticeable gain for non-latin languages
-(up to &times;40 in Chrome for Japan translation).
+(up to &times;40 in Chrome for Japan language).
 
 Extensions
 ==========
