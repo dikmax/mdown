@@ -3,10 +3,12 @@ library mdown.src.bit_set;
 import 'dart:collection';
 import 'dart:typed_data';
 
+/// Fast bit-set implementation.
 class BitSet extends SetMixin<int> {
   final int _size;
   final Uint32List _list;
 
+  /// Constructs new instance of BitSet with specified size.
   BitSet(this._size) : _list = new Uint32List(_size >> 5);
 
   @override

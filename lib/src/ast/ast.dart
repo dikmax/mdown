@@ -105,8 +105,8 @@ class AutolinkImpl extends LinkImpl implements Autolink {
 
   /// Constructs instance of Autolink.
   AutolinkImpl(this._link, [String text]) : super(null) {
-    _contents =
-        new NodeListImpl(this, <InlineNode>[astFactory.str(text ?? _link)]);
+    _contents = new NodeListImpl<InlineNode>(
+        this, <InlineNode>[astFactory.str(text ?? _link)]);
   }
 
   @override
@@ -772,8 +772,8 @@ abstract class RawInlineImpl extends InlineNodeImpl implements RawInline {
 
 /// Default Reference implementation.
 abstract class ReferenceImpl extends AstNodeImpl implements Reference {
-  String _reference;
-  Target _target;
+  final String _reference;
+  final Target _target;
 
   /// Constructs Reference instance.
   ReferenceImpl(this._reference, this._target);

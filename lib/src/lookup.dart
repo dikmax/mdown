@@ -43,7 +43,7 @@ class HtmlBlock1Lookup extends Lookup {
 
   @override
   bool isFound(String text, int offset) {
-    int length = text.length;
+    final int length = text.length;
 
     if (offset + 4 > length || text.codeUnitAt(offset) != lessThanCodeUnit) {
       // Check for minimal length `<pre`

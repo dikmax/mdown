@@ -248,10 +248,10 @@ int getBlockFirstChar(String text, int offset) {
 
 String trimLeft(String text) {
   int offset = 0;
-  int length = text.length;
+  final int length = text.length;
 
   while (offset < length) {
-    int codeUnit = text.codeUnitAt(offset);
+    final int codeUnit = text.codeUnitAt(offset);
     if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
       return offset == 0 ? text : text.substring(offset);
     }
@@ -264,10 +264,10 @@ String trimLeft(String text) {
 
 bool isOnlyWhitespace(String text) {
   int offset = 0;
-  int length = text.length;
+  final int length = text.length;
 
   while (offset < length) {
-    int codeUnit = text.codeUnitAt(offset);
+    final int codeUnit = text.codeUnitAt(offset);
     if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
       return false;
     }

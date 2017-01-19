@@ -28,8 +28,8 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
         if (block.attributes is InfoString) {
           final InfoString attr = block.attributes;
           if (attr.language == 'example') {
-            StringBuffer testBuffer = new StringBuffer();
-            StringBuffer resBuffer = new StringBuffer();
+            final StringBuffer testBuffer = new StringBuffer();
+            final StringBuffer resBuffer = new StringBuffer();
             bool writeTest = true;
             for (String line in block.contents) {
               if (line == '.') {
@@ -41,7 +41,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
 
             final String test = testBuffer.toString();
             if (result.containsKey(test)) {
-              print('Duplicate test: ${test}');
+              print('Duplicate test: $test');
             } else {
               result[test] = resBuffer.toString();
             }

@@ -479,14 +479,6 @@ abstract class NodeList<E extends AstNode> implements List<E> {
   factory NodeList(AstNode owner, [List<E> elements]) =>
       new NodeListImpl<E>(owner as AstNodeImpl, elements);
 
-  /**
-   * Initialize a newly created list of nodes such that all of the nodes that
-   * are added to the list will have their parent set to the given [owner]. The
-   * list will initially be populated with the given [elements].
-   */
-  /* factory NodeList(AstNode owner, [List<E> elements]) =>
-      new NodeListImpl<E>(owner as AstNodeImpl, elements); */
-
   /// Return the node that is the parent of each of the elements in the list.
   AstNode get owner;
 

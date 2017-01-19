@@ -224,7 +224,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
           }
         }
 
-        if (stack.length == 0) {
+        if (stack.isEmpty) {
           endOffset = offset;
           offset++;
           break;

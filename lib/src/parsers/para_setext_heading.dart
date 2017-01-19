@@ -91,7 +91,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
         }
 
         final int indent = skipIndent(lineResult.value, 0);
-        if (indent != -1 && contents.length > 0) {
+        if (indent != -1 && contents.isNotEmpty) {
           final int codeUnit = lineResult.value.codeUnitAt(indent);
           final List<Lookup> lookups = _paragraphBreaks[codeUnit];
           if (lookups != null &&

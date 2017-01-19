@@ -41,16 +41,16 @@ class _StackItem {
     Iterable<BlockNodeImpl> blocks = result.value;
     final bool endsWithBlankline = blocks.last == null;
 
-    while (blocks.length > 0 && blocks.last == null) {
+    while (blocks.isNotEmpty && blocks.last == null) {
       final List<BlockNodeImpl> b = blocks;
       b.removeLast();
     }
 
-    if (!marker.isBlockquote && blocks.length > 0 && block is ListBlockImpl) {
+    if (!marker.isBlockquote && blocks.isNotEmpty && block is ListBlockImpl) {
       final ListBlockImpl listBlock = block as ListBlock;
 
-      if (listBlock.items.length > 0 &&
-          listBlock.items.last.contents.length == 0 &&
+      if (listBlock.items.isNotEmpty &&
+          listBlock.items.last.contents.isEmpty &&
           blocks.elementAt(0) == null) {
         blocks = blocks.skip(1);
       }
@@ -132,7 +132,7 @@ class _Stack extends ListBase<_StackItem> {
 
   @override
   void add(_StackItem element) {
-    if (_stack.length > 0) {
+    if (_stack.isNotEmpty) {
       _stack.last.parse();
     }
 
@@ -141,7 +141,7 @@ class _Stack extends ListBase<_StackItem> {
 
   @override
   void addAll(Iterable<_StackItem> all) {
-    if (_stack.length > 0) {
+    if (_stack.isNotEmpty) {
       _stack.last.parse();
     }
 
@@ -157,19 +157,19 @@ class _Stack extends ListBase<_StackItem> {
   }
 
   void addItem(_Marker marker) {
-    assert(_stack.length > 0);
+    assert(_stack.isNotEmpty);
 
     _stack.last.addItem(marker);
   }
 
   void addLine(String line) {
-    assert(_stack.length > 0);
+    assert(_stack.isNotEmpty);
 
     _stack.last.addLine(line);
   }
 
   bool addLazyLine(String line) {
-    assert(_stack.length > 0);
+    assert(_stack.isNotEmpty);
 
     return _stack.last.addLazyLine(line);
   }
@@ -210,7 +210,7 @@ class _Stack extends ListBase<_StackItem> {
   }
 
   void setTight(bool tight) {
-    assert(_stack.length > 0);
+    assert(_stack.isNotEmpty);
 
     _stack.last.setTight(tight);
   }
@@ -266,9 +266,9 @@ class _ExtendedOrderedList extends OrderedListImpl implements _ExtendedBlock {
   }
 
   @override
-  BlockNode get last => items.length == 0
+  BlockNode get last => items.isEmpty
       ? null
-      : (items.last.contents.length == 0 ? null : items.last.contents.last);
+      : (items.last.contents.isEmpty ? null : items.last.contents.last);
 }
 
 class _ExtendedUnorderedList extends UnorderedListImpl
@@ -279,7 +279,7 @@ class _ExtendedUnorderedList extends UnorderedListImpl
 
   @override
   void addToEnd(Iterable<BlockNodeImpl> blocks) {
-    assert(items.length != 0);
+    assert(items.isNotEmpty);
 
     final ListItem item = items.last;
 
@@ -290,7 +290,7 @@ class _ExtendedUnorderedList extends UnorderedListImpl
 
   @override
   void addItem() {
-    assert(this.items.length != 0);
+    assert(this.items.isNotEmpty);
 
     final NodeList<ListItem> items = this.items;
 
@@ -298,9 +298,9 @@ class _ExtendedUnorderedList extends UnorderedListImpl
   }
 
   @override
-  BlockNode get last => items.length == 0
+  BlockNode get last => items.isEmpty
       ? null
-      : (items.last.contents.length == 0 ? null : items.last.contents.last);
+      : (items.last.contents.isEmpty ? null : items.last.contents.last);
 }
 
 abstract class _Marker {
@@ -560,7 +560,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
       final Match match = _markerRegExp.matchAsPrefix(line, offset);
       if (match == null) {
-        if (result.length > 0) {
+        if (result.isNotEmpty) {
           // Blocks indent should counted from first block indent, but
           // only if it not exceeds 3 spaces.
           if (indent < result.last.endIndent + 4) {
@@ -615,7 +615,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
       Iterable<_Marker> markers = _getMarkers(lineResult.value, 0, 0);
 
-      if (markers.length == 0 && stack.length == 0) {
+      if (markers.isEmpty && stack.isEmpty) {
         // No marker found and we at the top.
         // What we parsing isn't a list or blockquote.
         break;
@@ -752,7 +752,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
       // Here we've processed whole stack or whole markers list, or both
 
-      if (markers.length == 0 && stack.length == 0) {
+      if (markers.isEmpty && stack.isEmpty) {
         // No marker found and we at the top.
         // Most likely thematic break had broke parsing.
         break;
@@ -764,7 +764,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
       if (stackIndex < stack.length) {
         // Going through rest of stack. Cases 3 and 7.
 
-        lineRest = markers.length > 0
+        lineRest = markers.isNotEmpty
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
         isEmpty = isOnlyWhitespace(lineRest);
@@ -815,7 +815,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
         for (_Marker marker in markers.skip(markersIndex)) {
           String thematicTest;
-          if (stack.length > 0) {
+          if (stack.isNotEmpty) {
             if (stack.last.marker.offset < lineResult.value.length) {
               thematicTest =
                   lineResult.value.substring(stack.last.marker.offset);
@@ -837,7 +837,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
             break;
           }
 
-          if (stack.length > 0 && stack.last.afterEmpty) {
+          if (stack.isNotEmpty && stack.last.afterEmpty) {
             stack.last.setTight(false);
           }
 
@@ -863,18 +863,18 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
         isEmpty = isOnlyWhitespace(lineRest);
 
         if (isEmpty) {
-          if (stack.length > 0) {
+          if (stack.isNotEmpty) {
             stack.addLine('');
           }
         }
       } else {
-        lineRest = markers.length > 0
+        lineRest = markers.isNotEmpty
             ? lineResult.value.substring(markers.last.offset)
             : lineResult.value;
         isEmpty = isOnlyWhitespace(lineRest);
 
         if (isEmpty) {
-          if (stack.length > 0) {
+          if (stack.isNotEmpty) {
             stack.addLine('');
           }
         }
@@ -897,7 +897,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
           // Otherwise switching to strict mode.
 
-          if (stack.length == 0) {
+          if (stack.isEmpty) {
             // But we can't apply strict line if stack is empty.
             // It is a separate block then.
             break;
@@ -911,7 +911,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
           stack.flush(stack.length - 1, result);
 
-          if (stack.length == 0) {
+          if (stack.isEmpty) {
             break;
           }
         }

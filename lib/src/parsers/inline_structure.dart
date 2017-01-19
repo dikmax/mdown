@@ -48,11 +48,14 @@ class _Delim {
 /// Space inline
 class EscapedSpace extends InlineNodeImpl {
   @override
-  // ignore: avoid_as
-  R accept<R>(AstVisitor<R> visitor) => (visitor as ReplaceEscapedVisitor)
-      .visitEscapedSpace(this);
+  R accept<R>(AstVisitor<R> visitor) {
+    if (visitor is ExcapedInlinesVisitor) {
+      final ExcapedInlinesVisitor<R> v = visitor;
+      return v.visitEscapedSpace(this);
+    }
+    return null;
+  }
 
-  // TODO: implement childEntities
   @override
   Iterable<AstNode> get childEntities => null;
 
@@ -64,10 +67,14 @@ class EscapedSpace extends InlineNodeImpl {
 class EscapedTab extends InlineNodeImpl {
   @override
   // ignore: avoid_as
-  R accept<R>(AstVisitor<R> visitor) => (visitor as ReplaceEscapedVisitor)
-      .visitEscapedTab(this);
+  R accept<R>(AstVisitor<R> visitor) {
+    if (visitor is ExcapedInlinesVisitor) {
+      final ExcapedInlinesVisitor<R> v = visitor;
+      return v.visitEscapedTab(this);
+    }
+    return null;
+  }
 
-  // TODO: implement childEntities
   @override
   Iterable<AstNode> get childEntities => null;
 
@@ -75,14 +82,25 @@ class EscapedTab extends InlineNodeImpl {
   void visitChildren<R>(AstVisitor<R> visitor) {}
 }
 
+/// Extended visitor for UnparsedInlines.
+abstract class ExcapedInlinesVisitor<R> extends AstVisitor<R> {
+  /// Visits escaped space.
+  R visitEscapedSpace(EscapedSpace node);
+
+  /// Visits escaped tab.
+  R visitEscapedTab(EscapedTab node);
+}
+
 /// Replaces [EscapedSpace] and [EscapedTab] with correspondent inlines.
-class ReplaceEscapedVisitor extends ListReplacingAstVisitor {
+class ReplaceEscapedVisitor extends ListReplacingAstVisitor
+    implements ExcapedInlinesVisitor<List<AstNodeImpl>> {
   final bool _success;
 
   /// Constructs new visitor. Set [_success] to true if parsing was successful.
   ReplaceEscapedVisitor(this._success);
 
-  visitEscapedSpace(EscapedSpace node) {
+  @override
+  List<AstNodeImpl> visitEscapedSpace(EscapedSpace node) {
     final List<InlineNodeImpl> result = <InlineNodeImpl>[];
     if (!_success) {
       result.add(new StrImpl('\\'));
@@ -92,7 +110,8 @@ class ReplaceEscapedVisitor extends ListReplacingAstVisitor {
     return result;
   }
 
-  visitEscapedTab(EscapedTab node) {
+  @override
+  List<AstNodeImpl> visitEscapedTab(EscapedTab node) {
     final List<InlineNodeImpl> result = <InlineNodeImpl>[];
     if (!_success) {
       result.add(new StrImpl('\\'));
@@ -332,7 +351,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
     List<InlineNodeImpl> result = <InlineNodeImpl>[];
 
     final int length = text.length;
-    while (offset < length && stack.length > 0) {
+    while (offset < length && stack.isNotEmpty) {
       final _Delim delim = _scanDelims(text, offset);
       if (delim != null) {
         final int charCode = delim.charCode;
@@ -440,7 +459,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                 if (openDelim.count == 0) {
                   final List<InlineNodeImpl> itemRes =
                       _buildStack(stack, stack.length - 1);
-                  if (stack.length == 0) {
+                  if (stack.isEmpty) {
                     result.addAll(itemRes);
                   } else {
                     stack.last.inlines.addAll(itemRes);
@@ -460,7 +479,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
             stack.add(delim);
           } else {
             final List<InlineNodeImpl> inlines =
-                stack.length == 0 ? result : stack.last.inlines;
+                stack.isEmpty ? result : stack.last.inlines;
             if (charCode == singleQuoteCodeUnit) {
               inlines.addAll(new List<InlineNodeImpl>.filled(
                   delim.count,

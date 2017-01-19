@@ -53,7 +53,7 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
     }
 
     final String label = labelAndLinkMatch[1].trim();
-    if (label.length == 0) {
+    if (label.isEmpty) {
       // Label cannot be empty
       return new ParseResult<LinkReferenceImpl>.failure();
     }

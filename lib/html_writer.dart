@@ -5,26 +5,22 @@ import 'package:mdown/ast/visitor.dart';
 import 'package:mdown/options.dart';
 import 'package:mdown/src/code_units.dart';
 
-final RegExp _urlEncode = new RegExp(r'%[0-9a-fA-F]{2}');
-final RegExp _htmlEntity = new RegExp(
+final RegExp _urlEncodeRegExp = new RegExp(r'%[0-9a-fA-F]{2}');
+final RegExp _htmlEntityRegExp = new RegExp(
     r'&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});',
     caseSensitive: false);
 
-String urlEncode(String url) {
-  String result = url.splitMapJoin(_urlEncode,
+String _urlEncode(String url) {
+  String result = url.splitMapJoin(_urlEncodeRegExp,
       onMatch: (Match m) => m.group(0),
       onNonMatch: (String s) => Uri.encodeFull(s));
-  result = result.splitMapJoin(_htmlEntity,
+  result = result.splitMapJoin(_htmlEntityRegExp,
       onMatch: (Match m) => m.group(0),
-      onNonMatch: (String s) => htmlEscape(s));
+      onNonMatch: (String s) => _htmlEscape(s));
   return result;
 }
 
-// SB - 729
-// List - 666
-// String.replace - 815
-
-String htmlEscape(String str) {
+String _htmlEscape(String str) {
   final List<int> charCodes = <int>[];
   final int length = str.length;
   for (int i = 0; i < length; ++i) {
@@ -78,7 +74,7 @@ class _InfoStringVisitor extends SimpleAstVisitor<String> {
     if (node.language == "") {
       return "";
     }
-    return ' class="language-${htmlEscape(node.language)}"';
+    return ' class="language-${_htmlEscape(node.language)}"';
   }
 }
 
@@ -313,7 +309,7 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
   Object visitCode(Code node) {
     _sb.write("<code");
     node.attributes?.accept(this);
-    _sb..write(">")..write(htmlEscape(node.contents))..write("</code>");
+    _sb..write(">")..write(_htmlEscape(node.contents))..write("</code>");
     return null;
   }
 
@@ -326,7 +322,7 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
       ..write(node.attributes?.accept(_infoStringVisitor) ?? '')
       ..write(">");
     for (String line in node.contents) {
-      _sb.writeln(htmlEscape(line));
+      _sb.writeln(_htmlEscape(line));
     }
     _sb.write("</code></pre>");
     return null;
@@ -385,15 +381,15 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
   @override
   Object visitImage(Image node) {
     _sb.write('<img src="');
-    _sb.write(urlEncode(node?.link));
+    _sb.write(_urlEncode(node?.link));
     _sb.write('" alt="');
 
     final _ImageLabelVisitor innerVisitor = new _ImageLabelVisitor();
     node.contents.accept(innerVisitor);
 
-    _sb..write(htmlEscape(innerVisitor.result))..write('"');
+    _sb..write(_htmlEscape(innerVisitor.result))..write('"');
     if (node.title != null) {
-      _sb..write(' title="')..write(htmlEscape(node.title))..write('"');
+      _sb..write(' title="')..write(_htmlEscape(node.title))..write('"');
     }
     node.attributes?.accept(this);
     _sb.write(" />");
@@ -402,9 +398,9 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
 
   @override
   Object visitLink(Link node) {
-    _sb..write('<a href="')..write(urlEncode(node.link))..write('"');
+    _sb..write('<a href="')..write(_urlEncode(node.link))..write('"');
     if (node.title != null) {
-      _sb..write(' title="')..write(htmlEscape(node.title))..write('"');
+      _sb..write(' title="')..write(_htmlEscape(node.title))..write('"');
     }
     node.attributes?.accept(this);
     _sb.write('>');
@@ -419,18 +415,20 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
 
   @override
   Object visitListItem(ListItem node) {
-    final ListBlock listBlock = node.parent as ListBlock;
-    if (listBlock.tight) {
-      _sb.write("<li>");
-      _writeBlocks(node.contents, tight: true);
-      _sb.write("</li>\n");
-    } else {
-      if (node.contents.isEmpty) {
-        _sb.write('<li></li>\n');
+    if (node.parent is ListBlock) {
+      final ListBlock listBlock = node.parent;
+      if (listBlock.tight) {
+        _sb.write("<li>");
+        _writeBlocks(node.contents, tight: true);
+        _sb.write("</li>\n");
       } else {
-        _sb.write('<li>\n');
-        _writeBlocks(node.contents, tight: false);
-        _sb.write('\n</li>\n');
+        if (node.contents.isEmpty) {
+          _sb.write('<li></li>\n');
+        } else {
+          _sb.write('<li>\n');
+          _writeBlocks(node.contents, tight: false);
+          _sb.write('\n</li>\n');
+        }
       }
     }
     return null;
@@ -507,7 +505,7 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
 
   @override
   Object visitStr(Str node) {
-    _sb.write(htmlEscape(node.contents));
+    _sb.write(_htmlEscape(node.contents));
     return null;
   }
 
@@ -555,7 +553,7 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
       ..write('<span class="')
       ..write(_options.displayTexMathClasses.join(' '))
       ..write(r'">\[')
-      ..write(htmlEscape(node.contents))
+      ..write(_htmlEscape(node.contents))
       ..write(r'\]</span>');
     return null;
   }
@@ -566,7 +564,7 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
       ..write('<span class="')
       ..write(_options.inlineTexMathClasses.join(' '))
       ..write(r'">\(')
-      ..write(htmlEscape(node.contents))
+      ..write(_htmlEscape(node.contents))
       ..write(r'\)</span>');
 
     return null;
@@ -574,7 +572,7 @@ class _Visitor extends GeneralizingAstVisitor<Object> {
 
   @override
   Object visitTexRawBlock(TexRawBlock node) {
-    _sb.write(htmlEscape(node.contents));
+    _sb.write(_htmlEscape(node.contents));
     return null;
   }
 
