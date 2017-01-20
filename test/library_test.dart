@@ -1,5 +1,6 @@
 import 'package:mdown/options.dart';
 
+import 'blns.dart';
 import 'custom_classes.dart';
 import 'parser.dart';
 import 'reference_resolver.dart';
@@ -9,6 +10,7 @@ import 'data/test_data.dart';
 /// Main tests runner
 void main() {
   // serviceTests();
+  blnsTests();
 
   final TestFunc strictTestFunc = generateTestFunc(Options.strict);
   final TestFunc defaultsTestFunc = generateTestFunc(Options.defaults);

@@ -1,6 +1,9 @@
 library mdown.test.data.test_data;
 
+import 'dart:convert';
+
 import 'package:mdown/generators/embed_tests.dart';
+import 'package:mdown/generators/embed_blns_tests.dart';
 
 part 'test_data.g.dart';
 
@@ -74,3 +77,8 @@ final Map<String, String> texMathCustomClasses = _$texMathCustomClassesTests;
 /// Tests for raw TeX.
 @EmbedTests('raw_tex.txt')
 final Map<String, String> rawTex = _$rawTexTests;
+
+/// Big list of naughty strings
+@EmbedBlnsTests('blns.base64.json')
+final Iterable<String> blns = _$blnsTests
+    .map((String str) => UTF8.decode(BASE64.decode(str), allowMalformed: true));
