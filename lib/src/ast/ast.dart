@@ -979,6 +979,109 @@ class TabImpl extends WhitespaceImpl implements Tab {
   R accept<R>(AstVisitor<R> visitor) => visitor.visitTab(this);
 }
 
+/// Default Table implementation
+class TableImpl extends BlockNodeImpl implements Table {
+  final List<Alignment> _alignment;
+  final BaseInline _caption;
+  NodeList<TableRowImpl> _contents;
+  NodeList<TableCellImpl> _headers;
+
+  /// Constructs Table instance
+  factory TableImpl(
+          List<Alignment> alignment,
+          BaseInline caption,
+          Iterable<TableCell> headers,
+          Iterable<Iterable<TableCell>> contents) =>
+      new TableImpl.rows(alignment, caption, headers,
+          contents.map((Iterable<TableCell> item) => new TableRowImpl(item)));
+
+  /// Constructs Table instance from rows
+  TableImpl.rows(this._alignment, this._caption, Iterable<TableCell> headers,
+      Iterable<TableRow> contents) {
+    _headers = new NodeListImpl<TableCellImpl>(this, headers);
+    _contents = new NodeListImpl<TableRowImpl>(this, contents);
+  }
+
+  @override
+  R accept<R>(AstVisitor<R> visitor) => visitor.visitTable(this);
+
+  @override
+  List<Alignment> get alignment => _alignment;
+
+  @override
+  BaseInline get caption => _caption;
+
+  @override
+  Iterable<AstNode> get childEntities {
+    final List<AstNode> result = <AstNode>[_caption]
+      ..addAll(_headers)
+      ..addAll(_contents);
+    return result;
+  }
+
+  @override
+  NodeList<TableRow> get contents => _contents;
+
+  @override
+  NodeList<TableCell> get headers => _headers;
+
+  @override
+  void visitChildren<R>(AstVisitor<R> visitor) {
+    _caption.accept(visitor);
+    _headers.accept(visitor);
+    _contents.accept(visitor);
+  }
+}
+
+/// Default TableCell implementation
+class TableCellImpl extends AstNodeImpl implements TableCell {
+  /// Cell contents.
+  NodeList<BlockNodeImpl> _contents;
+
+  /// Constructs instance of TableCell.
+  TableCellImpl(Iterable<BlockNodeImpl> contents) {
+    _contents = new NodeListImpl<BlockNodeImpl>(this, contents);
+  }
+
+  @override
+  R accept<R>(AstVisitor<R> visitor) => visitor.visitTableCell(this);
+
+  @override
+  Iterable<AstNode> get childEntities => _contents;
+
+  @override
+  NodeList<BlockNode> get contents => _contents;
+
+  @override
+  void visitChildren<R>(AstVisitor<R> visitor) {
+    _contents?.accept<R>(visitor);
+  }
+}
+
+/// Default TableRow implementation.
+class TableRowImpl extends AstNodeImpl implements TableRow {
+  NodeList<TableCellImpl> _contents;
+
+  /// Constructs instance of TableRow.
+  TableRowImpl(Iterable<TableCellImpl> contents) {
+    _contents = new NodeListImpl<TableCellImpl>(this, contents);
+  }
+
+  @override
+  R accept<R>(AstVisitor<R> visitor) => visitor.visitTableRow(this);
+
+  @override
+  Iterable<AstNode> get childEntities => _contents;
+
+  @override
+  NodeList<TableCell> get contents => _contents;
+
+  @override
+  void visitChildren<R>(AstVisitor<R> visitor) {
+    _contents.accept(visitor);
+  }
+}
+
 /// Default Target implementation.
 class TargetImpl extends AstNodeImpl implements Target {
   final TargetLink _link;

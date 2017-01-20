@@ -4,6 +4,7 @@ import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/visitor.dart';
 import 'package:mdown/options.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/ast/enums.dart';
 
 final RegExp _urlEncodeRegExp = new RegExp(r'%[0-9a-fA-F]{2}');
 final RegExp _htmlEntityRegExp = new RegExp(
@@ -544,6 +545,54 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
   @override
   Null visitTab(Tab node) {
     _sb.write("\t" * node.amount);
+    return null;
+  }
+
+  @override
+  Null visitTable(Table node) {
+    _sb.write("<table>");
+    final int alignmentLength = node.alignment.length;
+    if (node.headers != null) {
+      _sb.write("<thead><tr>");
+      final int length = node.headers.length;
+      for (int i = 0; i < length; i += 1) {
+        _sb.write("<th");
+        if (i < alignmentLength) {
+          _sb.write(alignmentToStyleString(node.alignment[i]));
+        }
+        _sb.write(">");
+        node.headers[i].accept(this);
+        _sb.write("</th>");
+      }
+      _sb.write("</tr></thead>");
+    }
+    _sb.write("<tbody>");
+    for (TableRow row in node.contents) {
+      _sb.write("<tr>");
+      final int length = row.contents.length;
+      for (int i = 0; i < length; i += 1) {
+        _sb.write("<td");
+        if (i < alignmentLength) {
+          _sb.write(alignmentToStyleString(node.alignment[i]));
+        }
+        _sb.write(">");
+        row.contents[i].accept(this);
+        _sb.write("</td>");
+      }
+      _sb.write("</tr>");
+    }
+    _sb.write("</tbody></table>");
+    return null;
+  }
+
+  @override
+  Null visitTableCell(TableCell node) {
+    if (node.contents.length == 1 && node.contents.single is Para) {
+      final Para para = node.contents.single;
+      para.contents.accept(this);
+    } else {
+      node.contents.accept(this);
+    }
     return null;
   }
 

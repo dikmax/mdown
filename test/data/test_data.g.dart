@@ -4804,8 +4804,66 @@ All odd numbers are prime.
 };
 
 // **************************************************************************
+// Generator: EmbedTestsGenerator
+// Target: final Map<String, String> pipeTables
+// **************************************************************************
+
+final Map<String, String> _$pipeTablesTests = <String, String>{
+  r'''head | cells
+-----|------
+body | cells
+''': r'''<table><thead><tr><th>head</th><th>cells</th></tr></thead><tbody><tr><td>body</td><td>cells</td></tr></tbody></table>
+''',
+  r'''head | cells
+-----|------
+body | cells
+more | cells
+''': r'''<table><thead><tr><th>head</th><th>cells</th></tr></thead><tbody><tr><td>body</td><td>cells</td></tr><tr><td>more</td><td>cells</td></tr></tbody></table>
+''',
+  r'''| head | cells |
+|------|-------|
+| body | cells |
+''': r'''<table><thead><tr><th>head</th><th>cells</th></tr></thead><tbody><tr><td>body</td><td>cells</td></tr></tbody></table>
+''',
+  r'''head `code` | _cells_
+------------|--------
+*text*      | <span>text</span>
+''': r'''<table><thead><tr><th>head <code>code</code></th><th><em>cells</em></th></tr></thead><tbody><tr><td><em>text</em></td><td><span>text</span></td></tr></tbody></table>
+''',
+  r'''header | _foo | bar_
+-------|------------
+text   | text
+''': r'''<table><thead><tr><th>header</th><th>_foo</th><th>bar_</th></tr></thead><tbody><tr><td>text</td><td>text</td></tr></tbody></table>
+''',
+  r'''header | header
+-------|--------
+text   | [link][here]
+
+[here]: http://url
+''': r'''<table><thead><tr><th>header</th><th>header</th></tr></thead><tbody><tr><td>text</td><td><a href="http://url">link</a></td></tr></tbody></table>
+''',
+  r'''head
+-----|-----
+body
+''': r'''<table><thead><tr><th>head</th></tr></thead><tbody><tr><td>body</td></tr></tbody></table>
+''',
+  r'''head | foo | bar
+-----|-----
+body
+row with | two cells
+''': r'''<table><thead><tr><th>head</th><th>foo</th><th>bar</th></tr></thead><tbody><tr><td>body</td></tr><tr><td>row with</td><td>two cells</td></tr></tbody></table>
+''',
+  r'''head | cells | here
+:----|:-----:|----:
+body | cells | here
+too | many | cells | here
+''': r'''<table><thead><tr><th style="text-align: left;">head</th><th style="text-align: center;">cells</th><th style="text-align: right;">here</th></tr></thead><tbody><tr><td style="text-align: left;">body</td><td style="text-align: center;">cells</td><td style="text-align: right;">here</td></tr><tr><td style="text-align: left;">too</td><td style="text-align: center;">many</td><td style="text-align: right;">cells</td><td>here</td></tr></tbody></table>
+''',
+};
+
+// **************************************************************************
 // Generator: EmbedBlnsTestsGenerator
-// Target: final List<String> blns
+// Target: final Iterable<String> blns
 // **************************************************************************
 
 final List<String> _$blnsTests = <String>[

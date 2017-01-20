@@ -171,6 +171,18 @@ class AstFactoryImpl implements AstFactory {
   Tab tab(int amount) => new TabImpl(amount);
 
   @override
+  Table table(
+          Iterable<Alignment> alignment,
+          BaseInline caption,
+          Iterable<TableCell> headers,
+          Iterable<Iterable<TableCell>> contents) =>
+      new TableImpl(alignment, caption, headers, contents);
+
+  @override
+  TableCell tableCell(Iterable<BlockNode> contents) =>
+      new TableCellImpl(contents);
+
+  @override
   Target target(TargetLink link, TargetTitle title) =>
       new TargetImpl(link, title);
 

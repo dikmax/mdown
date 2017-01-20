@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:mdown/generators/embed_tests.dart';
 import 'package:mdown/generators/embed_blns_tests.dart';
 
+// TODO move one folder up.
+
 part 'test_data.g.dart';
 
 /// Specification tests
@@ -77,6 +79,10 @@ final Map<String, String> texMathCustomClasses = _$texMathCustomClassesTests;
 /// Tests for raw TeX.
 @EmbedTests('raw_tex.txt')
 final Map<String, String> rawTex = _$rawTexTests;
+
+/// Tests for tables.
+@EmbedTests('pipe_tables.txt')
+final Map<String, String> pipeTables = _$pipeTablesTests;
 
 /// Big list of naughty strings
 @EmbedBlnsTests('blns.base64.json')

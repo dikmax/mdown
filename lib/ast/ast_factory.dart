@@ -146,6 +146,13 @@ abstract class AstFactory {
   /// Creates sequence of [amount] tabs.
   Tab tab(int amount);
 
+  /// Creates table
+  Table table(Iterable<Alignment> alignment, BaseInline caption,
+      Iterable<TableCell> headers, Iterable<Iterable<TableCell>> contents);
+
+  /// Creates table cell.
+  TableCell tableCell(Iterable<BlockNode> contents);
+
   /// Creates target for link and image.
   Target target(TargetLink link, TargetTitle title);
 

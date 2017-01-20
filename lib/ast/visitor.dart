@@ -128,6 +128,15 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
   R visitTab(Tab node) => null;
 
   @override
+  R visitTable(Table node) => null;
+
+  @override
+  R visitTableCell(TableCell node) => null;
+
+  @override
+  R visitTableRow(TableRow node) => null;
+
+  @override
   R visitTarget(Target node) => null;
 
   @override
@@ -405,6 +414,24 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
   }
 
   @override
+  R visitTable(Table node) {
+    node.visitChildren(this);
+    return null;
+  }
+
+  @override
+  R visitTableCell(TableCell node) {
+    node.visitChildren(this);
+    return null;
+  }
+
+  @override
+  R visitTableRow(TableRow node) {
+    node.visitChildren(this);
+    return null;
+  }
+
+  @override
   R visitTarget(Target node) {
     node.visitChildren(this);
     return null;
@@ -625,6 +652,15 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
   R visitTab(Tab node) => visitWhitespace(node);
 
   @override
+  R visitTable(Table node) => visitBlockNode(node);
+
+  @override
+  R visitTableCell(TableCell node) => visitNode(node);
+
+  @override
+  R visitTableRow(TableRow node) => visitNode(node);
+
+  @override
   R visitTarget(Target node) => visitNode(node);
 
   @override
@@ -790,6 +826,15 @@ class UnifyingAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitTab(Tab node) => visitNode(node);
+
+  @override
+  R visitTable(Table node) => visitNode(node);
+
+  @override
+  R visitTableCell(TableCell node) => visitNode(node);
+
+  @override
+  R visitTableRow(TableRow node) => visitNode(node);
 
   @override
   R visitTarget(Target node) => visitNode(node);

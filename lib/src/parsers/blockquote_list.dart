@@ -380,6 +380,8 @@ class _OrderedListMarker extends _Marker {
 class _InnerBlocksParser extends AbstractParser<Iterable<BlockNodeImpl>> {
   Map<int, List<AbstractParser<BlockNodeImpl>>> _blockParsers;
 
+  List<AbstractParser<BlockNodeImpl>> _blockParsersRest;
+
   _InnerBlocksParser(ParsersContainer container) : super(container);
 
   @override
@@ -420,6 +422,13 @@ class _InnerBlocksParser extends AbstractParser<Iterable<BlockNodeImpl>> {
         container.rawTexParser
       ];
     }
+
+    // Rest of block parsers
+    _blockParsersRest = <AbstractParser<BlockNodeImpl>>[];
+    if (container.options.pipeTables) {
+      _blockParsersRest.add(container.pipeTablesParser);
+    }
+    _blockParsersRest.add(container.paraSetextHeadingParser);
   }
 
   @override
@@ -487,17 +496,21 @@ class _InnerBlocksParser extends AbstractParser<Iterable<BlockNodeImpl>> {
         }
       }
 
-      final ParseResult<BlockNodeImpl> res =
-          container.paraSetextHeadingParser.parse(text, offset);
-      assert(res.isSuccess);
-
-      if (res.value is CombiningBlockNodeImpl) {
-        final CombiningBlockNodeImpl combining = res.value;
-        blocks.addAll(combining.list);
-      } else {
-        blocks.add(res.value);
+      for (AbstractParser<BlockNodeImpl> parser in _blockParsersRest) {
+        final ParseResult<BlockNodeImpl> res = parser.parse(text, offset);
+        if (res.isSuccess) {
+          if (res.value != null) {
+            if (res.value is CombiningBlockNodeImpl) {
+              final CombiningBlockNodeImpl combining = res.value;
+              blocks.addAll(combining.list);
+            } else {
+              blocks.add(res.value);
+            }
+          }
+          offset = res.offset;
+          break;
+        }
       }
-      offset = res.offset;
     }
 
     return new ParseResult<Iterable<BlockNodeImpl>>.success(blocks, offset);

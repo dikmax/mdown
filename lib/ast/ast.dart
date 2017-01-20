@@ -2,6 +2,21 @@ library mdown.ast.ast;
 
 import 'package:mdown/src/ast/ast.dart';
 
+/// Column alignment in table.
+enum Alignment {
+  /// Align to left
+  left,
+
+  /// Align to center
+  center,
+
+  /// Align to right
+  right,
+
+  /// No alignment (default)
+  none
+}
+
 /// Bullet type for unordered list
 enum BulletType {
   /// `-` bullet
@@ -393,6 +408,31 @@ abstract class Superscript implements CompositeInline {}
 /// Tab char inline
 abstract class Tab implements Whitespace {}
 
+/// Table block.
+abstract class Table implements BlockNode {
+  /// Table caption
+  BaseInline get caption;
+
+  /// Alignment descriptions
+  List<Alignment> get alignment;
+
+  /// Table headers
+  NodeList<TableCell> get headers;
+
+  /// Table contents
+  NodeList<TableRow> get contents;
+}
+
+abstract class TableCell implements AstNode {
+  /// Cell contents contents
+  NodeList<BlockNode> get contents;
+}
+
+abstract class TableRow implements AstNode {
+  /// Cells in row
+  NodeList<TableCell> get contents;
+}
+
 /// Target ::= TargetLink (' ' TargetTitle)?
 abstract class Target implements AstNode {
   TargetLink get link;
@@ -579,6 +619,12 @@ abstract class AstVisitor<R> {
   R visitSuperscript(Superscript node);
 
   R visitTab(Tab node);
+
+  R visitTable(Table node);
+
+  R visitTableCell(TableCell node);
+
+  R visitTableRow(TableRow node);
 
   R visitTarget(Target node);
 

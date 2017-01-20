@@ -34,6 +34,8 @@ class InlineParsingVisitor extends ReplacingAstVisitor
 class DocumentParser extends AbstractParser<Document> {
   Map<int, List<AbstractParser<BlockNodeImpl>>> _blockParsers;
 
+  List<AbstractParser<BlockNodeImpl>> _blockParsersRest;
+
   Map<int, List<AbstractParser<InlineNodeImpl>>> _inlineParsers;
 
   /// Constructor.
@@ -102,6 +104,13 @@ class DocumentParser extends AbstractParser<Document> {
         container.blockquoteListParser
       ];
     }
+
+    // Rest of block parsers
+    _blockParsersRest = <AbstractParser<BlockNodeImpl>>[];
+    if (container.options.pipeTables) {
+      _blockParsersRest.add(container.pipeTablesParser);
+    }
+    _blockParsersRest.add(container.paraSetextHeadingParser);
 
     // Inline parsers
     _inlineParsers = new HashMap<int, List<AbstractParser<InlineNodeImpl>>>();
@@ -242,17 +251,21 @@ class DocumentParser extends AbstractParser<Document> {
         }
       }
 
-      final ParseResult<BlockNodeImpl> res =
-          container.paraSetextHeadingParser.parse(text, offset);
-      assert(res.isSuccess);
-
-      if (res.value is CombiningBlockNodeImpl) {
-        final CombiningBlockNodeImpl combining = res.value;
-        blocks.addAll(combining.list);
-      } else {
-        blocks.add(res.value);
+      for (AbstractParser<BlockNodeImpl> parser in _blockParsersRest) {
+        final ParseResult<BlockNodeImpl> res = parser.parse(text, offset);
+        if (res.isSuccess) {
+          if (res.value != null) {
+            if (res.value is CombiningBlockNodeImpl) {
+              final CombiningBlockNodeImpl combining = res.value;
+              blocks.addAll(combining.list);
+            } else {
+              blocks.add(res.value);
+            }
+          }
+          offset = res.offset;
+          break;
+        }
       }
-      offset = res.offset;
     }
 
     final InlineParsingVisitor visitor = new InlineParsingVisitor(this);

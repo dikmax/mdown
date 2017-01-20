@@ -152,6 +152,8 @@ class Options {
   /// should be placed on separate lines and `env` identifiers should be same.
   final bool rawTex;
 
+  final bool pipeTables;
+
   /// Custom reference resolver may be required when parsing document without
   /// implicit defined references, for example Dartdoc.
   ///
@@ -197,11 +199,13 @@ class Options {
       this.texMathSingleBackslash: false,
       this.texMathDoubleBackslash: false,
       this.rawTex: false,
+      this.pipeTables: false,
       this.inlineTexMathClasses: const <String>['math', 'inline'],
       this.displayTexMathClasses: const <String>['math', 'display'],
       this.linkResolver: defaultLinkResolver});
 
-  /// Predefined version of Options. Alongside with strict also supports smart puctuation, which is declared separately
+  /// Predefined version of Options. Alongside with [strict] also supports smart
+  /// puctuation, which is declared separately
   /// in [CommonMark](http://commonmark.org).
   static const Options commonmark = const Options(smartPunctuation: true);
 
@@ -216,8 +220,10 @@ class Options {
       subscript: true,
       superscript: true,
       texMathDollars: true,
-      rawTex: true);
+      rawTex: true,
+      pipeTables: true);
 
-  /// Predefined strict version of Options. Only support [CommonMark specification](http://commonmark.org).
+  /// Predefined strict version of Options. Only support
+  /// [CommonMark specification](http://commonmark.org).
   static const Options strict = const Options();
 }

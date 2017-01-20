@@ -24,6 +24,7 @@ import 'package:mdown/src/parsers/link_image.dart';
 import 'package:mdown/src/parsers/link_reference.dart';
 import 'package:mdown/src/parsers/mn_dash.dart';
 import 'package:mdown/src/parsers/para_setext_heading.dart';
+import 'package:mdown/src/parsers/pipe_tables.dart';
 import 'package:mdown/src/parsers/raw_tex.dart';
 import 'package:mdown/src/parsers/str.dart';
 import 'package:mdown/src/parsers/tex_math_dollars.dart';
@@ -74,6 +75,9 @@ class ParsersContainer {
 
   /// Parser for raw TeX blocks
   RawTexParser rawTexParser;
+
+  /// Parser for pipe tables
+  PipeTablesParser pipeTablesParser;
 
   /// Parser for link references.
   LinkReferenceParser linkReferenceParser;
@@ -141,6 +145,7 @@ class ParsersContainer {
     htmlBlockParser = new HtmlBlockParser(this);
     htmlBlock7Parser = new HtmlBlock7Parser(this);
     rawTexParser = new RawTexParser(this);
+    pipeTablesParser = new PipeTablesParser(this);
 
     // Inline parsers
     escapesParser = new EscapesParser(this);
@@ -179,6 +184,7 @@ class ParsersContainer {
     htmlBlockParser.init();
     htmlBlock7Parser.init();
     rawTexParser.init();
+    pipeTablesParser.init();
 
     // Inline parsers
     escapesParser.init();

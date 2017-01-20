@@ -4,7 +4,7 @@ import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/visitor.dart';
 import 'package:mdown/src/ast/ast.dart';
 
-class ListReplacingAstVisitor extends SimpleAstVisitor<List<AstNodeImpl>> {
+class ListReplacingAstVisitor extends UnifyingAstVisitor<List<AstNodeImpl>> {
   ReplacingAstVisitor _outerVisitor;
 
   set outerVisitor(ReplacingAstVisitor visitor) {
@@ -12,289 +12,7 @@ class ListReplacingAstVisitor extends SimpleAstVisitor<List<AstNodeImpl>> {
   }
 
   @override
-  List<AstNodeImpl> visitAtxHeading(AtxHeading node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitAutolink(Autolink node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitAutolinkEmail(AutolinkEmail node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitBaseCompositeInline(BaseCompositeInline node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitBlockquote(Blockquote node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitClassAttribute(ClassAttribute node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitCode(Code node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitCollapsedReference(CollapsedReference node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitDocument(Document node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitEmphasis(Emphasis node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitExtendedAttributes(ExtendedAttributes node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitFencedCodeBlock(FencedCodeBlock node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitFullReference(FullReference node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitHardLineBreak(HardLineBreak node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitHtmlRawBlock(HtmlRawBlock node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitHtmlRawInline(HtmlRawInline node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitIdentifierAttribute(IdentifierAttribute node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitIndentedCodeBlock(IndentedCodeBlock node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitInfoString(InfoString node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitInlineImage(InlineImage node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitInlineLink(InlineLink node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitKeyValueAttribute(KeyValueAttribute node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitLinkReference(LinkReference node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitListItem(ListItem node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitNonBreakableSpace(NonBreakableSpace node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitOrderedList(OrderedList node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitPara(Para node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitReferenceImage(ReferenceImage node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitReferenceLink(ReferenceLink node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitSetextHeading(SetextHeading node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitShortcutReference(ShortcutReference node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitSmartChar(SmartChar node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitSoftLineBreak(SoftLineBreak node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitSpace(Space node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitStr(Str node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitStrikeout(Strikeout node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitStrong(Strong node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitSubscript(Subscript node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitSuperscript(Superscript node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitTab(Tab node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitTarget(Target node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitTargetLink(TargetLink node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitTargetTitle(TargetTitle node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitTexMathDisplay(TexMathDisplay node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitTexMathInline(TexMathInline node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitTexRawBlock(TexRawBlock node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitThematicBreak(ThematicBreak node) {
-    final AstNode updatedNode = node.accept(_outerVisitor);
-    return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
-  }
-
-  @override
-  List<AstNodeImpl> visitUnorderedList(UnorderedList node) {
+  List<AstNodeImpl> visitNode(AstNode node) {
     final AstNode updatedNode = node.accept(_outerVisitor);
     return node == updatedNode ? null : <AstNodeImpl>[updatedNode];
   }
@@ -342,6 +60,44 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
         changed = true;
         for (AstNodeImpl node in replacement) {
           result.add(node as BlockNodeImpl);
+        }
+      }
+    }
+
+    return changed ? result : null;
+  }
+
+  List<TableCellImpl> _visitCellNodeList(Iterable<TableCell> list) {
+    final List<TableCellImpl> result = <TableCellImpl>[];
+    bool changed = false;
+    for (TableCell child in list) {
+      final List<AstNodeImpl> replacement =
+          child.accept<List<AstNodeImpl>>(_childVisitor);
+      if (replacement == null) {
+        result.add(child);
+      } else {
+        changed = true;
+        for (AstNodeImpl node in replacement) {
+          result.add(node as TableCellImpl);
+        }
+      }
+    }
+
+    return changed ? result : null;
+  }
+
+  List<TableRowImpl> _visitRowNodeList(Iterable<TableRow> list) {
+    final List<TableRowImpl> result = <TableRowImpl>[];
+    bool changed = false;
+    for (TableRow child in list) {
+      final List<AstNodeImpl> replacement =
+          child.accept<List<AstNodeImpl>>(_childVisitor);
+      if (replacement == null) {
+        result.add(child);
+      } else {
+        changed = true;
+        for (AstNodeImpl node in replacement) {
+          result.add(node as TableRowImpl);
         }
       }
     }
@@ -670,6 +426,29 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
   @override
   TabImpl visitTab(Tab node) => node as TabImpl;
+
+  @override
+  TableImpl visitTable(Table node) {
+    final BaseInline caption = node.caption?.accept<AstNode>(this);
+    final List<TableCell> headers = _visitCellNodeList(node.headers);
+    final List<TableRow> contents = _visitRowNodeList(node.contents);
+    return caption != node.caption || headers != null || contents != null
+        ? new TableImpl.rows(node.alignment, caption, headers ?? node.headers,
+            contents ?? node.contents)
+        : node as TableImpl;
+  }
+
+  @override
+  TableCellImpl visitTableCell(TableCell node) {
+    final List<BlockNodeImpl> contents = _visitBlockNodeList(node.contents);
+    return contents != null ? new TableCellImpl(contents) : node;
+  }
+
+  @override
+  TableRowImpl visitTableRow(TableRow node) {
+    final List<TableCellImpl> contents = _visitCellNodeList(node.contents);
+    return contents != null ? new TableRowImpl(contents) : node as TableRowImpl;
+  }
 
   @override
   TargetImpl visitTarget(Target node) {

@@ -111,6 +111,12 @@ void main() {
   tests("Raw TeX", rawTex, rawTexTestFunc);
   tests("Raw TeX spec", specification, rawTexTestFunc);
 
+  // Pipe tables
+  final TestFunc pipeTablesTestFunc =
+  generateTestFunc(const Options(pipeTables: true));
+  tests("Pipe tables", pipeTables, pipeTablesTestFunc);
+  tests("Pipe tables spec", specification, pipeTablesTestFunc);
+
   // Custom classes
   // customClassesTests();
 

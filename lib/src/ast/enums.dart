@@ -3,6 +3,19 @@ library mdown.src.ast.enums;
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
 
+String alignmentToStyleString(Alignment alignment) {
+  switch (alignment) {
+    case Alignment.left:
+      return ' style="text-align: left;"';
+    case Alignment.center:
+      return ' style="text-align: center;"';
+    case Alignment.right:
+      return ' style="text-align: right;"';
+    default:
+      return '';
+  }
+}
+
 BulletType bulletTypeFromCodeUnit(int codeUnit) {
   if (codeUnit == minusCodeUnit) {
     return BulletType.minus;
