@@ -21,7 +21,7 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
     final RegExp r = new RegExp(r"^&(.*);$");
     final HttpClient client = new HttpClient();
     final HttpClientRequest request = await client
-        .getUrl(Uri.parse('https://html.spec.whatwg.org/entities.json'));
+        .getUrl(Uri.parse(annotation.url));
     final HttpClientResponse response = await request.close();
     final dynamic json =
         await response.transform(UTF8.decoder).transform(JSON.decoder).first;

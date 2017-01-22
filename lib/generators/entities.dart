@@ -2,6 +2,9 @@ library mdown.generators.entities;
 
 /// Entities annotation
 class Entities {
+  /// Url for entities.
+  final String url;
+
   /// Constructor
-  const Entities();
+  const Entities(this.url);
 }
