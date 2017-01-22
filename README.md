@@ -78,7 +78,7 @@ There three predefined versions of parsers/writers:
 - `strict`: all extensions are disabled
 - `commonmark`: only `smartPunctuation` extension is enabled.
 - `defaults`: `smartPunctuation`, `strikeout`, `subscript`,
-  `superscript`, `texMathDollars`, `rawTex` are enabled.
+  `superscript`, `pipeTables`, `texMathDollars`, `rawTex` are enabled.
 
 To get correspondent parser/writer instance use static getter on class:
 
@@ -207,6 +207,27 @@ superscript, escape space (`\ `).
 
 ```md
 superscript^with\ spaces^
+```
+
+
+Pipe tables (`Options.pipeTables`)
+----------------------------------
+
+Allows to parse tables where cells are separated with vertical bars
+(`|`). Compatible with GitHub table syntax.
+
+```md
+head | cells
+-----|------
+body | cells
+more | cells
+```
+
+Also supports cells alignment.
+
+```md
+:----|:-----:|----:
+left aligned | center aligned | right aligned
 ```
 
 
