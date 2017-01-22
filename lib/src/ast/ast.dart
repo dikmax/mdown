@@ -7,31 +7,31 @@ import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/ast/visitor.dart';
 import 'package:mdown/src/parsers/common.dart';
 
-class _ContainsLinkVisitor extends RecursiveAstVisitor<Object> {
+class _ContainsLinkVisitor extends RecursiveAstVisitor<Null> {
   bool _result = false;
 
   bool get result => _result;
 
   @override
-  Object visitAutolink(Autolink node) {
+  Null visitAutolink(Autolink node) {
     _result = true;
     return null;
   }
 
   @override
-  Object visitReferenceLink(ReferenceLink node) {
+  Null visitReferenceLink(ReferenceLink node) {
     _result = true;
     return null;
   }
 
   @override
-  bool visitInlineLink(InlineLink node) {
+  Null visitInlineLink(InlineLink node) {
     _result = true;
     return null;
   }
 
   @override
-  bool visitAutolinkEmail(AutolinkEmail node) {
+  Null visitAutolinkEmail(AutolinkEmail node) {
     _result = true;
     return null;
   }
