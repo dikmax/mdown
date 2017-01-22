@@ -4859,6 +4859,12 @@ body | cells | here
 too | many | cells | here
 ''': r'''<table><thead><tr><th style="text-align: left;">head</th><th style="text-align: center;">cells</th><th style="text-align: right;">here</th></tr></thead><tbody><tr><td style="text-align: left;">body</td><td style="text-align: center;">cells</td><td style="text-align: right;">here</td></tr><tr><td style="text-align: left;">too</td><td style="text-align: center;">many</td><td style="text-align: right;">cells</td><td>here</td></tr></tbody></table>
 ''',
+  r'''First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
+''': r'''<table><thead><tr><th>First Header</th><th>Second Header</th></tr></thead><tbody><tr><td>Content from cell 1</td><td>Content from cell 2</td></tr><tr><td>Content in the first column</td><td>Content in the second column</td></tr></tbody></table>
+''',
 };
 
 // **************************************************************************

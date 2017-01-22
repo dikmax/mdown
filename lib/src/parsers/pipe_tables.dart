@@ -132,7 +132,7 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
     }
 
     for (int i = start; i < end; i += 1) {
-      final String columnString = columns[i];
+      final String columnString = columns[i].trim();
       int columnStart = 0, columnEnd = columnString.length;
       Alignment align = Alignment.none;
       if (columnString.codeUnitAt(0) == colonCodeUnit) {
