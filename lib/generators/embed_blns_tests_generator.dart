@@ -16,13 +16,9 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
   /// Constructor
   const EmbedBlnsTestsGenerator();
 
-  List<String> _readFile(String fileName) {
-    final File file = new File(fileName);
-    final String json = file.readAsStringSync();
-
-    final dynamic decode = JSON.decode(json);
-    if (decode is Iterable) {
-      return decode.map((dynamic el) => el.toString());
+  List<String> _readFile(dynamic json) {
+    if (json is Iterable) {
+      return json.map((dynamic el) => el.toString());
     }
 
     return <String>[];
@@ -35,15 +31,26 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
       throw new Exception('must be relative path to the source file');
     }
 
+    // Downloading source.
+    final HttpClient client = new HttpClient();
+    final HttpClientRequest request =
+        await client.getUrl(Uri.parse(annotation.url));
+    final List<int> response = await (await request.close()).fold(<int>[],
+        (List<int> list, List<int> el) {
+      list.addAll(el);
+      return list;
+    });
+
     final String sourcePathDir = path.dirname(buildStep.input.id.path);
-
     final String filePath = path.join(sourcePathDir, annotation.path);
+    final File file = new File(filePath);
 
-    if (!await FileSystemEntity.isFile(filePath)) {
-      throw new Exception('Not a file! - $filePath');
-    }
+    file.writeAsBytesSync(response, mode: FileMode.WRITE);
 
-    final List<String> content = _readFile(filePath);
+    final dynamic json =
+        JSON.decode(UTF8.decode(response, allowMalformed: true));
+
+    final List<String> content = _readFile(json);
 
     final StringBuffer result = new StringBuffer();
     result.writeln('final List<String> _\$${element.displayName}Tests = '

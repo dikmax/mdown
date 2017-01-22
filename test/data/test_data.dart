@@ -85,6 +85,7 @@ final Map<String, String> rawTex = _$rawTexTests;
 final Map<String, String> pipeTables = _$pipeTablesTests;
 
 /// Big list of naughty strings
-@EmbedBlnsTests('blns.base64.json')
+@EmbedBlnsTests('blns.base64.json',
+    'https://raw.githubusercontent.com/minimaxir/big-list-of-naughty-strings/master/blns.base64.json')
 final Iterable<String> blns = _$blnsTests
     .map((String str) => UTF8.decode(BASE64.decode(str), allowMalformed: true));
