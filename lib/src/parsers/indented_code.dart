@@ -64,7 +64,7 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
     }
 
     return new ParseResult<BlockNodeImpl>.success(
-        new IndentedCodeBlockImpl(result), offset);
+        new CodeBlockImpl(result, null), offset);
   }
 
   // TODO make it work on text

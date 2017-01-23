@@ -68,29 +68,6 @@ String emphasisDelimiterTypeToChar(EmphasisDelimiterType delimiterType) {
   return null;
 }
 
-FencedCodeBlockType fencedCodeBlockTypeFromCodeUnit(int codeUnit) {
-  if (codeUnit == backtickCodeUnit) {
-    return FencedCodeBlockType.backtick;
-  }
-  if (codeUnit == tildeCodeUnit) {
-    return FencedCodeBlockType.tilde;
-  }
-
-  return null;
-}
-
-String fencedCodeBlockTypeToChar(FencedCodeBlockType type) {
-  switch (type) {
-    case FencedCodeBlockType.backtick:
-      return '`';
-
-    case FencedCodeBlockType.tilde:
-      return '~';
-  }
-
-  return null;
-}
-
 IndexSeparator indexSeparatorFromCodeUnit(int codeUnit) {
   if (codeUnit == dotCodeUnit) {
     return IndexSeparator.dot;

@@ -24,7 +24,8 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
 
     final Document doc = CommonMarkParser.strict.parse(md);
     for (BlockNode block in doc.contents) {
-      if (block is FencedCodeBlock) {
+      // TODO use visitors
+      if (block is CodeBlock) {
         if (block.attributes is InfoString) {
           final InfoString attr = block.attributes;
           if (attr.language == 'example') {

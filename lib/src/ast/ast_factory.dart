@@ -46,9 +46,8 @@ class AstFactoryImpl implements AstFactory {
       new ExtendedAttributesImpl(attributes);
 
   @override
-  FencedCodeBlock fencedCodeBlock(Iterable<String> contents,
-          FencedCodeBlockType type, int fenceSize, Attributes attributes) =>
-      new FencedCodeBlockImpl(contents, type, fenceSize, attributes);
+  CodeBlock codeBlock(Iterable<String> contents, Attributes attributes) =>
+      new CodeBlockImpl(contents, attributes);
 
   @override
   FullReference fullReference(String reference, Target target) =>
@@ -58,8 +57,8 @@ class AstFactoryImpl implements AstFactory {
   HardLineBreak hardLineBreak() => new HardLineBreakImpl();
 
   @override
-  Heading heading(BaseInline contents, int level,
-      ExtendedAttributes attributes) =>
+  Heading heading(
+          BaseInline contents, int level, ExtendedAttributes attributes) =>
       new HeadingImpl(contents, level, attributes);
 
   @override
@@ -72,10 +71,6 @@ class AstFactoryImpl implements AstFactory {
   @override
   IdentifierAttribute identifierAttribute(String identifier) =>
       new IdentifierAttributeImpl(identifier);
-
-  @override
-  IndentedCodeBlock indentedCodeBlock(Iterable<String> contents) =>
-      new IndentedCodeBlockImpl(contents);
 
   @override
   InfoString infoString(String language) => new InfoStringImpl(language);

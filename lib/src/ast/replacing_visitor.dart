@@ -186,6 +186,16 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   }
 
   @override
+  CodeBlockImpl visitCodeBlock(CodeBlock node) {
+    final Attributes attributes = node.attributes?.accept<AstNode>(this);
+
+    return attributes == node.attributes
+        ? node
+        : new CodeBlockImpl(
+        node.contents, attributes);
+  }
+
+  @override
   CollapsedReferenceImpl visitCollapsedReference(CollapsedReference node) {
     final Target target = node.target.accept<AstNode>(this);
 
@@ -212,16 +222,6 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   ExtendedAttributesImpl visitExtendedAttributes(ExtendedAttributes node) {
     final List<Attribute> attributes = _visitAttributeNodeList(node.attributes);
     return attributes != null ? new ExtendedAttributesImpl(attributes) : node;
-  }
-
-  @override
-  FencedCodeBlockImpl visitFencedCodeBlock(FencedCodeBlock node) {
-    final Attributes attributes = node.attributes?.accept<AstNode>(this);
-
-    return attributes == node.attributes
-        ? node
-        : new FencedCodeBlockImpl(
-            node.contents, node.type, node.fenceSize, attributes);
   }
 
   @override
@@ -259,10 +259,6 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   IdentifierAttributeImpl visitIdentifierAttribute(IdentifierAttribute node) =>
       node as IdentifierAttributeImpl;
-
-  @override
-  IndentedCodeBlockImpl visitIndentedCodeBlock(IndentedCodeBlock node) =>
-      node as IndentedCodeBlockImpl;
 
   @override
   InfoStringImpl visitInfoString(InfoString node) => node as InfoStringImpl;

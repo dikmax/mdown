@@ -38,15 +38,6 @@ enum EmphasisDelimiterType {
   underscore
 }
 
-/// Fence type for fenced code block
-enum FencedCodeBlockType {
-  /// `` ` `` fence
-  backtick,
-
-  /// `~` fence
-  tilde
-}
-
 /// Index separator for ordered list
 enum IndexSeparator {
   /// 1. list
@@ -179,8 +170,7 @@ abstract class Code implements InlineNode, WithExtendedAttributes {
   int get fenceSize;
 }
 
-/// Abstract code block
-/// CodeBlock = IndentedCodeBlock | FencedCodeBlock
+/// Code block
 abstract class CodeBlock implements BlockNode, WithAttributes {
   /// Code block contents
   Iterable<String> get contents;
@@ -214,15 +204,6 @@ abstract class Emphasis implements CompositeInline {
 abstract class ExtendedAttributes implements Attributes {
   /// List of attributes.
   NodeList<Attribute> get attributes;
-}
-
-/// Fenced code block
-abstract class FencedCodeBlock implements CodeBlock {
-  /// Fence type `` ` `` or `~`
-  FencedCodeBlockType get type;
-
-  /// Fence size
-  int get fenceSize;
 }
 
 /// Full reference
@@ -260,9 +241,6 @@ abstract class Image implements CompositeInline, WithExtendedAttributes {
 
   String get title;
 }
-
-/// Indented code block
-abstract class IndentedCodeBlock implements CodeBlock {}
 
 /// InfoString attribute (for fenced code only).
 abstract class InfoString implements Attributes {
@@ -546,6 +524,8 @@ abstract class AstVisitor<R> {
 
   R visitCode(Code node);
 
+  R visitCodeBlock(CodeBlock node);
+
   R visitCollapsedReference(CollapsedReference node);
 
   R visitDocument(Document node);
@@ -553,8 +533,6 @@ abstract class AstVisitor<R> {
   R visitEmphasis(Emphasis node);
 
   R visitExtendedAttributes(ExtendedAttributes node);
-
-  R visitFencedCodeBlock(FencedCodeBlock node);
 
   R visitFullReference(FullReference node);
 
@@ -567,8 +545,6 @@ abstract class AstVisitor<R> {
   R visitHtmlRawInline(HtmlRawInline node);
 
   R visitIdentifierAttribute(IdentifierAttribute node);
-
-  R visitIndentedCodeBlock(IndentedCodeBlock node);
 
   R visitInfoString(InfoString node);
 

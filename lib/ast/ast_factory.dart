@@ -24,8 +24,11 @@ abstract class AstFactory {
   /// Creates attribute with [className] class.
   ClassAttribute classAttribute(String className);
 
-  /// Creates inline code block
+  /// Creates inline code
   Code code(String contents, int fenceSize, ExtendedAttributes attributes);
+
+  /// Creates code block.
+  CodeBlock codeBlock(Iterable<String> contents, Attributes attributes);
 
   /// Creates collapsed reference.
   CollapsedReference collapsedReference(String reference, Target target);
@@ -39,10 +42,6 @@ abstract class AstFactory {
 
   /// Creates extended attributes.
   ExtendedAttributes extendedAttributes(Iterable<Attribute> attributes);
-
-  /// Creates fenced code block.
-  FencedCodeBlock fencedCodeBlock(Iterable<String> contents,
-      FencedCodeBlockType type, int fenceSize, Attributes attributes);
 
   /// Creates full reference
   FullReference fullReference(String reference, Target target);
@@ -62,9 +61,6 @@ abstract class AstFactory {
 
   /// Creates Identifier attribute.
   IdentifierAttribute identifierAttribute(String identifier);
-
-  /// Creates fenced code block.
-  IndentedCodeBlock indentedCodeBlock(Iterable<String> contents);
 
   /// Creates infostring attribute.
   InfoString infoString(String language);

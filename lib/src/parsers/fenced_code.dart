@@ -3,7 +3,6 @@ library mdown.src.parsers.fenced_code;
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/src/ast/ast.dart';
-import 'package:mdown/src/ast/enums.dart';
 import 'package:mdown/src/code_units.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
@@ -66,11 +65,7 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
       }
       attributes = attributes ?? _parseInfoString(infoString);
     }
-    final FencedCodeBlockImpl codeBlock = new FencedCodeBlockImpl(
-        code,
-        fencedCodeBlockTypeFromCodeUnit(char.codeUnitAt(0)),
-        line.length,
-        attributes);
+    final CodeBlockImpl codeBlock = new CodeBlockImpl(code, attributes);
     return new ParseResult<BlockNodeImpl>.success(codeBlock, offset);
   }
 

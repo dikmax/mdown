@@ -220,14 +220,29 @@ class CodeImpl extends InlineNodeImpl implements Code {
 }
 
 /// Default CodeBlock implementation.
-abstract class CodeBlockImpl extends BlockNodeImpl implements CodeBlock {
+class CodeBlockImpl extends BlockNodeImpl implements CodeBlock {
   final Iterable<String> _contents;
+  final Attributes _attributes;
 
   /// Constructs CodeBlock instance.
-  CodeBlockImpl(this._contents);
+  CodeBlockImpl(this._contents, this._attributes);
 
   @override
   Iterable<String> get contents => _contents;
+
+  @override
+  Attributes get attributes => _attributes;
+
+  @override
+  void visitChildren<R>(AstVisitor<R> visitor) {
+    this._attributes?.accept(visitor);
+  }
+
+  @override
+  R accept<R>(AstVisitor<R> visitor) => visitor.visitCodeBlock(this);
+
+  @override
+  Iterable<AstNode> get childEntities => <AstNode>[_attributes];
 }
 
 /// Default CollapsedReference implementation.
@@ -328,38 +343,6 @@ class ExtendedAttributesImpl extends AttributesImpl
   }
 }
 
-/// Default FencedCodeBlock implementation.
-class FencedCodeBlockImpl extends CodeBlockImpl implements FencedCodeBlock {
-  final Attributes _attributes;
-  final int _fenceSize;
-  final FencedCodeBlockType _type;
-
-  /// Constructs FencedCodeBlock instance.
-  FencedCodeBlockImpl(
-      Iterable<String> contents, this._type, this._fenceSize, this._attributes)
-      : super(contents);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitFencedCodeBlock(this);
-
-  @override
-  Attributes get attributes => _attributes;
-
-  @override
-  Iterable<AstNode> get childEntities => <AstNode>[_attributes];
-
-  @override
-  int get fenceSize => _fenceSize;
-
-  @override
-  FencedCodeBlockType get type => _type;
-
-  @override
-  void visitChildren<R>(AstVisitor<R> visitor) {
-    _attributes?.accept(visitor);
-  }
-}
-
 /// Default FullReference implementation.
 class FullReferenceImpl extends ReferenceImpl implements FullReference {
   /// Constructs FullReference instance.
@@ -389,7 +372,7 @@ class HeadingImpl extends BlockNodeImpl implements Heading {
 
   final int _level;
 
-  /// Constucts instance of Heading.
+  /// Constructs instance of Heading.
   HeadingImpl(this._contents, this._level, this._attributes);
 
   @override
@@ -451,24 +434,6 @@ class IdentifierAttributeImpl extends AttributeImpl
 abstract class ImageImpl extends CompositeInlineImpl implements Image {
   /// Constructs instance of Link.
   ImageImpl(Iterable<InlineNode> contents) : super(contents);
-}
-
-/// Default IndentedCodeBlock implementation.
-class IndentedCodeBlockImpl extends CodeBlockImpl implements IndentedCodeBlock {
-  /// Constructs IndentedCodeBlock instance.
-  IndentedCodeBlockImpl(Iterable<String> contents) : super(contents);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitIndentedCodeBlock(this);
-
-  @override
-  Iterable<AstNode> get childEntities => null;
-
-  @override
-  void visitChildren<R>(AstVisitor<R> visitor) {}
-
-  @override
-  Attributes get attributes => null;
 }
 
 /// Default InfoString implementation.
