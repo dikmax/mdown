@@ -194,8 +194,7 @@ class AstFactoryImpl implements AstFactory {
   TexRawBlock texRawBlock(String contents) => new TexRawBlockImpl(contents);
 
   @override
-  ThematicBreak thematicBreak(ThematicBreakType type) =>
-      new ThematicBreakImpl(type);
+  ThematicBreak thematicBreak() => new ThematicBreakImpl();
 
   @override
   UnorderedList unorderedList(

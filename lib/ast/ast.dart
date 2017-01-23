@@ -74,18 +74,6 @@ enum SmartCharType {
   apostrophe
 }
 
-/// Type of thematic break
-enum ThematicBreakType {
-  /// `---`
-  minus,
-
-  /// `***`
-  star,
-
-  /// `___`
-  underscore
-}
-
 /// A predicate is a one-argument function that returns a boolean value.
 typedef bool Predicate<E>(E argument);
 
@@ -440,10 +428,7 @@ abstract class TexRawBlock implements RawBlock {}
 abstract class TexRawInline implements RawInline {}
 
 /// Thematic break block
-abstract class ThematicBreak implements BlockNode {
-  /// Thematic break type `-`, `_` or `*`.
-  ThematicBreakType get type;
-}
+abstract class ThematicBreak implements BlockNode {}
 
 /// Unordered list
 abstract class UnorderedList implements ListBlock {

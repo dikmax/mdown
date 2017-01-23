@@ -50,8 +50,8 @@ abstract class AstFactory {
   HardLineBreak hardLineBreak();
 
   /// Creates heading with [level] and [contents] as contents.
-  Heading heading(BaseInline contents, int level,
-      ExtendedAttributes attributes);
+  Heading heading(
+      BaseInline contents, int level, ExtendedAttributes attributes);
 
   /// Creates HTML raw block.
   HtmlRawBlock htmlRawBlock(String contents);
@@ -164,7 +164,7 @@ abstract class AstFactory {
   TexRawBlock texRawBlock(String contents);
 
   /// Creates thematic break.
-  ThematicBreak thematicBreak(ThematicBreakType type);
+  ThematicBreak thematicBreak();
 
   /// Creates unordered list.
   UnorderedList unorderedList(

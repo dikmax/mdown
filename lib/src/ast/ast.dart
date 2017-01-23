@@ -1141,19 +1141,14 @@ abstract class TexRawInlineImpl extends RawInlineImpl implements TexRawInline {
 
 /// Default ThematicBreak implementation.
 class ThematicBreakImpl extends BlockNodeImpl implements ThematicBreak {
-  final ThematicBreakType _type;
-
   /// Constructs ThematicBreak instance.
-  ThematicBreakImpl(this._type);
+  ThematicBreakImpl();
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitThematicBreak(this);
 
   @override
   Iterable<AstNode> get childEntities => null;
-
-  @override
-  ThematicBreakType get type => _type;
 
   @override
   void visitChildren<R>(AstVisitor<R> visitor) {}

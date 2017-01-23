@@ -90,30 +90,3 @@ String indexSeparatorToChar(IndexSeparator separator) {
 
   return null;
 }
-
-ThematicBreakType thematicBreakTypeFromCodeUnit(int codeUnit) {
-  if (codeUnit == minusCodeUnit) {
-    return ThematicBreakType.minus;
-  }
-  if (codeUnit == starCodeUnit) {
-    return ThematicBreakType.star;
-  }
-  if (codeUnit == underscoreCodeUnit) {
-    return ThematicBreakType.underscore;
-  }
-
-  return null;
-}
-
-String thematicBreakTypeToChar(ThematicBreakType type) {
-  switch (type) {
-    case ThematicBreakType.minus:
-      return '-';
-    case ThematicBreakType.star:
-      return '*';
-    case ThematicBreakType.underscore:
-      return '_';
-  }
-
-  return null;
-}

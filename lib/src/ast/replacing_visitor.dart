@@ -191,8 +191,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
     return attributes == node.attributes
         ? node
-        : new CodeBlockImpl(
-        node.contents, attributes);
+        : new CodeBlockImpl(node.contents, attributes);
   }
 
   @override
@@ -241,7 +240,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   HeadingImpl visitHeading(Heading node) {
     final BaseInline contents = node.contents.accept<AstNode>(this);
     final ExtendedAttributes attributes =
-    node.attributes?.accept<AstNode>(this);
+        node.attributes?.accept<AstNode>(this);
 
     return contents == node.contents && attributes == node.attributes
         ? node

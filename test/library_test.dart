@@ -113,7 +113,7 @@ void main() {
 
   // Pipe tables
   final TestFunc pipeTablesTestFunc =
-  generateTestFunc(const Options(pipeTables: true));
+      generateTestFunc(const Options(pipeTables: true));
   tests("Pipe tables", pipeTables, pipeTablesTestFunc);
   tests("Pipe tables spec", specification, pipeTablesTestFunc);
 

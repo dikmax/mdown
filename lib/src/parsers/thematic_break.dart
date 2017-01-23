@@ -1,7 +1,6 @@
 library mdown.src.parsers.thematic_break;
 
 import 'package:mdown/src/ast/ast.dart';
-import 'package:mdown/src/ast/enums.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -23,10 +22,7 @@ class ThematicBreakParser extends AbstractParser<BlockNodeImpl> {
       return const ParseResult<BlockNodeImpl>.failure();
     }
 
-    final int codeUnit = match[2].codeUnitAt(0);
-
     return new ParseResult<BlockNodeImpl>.success(
-        new ThematicBreakImpl(thematicBreakTypeFromCodeUnit(codeUnit)),
-        lineResult.offset);
+        new ThematicBreakImpl(), lineResult.offset);
   }
 }

@@ -20,8 +20,8 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
       Element element, Entities annotation, BuildStep buildStep) async {
     final RegExp r = new RegExp(r"^&(.*);$");
     final HttpClient client = new HttpClient();
-    final HttpClientRequest request = await client
-        .getUrl(Uri.parse(annotation.url));
+    final HttpClientRequest request =
+        await client.getUrl(Uri.parse(annotation.url));
     final HttpClientResponse response = await request.close();
     final dynamic json =
         await response.transform(UTF8.decoder).transform(JSON.decoder).first;
