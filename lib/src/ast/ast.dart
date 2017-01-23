@@ -88,16 +88,6 @@ abstract class AttributeImpl extends AstNodeImpl implements Attribute {
 /// Default Attributes implementation.
 abstract class AttributesImpl extends AstNodeImpl implements Attributes {}
 
-/// Default AtxHeading implementation.
-class AtxHeadingImpl extends HeadingImpl implements AtxHeading {
-  /// Constructs instance of AtxHeading.
-  AtxHeadingImpl(BaseInline inlines, int level, ExtendedAttributes attributes)
-      : super(inlines, level, attributes);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitAtxHeading(this);
-}
-
 /// Default Autolink implementation.
 class AutolinkImpl extends LinkImpl implements Autolink {
   /// Link
@@ -392,7 +382,7 @@ class HardLineBreakImpl extends InlineNodeImpl implements HardLineBreak {
 }
 
 /// Default Heading implementation.
-abstract class HeadingImpl extends BlockNodeImpl implements Heading {
+class HeadingImpl extends BlockNodeImpl implements Heading {
   ExtendedAttributes _attributes;
 
   BaseInline _contents;
@@ -401,6 +391,9 @@ abstract class HeadingImpl extends BlockNodeImpl implements Heading {
 
   /// Constucts instance of Heading.
   HeadingImpl(this._contents, this._level, this._attributes);
+
+  @override
+  R accept<R>(AstVisitor<R> visitor) => visitor.visitHeading(this);
 
   @override
   ExtendedAttributes get attributes => _attributes;
@@ -843,17 +836,6 @@ class ReferenceLinkImpl extends LinkImpl implements ReferenceLink {
 
   @override
   String get title => _reference?.target?.title?.title;
-}
-
-/// Default SetextHeading implementation.
-class SetextHeadingImpl extends HeadingImpl implements SetextHeading {
-  /// Constructs instance of SetextHeading.
-  SetextHeadingImpl(
-      BaseInline inlines, int level, ExtendedAttributes attributes)
-      : super(inlines, level, attributes);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitSetextHeading(this);
 }
 
 /// Default ShortcutReference implementation.

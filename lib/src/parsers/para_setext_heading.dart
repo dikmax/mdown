@@ -176,7 +176,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
       final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
 
       return new ParseResult<BlockNodeImpl>.success(
-          new SetextHeadingImpl(inlines, level, attr), offset);
+          new HeadingImpl(inlines, level, attr), offset);
     }
 
     final BaseInline inlines = new UnparsedInlinesImpl(contentsString);

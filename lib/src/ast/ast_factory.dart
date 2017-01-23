@@ -8,11 +8,6 @@ import 'ast.dart';
 /// Standard implementation of AST Factory.
 class AstFactoryImpl implements AstFactory {
   @override
-  AtxHeading atxHeading(
-          BaseInline contens, int level, ExtendedAttributes attributes) =>
-      new AtxHeadingImpl(contens, level, attributes);
-
-  @override
   Autolink autolink(String link) => new AutolinkImpl(link);
 
   @override
@@ -61,6 +56,11 @@ class AstFactoryImpl implements AstFactory {
 
   @override
   HardLineBreak hardLineBreak() => new HardLineBreakImpl();
+
+  @override
+  Heading heading(BaseInline contents, int level,
+      ExtendedAttributes attributes) =>
+      new HeadingImpl(contents, level, attributes);
 
   @override
   HtmlRawBlock htmlRawBlock(String contents) => new HtmlRawBlockImpl(contents);
@@ -128,11 +128,6 @@ class AstFactoryImpl implements AstFactory {
   ReferenceLink referenceLink(Iterable<InlineNode> contents,
           Reference reference, ExtendedAttributes attributes) =>
       new ReferenceLinkImpl(contents, reference, attributes);
-
-  @override
-  SetextHeading setextHeading(
-          BaseInline contents, int level, ExtendedAttributes attributes) =>
-      new SetextHeadingImpl(contents, level, attributes);
 
   @override
   ShortcutReference shortcutReference(String reference, Target target) =>

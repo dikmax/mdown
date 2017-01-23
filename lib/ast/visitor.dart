@@ -8,9 +8,6 @@ import 'ast.dart';
 /// a whole structure) and that only need to visit a small number of node types.
 class SimpleAstVisitor<R> implements AstVisitor<R> {
   @override
-  R visitAtxHeading(AtxHeading node) => null;
-
-  @override
   R visitAutolink(Autolink node) => null;
 
   @override
@@ -48,6 +45,9 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitHardLineBreak(HardLineBreak node) => null;
+
+  @override
+  R visitHeading(Heading node) => null;
 
   @override
   R visitHtmlRawBlock(HtmlRawBlock node) => null;
@@ -93,9 +93,6 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitReferenceLink(ReferenceLink node) => null;
-
-  @override
-  R visitSetextHeading(SetextHeading node) => null;
 
   @override
   R visitShortcutReference(ShortcutReference node) => null;
@@ -174,12 +171,6 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
 /// Clients may extend or implement this class.
 class RecursiveAstVisitor<R> implements AstVisitor<R> {
   @override
-  R visitAtxHeading(AtxHeading node) {
-    node.visitChildren(this);
-    return null;
-  }
-
-  @override
   R visitAutolink(Autolink node) {
     node.visitChildren(this);
     return null;
@@ -253,6 +244,12 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitHardLineBreak(HardLineBreak node) {
+    node.visitChildren(this);
+    return null;
+  }
+
+  @override
+  R visitHeading(Heading node) {
     node.visitChildren(this);
     return null;
   }
@@ -343,12 +340,6 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitReferenceLink(ReferenceLink node) {
-    node.visitChildren(this);
-    return null;
-  }
-
-  @override
-  R visitSetextHeading(SetextHeading node) {
     node.visitChildren(this);
     return null;
   }
@@ -502,9 +493,6 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
   R visitAttributes(Attributes node) => visitNode(node);
 
   @override
-  R visitAtxHeading(AtxHeading node) => visitHeading(node);
-
-  @override
   R visitAutolink(Autolink node) => visitLink(node);
 
   @override
@@ -619,9 +607,6 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
   R visitReferenceLink(ReferenceLink node) => visitLink(node);
 
   @override
-  R visitSetextHeading(SetextHeading node) => visitHeading(node);
-
-  @override
   R visitShortcutReference(ShortcutReference node) => visitReference(node);
 
   @override
@@ -703,9 +688,6 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
 /// Clients may extend or implement this class.
 class UnifyingAstVisitor<R> implements AstVisitor<R> {
   @override
-  R visitAtxHeading(AtxHeading node) => visitNode(node);
-
-  @override
   R visitAutolink(Autolink node) => visitNode(node);
 
   @override
@@ -743,6 +725,9 @@ class UnifyingAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitHardLineBreak(HardLineBreak node) => visitNode(node);
+
+  @override
+  R visitHeading(Heading node) => visitNode(node);
 
   @override
   R visitHtmlRawBlock(HtmlRawBlock node) => visitNode(node);
@@ -793,9 +778,6 @@ class UnifyingAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitReferenceLink(ReferenceLink node) => visitNode(node);
-
-  @override
-  R visitSetextHeading(SetextHeading node) => visitNode(node);
 
   @override
   R visitShortcutReference(ShortcutReference node) => visitNode(node);

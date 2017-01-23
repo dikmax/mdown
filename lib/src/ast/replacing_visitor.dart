@@ -153,17 +153,6 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       _visitListItemNodeList(list) ?? list;
 
   @override
-  AtxHeadingImpl visitAtxHeading(AtxHeading node) {
-    final BaseInline contents = node.contents.accept<AstNode>(this);
-    final ExtendedAttributes attributes =
-        node.attributes?.accept<AstNode>(this);
-
-    return contents == node.contents && attributes == node.attributes
-        ? node
-        : new AtxHeadingImpl(contents, node.level, attributes);
-  }
-
-  @override
   AutolinkImpl visitAutolink(Autolink node) => node as AutolinkImpl;
 
   @override
@@ -247,6 +236,17 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   HardLineBreakImpl visitHardLineBreak(HardLineBreak node) =>
       node as HardLineBreakImpl;
+
+  @override
+  HeadingImpl visitHeading(Heading node) {
+    final BaseInline contents = node.contents.accept<AstNode>(this);
+    final ExtendedAttributes attributes =
+    node.attributes?.accept<AstNode>(this);
+
+    return contents == node.contents && attributes == node.attributes
+        ? node
+        : new HeadingImpl(contents, node.level, attributes);
+  }
 
   @override
   HtmlRawBlockImpl visitHtmlRawBlock(HtmlRawBlock node) =>
@@ -363,17 +363,6 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
         ? node
         : new ReferenceLinkImpl(
             contents ?? node.contents, reference, attributes);
-  }
-
-  @override
-  SetextHeadingImpl visitSetextHeading(SetextHeading node) {
-    final BaseInline contents = node.contents.accept<AstNode>(this);
-    final ExtendedAttributes attributes =
-        node.attributes?.accept<AstNode>(this);
-
-    return contents == node.contents && attributes == node.attributes
-        ? node
-        : new SetextHeadingImpl(contents, node.level, attributes);
   }
 
   @override

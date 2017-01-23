@@ -124,6 +124,6 @@ class AtxHeadingParser extends AbstractParser<BlockNodeImpl> {
     }
 
     return new ParseResult<BlockNodeImpl>.success(
-        new AtxHeadingImpl(inlines, level, attr), lineResult.offset);
+        new HeadingImpl(inlines, level, attr), lineResult.offset);
   }
 }

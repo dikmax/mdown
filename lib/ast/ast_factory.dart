@@ -9,10 +9,6 @@ import 'ast.dart';
 ///
 /// Clients should not extend, implement or mix-in this class.
 abstract class AstFactory {
-  /// Creates ATX heading with [level] and [contents] as contents.
-  AtxHeading atxHeading(
-      BaseInline contents, int level, ExtendedAttributes attributes);
-
   /// Creates autolink with [link] as a target.
   Autolink autolink(String link);
 
@@ -53,6 +49,10 @@ abstract class AstFactory {
 
   /// Creates hard line break.
   HardLineBreak hardLineBreak();
+
+  /// Creates heading with [level] and [contents] as contents.
+  Heading heading(BaseInline contents, int level,
+      ExtendedAttributes attributes);
 
   /// Creates HTML raw block.
   HtmlRawBlock htmlRawBlock(String contents);
@@ -110,10 +110,6 @@ abstract class AstFactory {
   /// Creates reference link.
   ReferenceLink referenceLink(Iterable<InlineNode> contents,
       Reference reference, ExtendedAttributes attributes);
-
-  /// Creates Setext heading.
-  SetextHeading setextHeading(
-      BaseInline contents, int level, ExtendedAttributes attributes);
 
   /// Creates shortcut reference.
   ShortcutReference shortcutReference(String reference, Target target);

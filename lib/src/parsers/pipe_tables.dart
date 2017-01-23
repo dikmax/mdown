@@ -6,7 +6,6 @@ import 'package:mdown/src/ast/unparsed_inlines.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
-import 'package:mdown/src/parsers/line.dart';
 import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/code_units.dart';
 

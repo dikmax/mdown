@@ -136,9 +136,6 @@ abstract class Attribute implements AstNode {}
 /// Abstract attributes
 abstract class Attributes implements AstNode {}
 
-/// ATX heading block
-abstract class AtxHeading implements Heading {}
-
 /// Autolink
 abstract class Autolink implements Link {}
 
@@ -366,9 +363,6 @@ abstract class ReferenceImage
 /// Reference link.
 abstract class ReferenceLink implements Link, WithReference {}
 
-/// Setext heading.
-abstract class SetextHeading implements Heading {}
-
 /// Shortcut reference.
 abstract class ShortcutReference implements Reference {}
 
@@ -540,8 +534,6 @@ abstract class NodeList<E extends AstNode> implements List<E> {
 ///
 /// Clients may extend or implement this class.
 abstract class AstVisitor<R> {
-  R visitAtxHeading(AtxHeading node);
-
   R visitAutolink(Autolink node);
 
   R visitAutolinkEmail(AutolinkEmail node);
@@ -567,6 +559,8 @@ abstract class AstVisitor<R> {
   R visitFullReference(FullReference node);
 
   R visitHardLineBreak(HardLineBreak node);
+
+  R visitHeading(Heading node);
 
   R visitHtmlRawBlock(HtmlRawBlock node);
 
@@ -597,8 +591,6 @@ abstract class AstVisitor<R> {
   R visitReferenceImage(ReferenceImage node);
 
   R visitReferenceLink(ReferenceLink node);
-
-  R visitSetextHeading(SetextHeading node);
 
   R visitShortcutReference(ShortcutReference node);
 
