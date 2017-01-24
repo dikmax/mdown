@@ -19,20 +19,9 @@ Set<int> get escapableCodes {
   return _escapableCodesSet;
 }
 
-// TODO move to paragraph file
-final RegExp atxHeadingTest = new RegExp('^ {0,3}(#{1,6})(?:[ \t]|\$)');
-final RegExp blockquoteSimpleTest = new RegExp(r'^ {0,3}>');
-final RegExp fencedCodeStartTest =
-    new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
 final RegExp thematicBreakTest = new RegExp(
     '^( {0,3})((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$');
 
-final Pattern htmlBlock1Test =
-    new RegExp(r'<(?:script|pre|style)(?:\s|>|$)', caseSensitive: false);
-final Pattern htmlBlock2Test = '<!--';
-final Pattern htmlBlock3Test = '<?';
-final Pattern htmlBlock4Test = '<!';
-final Pattern htmlBlock5Test = '<!\[CDATA\[';
 final Pattern htmlBlock6Test = new RegExp(
   r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 );

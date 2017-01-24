@@ -4,6 +4,7 @@ import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/lookup.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -14,12 +15,15 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
   /// Constructor.
   FencedCodeParser(ParsersContainer container) : super(container);
 
+  static final RegExp _fencedCodeStartTest =
+    new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
+
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
     ParseResult<String> lineResult = container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    final Match startRes = fencedCodeStartTest.firstMatch(lineResult.value);
+    final Match startRes = _fencedCodeStartTest.firstMatch(lineResult.value);
     if (startRes == null) {
       return const ParseResult<BlockNodeImpl>.failure();
     }

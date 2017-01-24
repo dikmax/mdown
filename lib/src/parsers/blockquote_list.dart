@@ -9,6 +9,7 @@ import 'package:mdown/src/ast/enums.dart';
 import 'package:mdown/src/ast/combining_nodes.dart';
 import 'package:mdown/src/ast/unparsed_inlines.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/lookup.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -94,9 +95,10 @@ class _StackItem {
     parse();
     final BlockNode last = block.last;
     if (last != null && last is Para) {
-      if (thematicBreakTest.hasMatch(line) ||
-          atxHeadingTest.hasMatch(line) ||
-          fencedCodeStartTest.hasMatch(line)) {
+      final int indent = skipIndent(line, 0);
+      if (thematicBreakLookup.isFound(line, indent) ||
+          atxHeadingLookup.isFound(line, indent) ||
+          fencedCodeStartLookup.isFound(line, indent)) {
         // TODO add html block and link reference test
         return false;
       }
