@@ -37,8 +37,7 @@ abstract class AstFactory {
   Document document(Iterable<BlockNode> contents);
 
   /// Creates emphasis.
-  Emphasis emphasis(
-      Iterable<InlineNode> contents, EmphasisDelimiterType delimiterType);
+  Emphasis emphasis(Iterable<InlineNode> contents);
 
   /// Creates extended attributes.
   ExtendedAttributes extendedAttributes(Iterable<Attribute> attributes);
@@ -126,8 +125,7 @@ abstract class AstFactory {
   Strikeout strikeout(Iterable<InlineNode> contents);
 
   /// Creates strong emphasis.
-  Strong strong(
-      Iterable<InlineNode> contents, EmphasisDelimiterType delimiterType);
+  Strong strong(Iterable<InlineNode> contents);
 
   /// Creates subscript inline.
   Subscript subscript(Iterable<InlineNode> contents);

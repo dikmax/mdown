@@ -212,9 +212,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   EmphasisImpl visitEmphasis(Emphasis node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null
-        ? new EmphasisImpl(contents, node.delimiterType)
-        : node;
+    return contents != null ? new EmphasisImpl(contents) : node;
   }
 
   @override
@@ -391,9 +389,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   StrongImpl visitStrong(Strong node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null
-        ? new StrongImpl(contents, node.delimiterType)
-        : node;
+    return contents != null ? new StrongImpl(contents) : node;
   }
 
   @override

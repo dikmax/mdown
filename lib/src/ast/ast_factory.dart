@@ -37,9 +37,8 @@ class AstFactoryImpl implements AstFactory {
   Document document(Iterable<BlockNode> contents) => new DocumentImpl(contents);
 
   @override
-  Emphasis emphasis(
-          Iterable<InlineNode> contents, EmphasisDelimiterType delimiterType) =>
-      new EmphasisImpl(contents, delimiterType);
+  Emphasis emphasis(Iterable<InlineNode> contents) =>
+      new EmphasisImpl(contents);
 
   @override
   ExtendedAttributes extendedAttributes(Iterable<Attribute> attributes) =>
@@ -145,9 +144,7 @@ class AstFactoryImpl implements AstFactory {
       new StrikeoutImpl(contents);
 
   @override
-  Strong strong(
-          Iterable<InlineNode> contents, EmphasisDelimiterType delimiterType) =>
-      new StrongImpl(contents, delimiterType);
+  Strong strong(Iterable<InlineNode> contents) => new StrongImpl(contents);
 
   @override
   Subscript subscript(Iterable<InlineNode> contents) =>

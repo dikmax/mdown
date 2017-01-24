@@ -29,15 +29,6 @@ enum BulletType {
   star
 }
 
-/// Type of emphasis and strong delimiter.
-enum EmphasisDelimiterType {
-  /// `*emphasis*`
-  star,
-
-  /// `_emphasis_`
-  underscore
-}
-
 /// Index separator for ordered list
 enum IndexSeparator {
   /// 1. list
@@ -181,10 +172,7 @@ abstract class Document implements AstNode {
 }
 
 /// Emphasis inline
-abstract class Emphasis implements CompositeInline {
-  /// Type of delimiter
-  EmphasisDelimiterType get delimiterType;
-}
+abstract class Emphasis implements CompositeInline {}
 
 /// Extended attributes
 ///
@@ -354,10 +342,7 @@ abstract class Str implements InlineNode {
 abstract class Strikeout implements CompositeInline {}
 
 /// Strong inline
-abstract class Strong implements CompositeInline {
-  /// Type of delimiter
-  EmphasisDelimiterType get delimiterType;
-}
+abstract class Strong implements CompositeInline {}
 
 /// Subscript inline
 abstract class Subscript implements CompositeInline {}

@@ -45,29 +45,6 @@ String bulletTypeToChar(BulletType type) {
   return null;
 }
 
-EmphasisDelimiterType emphasisDelimiterTypeFromCodeUnit(int codeUnit) {
-  if (codeUnit == starCodeUnit) {
-    return EmphasisDelimiterType.star;
-  }
-  if (codeUnit == underscoreCodeUnit) {
-    return EmphasisDelimiterType.underscore;
-  }
-
-  return null;
-}
-
-String emphasisDelimiterTypeToChar(EmphasisDelimiterType delimiterType) {
-  switch (delimiterType) {
-    case EmphasisDelimiterType.star:
-      return '*';
-
-    case EmphasisDelimiterType.underscore:
-      return '_';
-  }
-
-  return null;
-}
-
 IndexSeparator indexSeparatorFromCodeUnit(int codeUnit) {
   if (codeUnit == dotCodeUnit) {
     return IndexSeparator.dot;

@@ -6,7 +6,6 @@ import 'dart:math';
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/ast/combining_nodes.dart';
-import 'package:mdown/src/ast/enums.dart';
 import 'package:mdown/src/ast/replacing_visitor.dart';
 import 'package:mdown/src/bit_set.dart';
 import 'package:mdown/src/code_units.dart';
@@ -437,18 +436,12 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                   case starCodeUnit:
                     int delimsLeft = countCloses;
                     if ((delimsLeft & 1) == 1) {
-                      itemRes = <InlineNodeImpl>[
-                        new EmphasisImpl(itemRes,
-                            emphasisDelimiterTypeFromCodeUnit(charCode))
-                      ];
+                      itemRes = <InlineNodeImpl>[new EmphasisImpl(itemRes)];
                       delimsLeft--;
                     }
 
                     while (delimsLeft > 0) {
-                      itemRes = <InlineNodeImpl>[
-                        new StrongImpl(itemRes,
-                            emphasisDelimiterTypeFromCodeUnit(charCode))
-                      ];
+                      itemRes = <InlineNodeImpl>[new StrongImpl(itemRes)];
                       delimsLeft -= 2;
                     }
                     break;

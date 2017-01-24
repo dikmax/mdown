@@ -304,18 +304,11 @@ class DocumentImpl extends AstNodeImpl implements Document {
 
 /// Default Emphasis implementation.
 class EmphasisImpl extends CompositeInlineImpl implements Emphasis {
-  /// Type of delimiter
-  final EmphasisDelimiterType _delimiterType;
-
   /// Constructs Emplasis instance.
-  EmphasisImpl(Iterable<InlineNode> contents, this._delimiterType)
-      : super(contents);
+  EmphasisImpl(Iterable<InlineNode> contents) : super(contents);
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitEmphasis(this);
-
-  @override
-  EmphasisDelimiterType get delimiterType => _delimiterType;
 }
 
 /// Default ExtendedAttributes implementation.
@@ -885,18 +878,11 @@ class StrikeoutImpl extends CompositeInlineImpl implements Strikeout {
 
 /// Default Strong implementation.
 class StrongImpl extends CompositeInlineImpl implements Strong {
-  /// Type of delimiter
-  final EmphasisDelimiterType _delimiterType;
-
   /// Constructs Strong instance.
-  StrongImpl(Iterable<InlineNode> contents, this._delimiterType)
-      : super(contents);
+  StrongImpl(Iterable<InlineNode> contents) : super(contents);
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitStrong(this);
-
-  @override
-  EmphasisDelimiterType get delimiterType => _delimiterType;
 }
 
 /// Default Subscript implementation.
@@ -1154,7 +1140,7 @@ class ThematicBreakImpl extends BlockNodeImpl implements ThematicBreak {
   void visitChildren<R>(AstVisitor<R> visitor) {}
 }
 
-/// Default UnorderedList implemtation.
+/// Default UnorderedList implementation.
 class UnorderedListImpl extends ListBlockImpl implements UnorderedList {
   final BulletType _bulletType;
 
