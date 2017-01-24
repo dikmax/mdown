@@ -19,14 +19,22 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
     final ParseResult<String> firstLineResult =
         container.lineParser.parse(text, offset);
     assert(firstLineResult.isSuccess);
-    final List<String> firstLineColumns =
-        _splitToColumns(firstLineResult.value);
+    final String firstLine = firstLineResult.value;
+
     offset = firstLineResult.offset;
     final int length = text.length;
 
-    List<Alignment> alignment = _getAlignment(firstLineColumns);
-
+    List<Alignment> alignment;
+    List<String> firstLineColumns;
     List<TableCell> headers;
+
+    final int firstLineFirstChar = getBlockFirstChar(firstLine, 0);
+    if (firstLineFirstChar == verticalBarCodeUnit ||
+        firstLineFirstChar == minusCodeUnit ||
+        firstLineFirstChar == colonCodeUnit) {
+      firstLineColumns = _splitToColumns(firstLine);
+      alignment = _getAlignment(firstLineColumns);
+    }
 
     if (alignment == null) {
       // First line is probably a header.
@@ -36,16 +44,26 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
         return new ParseResult<BlockNodeImpl>.failure();
       }
 
+      final String secondLine = secondLineResult.value;
+      if (secondLine.isEmpty) {
+        return new ParseResult<BlockNodeImpl>.failure();
+      }
+      final int secondLineFirstChar = getBlockFirstChar(secondLine, 0);
+      if (secondLineFirstChar != verticalBarCodeUnit &&
+          secondLineFirstChar != minusCodeUnit &&
+          secondLineFirstChar != colonCodeUnit) {
+        return new ParseResult<BlockNodeImpl>.failure();
+      }
+
       offset = secondLineResult.offset;
-      final List<String> secondLineColumns =
-          _splitToColumns(secondLineResult.value);
+      final List<String> secondLineColumns = _splitToColumns(secondLine);
       alignment = _getAlignment(secondLineColumns);
       if (alignment == null) {
         // No description here too.
         return new ParseResult<BlockNodeImpl>.failure();
       }
 
-      headers = _parseRow(firstLineColumns);
+      headers = _parseRow(firstLineColumns ?? _splitToColumns(firstLine));
       if (headers == null) {
         // No headers on first line.
         return new ParseResult<BlockNodeImpl>.failure();

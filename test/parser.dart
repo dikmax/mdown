@@ -94,7 +94,7 @@ TestFunc generateTestFunc(Options options, [FilterFunc filter = emptyFilter]) {
 
   return (int num, String mdOrig, String html) {
     if (filter(num)) {
-      t.test('html $num', () {
+      t.test('$num', () {
         final String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
         html = html.replaceAll("→", "\t").replaceAll("␣", " ");
 

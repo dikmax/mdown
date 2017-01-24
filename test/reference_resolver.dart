@@ -46,24 +46,22 @@ This is a [link].
 
 /// Link resolver tests
 void referenceResolverTests() {
-  final CommonMarkParser parser =
-      new CommonMarkParser(const Options(linkResolver: _linkResolver));
-  final CommonMarkParser defaultParser = CommonMarkParser.defaults;
+  const Options options = const Options(linkResolver: _linkResolver);
 
   t.group("Custom reference resolver test", () {
     t.test("Should leave defined links as is", () {
-      final Document d1 = parser.parse(_md1Test);
-      final Document d2 = defaultParser.parse(_md1Pattern);
+      final String d1 = markdownToHtml(_md1Test, options);
+      final String d2 = markdownToHtml(_md1Pattern);
       t.expect(d1, t.equals(d2));
     });
     t.test("May resolve undefined links", () {
-      final Document d1 = parser.parse(_md2Test);
-      final Document d2 = defaultParser.parse(_md2Pattern);
+      final String d1 = markdownToHtml(_md2Test, options);
+      final String d2 = markdownToHtml(_md2Pattern);
       t.expect(d1, t.equals(d2));
     });
     t.test("May not resolve undefined links", () {
-      final Document d1 = parser.parse(_md3Test);
-      final Document d2 = defaultParser.parse(_md3Pattern);
+      final String d1 = markdownToHtml(_md3Test, options);
+      final String d2 = markdownToHtml(_md3Pattern);
       t.expect(d1, t.equals(d2));
     });
   });

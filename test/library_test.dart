@@ -23,7 +23,7 @@ void main() {
   tests("Regressions [strict]", regression, strictTestFunc);
 
   // Additional tests
-  tests("Additional [strict]", additionalMarkdownToHtml, defaultsTestFunc);
+  tests("Additional [defauls]", additionalMarkdownToHtml, defaultsTestFunc);
 
   // SmartPunct
   tests("SmartPunct [commonmark]", smartPunctuation, commonmarkTestFunc);
@@ -118,8 +118,8 @@ void main() {
   tests("Pipe tables spec", specification, pipeTablesTestFunc);
 
   // Custom classes
-  // customClassesTests();
+  customClassesTests();
 
   // Custom resolver
-  // referenceResolverTests();
+  referenceResolverTests();
 }
