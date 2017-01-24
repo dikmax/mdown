@@ -219,7 +219,6 @@ class DocumentParser extends AbstractParser<Document> {
         final ParseResult<LinkReferenceImpl> res =
             container.linkReferenceParser.parse(text, offset);
         if (res.isSuccess) {
-          blocks.add(res.value);
           final String referenceString = res.value.normalizedReference;
           if (!container.references.containsKey(referenceString)) {
             container.references[referenceString] = res.value;
