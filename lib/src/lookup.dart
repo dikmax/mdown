@@ -20,25 +20,66 @@ class PatternLookup extends Lookup {
       _pattern.matchAsPrefix(text, offset) != null;
 }
 
+/// Simple lookup for blockquote.
+class BlockquoteSimpleLookup extends Lookup {
+  /// Constant constructor.
+  const BlockquoteSimpleLookup();
+
+  @override
+  bool isFound(String text, int offset) {
+    return text.codeUnitAt(offset) == greaterThanCodeUnit;
+  }
+}
+
+const Lookup blockquoteSimpleLookup = const BlockquoteSimpleLookup();
+
+/// Simple lookup for thematic break.
+class ThematicBreakLookup extends Lookup {
+  /// Constant constructor.
+  const ThematicBreakLookup();
+
+  @override
+  bool isFound(String text, int offset) {
+    final int mainCodeUnit = text.codeUnitAt(offset);
+    if (mainCodeUnit != starCodeUnit &&
+        mainCodeUnit != minusCodeUnit &&
+        mainCodeUnit != underscoreCodeUnit) {
+      return false;
+    }
+
+    final int length = text.length;
+    offset += 1;
+    int count = 1;
+
+    while (offset < length) {
+      final int codeUnit = text.codeUnitAt(offset);
+
+      if (codeUnit == mainCodeUnit) {
+        ++count;
+      } else if (codeUnit == carriageReturnCodeUnit ||
+          codeUnit == newLineCodeUnit) {
+        break;
+      } else if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
+        return false;
+      }
+
+      offset += 1;
+    }
+
+    return count >= 3;
+  }
+}
+
+const Lookup thematicBreakLookup = const ThematicBreakLookup();
+
 final Lookup atxHeadingLookup =
     new Lookup.regExp(new RegExp('(#{1,6})(?:[ \t]|\$)'));
-final Lookup blockquoteSimpleLookup = new Lookup.regExp('>');
 final Lookup fencedCodeStartLookup =
     new Lookup.regExp(new RegExp('(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$'));
-final Lookup thematicBreakLookup = new Lookup.regExp(
-    new RegExp('((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$'));
-
-/*
-final Lookup htmlBlock1Lookup = new Lookup.regExp(
-    new RegExp(r'<(?:script|pre|style)(?:\s|>|$)', caseSensitive: false));
-*/
-final Lookup htmlBlock5Lookup = new Lookup.regExp('<!\[CDATA\[');
-final Lookup htmlBlock6Lookup = new Lookup.regExp(new RegExp(
-  r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
-));
 
 /// Lookup for HTML block type 1: <(?:script|pre|style)(?:\s|>|$)
 class HtmlBlock1Lookup extends Lookup {
+  /// Constant constructor
   const HtmlBlock1Lookup();
 
   @override
@@ -129,8 +170,11 @@ class HtmlBlock1Lookup extends Lookup {
   }
 }
 
+const Lookup htmlBlock1Lookup = const HtmlBlock1Lookup();
+
 /// Lookup for HTML block type 2: <!--
 class HtmlBlock2Lookup extends Lookup {
+  /// Constant constructor
   const HtmlBlock2Lookup();
 
   @override
@@ -145,6 +189,8 @@ class HtmlBlock2Lookup extends Lookup {
         text.codeUnitAt(offset + 3) == minusCodeUnit;
   }
 }
+
+const Lookup htmlBlock2Lookup = const HtmlBlock2Lookup();
 
 /// Lookup for HTML block type 3: <?
 class HtmlBlock3Lookup extends Lookup {
@@ -161,8 +207,11 @@ class HtmlBlock3Lookup extends Lookup {
   }
 }
 
+const Lookup htmlBlock3Lookup = const HtmlBlock3Lookup();
+
 /// Lookup for HTML block type 4: <!
 class HtmlBlock4Lookup extends Lookup {
+  /// Constant constructor
   const HtmlBlock4Lookup();
 
   @override
@@ -175,3 +224,30 @@ class HtmlBlock4Lookup extends Lookup {
         text.codeUnitAt(offset + 1) == exclamationMarkCodeUnit;
   }
 }
+
+const Lookup htmlBlock4Lookup = const HtmlBlock4Lookup();
+
+/// Lookup for HTML block type 5: `<![CDATA[`
+class HtmlBlock5Lookup extends Lookup {
+  /// Constant constructor
+  const HtmlBlock5Lookup();
+
+  @override
+  bool isFound(String text, int offset) {
+    if (offset + 9 >= text.length) {
+      return false;
+    }
+
+    return text.codeUnitAt(offset) == lessThanCodeUnit &&
+        text.codeUnitAt(offset + 1) == exclamationMarkCodeUnit &&
+        text.codeUnitAt(offset + 2) == openBracketCodeUnit &&
+        text.codeUnitAt(offset + 3) == bigCCharCode &&
+        text.codeUnitAt(offset + 4) == bigDCharCode &&
+        text.codeUnitAt(offset + 5) == bigACharCode &&
+        text.codeUnitAt(offset + 6) == bigTCharCode &&
+        text.codeUnitAt(offset + 7) == bigACharCode &&
+        text.codeUnitAt(offset + 8) == openBracketCodeUnit;
+  }
+}
+
+const Lookup htmlBlock5Lookup = const HtmlBlock5Lookup();

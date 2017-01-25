@@ -13,10 +13,10 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
   HtmlBlockParser(ParsersContainer container) : super(container);
 
   static final List<Lookup> _starts = <Lookup>[
-    const HtmlBlock1Lookup(),
-    const HtmlBlock2Lookup(),
-    const HtmlBlock3Lookup(),
-    const HtmlBlock4Lookup(),
+    htmlBlock1Lookup,
+    htmlBlock2Lookup,
+    htmlBlock3Lookup,
+    htmlBlock4Lookup,
     htmlBlock5Lookup
   ];
 

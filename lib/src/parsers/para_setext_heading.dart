@@ -53,10 +53,10 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
 
     if (container.options.rawHtml) {
       _paragraphBreaks[lessThanCodeUnit] = <Lookup>[
-        const HtmlBlock1Lookup(),
-        const HtmlBlock2Lookup(),
-        const HtmlBlock3Lookup(),
-        const HtmlBlock4Lookup(),
+        htmlBlock1Lookup,
+        htmlBlock2Lookup,
+        htmlBlock3Lookup,
+        htmlBlock4Lookup,
         htmlBlock5Lookup
       ];
     }
