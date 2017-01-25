@@ -344,7 +344,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
               final List<InlineNodeImpl> labelInlines = container.documentParser
                   .parseInlines(text.substring(startOffset, endOffset));
               final Reference reference =
-                  astFactory.collapsedReference(referenceString, target);
+                  astFactory.reference(referenceString, target);
 
               final InlineNode result = isImage
                   ? astFactory.referenceImage(
@@ -383,7 +383,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
                   .parseInlines(text.substring(startOffset, endOffset));
 
               final Reference reference =
-                  astFactory.fullReference(referenceString, target);
+                  astFactory.reference(referenceString, target);
               final InlineNode result = isImage
                   ? astFactory.referenceImage(
                       labelInlines, reference, attributes)
@@ -426,7 +426,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
           final List<InlineNodeImpl> labelInlines = container.documentParser
               .parseInlines(text.substring(startOffset, endOffset));
           final Reference reference =
-              astFactory.shortcutReference(referenceString, target);
+              astFactory.reference(referenceString, target);
 
           final InlineNode result = isImage
               ? astFactory.referenceImage(labelInlines, reference, attributes)

@@ -29,9 +29,6 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
   R visitCodeBlock(CodeBlock node) => null;
 
   @override
-  R visitCollapsedReference(CollapsedReference node) => null;
-
-  @override
   R visitDocument(Document node) => null;
 
   @override
@@ -39,9 +36,6 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitExtendedAttributes(ExtendedAttributes node) => null;
-
-  @override
-  R visitFullReference(FullReference node) => null;
 
   @override
   R visitHardLineBreak(HardLineBreak node) => null;
@@ -86,13 +80,13 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
   R visitPara(Para node) => null;
 
   @override
+  R visitReference(Reference node) => null;
+
+  @override
   R visitReferenceImage(ReferenceImage node) => null;
 
   @override
   R visitReferenceLink(ReferenceLink node) => null;
-
-  @override
-  R visitShortcutReference(ShortcutReference node) => null;
 
   @override
   R visitSmartChar(SmartChar node) => null;
@@ -210,12 +204,6 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
   }
 
   @override
-  R visitCollapsedReference(CollapsedReference node) {
-    node.visitChildren(this);
-    return null;
-  }
-
-  @override
   R visitDocument(Document node) {
     node.visitChildren(this);
     return null;
@@ -229,12 +217,6 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitExtendedAttributes(ExtendedAttributes node) {
-    node.visitChildren(this);
-    return null;
-  }
-
-  @override
-  R visitFullReference(FullReference node) {
     node.visitChildren(this);
     return null;
   }
@@ -324,6 +306,12 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
   }
 
   @override
+  R visitReference(Reference node) {
+    node.visitChildren(this);
+    return null;
+  }
+
+  @override
   R visitReferenceImage(ReferenceImage node) {
     node.visitChildren(this);
     return null;
@@ -331,12 +319,6 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitReferenceLink(ReferenceLink node) {
-    node.visitChildren(this);
-    return null;
-  }
-
-  @override
-  R visitShortcutReference(ShortcutReference node) {
     node.visitChildren(this);
     return null;
   }
@@ -509,9 +491,6 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
   @override
   R visitCodeBlock(CodeBlock node) => visitBlockNode(node);
 
-  @override
-  R visitCollapsedReference(CollapsedReference node) => visitReference(node);
-
   R visitCompositeInline(CompositeInline node) => visitInlineNode(node);
 
   @override
@@ -522,9 +501,6 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitExtendedAttributes(ExtendedAttributes node) => visitAttributes(node);
-
-  @override
-  R visitFullReference(FullReference node) => visitReference(node);
 
   @override
   R visitHardLineBreak(HardLineBreak node) => visitInlineNode(node);
@@ -585,6 +561,7 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
 
   R visitRawInline(RawInline node) => visitInlineNode(node);
 
+  @override
   R visitReference(Reference node) => visitNode(node);
 
   @override
@@ -592,9 +569,6 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitReferenceLink(ReferenceLink node) => visitLink(node);
-
-  @override
-  R visitShortcutReference(ShortcutReference node) => visitReference(node);
 
   @override
   R visitSmartChar(SmartChar node) => visitChar(node);
@@ -696,9 +670,6 @@ class UnifyingAstVisitor<R> implements AstVisitor<R> {
   R visitCodeBlock(CodeBlock node) => visitNode(node);
 
   @override
-  R visitCollapsedReference(CollapsedReference node) => visitNode(node);
-
-  @override
   R visitDocument(Document node) => visitNode(node);
 
   @override
@@ -706,9 +677,6 @@ class UnifyingAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitExtendedAttributes(ExtendedAttributes node) => visitNode(node);
-
-  @override
-  R visitFullReference(FullReference node) => visitNode(node);
 
   @override
   R visitHardLineBreak(HardLineBreak node) => visitNode(node);
@@ -758,13 +726,13 @@ class UnifyingAstVisitor<R> implements AstVisitor<R> {
   R visitPara(Para node) => visitNode(node);
 
   @override
+  R visitReference(Reference node) => visitNode(node);
+
+  @override
   R visitReferenceImage(ReferenceImage node) => visitNode(node);
 
   @override
   R visitReferenceLink(ReferenceLink node) => visitNode(node);
-
-  @override
-  R visitShortcutReference(ShortcutReference node) => visitNode(node);
 
   @override
   R visitSmartChar(SmartChar node) => visitNode(node);

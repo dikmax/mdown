@@ -245,17 +245,6 @@ class CodeBlockImpl extends BlockNodeImpl implements CodeBlock {
   Iterable<AstNode> get childEntities => <AstNode>[_attributes];
 }
 
-/// Default CollapsedReference implementation.
-class CollapsedReferenceImpl extends ReferenceImpl
-    implements CollapsedReference {
-  /// Constructs CollapsedReference instance.
-  CollapsedReferenceImpl(String reference, Target target)
-      : super(reference, target);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitCollapsedReference(this);
-}
-
 /// Default CompositeInline implementation.
 abstract class CompositeInlineImpl extends InlineNodeImpl
     implements CompositeInline {
@@ -334,15 +323,6 @@ class ExtendedAttributesImpl extends AttributesImpl
   void visitChildren<R>(AstVisitor<R> visitor) {
     _attributes?.accept(visitor);
   }
-}
-
-/// Default FullReference implementation.
-class FullReferenceImpl extends ReferenceImpl implements FullReference {
-  /// Constructs FullReference instance.
-  FullReferenceImpl(String reference, Target target) : super(reference, target);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitFullReference(this);
 }
 
 /// Default HardLineBreak implementation.
@@ -722,7 +702,7 @@ abstract class RawInlineImpl extends InlineNodeImpl implements RawInline {
 }
 
 /// Default Reference implementation.
-abstract class ReferenceImpl extends AstNodeImpl implements Reference {
+class ReferenceImpl extends AstNodeImpl implements Reference {
   final String _reference;
   final Target _target;
 
@@ -740,6 +720,9 @@ abstract class ReferenceImpl extends AstNodeImpl implements Reference {
 
   @override
   Target get target => _target;
+
+  @override
+  R accept<R>(AstVisitor<R> visitor) => visitor.visitReference(this);
 }
 
 /// Default ReferenceImage implementation.
@@ -794,16 +777,6 @@ class ReferenceLinkImpl extends LinkImpl implements ReferenceLink {
 
   @override
   String get title => _reference?.target?.title?.title;
-}
-
-/// Default ShortcutReference implementation.
-class ShortcutReferenceImpl extends ReferenceImpl implements ShortcutReference {
-  /// Constructs ShortcutReference instance.
-  ShortcutReferenceImpl(String reference, Target target)
-      : super(reference, target);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitShortcutReference(this);
 }
 
 /// Default SmartChar implementation.

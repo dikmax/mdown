@@ -30,9 +30,6 @@ abstract class AstFactory {
   /// Creates code block.
   CodeBlock codeBlock(Iterable<String> contents, Attributes attributes);
 
-  /// Creates collapsed reference.
-  CollapsedReference collapsedReference(String reference, Target target);
-
   /// Creates document.
   Document document(Iterable<BlockNode> contents);
 
@@ -41,9 +38,6 @@ abstract class AstFactory {
 
   /// Creates extended attributes.
   ExtendedAttributes extendedAttributes(Iterable<Attribute> attributes);
-
-  /// Creates full reference
-  FullReference fullReference(String reference, Target target);
 
   /// Creates hard line break.
   HardLineBreak hardLineBreak();
@@ -98,6 +92,9 @@ abstract class AstFactory {
   /// Creates paragraph.
   Para para(BaseInline contents);
 
+  /// Creates reference.
+  Reference reference(String reference, Target target);
+
   /// Creates reference image.
   ReferenceImage referenceImage(Iterable<InlineNode> contents,
       Reference reference, ExtendedAttributes attributes);
@@ -105,9 +102,6 @@ abstract class AstFactory {
   /// Creates reference link.
   ReferenceLink referenceLink(Iterable<InlineNode> contents,
       Reference reference, ExtendedAttributes attributes);
-
-  /// Creates shortcut reference.
-  ShortcutReference shortcutReference(String reference, Target target);
 
   /// Creates smart char.
   SmartChar smartChar(SmartCharType type);

@@ -30,10 +30,6 @@ class AstFactoryImpl implements AstFactory {
       new CodeImpl(contents, fenceSize, attributes);
 
   @override
-  CollapsedReference collapsedReference(String reference, Target target) =>
-      new CollapsedReferenceImpl(reference, target);
-
-  @override
   Document document(Iterable<BlockNode> contents) => new DocumentImpl(contents);
 
   @override
@@ -47,10 +43,6 @@ class AstFactoryImpl implements AstFactory {
   @override
   CodeBlock codeBlock(Iterable<String> contents, Attributes attributes) =>
       new CodeBlockImpl(contents, attributes);
-
-  @override
-  FullReference fullReference(String reference, Target target) =>
-      new FullReferenceImpl(reference, target);
 
   @override
   HardLineBreak hardLineBreak() => new HardLineBreakImpl();
@@ -114,6 +106,10 @@ class AstFactoryImpl implements AstFactory {
   Para para(BaseInline contents) => new ParaImpl(contents);
 
   @override
+  Reference reference(String reference, Target target) =>
+      new ReferenceImpl(reference, target);
+
+  @override
   ReferenceImage referenceImage(Iterable<InlineNode> contents,
           Reference reference, ExtendedAttributes attributes) =>
       new ReferenceImageImpl(contents, reference, attributes);
@@ -122,10 +118,6 @@ class AstFactoryImpl implements AstFactory {
   ReferenceLink referenceLink(Iterable<InlineNode> contents,
           Reference reference, ExtendedAttributes attributes) =>
       new ReferenceLinkImpl(contents, reference, attributes);
-
-  @override
-  ShortcutReference shortcutReference(String reference, Target target) =>
-      new ShortcutReferenceImpl(reference, target);
 
   @override
   SmartChar smartChar(SmartCharType type) => new SmartCharImpl(type);

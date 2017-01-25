@@ -195,15 +195,6 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   }
 
   @override
-  CollapsedReferenceImpl visitCollapsedReference(CollapsedReference node) {
-    final Target target = node.target.accept<AstNode>(this);
-
-    return target == node.target
-        ? node
-        : new CollapsedReferenceImpl(node.reference, target);
-  }
-
-  @override
   DocumentImpl visitDocument(Document node) {
     final List<BlockNode> contents = _visitBlockNodeList(node.contents);
     return contents != null ? new DocumentImpl(contents) : node;
@@ -219,15 +210,6 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   ExtendedAttributesImpl visitExtendedAttributes(ExtendedAttributes node) {
     final List<Attribute> attributes = _visitAttributeNodeList(node.attributes);
     return attributes != null ? new ExtendedAttributesImpl(attributes) : node;
-  }
-
-  @override
-  FullReferenceImpl visitFullReference(FullReference node) {
-    final Target target = node.target.accept<AstNode>(this);
-
-    return target == node.target
-        ? node
-        : new FullReferenceImpl(node.reference, target);
   }
 
   @override
@@ -329,6 +311,15 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   }
 
   @override
+  ReferenceImpl visitReference(Reference node) {
+    final Target target = node.target.accept<AstNode>(this);
+
+    return target == node.target
+        ? node
+        : new ReferenceImpl(node.reference, target);
+  }
+
+  @override
   ReferenceImageImpl visitReferenceImage(ReferenceImage node) {
     final Reference reference = node.reference.accept<AstNode>(this);
     final ExtendedAttributes attributes =
@@ -356,15 +347,6 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
         ? node
         : new ReferenceLinkImpl(
             contents ?? node.contents, reference, attributes);
-  }
-
-  @override
-  ShortcutReferenceImpl visitShortcutReference(ShortcutReference node) {
-    final Target target = node.target.accept<AstNode>(this);
-
-    return target == node.target
-        ? node
-        : new CollapsedReferenceImpl(node.reference, target);
   }
 
   @override

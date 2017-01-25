@@ -155,9 +155,6 @@ abstract class CodeBlock implements BlockNode, WithAttributes {
   Iterable<String> get contents;
 }
 
-/// Collapsed reference
-abstract class CollapsedReference implements Reference {}
-
 /// Base class for all composite inlines. Also used as top component for
 /// inlines list.
 abstract class CompositeInline implements InlineNode {
@@ -181,9 +178,6 @@ abstract class ExtendedAttributes implements Attributes {
   /// List of attributes.
   NodeList<Attribute> get attributes;
 }
-
-/// Full reference
-abstract class FullReference implements Reference {}
 
 /// Hard line break.
 abstract class HardLineBreak implements InlineNode {}
@@ -304,7 +298,7 @@ abstract class RawInline implements InlineNode {
   String get contents;
 }
 
-/// Abstract reference.
+/// Reference.
 abstract class Reference implements AstNode, WithTarget {
   /// Reference
   String get reference;
@@ -316,9 +310,6 @@ abstract class ReferenceImage
 
 /// Reference link.
 abstract class ReferenceLink implements Link, WithReference {}
-
-/// Shortcut reference.
-abstract class ShortcutReference implements Reference {}
 
 /// Smart char
 abstract class SmartChar implements Char {
@@ -496,15 +487,11 @@ abstract class AstVisitor<R> {
 
   R visitCodeBlock(CodeBlock node);
 
-  R visitCollapsedReference(CollapsedReference node);
-
   R visitDocument(Document node);
 
   R visitEmphasis(Emphasis node);
 
   R visitExtendedAttributes(ExtendedAttributes node);
-
-  R visitFullReference(FullReference node);
 
   R visitHardLineBreak(HardLineBreak node);
 
@@ -534,11 +521,11 @@ abstract class AstVisitor<R> {
 
   R visitPara(Para node);
 
+  R visitReference(Reference node);
+
   R visitReferenceImage(ReferenceImage node);
 
   R visitReferenceLink(ReferenceLink node);
-
-  R visitShortcutReference(ShortcutReference node);
 
   R visitSmartChar(SmartChar node);
 
