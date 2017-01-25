@@ -5,6 +5,7 @@ import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
+import 'package:mdown/src/lookup.dart';
 
 /// Parser for thematic break.
 class ThematicBreakParser extends AbstractParser<BlockNodeImpl> {
@@ -17,8 +18,8 @@ class ThematicBreakParser extends AbstractParser<BlockNodeImpl> {
         container.lineParser.parse(text, offset);
     assert(lineResult.isSuccess);
 
-    final Match match = thematicBreakTest.firstMatch(lineResult.value);
-    if (match == null) {
+    final int indent = skipIndent(text, offset);
+    if (!thematicBreakLookup.isFound(text, indent)) {
       return const ParseResult<BlockNodeImpl>.failure();
     }
 

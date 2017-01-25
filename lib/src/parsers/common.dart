@@ -19,9 +19,6 @@ Set<int> get escapableCodes {
   return _escapableCodesSet;
 }
 
-final RegExp thematicBreakTest = new RegExp(
-    '^( {0,3})((?:\\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})\$');
-
 final Pattern htmlBlock6Test = new RegExp(
   r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 );

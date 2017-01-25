@@ -732,8 +732,9 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
               : lineResult.value;
 
           // Checking for thematic break;
-          final Match match = thematicBreakTest.firstMatch(thematicTest);
-          if (match != null && match[1].length < stack.last.marker.endIndent) {
+          final int thematicTestIndent = skipIndent(thematicTest, 0);
+          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent)
+              && thematicTestIndent < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             stack.flush(stackIndex, result);
             markers = markers.take(markersIndex);
@@ -842,8 +843,9 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
           }
 
           // Checking for thematic break;
-          final Match match = thematicBreakTest.firstMatch(thematicTest);
-          if (match != null && match[1].length < stack.last.marker.endIndent) {
+          final int thematicTestIndent = skipIndent(thematicTest, 0);
+          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent)
+              && thematicTestIndent < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             break;
           }
