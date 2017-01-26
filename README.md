@@ -22,15 +22,15 @@ Performance
 As there are not many Markdown parsers written in Dart out there,
 parsing speed is compared with markdown package. [Progit][] was used as
 a source of markdown files in different languages. ***mdown*** appears
-to be **3.21** times faster in **VM**, **12** times faster
-in **Chrome**, **2.35** times faster in **Safari** and **3.74** times
+to be **3** times faster in **VM**, **11** times faster
+in **Chrome**, **2.2** times faster in **Safari** and **3.7** times
 faster in **Firefox**.
 
 [Run benchmarks yourself or see details.](https://github.com/dikmax/mdown-benchmark)
 
 ***mdown*** make extensive use of `String.codeUnitAt` instead
 of `RegExp`. So you can see noticeable gain for non-latin languages
-(up to &times;40 in Chrome for Japan language).
+(up to &times;38 in Chrome for Japan language).
 
 Extensions
 ==========
