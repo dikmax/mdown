@@ -449,10 +449,10 @@ class InlineImageImpl extends ImageImpl implements InlineImage {
   Target get target => _target;
 
   @override
-  String get link => _target?.link?.link;
+  String get link => _target?.link;
 
   @override
-  String get title => _target?.title?.title;
+  String get title => _target?.title;
 }
 
 /// Default InlineLink implementation
@@ -475,10 +475,10 @@ class InlineLinkImpl extends LinkImpl implements InlineLink {
   Target get target => _target;
 
   @override
-  String get link => _target?.link?.link;
+  String get link => _target?.link;
 
   @override
-  String get title => _target?.title?.title;
+  String get title => _target?.title;
 }
 
 /// Default InlineNode implementation
@@ -746,10 +746,10 @@ class ReferenceImageImpl extends ImageImpl implements ReferenceImage {
   ExtendedAttributes get attributes => _attributes;
 
   @override
-  String get link => _reference?.target?.link?.link;
+  String get link => _reference?.target?.link;
 
   @override
-  String get title => _reference?.target?.title?.title;
+  String get title => _reference?.target?.title;
 }
 
 /// Default ReferenceLink implementation.
@@ -773,10 +773,10 @@ class ReferenceLinkImpl extends LinkImpl implements ReferenceLink {
   Reference get reference => _reference;
 
   @override
-  String get link => _reference?.target?.link?.link;
+  String get link => _reference?.target?.link;
 
   @override
-  String get title => _reference?.target?.title?.title;
+  String get title => _reference?.target?.title;
 }
 
 /// Default SmartChar implementation.
@@ -990,8 +990,8 @@ class TableRowImpl extends AstNodeImpl implements TableRow {
 
 /// Default Target implementation.
 class TargetImpl extends AstNodeImpl implements Target {
-  final TargetLink _link;
-  TargetTitle _title;
+  final String _link;
+  String _title;
 
   /// Constructs Target instance.
   TargetImpl(this._link, this._title);
@@ -1000,60 +1000,17 @@ class TargetImpl extends AstNodeImpl implements Target {
   R accept<R>(AstVisitor<R> visitor) => visitor.visitTarget(this);
 
   @override
-  Iterable<AstNode> get childEntities => <AstNode>[_link, _title];
-
-  @override
-  TargetLink get link => _link;
-
-  @override
-  TargetTitle get title => _title;
-
-  set title(TargetTitle title) {
-    _title = title;
-  }
-
-  @override
-  void visitChildren<R>(AstVisitor<R> visitor) {
-    _link?.accept(visitor);
-    _title?.accept(visitor);
-  }
-}
-
-/// Default TargetLink implementation.
-class TargetLinkImpl extends AstNodeImpl implements TargetLink {
-  final String _link;
-
-  /// Constructs TargetLink instance.
-  TargetLinkImpl(this._link);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitTargetLink(this);
-
-  @override
   Iterable<AstNode> get childEntities => null;
 
   @override
   String get link => _link;
 
   @override
-  void visitChildren<R>(AstVisitor<R> visitor) {}
-}
-
-/// Default TargetTitle implementation.
-class TargetTitleImpl extends AstNodeImpl implements TargetTitle {
-  final String _title;
-
-  /// Constructs TargetTitle instance.
-  TargetTitleImpl(this._title);
-
-  @override
-  R accept<R>(AstVisitor<R> visitor) => visitor.visitTargetTitle(this);
-
-  @override
-  Iterable<AstNode> get childEntities => null;
-
-  @override
   String get title => _title;
+
+  set title(String title) {
+    _title = title;
+  }
 
   @override
   void visitChildren<R>(AstVisitor<R> visitor) {}

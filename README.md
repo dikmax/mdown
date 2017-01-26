@@ -270,18 +270,23 @@ In that case, you could supply parser with the resolver, which should
 provide all missing links.
 
 ```dart
+import 'package:mdown/mdown.dart';
+import 'package:mdown/ast/standard_ast_factory.dart';
+
 String library = "mdown";
 String version = "0.11.0";
 Target linkResolver(String normalizedReference, String reference) {
   if (reference.startsWith("new ")) {
     String className = reference.substring(4);
-    return new Target("http://www.dartdocs.org/documentation/$library/$version/index.html#$library/$library.$className@id_$className-", null);
+    return astFactory.target(
+        "http://www.dartdocs.org/documentation/$library/$version/index.html#$library/$library.$className@id_$className-",
+        null);
   } else {
     return null;
   }
 }
 
-String res = markdownToHtml('Hello world!\n===', const Options(linkResolver: linkResolver));
+String res = markdownToHtml('Hello world!\n===', new Options(linkResolver: linkResolver));
 ```
 
 [CommonMark]: http://commonmark.org/

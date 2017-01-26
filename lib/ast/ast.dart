@@ -371,22 +371,8 @@ abstract class TableRow implements AstNode {
 
 /// Target ::= TargetLink (' ' TargetTitle)?
 abstract class Target implements AstNode {
-  TargetLink get link;
-
-  TargetTitle get title;
-}
-
-/// Target link.
-///
-/// TargetLink ::= '<'? link '>'?
-abstract class TargetLink implements AstNode {
   String get link;
-}
 
-/// Target title.
-///
-/// TargetTitle ::= '(' title ')' | '"' title '"' | "'" title "'"
-abstract class TargetTitle implements AstNode {
   String get title;
 }
 
@@ -552,10 +538,6 @@ abstract class AstVisitor<R> {
   R visitTableRow(TableRow node);
 
   R visitTarget(Target node);
-
-  R visitTargetLink(TargetLink node);
-
-  R visitTargetTitle(TargetTitle node);
 
   R visitTexMathDisplay(TexMathDisplay node);
 

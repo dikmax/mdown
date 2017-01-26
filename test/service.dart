@@ -58,7 +58,7 @@ void serviceTests() {
             '<p><a href="http://test.com/" id="id">test</a></p>'));
     });
 
-    /*t.test('Link resolver', () {
+    t.test('Link resolver', () {
       final String library = "mdown";
       final String version = "0.11.0";
       Target linkResolver(String normalizedReference, String reference) {
@@ -73,7 +73,8 @@ void serviceTests() {
       }
 
       String res = markdownToHtml(
-          'Hello world!\n===', const Options(linkResolver: linkResolver));
-    });*/
+          'Hello world!\n===', new Options(linkResolver: linkResolver));
+      t.expect(res, t.equals("<h1>Hello world!</h1>"));
+    });
   });
 }

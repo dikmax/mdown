@@ -135,25 +135,19 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
     if (offsetAfterAttributes != -1) {
       return new ParseResult<LinkReferenceImpl>.success(
           new LinkReferenceImpl(
-              label,
-              astFactory.target(
-                  astFactory.targetLink(link), astFactory.targetTitle(title)),
-              attributes),
+              label, astFactory.target(link, title), attributes),
           offsetAfterAttributes);
     }
     if (offsetAfterTitle != -1) {
       return new ParseResult<LinkReferenceImpl>.success(
           new LinkReferenceImpl(
-              label,
-              astFactory.target(
-                  astFactory.targetLink(link), astFactory.targetTitle(title)),
-              attributes),
+              label, astFactory.target(link, title), attributes),
           offsetAfterTitle);
     }
     if (offsetAfterLink != -1) {
       return new ParseResult<LinkReferenceImpl>.success(
           new LinkReferenceImpl(label,
-              astFactory.target(astFactory.targetLink(link), null), null),
+              astFactory.target(link, null), null),
           offsetAfterLink);
     }
 

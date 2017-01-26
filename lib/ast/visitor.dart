@@ -128,12 +128,6 @@ class SimpleAstVisitor<R> implements AstVisitor<R> {
   R visitTarget(Target node) => null;
 
   @override
-  R visitTargetLink(TargetLink node) => null;
-
-  @override
-  R visitTargetTitle(TargetTitle node) => null;
-
-  @override
   R visitTexMathDisplay(TexMathDisplay node) => null;
 
   @override
@@ -402,18 +396,6 @@ class RecursiveAstVisitor<R> implements AstVisitor<R> {
   }
 
   @override
-  R visitTargetLink(TargetLink node) {
-    node.visitChildren(this);
-    return null;
-  }
-
-  @override
-  R visitTargetTitle(TargetTitle node) {
-    node.visitChildren(this);
-    return null;
-  }
-
-  @override
   R visitTexMathDisplay(TexMathDisplay node) {
     node.visitChildren(this);
     return null;
@@ -609,12 +591,6 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
   @override
   R visitTarget(Target node) => visitNode(node);
 
-  @override
-  R visitTargetLink(TargetLink node) => visitNode(node);
-
-  @override
-  R visitTargetTitle(TargetTitle node) => visitNode(node);
-
   R visitTexMath(TexMath node) => visitTexRawInline(node);
 
   @override
@@ -772,12 +748,6 @@ class UnifyingAstVisitor<R> implements AstVisitor<R> {
 
   @override
   R visitTarget(Target node) => visitNode(node);
-
-  @override
-  R visitTargetLink(TargetLink node) => visitNode(node);
-
-  @override
-  R visitTargetTitle(TargetTitle node) => visitNode(node);
 
   @override
   R visitTexMathDisplay(TexMathDisplay node) => visitNode(node);

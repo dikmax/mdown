@@ -162,14 +162,8 @@ class AstFactoryImpl implements AstFactory {
       new TableCellImpl(contents);
 
   @override
-  Target target(TargetLink link, TargetTitle title) =>
+  Target target(String link, String title) =>
       new TargetImpl(link, title);
-
-  @override
-  TargetLink targetLink(String link) => new TargetLinkImpl(link);
-
-  @override
-  TargetTitle targetTitle(String title) => new TargetTitleImpl(title);
 
   @override
   TexMathDisplay texMathDisplay(String contents) =>

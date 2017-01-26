@@ -8,7 +8,7 @@ import 'package:mdown/ast/standard_ast_factory.dart';
 
 Target _linkResolver(String normalizedReference, String reference) {
   if (reference == "reference") {
-    return astFactory.target(astFactory.targetLink(reference), null);
+    return astFactory.target(reference, null);
   } else {
     return null;
   }

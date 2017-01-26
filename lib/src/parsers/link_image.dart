@@ -121,7 +121,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
     }
 
     final TargetImpl result =
-        astFactory.target(astFactory.targetLink(href), null);
+        astFactory.target(href, null);
 
     // Maybe parsing title.
     int codeUnit = text.codeUnitAt(offset);
@@ -152,7 +152,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
 
       String title = text.substring(startOffset, offset - 1);
       title = unescapeAndUnreference(title);
-      result.title = astFactory.targetTitle(title);
+      result.title = title;
 
       // Skip whitespace.
       while (offset < length) {

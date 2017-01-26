@@ -138,13 +138,7 @@ abstract class AstFactory {
   TableCell tableCell(Iterable<BlockNode> contents);
 
   /// Creates target for link and image.
-  Target target(TargetLink link, TargetTitle title);
-
-  /// Crates target link.
-  TargetLink targetLink(String link);
-
-  /// Creates target title.
-  TargetTitle targetTitle(String title);
+  Target target(String link, String title);
 
   /// Creates display TeX math.
   TexMathDisplay texMathDisplay(String contents);

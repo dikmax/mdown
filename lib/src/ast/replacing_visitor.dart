@@ -413,20 +413,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   }
 
   @override
-  TargetImpl visitTarget(Target node) {
-    final TargetLink link = node.link.accept<AstNode>(this);
-    final TargetTitle title = node.title?.accept<AstNode>(this);
-
-    return link == node.link && title == node.title
-        ? node
-        : new TargetImpl(link, title);
-  }
-
-  @override
-  TargetLinkImpl visitTargetLink(TargetLink node) => node as TargetLinkImpl;
-
-  @override
-  TargetTitleImpl visitTargetTitle(TargetTitle node) => node as TargetTitleImpl;
+  TargetImpl visitTarget(Target node) => node as TargetImpl;
 
   @override
   TexMathDisplayImpl visitTexMathDisplay(TexMathDisplay node) =>
