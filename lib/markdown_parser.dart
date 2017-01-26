@@ -9,14 +9,14 @@ import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Main parser class.
-class CommonMarkParser {
+class MarkdownParser {
   Options _options;
 
   /// DI container + options.
   ParsersContainer container;
 
   /// Constructor
-  CommonMarkParser(this._options) {
+  MarkdownParser(this._options) {
     container = new ParsersContainer(_options);
   }
 
@@ -45,11 +45,11 @@ class CommonMarkParser {
   }
 
   /// Predefined html writer with CommonMark default settings
-  static CommonMarkParser commonmark = new CommonMarkParser(Options.commonmark);
+  static MarkdownParser commonmark = new MarkdownParser(Options.commonmark);
 
   /// Predefined html writer with strict settings
-  static CommonMarkParser strict = new CommonMarkParser(Options.strict);
+  static MarkdownParser strict = new MarkdownParser(Options.strict);
 
   /// Predefined html writer with default settings
-  static CommonMarkParser defaults = new CommonMarkParser(Options.defaults);
+  static MarkdownParser defaults = new MarkdownParser(Options.defaults);
 }

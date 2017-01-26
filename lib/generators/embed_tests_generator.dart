@@ -22,7 +22,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     final File file = new File(fileName);
     final String md = file.readAsStringSync();
 
-    final Document doc = CommonMarkParser.strict.parse(md);
+    final Document doc = MarkdownParser.strict.parse(md);
     for (BlockNode block in doc.contents) {
       // TODO use visitors
       if (block is CodeBlock) {

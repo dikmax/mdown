@@ -16,33 +16,6 @@ print(markdownToHtml('# Hello world!'));
 
 Project main goal is create processing library for Markdown.
 
-
-Parsing
--------
-
-```dart
-import "package:mdown/mdown.dart";
-
-void main() {
-  Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
-  print(doc); // Document [SetextHeader 1 [Str "Hello", Space, Str "world", Str "!"]]
-}
-```
-
-
-Writing HTML
----------
-
-```dart
-import "package:mdown/mdown.dart";
-
-void main() {
-  Document doc = CommonMarkParser.defaults.parse('Hello world!\n===');
-  String res = HtmlWriter.defaults.write(doc);
-  print(res); // <h1>Hello world!</h1>
-}
-```
-
 Performance
 ===========
 
@@ -63,30 +36,27 @@ Extensions
 ==========
 
 ***mdown*** supports some language extensions. You can specify enabled
-extensions using options parameter in parser and renderer.
+extensions using options parameter in `markdownToHtml`.
 
 ```dart
 Options options = const Options(superscript: true);
-CommonMarkParser parser = new CommonMarkParser(options);
-Document doc = parser.parse('Hello world!\n===');
-HtmlWriter writer = new HtmlWriter(options);
-String res = writer.write(doc);
+String res = markdownToHtml('Hello world!\n===', options);
 ```
 
-There three predefined versions of parsers/writers:
+There three predefined sets of options:
 
-- `strict`: all extensions are disabled
-- `commonmark`: only `smartPunctuation` extension is enabled.
-- `defaults`: `smartPunctuation`, `strikeout`, `subscript`,
+- `Options.strict`: all extensions are disabled
+- `Options.commonmark`: only `smartPunctuation` extension is enabled.
+- `Options.defaults`: `smartPunctuation`, `strikeout`, `subscript`,
   `superscript`, `pipeTables`, `texMathDollars`, `rawTex` are enabled.
 
 To get correspondent parser/writer instance use static getter on class:
 
 ```dart
-CommonMarkParser defaultParser = CommonMarkParser.defaults;
-HtmlWriter strictWriter = HtmlWriter.strict;
+String res = markdownToHtml('Hello world!\n===', Options.strict);
 ```
 
+If second parameter is not provided, `Options.defaults` is used.
 
 Smart punctuation (`Options.smartPunctuation`)
 ----------------------------------------------
@@ -157,12 +127,14 @@ links are supported.
 ![](image.jpg){width="800" height="600"}
 
 [test][ref]
+
+[ref]: http://test.com/ {#id}
 ``````
 
 This will be transformed into:
 
 ``````html
-<p><img src="image.jpg" width="800" height="600"/></p>
+<p><img src="image.jpg" alt="" width="800" height="600" /></p>
 <p><a href="http://test.com/" id="id">test</a></p>
 ``````
 
@@ -309,9 +281,7 @@ Target linkResolver(String normalizedReference, String reference) {
   }
 }
 
-CommonMarkParser parser = new CommonMarkParser(const Options(linkResolver: linkResolver));
-Document doc = parser.parse('Hello world!\n===');
-String res = HtmlWriter.defaults.write(doc);
+String res = markdownToHtml('Hello world!\n===', const Options(linkResolver: linkResolver));
 ```
 
 [CommonMark]: http://commonmark.org/

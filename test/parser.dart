@@ -89,7 +89,7 @@ String _tidy(String html) {
 
 /// Generate md->html tests
 TestFunc generateTestFunc(Options options, [FilterFunc filter = emptyFilter]) {
-  final CommonMarkParser parser = new CommonMarkParser(options);
+  final MarkdownParser parser = new MarkdownParser(options);
   final HtmlWriter writer = new HtmlWriter(options);
 
   return (int num, String mdOrig, String html) {
