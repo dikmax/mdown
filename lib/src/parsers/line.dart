@@ -6,7 +6,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for any line.
-class LineParser extends AbstractParser<String> {
+class LineParser extends AbstractStringParser<String> {
   /// Constructor.
   LineParser(ParsersContainer container) : super(container);
 

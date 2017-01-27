@@ -21,7 +21,7 @@ class _LinkStackItem {
 }
 
 /// Parser for links and images.
-class LinkImageParser extends AbstractParser<InlineNodeImpl> {
+class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
   static final RegExp _hrefRegExp = new RegExp(
       // Link in <>
       r'<(?:[^\\> \t\r\n]|\\.|\\)*>|'

@@ -31,7 +31,7 @@ class InlineParsingVisitor extends ReplacingAstVisitor
 }
 
 /// Parser for whole document.
-class DocumentParser extends AbstractParser<Document> {
+class DocumentParser extends AbstractStringParser<Document> {
   Map<int, List<AbstractParser<BlockNodeImpl>>> _blockParsers;
 
   List<AbstractParser<BlockNodeImpl>> _blockParsersRest;

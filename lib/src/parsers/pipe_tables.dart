@@ -10,7 +10,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/code_units.dart';
 
 /// Parser for pipe tables.
-class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
+class PipeTablesParser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   PipeTablesParser(ParsersContainer container) : super(container);
 

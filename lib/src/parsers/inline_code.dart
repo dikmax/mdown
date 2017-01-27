@@ -9,7 +9,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for code inlines.
-class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
+class InlineCodeParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   InlineCodeParser(ParsersContainer container) : super(container);
 

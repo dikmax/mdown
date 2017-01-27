@@ -7,7 +7,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for empty line.
-class BlanklineParser extends AbstractParser<BlockNodeImpl> {
+class BlanklineParser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   BlanklineParser(ParsersContainer container) : super(container);
 

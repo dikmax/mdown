@@ -8,7 +8,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for inline html.
-class InlineHtmlParser extends AbstractParser<InlineNodeImpl> {
+class InlineHtmlParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   InlineHtmlParser(ParsersContainer container) : super(container);
 

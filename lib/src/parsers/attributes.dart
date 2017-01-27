@@ -8,7 +8,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for extended attiributes.
-class ExtendedAttributesParser extends AbstractParser<Attributes> {
+class ExtendedAttributesParser extends AbstractStringParser<Attributes> {
   /// Constructor.
   ExtendedAttributesParser(ParsersContainer container) : super(container);
 

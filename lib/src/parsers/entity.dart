@@ -9,7 +9,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for entities.
-class EntityParser extends AbstractParser<InlineNodeImpl> {
+class EntityParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   EntityParser(ParsersContainer container) : super(container);
 

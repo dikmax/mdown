@@ -7,7 +7,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for hard line breaks.
-class HardLineBreakParser extends AbstractParser<InlineNodeImpl> {
+class HardLineBreakParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   HardLineBreakParser(ParsersContainer container) : super(container);
 

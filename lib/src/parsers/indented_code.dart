@@ -8,7 +8,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for indented code blocks.
-class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
+class IndentedCodeParser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   IndentedCodeParser(ParsersContainer container) : super(container);
 

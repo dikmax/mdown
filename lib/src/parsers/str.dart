@@ -8,7 +8,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for arbitrary string.
-class StrParser extends AbstractParser<InlineNodeImpl> {
+class StrParser extends AbstractStringParser<InlineNodeImpl> {
   final BitSet _specialChars = new BitSet(256);
 
   /// Constructor.

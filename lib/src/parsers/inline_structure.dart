@@ -128,7 +128,7 @@ final ReplacingAstVisitor _successVisitor =
     new ReplacingAstVisitor(new ReplaceEscapedVisitor(true));
 
 /// Parsing emphasis, strongs, smartquotes, etc.
-class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
+class InlineStructureParser extends AbstractStringParser<InlineNodeImpl> {
   Set<int> _delimitersChars;
 
   Set<int> _intrawordDelimetersChars;

@@ -10,7 +10,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for link reference blocks.
-class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
+class LinkReferenceParser extends AbstractStringParser<LinkReferenceImpl> {
   /// Constructor.
   LinkReferenceParser(ParsersContainer container) : super(container);
 

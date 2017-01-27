@@ -379,7 +379,7 @@ class _OrderedListMarker extends _Marker {
 
 // Parser
 
-class _InnerBlocksParser extends AbstractParser<Iterable<BlockNodeImpl>> {
+class _InnerBlocksParser extends AbstractStringParser<Iterable<BlockNodeImpl>> {
   Map<int, List<AbstractParser<BlockNodeImpl>>> _blockParsers;
 
   List<AbstractParser<BlockNodeImpl>> _blockParsersRest;
@@ -520,7 +520,7 @@ class _InnerBlocksParser extends AbstractParser<Iterable<BlockNodeImpl>> {
 }
 
 /// Parser for blockquotes and lists.
-class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
+class BlockquoteListParser extends AbstractStringParser<BlockNodeImpl> {
   _InnerBlocksParser _innerBlocksParser;
 
   /// Constructor.

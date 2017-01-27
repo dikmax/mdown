@@ -8,7 +8,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parses string between `$...$` and `$$...$$` as TeX Math.
-class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
+class TexMathDollarsParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   TexMathDollarsParser(ParsersContainer container) : super(container);
 

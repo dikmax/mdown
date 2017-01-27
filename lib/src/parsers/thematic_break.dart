@@ -8,7 +8,7 @@ import 'package:mdown/src/parsers/container.dart';
 import 'package:mdown/src/lookup.dart';
 
 /// Parser for thematic break.
-class ThematicBreakParser extends AbstractParser<BlockNodeImpl> {
+class ThematicBreakParser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   ThematicBreakParser(ParsersContainer container) : super(container);
 

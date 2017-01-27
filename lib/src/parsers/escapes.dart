@@ -8,7 +8,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for escaped chars.
-class EscapesParser extends AbstractParser<InlineNodeImpl> {
+class EscapesParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   EscapesParser(ParsersContainer container) : super(container);
 

@@ -6,7 +6,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parses raw TeX blocks.
-class RawTexParser extends AbstractParser<BlockNodeImpl> {
+class RawTexParser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   RawTexParser(ParsersContainer container) : super(container);
 

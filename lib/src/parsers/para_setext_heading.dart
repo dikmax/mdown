@@ -28,7 +28,7 @@ bool fastBlockTest2(
 }
 
 /// Parser for paragraphs and setext headings.
-class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
+class ParaSetextHeadingParser extends AbstractStringParser<BlockNodeImpl> {
   static final RegExp _setextHeadingRegExp =
       new RegExp('^ {0,3}(-+|=+)[ \t]*\$');
 

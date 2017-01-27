@@ -11,7 +11,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for ATX-headings.
-class AtxHeadingParser extends AbstractParser<BlockNodeImpl> {
+class AtxHeadingParser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   AtxHeadingParser(ParsersContainer container) : super(container);
 

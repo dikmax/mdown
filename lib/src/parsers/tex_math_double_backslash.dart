@@ -7,7 +7,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parses TeX Match between `\\(...\\)` and `\\[...\\]`.
-class TexMathDoubleBackslashParser extends AbstractParser<InlineNodeImpl> {
+class TexMathDoubleBackslashParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   TexMathDoubleBackslashParser(ParsersContainer container) : super(container);
 

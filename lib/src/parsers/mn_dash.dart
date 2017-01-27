@@ -9,7 +9,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for mdashes and ndashes.
-class MNDashParser extends AbstractParser<InlineNodeImpl> {
+class MNDashParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   MNDashParser(ParsersContainer container) : super(container);
 

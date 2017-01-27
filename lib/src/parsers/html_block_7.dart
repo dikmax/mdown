@@ -7,7 +7,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for html blocks using rule 7.
-class HtmlBlock7Parser extends AbstractParser<BlockNodeImpl> {
+class HtmlBlock7Parser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   HtmlBlock7Parser(ParsersContainer container) : super(container);
 

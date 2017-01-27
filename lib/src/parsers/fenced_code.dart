@@ -11,7 +11,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for fenced code blocks.
-class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
+class FencedCodeParser extends AbstractStringParser<BlockNodeImpl> {
   /// Constructor.
   FencedCodeParser(ParsersContainer container) : super(container);
 

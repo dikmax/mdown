@@ -6,7 +6,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Autolinks (`<http://example.com/>`) parser
-class AutolinkParser extends AbstractParser<InlineNodeImpl> {
+class AutolinkParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   AutolinkParser(ParsersContainer container) : super(container);
 
