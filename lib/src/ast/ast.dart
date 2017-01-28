@@ -96,8 +96,8 @@ class AutolinkImpl extends LinkImpl implements Autolink {
 
   /// Constructs instance of Autolink.
   AutolinkImpl(this._link, [String text]) : super(null) {
-    _contents = new NodeListImpl<InlineNode>(
-        this, <InlineNode>[astFactory.str(new CodeUnitsList.string(text ?? _link))]);
+    _contents = new NodeListImpl<InlineNode>(this,
+        <InlineNode>[astFactory.str(new CodeUnitsList.string(text ?? _link))]);
   }
 
   @override
@@ -190,7 +190,7 @@ class ClassAttributeImpl extends AttributeImpl implements ClassAttribute {
 
 /// Default Code implementation.
 class CodeImpl extends InlineNodeImpl implements Code {
-  final String _contents;
+  final CodeUnitsList _contents;
 
   final int _fenceSize;
 
@@ -209,7 +209,7 @@ class CodeImpl extends InlineNodeImpl implements Code {
   Iterable<AstNode> get childEntities => <AstNode>[_attributes];
 
   @override
-  String get contents => _contents;
+  CodeUnitsList get contents => _contents;
 
   @override
   int get fenceSize => _fenceSize;
@@ -534,7 +534,8 @@ class LinkReferenceImpl extends BlockNodeImpl implements LinkReference {
 
   /// Constructs LinkReference instance.
   LinkReferenceImpl(this._reference, this._target, this._attributes) {
-    _normalizedReference = normalizeReference(_reference);
+    _normalizedReference =
+        normalizeReference(new CodeUnitsList.string(_reference));
   }
 
   @override

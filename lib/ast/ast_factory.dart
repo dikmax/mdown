@@ -26,7 +26,7 @@ abstract class AstFactory {
   ClassAttribute classAttribute(String className);
 
   /// Creates inline code
-  Code code(String contents, int fenceSize, ExtendedAttributes attributes);
+  Code code(CodeUnitsList contents, int fenceSize, ExtendedAttributes attributes);
 
   /// Creates code block.
   CodeBlock codeBlock(Iterable<String> contents, Attributes attributes);

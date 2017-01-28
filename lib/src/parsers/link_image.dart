@@ -334,7 +334,7 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
             final String referenceString =
                 text.substring(startOffset, endOffset);
             final String normalizedReference =
-                normalizeReference(referenceString);
+                normalizeReference(new CodeUnitsList.string(referenceString));
             Target target;
             ExtendedAttributes attributes;
             if (container.references.containsKey(normalizedReference)) {
@@ -372,7 +372,7 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
           if (referenceMatch != null) {
             final String referenceString = referenceMatch[1];
             final String normalizedReference =
-                normalizeReference(referenceString);
+                normalizeReference(new CodeUnitsList.string(referenceString));
 
             Target target;
             ExtendedAttributes attributes;
@@ -415,7 +415,7 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
       // Found variant
 
       final String referenceString = text.substring(startOffset, endOffset);
-      final String normalizedReference = normalizeReference(referenceString);
+      final String normalizedReference = normalizeReference(new CodeUnitsList.string(referenceString));
 
       // Shortcut reference.
       if (normalizedReference != '') {

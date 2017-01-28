@@ -10,7 +10,7 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for code inlines.
-class InlineCodeParser extends AbstractStringParser<InlineNodeImpl> {
+class InlineCodeParser extends AbstractListParser<InlineNodeImpl> {
   /// Constructor.
   InlineCodeParser(ParsersContainer container) : super(container);
 
@@ -20,18 +20,18 @@ class InlineCodeParser extends AbstractStringParser<InlineNodeImpl> {
   static const int _stateDone = 3;
 
   @override
-  ParseResult<InlineNodeImpl> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parseList(CodeUnitsList list, int offset) {
     int fenceSize = 1;
     offset++;
 
     // Finite Automata
-    final int length = text.length;
+    final int length = list.length;
     int state = _stateOpenFence;
     int codeStartOffset = -1;
     int endFenceSize = 0;
     int codeEndOffset = -1;
     while (offset < length) {
-      final int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = list[offset];
 
       switch (state) {
         case _stateOpenFence:
@@ -76,13 +76,13 @@ class InlineCodeParser extends AbstractStringParser<InlineNodeImpl> {
 
     if (state == _stateDone ||
         (state == _stateCloseFence && endFenceSize == fenceSize)) {
-      final String code =
-          trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
+      final CodeUnitsList code =
+          trimAndReplaceSpaces(list.sublist(codeStartOffset, codeEndOffset));
       ExtendedAttributes attributes;
       if (container.options.inlineCodeAttributes) {
-        if (offset < length && text.codeUnitAt(offset) == openBraceCodeUnit) {
+        if (offset < length && list[offset] == openBraceCodeUnit) {
           final ParseResult<Attributes> attributesResult =
-              container.attributesParser.parse(text, offset);
+              container.attributesParser.parse(list.toString(), offset);
           if (attributesResult.isSuccess) {
             attributes = attributesResult.value;
             offset = attributesResult.offset;

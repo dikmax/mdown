@@ -5,6 +5,7 @@ import 'dart:collection';
 import 'package:mdown/entities.dart';
 import 'package:mdown/src/bit_set.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 
 const String escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 Set<int> _escapableCodesSet;
@@ -131,10 +132,8 @@ String removeIndent(String line, int amount, bool allowLess,
   return null;
 }
 
-String trimAndReplaceSpaces(String s) =>
-    s.trim().replaceAll(_clashSpaceRegExp, ' ');
-
-String normalizeReference(String s) => trimAndReplaceSpaces(s).toUpperCase();
+String normalizeReference(CodeUnitsList s) =>
+    trimAndReplaceSpaces(s).toString().toUpperCase();
 
 final RegExp escapeRegExp =
     new RegExp(r'\\([!"#$%&' + "'" + r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');

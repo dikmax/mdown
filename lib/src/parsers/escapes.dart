@@ -9,15 +9,15 @@ import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for escaped chars.
-class EscapesParser extends AbstractStringParser<InlineNodeImpl> {
+class EscapesParser extends AbstractListParser<InlineNodeImpl> {
   /// Constructor.
   EscapesParser(ParsersContainer container) : super(container);
 
   @override
-  ParseResult<InlineNodeImpl> parse(String text, int offset) {
+  ParseResult<InlineNodeImpl> parseList(CodeUnitsList list, int offset) {
     // At this point we know that text[offset] == '\'
-    if (offset + 1 < text.length) {
-      final int codeUnit = text.codeUnitAt(offset + 1);
+    if (offset + 1 < list.length) {
+      final int codeUnit = list[offset + 1];
       if (escapableCodes.contains(codeUnit)) {
         return new ParseResult<InlineNodeImpl>.success(
             new StrImpl(new CodeUnitsList.single(codeUnit)), offset + 2);

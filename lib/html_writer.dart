@@ -316,7 +316,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
   Null visitCode(Code node) {
     _sb.write("<code");
     node.attributes?.accept(this);
-    _sb..write(">")..write(_htmlEscape(node.contents))..write("</code>");
+    _sb..write(">")..write(_htmlEscapeList(node.contents))..write("</code>");
     return null;
   }
 

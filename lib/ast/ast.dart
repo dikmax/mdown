@@ -144,8 +144,9 @@ abstract class ClassAttribute implements Attribute {
 /// Code inline
 abstract class Code implements InlineNode, WithExtendedAttributes {
   /// Code contents
-  String get contents;
+  CodeUnitsList get contents;
 
+  // TODO remove
   /// Size of fence
   int get fenceSize;
 }

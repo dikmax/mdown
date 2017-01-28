@@ -71,20 +71,22 @@ abstract class CodeUnitsList implements Iterable<int> {
   @override
   Set<int> toSet() => new Set<int>.from(this);
 
-  /**
-   * Remove spaces and tabs from left and right.
-   */
+  /// Remove spaces, tabs and newlines from left and right.
   CodeUnitsList trim();
 
-  /**
-   * Remove spaces and tabs from left.
-   */
+  /// Remove spaces, tabs and newlines from left.
   CodeUnitsList trimLeft();
 
-  /**
-   * Remove spaces and tabs from right.
-   */
+  /// Remove spaces, tabs and newlines from right.
   CodeUnitsList trimRight();
+}
+
+class _CodeUnitsEmptyIterator extends Iterator<int> {
+  @override
+  int get current => null;
+
+  @override
+  bool moveNext() => false;
 }
 
 class _CodeUnitsEmpty extends CodeUnitsList {
@@ -138,8 +140,7 @@ class _CodeUnitsEmpty extends CodeUnitsList {
   bool get isNotEmpty => false;
 
   @override
-  Iterator<int> get iterator =>
-      throw new UnimplementedError('CodeUnitList.iterator');
+  Iterator<int> get iterator => new _CodeUnitsEmptyIterator();
 
   @override
   String join([String separator = ""]) => '';
@@ -208,6 +209,22 @@ class _CodeUnitsEmpty extends CodeUnitsList {
   Iterable<int> where(bool test(int element)) => const <int>[];
 }
 
+class _CodeUnitsSingleIterator extends Iterator<int> {
+  final int codeUnit;
+  int _index = -1;
+
+  _CodeUnitsSingleIterator(this.codeUnit);
+
+  @override
+  int get current => _index == 0 ? codeUnit : null;
+
+  @override
+  bool moveNext() {
+    _index += 1;
+    return _index == 0;
+  }
+}
+
 class _CodeUnitsSingle extends CodeUnitsList {
   final int codeUnit;
 
@@ -271,8 +288,7 @@ class _CodeUnitsSingle extends CodeUnitsList {
   bool get isNotEmpty => true;
 
   @override
-  Iterator<int> get iterator =>
-      throw new UnimplementedError('_CodeUnitsSingle.iterator');
+  Iterator<int> get iterator => new _CodeUnitsSingleIterator(codeUnit);
 
   @override
   String join([String separator = ""]) =>
@@ -316,7 +332,7 @@ class _CodeUnitsSingle extends CodeUnitsList {
   @override
   CodeUnitsList sublist(int start, [int end]) {
     RangeError.checkValidRange(start, end, 1, 'start', 'end');
-    if (start == end ?? 1) {
+    if (start == (end ?? 1)) {
       return new CodeUnitsList.empty();
     }
     return this;
@@ -336,19 +352,22 @@ class _CodeUnitsSingle extends CodeUnitsList {
   String toString() => new String.fromCharCode(codeUnit);
 
   @override
-  CodeUnitsList trim() => codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit
+  CodeUnitsList trim() => codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit ||
+  codeUnit == newLineCodeUnit || codeUnit == carriageReturnCodeUnit
       ? const _CodeUnitsEmpty()
       : this;
 
   @override
   CodeUnitsList trimLeft() =>
-      codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit
+      codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit ||
+          codeUnit == newLineCodeUnit || codeUnit == carriageReturnCodeUnit
           ? const _CodeUnitsEmpty()
           : this;
 
   @override
   CodeUnitsList trimRight() =>
-      codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit
+      codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit ||
+          codeUnit == newLineCodeUnit || codeUnit == carriageReturnCodeUnit
           ? const _CodeUnitsEmpty()
           : this;
 
@@ -708,7 +727,8 @@ class _CodeUnitsSublist extends CodeUnitsList {
 
     while (start < end) {
       final int codeUnit = _list[start];
-      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
+      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit &&
+          codeUnit != newLineCodeUnit && codeUnit != carriageReturnCodeUnit) {
         break;
       }
       start += 1;
@@ -716,7 +736,8 @@ class _CodeUnitsSublist extends CodeUnitsList {
 
     while (end > start) {
       final int codeUnit = _list[end - 1];
-      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
+      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit &&
+          codeUnit != newLineCodeUnit && codeUnit != carriageReturnCodeUnit) {
         break;
       }
       end -= 1;
@@ -739,7 +760,8 @@ class _CodeUnitsSublist extends CodeUnitsList {
     int start = _start;
     while (start < _end) {
       final int codeUnit = _list[start];
-      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
+      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit &&
+          codeUnit != newLineCodeUnit && codeUnit != carriageReturnCodeUnit) {
         break;
       }
       start += 1;
@@ -762,7 +784,8 @@ class _CodeUnitsSublist extends CodeUnitsList {
     int end = _end;
     while (end > _start) {
       final int codeUnit = _list[end - 1];
-      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
+      if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit &&
+          codeUnit != newLineCodeUnit && codeUnit != carriageReturnCodeUnit) {
         break;
       }
       end -= 1;
@@ -1011,7 +1034,7 @@ class _CodeUnitsListConcat extends CodeUnitsList {
       return lists.first;
     }
 
-    List<CodeUnitsList> result =
+    final List<CodeUnitsList> result =
         lists.sublist(0, replaceLast == null ? end : end - 1);
     if (replaceLast != null) {
       result.add(replaceLast);
@@ -1024,3 +1047,33 @@ class _CodeUnitsListConcat extends CodeUnitsList {
     throw new UnimplementedError('_CodeUnitsListConcat.where');
   }
 }
+
+// Additional functions
+
+CodeUnitsList trimAndReplaceSpaces(CodeUnitsList s) {
+  List<int> result = new List<int>(s.length);
+  int length = 0;
+  bool writeSpace = true;
+  for (int codeUnit in s.trim()) {
+    if (codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit ||
+        codeUnit == carriageReturnCodeUnit || codeUnit == newLineCodeUnit) {
+      if (writeSpace) {
+        result[length] = spaceCodeUnit;
+        length += 1;
+        writeSpace = false;
+      }
+    } else {
+      result[length] = codeUnit;
+      length += 1;
+      writeSpace = true;
+    }
+  }
+  if (length == 0) {
+    return new _CodeUnitsEmpty();
+  }
+  if (length == 1) {
+    return new _CodeUnitsSingle(result[0]);
+  }
+  return new _CodeUnitsSublist(result, 0, length);
+}
+

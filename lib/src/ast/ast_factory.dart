@@ -27,7 +27,7 @@ class AstFactoryImpl implements AstFactory {
       new ClassAttributeImpl(className);
 
   @override
-  Code code(String contents, int fenceSize, ExtendedAttributes attributes) =>
+  Code code(CodeUnitsList contents, int fenceSize, ExtendedAttributes attributes) =>
       new CodeImpl(contents, fenceSize, attributes);
 
   @override
