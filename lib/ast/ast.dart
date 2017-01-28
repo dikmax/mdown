@@ -1,6 +1,7 @@
 library mdown.ast.ast;
 
 import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units_list.dart';
 
 /// Column alignment in table.
 enum Alignment {
@@ -326,7 +327,7 @@ abstract class Space implements Whitespace {}
 /// String inline
 abstract class Str implements InlineNode {
   /// String contents
-  String get contents;
+  CodeUnitsList get contents;
 }
 
 /// Strikeout inline

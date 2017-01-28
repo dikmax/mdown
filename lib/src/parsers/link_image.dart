@@ -7,6 +7,7 @@ import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -34,6 +35,11 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
 
   /// Constructor.
   LinkImageParser(ParsersContainer container) : super(container);
+
+  CodeUnitsList _imageOpening = new CodeUnitsList.string('![');
+  CodeUnitsList _linkOpening = new CodeUnitsList.single(openBracketCodeUnit);
+  CodeUnitsList _opening(bool isImage) =>
+      isImage ? _imageOpening : _linkOpening;
 
   @override
   void init() {
@@ -120,8 +126,7 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
       return new ParseResult<Target>.failure();
     }
 
-    final TargetImpl result =
-        astFactory.target(href, null);
+    final TargetImpl result = astFactory.target(href, null);
 
     // Maybe parsing title.
     int codeUnit = text.codeUnitAt(offset);
@@ -281,7 +286,7 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
 
     if (endOffset == -1) {
       return new ParseResult<InlineNodeImpl>.success(
-          new StrImpl(isImage ? '![' : '['), startOffset);
+          new StrImpl(_opening(isImage)), startOffset);
     }
 
     if (isImage || !containsLink) {
@@ -355,7 +360,7 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
                   result, offset + 2);
             }
             return new ParseResult<InlineNodeImpl>.success(
-                new StrImpl(isImage ? '![' : '['), startOffset);
+                new StrImpl(_opening(isImage)), startOffset);
           }
 
           // Full reference parsing
@@ -396,7 +401,7 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
           }
 
           return new ParseResult<InlineNodeImpl>.success(
-              new StrImpl(isImage ? '![' : '['), startOffset);
+              new StrImpl(_opening(isImage)), startOffset);
         }
       }
 
@@ -437,6 +442,6 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
     }
 
     return new ParseResult<InlineNodeImpl>.success(
-        new StrImpl(isImage ? '![' : '['), startOffset);
+        new StrImpl(_opening(isImage)), startOffset);
   }
 }

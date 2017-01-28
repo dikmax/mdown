@@ -9,9 +9,15 @@ import 'package:mdown/src/ast/combining_nodes.dart';
 import 'package:mdown/src/ast/replacing_visitor.dart';
 import 'package:mdown/src/bit_set.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
+
+StrImpl _backslashStr =
+    new StrImpl(new CodeUnitsList.single(backslashCodeUnit));
+StrImpl _caretStr = new StrImpl(new CodeUnitsList.single(caretCodeUnit));
+StrImpl _tildeStr = new StrImpl(new CodeUnitsList.single(tildeCodeUnit));
 
 class _Delim {
   final int charCode;
@@ -102,7 +108,7 @@ class ReplaceEscapedVisitor extends ListReplacingAstVisitor
   List<AstNodeImpl> visitEscapedSpace(EscapedSpace node) {
     final List<InlineNodeImpl> result = <InlineNodeImpl>[];
     if (!_success) {
-      result.add(new StrImpl('\\'));
+      result.add(_backslashStr);
     }
     result.add(new SpaceImpl(1));
 
@@ -113,7 +119,7 @@ class ReplaceEscapedVisitor extends ListReplacingAstVisitor
   List<AstNodeImpl> visitEscapedTab(EscapedTab node) {
     final List<InlineNodeImpl> result = <InlineNodeImpl>[];
     if (!_success) {
-      result.add(new StrImpl('\\'));
+      result.add(_backslashStr);
     }
     result.add(new TabImpl(1));
 
@@ -292,19 +298,19 @@ class InlineStructureParser extends AbstractStringParser<InlineNodeImpl> {
     final Iterable<_Delim> list = skip > 0 ? stack.skip(skip) : stack;
     for (_Delim delim in list) {
       if (delim.count > 0) {
-        final int charCode = delim.charCode;
-        if (charCode == singleQuoteCodeUnit) {
+        final int codeUnit = delim.charCode;
+        if (codeUnit == singleQuoteCodeUnit) {
           result.addAll(new List<InlineNodeImpl>.filled(
               delim.count,
               new SmartCharImpl(delim.matched
                   ? SmartCharType.singleOpenQuote
                   : SmartCharType.apostrophe)));
-        } else if (charCode == doubleQuoteCodeUnit) {
+        } else if (codeUnit == doubleQuoteCodeUnit) {
           result.addAll(new List<InlineNodeImpl>.filled(
               delim.count, new SmartCharImpl(SmartCharType.doubleOpenQuote)));
         } else {
           result.add(
-              new StrImpl(new String.fromCharCode(charCode) * delim.count));
+              new StrImpl(new CodeUnitsList.multiple(codeUnit, delim.count)));
         }
       }
       result.addAll(delim.inlines);
@@ -340,7 +346,7 @@ class InlineStructureParser extends AbstractStringParser<InlineNodeImpl> {
         }
       } else {
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(new String.fromCharCode(charCode) * delim.count),
+            new StrImpl(new CodeUnitsList.multiple(charCode, delim.count)),
             offset);
       }
     }
@@ -411,12 +417,12 @@ class InlineStructureParser extends AbstractStringParser<InlineNodeImpl> {
                             new SubscriptImpl(itemRes)
                           ];
                         } else {
-                          itemRes.insert(0, new StrImpl('~'));
-                          itemRes.add(new StrImpl('~'));
+                          itemRes.insert(0, _tildeStr);
+                          itemRes.add(_tildeStr);
                         }
                       } else {
-                        itemRes.insert(0, new StrImpl('~'));
-                        itemRes.add(new StrImpl('~'));
+                        itemRes.insert(0, _tildeStr);
+                        itemRes.add(_tildeStr);
                       }
                     }
                     break;
@@ -427,8 +433,8 @@ class InlineStructureParser extends AbstractStringParser<InlineNodeImpl> {
                           _successVisitor.visitInlineNodeList(itemRes);
                       itemRes = <InlineNodeImpl>[new SuperscriptImpl(replaced)];
                     } else {
-                      itemRes.insert(0, new StrImpl('^'));
-                      itemRes.add(new StrImpl('^'));
+                      itemRes.insert(0, _caretStr);
+                      itemRes.add(_caretStr);
                     }
                     break;
 
@@ -483,8 +489,8 @@ class InlineStructureParser extends AbstractStringParser<InlineNodeImpl> {
               inlines.addAll(new List<InlineNodeImpl>.filled(delim.count,
                   new SmartCharImpl(SmartCharType.doubleOpenQuote)));
             } else {
-              inlines.add(
-                  new StrImpl(new String.fromCharCode(charCode) * delim.count));
+              inlines.add(new StrImpl(
+                  new CodeUnitsList.multiple(charCode, delim.count)));
             }
           }
         }

@@ -44,6 +44,6 @@ abstract class AbstractListParser<A> extends AbstractParser<A> {
 
   @override
   ParseResult<A> parse(String text, int offset) {
-    return parseList(new CodeUnitsList.fromString(text), offset);
+    return parseList(new CodeUnitsList.string(text), offset);
   }
 }

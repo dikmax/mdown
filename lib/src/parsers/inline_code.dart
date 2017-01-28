@@ -3,6 +3,7 @@ library mdown.src.parsers.inline_code;
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -92,7 +93,8 @@ class InlineCodeParser extends AbstractStringParser<InlineNodeImpl> {
           new CodeImpl(code, fenceSize, attributes), offset);
     }
 
-    return new ParseResult<InlineNodeImpl>.success(new StrImpl('`' * fenceSize),
+    return new ParseResult<InlineNodeImpl>.success(new StrImpl(
+        new CodeUnitsList.multiple(backtickCodeUnit, fenceSize)),
         codeStartOffset == -1 ? offset : codeStartOffset);
   }
 }

@@ -9,16 +9,16 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for ellipsis.
-class EllipsisParser extends AbstractStringParser<InlineNodeImpl> {
+class EllipsisParser extends AbstractListParser<InlineNodeImpl> {
   /// Constructor.
   EllipsisParser(ParsersContainer container) : super(container);
 
   @override
-  ParseResult<InlineNodeImpl> parse(String text, int offset) {
-    if (offset + 2 < text.length &&
-        text.codeUnitAt(offset) == dotCodeUnit &&
-        text.codeUnitAt(offset + 1) == dotCodeUnit &&
-        text.codeUnitAt(offset + 2) == dotCodeUnit) {
+  ParseResult<InlineNodeImpl> parseList(CodeUnitsList list, int offset) {
+    if (offset + 2 < list.length &&
+        list[offset] == dotCodeUnit &&
+        list[offset + 1] == dotCodeUnit &&
+        list[offset + 2] == dotCodeUnit) {
       return new ParseResult<InlineNodeImpl>.success(
           new SmartCharImpl(SmartCharType.ellipsis), offset + 3);
     }

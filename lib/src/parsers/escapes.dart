@@ -2,6 +2,7 @@ library mdown.src.parsers.escapes;
 
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -19,7 +20,7 @@ class EscapesParser extends AbstractStringParser<InlineNodeImpl> {
       final int codeUnit = text.codeUnitAt(offset + 1);
       if (escapableCodes.contains(codeUnit)) {
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(new String.fromCharCode(codeUnit)), offset + 2);
+            new StrImpl(new CodeUnitsList.single(codeUnit)), offset + 2);
       } else if (codeUnit == newLineCodeUnit) {
         return new ParseResult<InlineNodeImpl>.success(
             new HardLineBreakImpl(), offset + 2);

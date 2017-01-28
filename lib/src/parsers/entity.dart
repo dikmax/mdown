@@ -3,6 +3,7 @@ library mdown.src.parsers.entity;
 import 'package:mdown/entities.dart';
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -26,26 +27,26 @@ class EntityParser extends AbstractStringParser<InlineNodeImpl> {
         final String str = htmlEntities[match[3]];
         if (str != null) {
           return new ParseResult<InlineNodeImpl>.success(
-              new StrImpl(str), match.end);
+              new StrImpl(new CodeUnitsList.string(str)), match.end);
         }
       } else {
-        int code;
+        int codeUnit;
         if (match[1] != null) {
-          code = int.parse(match[1], radix: 16, onError: (_) => 0);
+          codeUnit = int.parse(match[1], radix: 16, onError: (_) => 0);
         } else {
-          code = int.parse(match[2], radix: 10, onError: (_) => 0);
+          codeUnit = int.parse(match[2], radix: 10, onError: (_) => 0);
         }
 
-        if (code > 1114111 || code == 0) {
-          code = 0xFFFD;
+        if (codeUnit > 1114111 || codeUnit == 0) {
+          codeUnit = 0xFFFD;
         }
 
-        if (code == nonBreakableSpaceCodeUnit) {
+        if (codeUnit == nonBreakableSpaceCodeUnit) {
           return new ParseResult<InlineNodeImpl>.success(
               new NonBreakableSpaceImpl(1), match.end);
         }
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(new String.fromCharCode(code)), match.end);
+            new StrImpl(new CodeUnitsList.single(codeUnit)), match.end);
       }
     }
 

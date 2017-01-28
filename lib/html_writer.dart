@@ -4,6 +4,7 @@ import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/visitor.dart';
 import 'package:mdown/options.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/ast/enums.dart';
 
 final RegExp _urlEncodeRegExp = new RegExp(r'%[0-9a-fA-F]{2}');
@@ -19,6 +20,11 @@ String _urlEncode(String url) {
       onMatch: (Match m) => m.group(0),
       onNonMatch: (String s) => _htmlEscape(s));
   return result;
+}
+
+String _htmlEscapeList(CodeUnitsList list) {
+  // TODO implement
+  return _htmlEscape(list.toString());
 }
 
 String _htmlEscape(String str) {
@@ -506,7 +512,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitStr(Str node) {
-    _sb.write(_htmlEscape(node.contents));
+    _sb.write(_htmlEscapeList(node.contents));
     return null;
   }
 

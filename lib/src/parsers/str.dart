@@ -3,12 +3,13 @@ library mdown.src.parsers.str;
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/bit_set.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for arbitrary string.
-class StrParser extends AbstractStringParser<InlineNodeImpl> {
+class StrParser extends AbstractListParser<InlineNodeImpl> {
   final BitSet _specialChars = new BitSet(256);
 
   /// Constructor.
@@ -55,43 +56,43 @@ class StrParser extends AbstractStringParser<InlineNodeImpl> {
   }
 
   @override
-  ParseResult<InlineNodeImpl> parse(String text, int offset) {
-    final int char = text.codeUnitAt(offset);
-    final int length = text.length;
-    if (_specialChars.contains(char)) {
+  ParseResult<InlineNodeImpl> parseList(CodeUnitsList list, int offset) {
+    final int codeUnit = list[offset];
+    final int length = list.length;
+    if (_specialChars.contains(codeUnit)) {
       InlineNodeImpl result;
       int endOffset = offset + 1;
-      if (char == spaceCodeUnit) {
+      if (codeUnit == spaceCodeUnit) {
         while (
-            endOffset < length && text.codeUnitAt(endOffset) == spaceCodeUnit) {
+            endOffset < length && list[endOffset] == spaceCodeUnit) {
           endOffset += 1;
         }
         result = new SpaceImpl(endOffset - offset);
-      } else if (char == tabCodeUnit) {
+      } else if (codeUnit == tabCodeUnit) {
         while (
-            endOffset < length && text.codeUnitAt(endOffset) == tabCodeUnit) {
+            endOffset < length && list[endOffset] == tabCodeUnit) {
           endOffset += 1;
         }
         result = new TabImpl(endOffset - offset);
-      } else if (char == nonBreakableSpaceCodeUnit) {
+      } else if (codeUnit == nonBreakableSpaceCodeUnit) {
         while (endOffset < length &&
-            text.codeUnitAt(endOffset) == nonBreakableSpaceCodeUnit) {
+            list[endOffset] == nonBreakableSpaceCodeUnit) {
           endOffset += 1;
         }
         result = new NonBreakableSpaceImpl(endOffset - offset);
       } else {
-        result = new StrImpl(new String.fromCharCode(char));
+        result = new StrImpl(new CodeUnitsList.single(codeUnit));
       }
       return new ParseResult<InlineNodeImpl>.success(result, endOffset);
     } else {
       int endOffset = offset + 1;
       while (endOffset < length &&
-          !_specialChars.contains(text.codeUnitAt(endOffset))) {
+          !_specialChars.contains(list[endOffset])) {
         endOffset += 1;
       }
 
       return new ParseResult<InlineNodeImpl>.success(
-          new StrImpl(text.substring(offset, endOffset)), endOffset);
+          new StrImpl(list.sublist(offset, endOffset)), endOffset);
     }
   }
 }

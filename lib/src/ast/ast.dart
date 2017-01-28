@@ -6,6 +6,7 @@ import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/ast/visitor.dart';
 import 'package:mdown/src/parsers/common.dart';
+import 'package:mdown/src/code_units_list.dart';
 
 class _ContainsLinkVisitor extends RecursiveAstVisitor<Null> {
   bool _result = false;
@@ -96,7 +97,7 @@ class AutolinkImpl extends LinkImpl implements Autolink {
   /// Constructs instance of Autolink.
   AutolinkImpl(this._link, [String text]) : super(null) {
     _contents = new NodeListImpl<InlineNode>(
-        this, <InlineNode>[astFactory.str(text ?? _link)]);
+        this, <InlineNode>[astFactory.str(new CodeUnitsList.string(text ?? _link))]);
   }
 
   @override
@@ -822,7 +823,7 @@ class SpaceImpl extends WhitespaceImpl implements Space {
 
 /// Default Str implementation.
 class StrImpl extends InlineNodeImpl implements Str {
-  final String _contents;
+  final CodeUnitsList _contents;
 
   /// Constructs Str instance.
   StrImpl(this._contents);
@@ -834,7 +835,7 @@ class StrImpl extends InlineNodeImpl implements Str {
   Iterable<AstNode> get childEntities => null;
 
   @override
-  String get contents => _contents;
+  CodeUnitsList get contents => _contents;
 
   @override
   void visitChildren<R>(AstVisitor<R> visitor) {}

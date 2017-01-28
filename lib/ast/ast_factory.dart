@@ -2,6 +2,7 @@ library mdown.ast.ast_factory;
 
 import 'dart:core';
 
+import 'package:mdown/src/code_units_list.dart';
 import 'ast.dart';
 
 /// A collection of factory methods which may be used to create concrete
@@ -113,7 +114,7 @@ abstract class AstFactory {
   Space space(int amount);
 
   /// Creates inline str element.
-  Str str(String contents);
+  Str str(CodeUnitsList contents);
 
   /// Creates strikeout element.
   Strikeout strikeout(Iterable<InlineNode> contents);

@@ -2,6 +2,7 @@ library mdown.src.parsers.tex_math_dollars;
 
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -12,13 +13,17 @@ class TexMathDollarsParser extends AbstractStringParser<InlineNodeImpl> {
   /// Constructor.
   TexMathDollarsParser(ParsersContainer container) : super(container);
 
+  CodeUnitsList _oneDollar = new CodeUnitsList.single(dollarCodeUnit);
+  CodeUnitsList _twoDollars = new CodeUnitsList.string(r'$$');
+
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
     final int length = text.length;
     offset++;
     if (offset >= length) {
       // Just a `$` at the end of string.
-      return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), offset);
+      return new ParseResult<InlineNodeImpl>.success(
+          new StrImpl(_oneDollar), offset);
     }
     final int codeUnit = text.codeUnitAt(offset);
     final bool displayMath = codeUnit == dollarCodeUnit;
@@ -27,7 +32,7 @@ class TexMathDollarsParser extends AbstractStringParser<InlineNodeImpl> {
       if (offset >= length) {
         // Just a `$` at the end of string.
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$$'), offset);
+            new StrImpl(_twoDollars), offset);
       }
     } else {
       if (codeUnit == spaceCodeUnit ||
@@ -36,7 +41,7 @@ class TexMathDollarsParser extends AbstractStringParser<InlineNodeImpl> {
           codeUnit == carriageReturnCodeUnit ||
           (codeUnit >= zeroCodeUnit && codeUnit <= nineCodeUnit)) {
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$'), offset);
+            new StrImpl(new CodeUnitsList.single(dollarCodeUnit)), offset);
       }
     }
 
@@ -66,7 +71,7 @@ class TexMathDollarsParser extends AbstractStringParser<InlineNodeImpl> {
 
     if (!found) {
       return new ParseResult<InlineNodeImpl>.success(
-          new StrImpl(displayMath ? r'$$' : r'$'), offset);
+          new StrImpl(displayMath ? _twoDollars : _oneDollar), offset);
     }
 
     String math = text.substring(offset, endOffset);
@@ -81,7 +86,7 @@ class TexMathDollarsParser extends AbstractStringParser<InlineNodeImpl> {
           lastCodeUnit == tabCodeUnit) {
         // Inline math cannot end with space.
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$'), offset);
+            new StrImpl(_oneDollar), offset);
       }
 
       math = unescapeAndUnreference(math);

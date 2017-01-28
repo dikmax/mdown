@@ -2,6 +2,7 @@ library mdown.src.ast.ast_factory;
 
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/ast_factory.dart';
+import 'package:mdown/src/code_units_list.dart';
 
 import 'ast.dart';
 
@@ -129,7 +130,7 @@ class AstFactoryImpl implements AstFactory {
   Space space(int amount) => new SpaceImpl(amount);
 
   @override
-  Str str(String contents) => new StrImpl(contents);
+  Str str(CodeUnitsList contents) => new StrImpl(contents);
 
   @override
   Strikeout strikeout(Iterable<InlineNode> contents) =>
