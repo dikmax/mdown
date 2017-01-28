@@ -8,6 +8,7 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 
 /// Parser for pipe tables.
 class PipeTablesParser extends AbstractStringParser<BlockNodeImpl> {
@@ -115,7 +116,8 @@ class PipeTablesParser extends AbstractStringParser<BlockNodeImpl> {
     for (int i = start; i < end; i += 1) {
       final String columnString = columns[i];
       result.add(new TableCellImpl(<BlockNodeImpl>[
-        new ParaImpl(new UnparsedInlinesImpl(columnString.trim()))
+        new ParaImpl(new UnparsedInlinesImpl(
+            new CodeUnitsList.string(columnString).trim()))
       ]));
     }
 

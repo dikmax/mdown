@@ -9,6 +9,7 @@ import 'package:mdown/src/ast/enums.dart';
 import 'package:mdown/src/ast/combining_nodes.dart';
 import 'package:mdown/src/ast/unparsed_inlines.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/lookup.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
@@ -68,7 +69,11 @@ class _StackItem {
       final UnparsedInlines inlines = last.contents;
       final ParaImpl para = blocks.first;
       final UnparsedInlines inlines2 = para.contents;
-      inlines.contents += '\n' + inlines2.contents;
+      // TODO CodeUnitsList.concat
+      inlines.contents = inlines.contents.concat(<CodeUnitsList>[
+        new CodeUnitsList.single(newLineCodeUnit),
+        inlines2.contents
+      ]);
     } else {
       block.addToEnd(blocks);
     }
@@ -103,7 +108,10 @@ class _StackItem {
         return false;
       }
       final UnparsedInlines contents = last.contents;
-      contents.contents += '\n' + line;
+      contents.contents = contents.contents.concat(<CodeUnitsList>[
+        new CodeUnitsList.single(newLineCodeUnit),
+        new CodeUnitsList.string(line)
+      ]);
       return true;
     }
 
@@ -733,8 +741,8 @@ class BlockquoteListParser extends AbstractStringParser<BlockNodeImpl> {
 
           // Checking for thematic break;
           final int thematicTestIndent = skipIndent(thematicTest, 0);
-          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent)
-              && thematicTestIndent < stack.last.marker.endIndent) {
+          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent) &&
+              thematicTestIndent < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             stack.flush(stackIndex, result);
             markers = markers.take(markersIndex);
@@ -844,8 +852,8 @@ class BlockquoteListParser extends AbstractStringParser<BlockNodeImpl> {
 
           // Checking for thematic break;
           final int thematicTestIndent = skipIndent(thematicTest, 0);
-          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent)
-              && thematicTestIndent < stack.last.marker.endIndent) {
+          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent) &&
+              thematicTestIndent < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             break;
           }

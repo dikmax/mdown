@@ -2,27 +2,28 @@ library mdown.src.ast.unparsed_inlies;
 
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/src/ast/ast.dart';
+import 'package:mdown/src/code_units_list.dart';
 
 /// Unparsed inlines. Used in parsing process.
 abstract class UnparsedInlines implements BaseInline {
   /// Unparsed inlines contents.
-  String get contents;
+  CodeUnitsList get contents;
 
-  set contents(String contents);
+  set contents(CodeUnitsList contents);
 }
 
 /// Default UnparsedInline implementation.
 class UnparsedInlinesImpl extends InlineNodeImpl implements UnparsedInlines {
-  String _contents;
+  CodeUnitsList _contents;
 
   /// Constructs UnparsedInlines implementation.
   UnparsedInlinesImpl(this._contents);
 
   @override
-  String get contents => _contents;
+  CodeUnitsList get contents => _contents;
 
   @override
-  set contents(String contents) {
+  set contents(CodeUnitsList contents) {
     _contents = contents;
   }
 

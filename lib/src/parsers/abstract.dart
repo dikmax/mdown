@@ -32,8 +32,8 @@ abstract class AbstractStringParser<A> extends AbstractParser<A> {
   AbstractStringParser(ParsersContainer container) : super(container);
 
   @override
-  ParseResult<A> parseList(CodeUnitsList text, int offset) {
-    return parse(new String.fromCharCodes(text), offset);
+  ParseResult<A> parseList(CodeUnitsList list, int offset) {
+    return parse(list.toString(), offset);
   }
 }
 

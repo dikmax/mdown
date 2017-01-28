@@ -7,6 +7,7 @@ import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/ast/combining_nodes.dart';
 import 'package:mdown/src/ast/unparsed_inlines.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/lookup.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
@@ -173,13 +174,15 @@ class ParaSetextHeadingParser extends AbstractStringParser<BlockNodeImpl> {
           }
         }
       }
-      final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
+      final BaseInline inlines =
+          new UnparsedInlinesImpl(new CodeUnitsList.string(contentsString));
 
       return new ParseResult<BlockNodeImpl>.success(
           new HeadingImpl(inlines, level, attr), offset);
     }
 
-    final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
+    final BaseInline inlines =
+        new UnparsedInlinesImpl(new CodeUnitsList.string(contentsString));
 
     if (listAddition != null) {
       final List<BlockNodeImpl> result = <BlockNodeImpl>[new ParaImpl(inlines)];

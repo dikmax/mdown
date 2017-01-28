@@ -5,6 +5,7 @@ import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/ast/unparsed_inlines.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -118,7 +119,7 @@ class AtxHeadingParser extends AbstractStringParser<BlockNodeImpl> {
           }
         }
       }
-      inlines = new UnparsedInlinesImpl(content);
+      inlines = new UnparsedInlinesImpl(new CodeUnitsList.string(content));
     } else {
       inlines = astFactory.baseCompositeInline(<InlineNodeImpl>[]);
     }

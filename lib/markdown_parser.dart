@@ -5,6 +5,7 @@ import 'dart:collection';
 import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/options.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/container.dart';
 
@@ -41,7 +42,8 @@ class MarkdownParser {
     }
     container.references = refs;
 
-    return container.documentParser.parseInlines(inlinesString);
+    return container.documentParser.parseInlines(
+        new CodeUnitsList.string(inlinesString));
   }
 
   /// Predefined html writer with CommonMark default settings

@@ -221,7 +221,8 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
           if (!containsLink && last.bracketLevel == 2) {
             // There could be link
             final List<InlineNodeImpl> labelInlines = container.documentParser
-                .parseInlines(text.substring(last.offset, offset));
+                .parseInlines(
+                    new CodeUnitsList.string(text, last.offset, offset));
 
             if (labelInlines.any((InlineNodeImpl node) => node.containsLink)) {
               containsLink = true;
@@ -301,7 +302,8 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
 
             // Normal link.
             final List<InlineNodeImpl> labelInlines = container.documentParser
-                .parseInlines(text.substring(startOffset, endOffset));
+                .parseInlines(
+                    new CodeUnitsList.string(text, startOffset, endOffset));
 
             // Attributes (linkAttributes extensions).
             offset = targetResult.offset;
@@ -347,7 +349,8 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
 
             if (target != null) {
               final List<InlineNodeImpl> labelInlines = container.documentParser
-                  .parseInlines(text.substring(startOffset, endOffset));
+                  .parseInlines(new CodeUnitsList.string(text)
+                      .sublist(startOffset, endOffset));
               final Reference reference =
                   astFactory.reference(referenceString, target);
 
@@ -385,7 +388,8 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
             }
             if (target != null) {
               final List<InlineNodeImpl> labelInlines = container.documentParser
-                  .parseInlines(text.substring(startOffset, endOffset));
+                  .parseInlines(new CodeUnitsList.string(text)
+                      .sublist(startOffset, endOffset));
 
               final Reference reference =
                   astFactory.reference(referenceString, target);
@@ -429,7 +433,8 @@ class LinkImageParser extends AbstractStringParser<InlineNodeImpl> {
         }
         if (target != null) {
           final List<InlineNodeImpl> labelInlines = container.documentParser
-              .parseInlines(text.substring(startOffset, endOffset));
+              .parseInlines(
+                  new CodeUnitsList.string(text, startOffset, endOffset));
           final Reference reference =
               astFactory.reference(referenceString, target);
 

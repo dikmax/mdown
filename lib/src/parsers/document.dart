@@ -9,6 +9,7 @@ import 'package:mdown/src/ast/combining_nodes.dart';
 import 'package:mdown/src/ast/replacing_visitor.dart';
 import 'package:mdown/src/ast/unparsed_inlines.dart';
 import 'package:mdown/src/code_units.dart';
+import 'package:mdown/src/code_units_list.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -281,20 +282,20 @@ class DocumentParser extends AbstractStringParser<Document> {
   }
 
   /// Parses provided string as inlines.
-  List<InlineNodeImpl> parseInlines(String text) {
+  List<InlineNodeImpl> parseInlines(CodeUnitsList list) {
     int offset = 0;
     final List<InlineNodeImpl> inlines = <InlineNodeImpl>[];
 
-    text = text.trimRight();
-    final int length = text.length;
+    list = list.trimRight();
+    final int length = list.length;
     while (offset < length) {
-      final int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = list[offset];
       if (codeUnit == exclamationMarkCodeUnit &&
           offset + 1 < length &&
-          text.codeUnitAt(offset + 1) == openBracketCodeUnit) {
+          list[offset + 1] == openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
         final ParseResult<InlineNodeImpl> res =
-            container.linkImageParser.parse(text, offset);
+            container.linkImageParser.parseList(list, offset);
         if (res.isSuccess) {
           if (res.value != null) {
             // Link image parser doesn't return combining nodes.
@@ -307,7 +308,7 @@ class DocumentParser extends AbstractStringParser<Document> {
         bool found = false;
         for (AbstractParser<InlineNodeImpl> parser
             in _inlineParsers[codeUnit]) {
-          final ParseResult<InlineNodeImpl> res = parser.parse(text, offset);
+          final ParseResult<InlineNodeImpl> res = parser.parseList(list, offset);
           if (res.isSuccess) {
             if (res.value != null) {
               if (res.value is CombiningInlineNodeImpl) {
@@ -329,7 +330,7 @@ class DocumentParser extends AbstractStringParser<Document> {
       }
 
       final ParseResult<InlineNodeImpl> res =
-          container.strParser.parse(text, offset);
+          container.strParser.parseList(list, offset);
       assert(res.isSuccess);
 
       inlines.add(res.value);
