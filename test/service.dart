@@ -72,7 +72,7 @@ void serviceTests() {
         }
       }
 
-      String res = markdownToHtml(
+      final String res = markdownToHtml(
           'Hello world!\n===', new Options(linkResolver: linkResolver));
       t.expect(res, t.equals("<h1>Hello world!</h1>"));
     });

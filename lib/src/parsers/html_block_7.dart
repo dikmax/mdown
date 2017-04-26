@@ -16,20 +16,22 @@ class HtmlBlock7Parser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
+    int off = offset;
+
     final ParseResult<String> lineRes =
-        container.lineParser.parse(text, offset);
+        container.lineParser.parse(text, off);
     assert(lineRes.isSuccess);
 
     if (_startRegExp.firstMatch(lineRes.value) != null) {
       final StringBuffer result = new StringBuffer(lineRes.value + '\n');
-      offset = lineRes.offset;
+      off = lineRes.offset;
       final int length = text.length;
-      while (offset < length) {
+      while (off < length) {
         final ParseResult<String> lineRes =
-            container.lineParser.parse(text, offset);
+            container.lineParser.parse(text, off);
         assert(lineRes.isSuccess);
 
-        offset = lineRes.offset;
+        off = lineRes.offset;
         result.writeln(lineRes.value);
         if (isOnlyWhitespace(lineRes.value)) {
           break;
@@ -37,7 +39,7 @@ class HtmlBlock7Parser extends AbstractParser<BlockNodeImpl> {
       }
 
       return new ParseResult<BlockNodeImpl>.success(
-          new HtmlRawBlockImpl(result.toString()), offset);
+          new HtmlRawBlockImpl(result.toString()), off);
     }
 
     return new ParseResult<BlockNodeImpl>.failure();

@@ -15,11 +15,12 @@ class MNDashParser extends AbstractParser<InlineNodeImpl> {
 
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final int length = text.length;
     int count = 0;
-    while (offset < length && text.codeUnitAt(offset) == minusCodeUnit) {
+    while (off < length && text.codeUnitAt(off) == minusCodeUnit) {
       count++;
-      offset++;
+      off++;
     }
     if (count > 1) {
       List<InlineNodeImpl> result;
@@ -39,14 +40,15 @@ class MNDashParser extends AbstractParser<InlineNodeImpl> {
         result = new List<InlineNodeImpl>.filled(
             (count - 4) ~/ 3, new SmartCharImpl(SmartCharType.mdash),
             growable: true);
-        result.add(new SmartCharImpl(SmartCharType.ndash));
-        result.add(new SmartCharImpl(SmartCharType.ndash));
+        result
+          ..add(new SmartCharImpl(SmartCharType.ndash))
+          ..add(new SmartCharImpl(SmartCharType.ndash));
       }
       if (result.length == 1) {
-        return new ParseResult<InlineNodeImpl>.success(result.single, offset);
+        return new ParseResult<InlineNodeImpl>.success(result.single, off);
       }
       return new ParseResult<InlineNodeImpl>.success(
-          new CombiningInlineNodeImpl(result), offset);
+          new CombiningInlineNodeImpl(result), off);
     }
 
     return new ParseResult<InlineNodeImpl>.failure();

@@ -285,16 +285,16 @@ class DocumentParser extends AbstractParser<Document> {
     int offset = 0;
     final List<InlineNodeImpl> inlines = <InlineNodeImpl>[];
 
-    text = text.trimRight();
-    final int length = text.length;
+    final String t = text.trimRight();
+    final int length = t.length;
     while (offset < length) {
-      final int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = t.codeUnitAt(offset);
       if (codeUnit == exclamationMarkCodeUnit &&
           offset + 1 < length &&
-          text.codeUnitAt(offset + 1) == openBracketCodeUnit) {
+          t.codeUnitAt(offset + 1) == openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
         final ParseResult<InlineNodeImpl> res =
-            container.linkImageParser.parse(text, offset);
+            container.linkImageParser.parse(t, offset);
         if (res.isSuccess) {
           if (res.value != null) {
             // Link image parser doesn't return combining nodes.
@@ -307,7 +307,7 @@ class DocumentParser extends AbstractParser<Document> {
         bool found = false;
         for (AbstractParser<InlineNodeImpl> parser
             in _inlineParsers[codeUnit]) {
-          final ParseResult<InlineNodeImpl> res = parser.parse(text, offset);
+          final ParseResult<InlineNodeImpl> res = parser.parse(t, offset);
           if (res.isSuccess) {
             if (res.value != null) {
               if (res.value is CombiningInlineNodeImpl) {
@@ -329,7 +329,7 @@ class DocumentParser extends AbstractParser<Document> {
       }
 
       final ParseResult<InlineNodeImpl> res =
-          container.strParser.parse(text, offset);
+          container.strParser.parse(t, offset);
       assert(res.isSuccess);
 
       inlines.add(res.value);

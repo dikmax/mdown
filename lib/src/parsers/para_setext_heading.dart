@@ -64,6 +64,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final List<String> contents = <String>[];
     bool canBeHeading = false;
     int level = 0;
@@ -71,20 +72,20 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
 
     BlockNodeImpl listAddition;
 
-    while (offset < length) {
+    while (off < length) {
       final ParseResult<String> lineResult =
-          container.lineParser.parse(text, offset);
+          container.lineParser.parse(text, off);
       assert(lineResult.isSuccess);
 
       final String line = lineResult.value;
 
       if (!isOnlyWhitespace(line)) {
         if (canBeHeading) {
-          if (fastBlockTest2(text, offset, minusCodeUnit, equalCodeUnit)) {
+          if (fastBlockTest2(text, off, minusCodeUnit, equalCodeUnit)) {
             final Match match = _setextHeadingRegExp.firstMatch(line);
             if (match != null) {
               level = match[1][0] == '=' ? 1 : 2;
-              offset = lineResult.offset;
+              off = lineResult.offset;
               break;
             }
           }
@@ -118,7 +119,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
           // It could be a list.
 
           final ParseResult<BlockNodeImpl> listResult =
-              container.blockquoteListParser.parse(text, offset);
+              container.blockquoteListParser.parse(text, off);
           if (listResult.isSuccess) {
             // It's definitely a list
             BlockNodeImpl firstBlock = listResult.value;
@@ -131,7 +132,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
                   firstBlock.items.first.contents.isNotEmpty) {
                 // It's not empty list, append it in the end and stop parsing.
 
-                offset = listResult.offset;
+                off = listResult.offset;
                 listAddition = listResult.value;
                 break;
               }
@@ -155,7 +156,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
         // List tightness rely on this. So, we exit here.
         break;
       }
-      offset = lineResult.offset;
+      off = lineResult.offset;
     }
 
     String contentsString = contents.join('\n');
@@ -176,7 +177,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
       final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
 
       return new ParseResult<BlockNodeImpl>.success(
-          new HeadingImpl(inlines, level, attr), offset);
+          new HeadingImpl(inlines, level, attr), off);
     }
 
     final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
@@ -190,9 +191,9 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
         result.add(listAddition);
       }
       return new ParseResult<BlockNodeImpl>.success(
-          new CombiningBlockNodeImpl(result), offset);
+          new CombiningBlockNodeImpl(result), off);
     }
     return new ParseResult<BlockNodeImpl>.success(
-        new ParaImpl(inlines), offset);
+        new ParaImpl(inlines), off);
   }
 }

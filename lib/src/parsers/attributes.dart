@@ -14,11 +14,12 @@ class ExtendedAttributesParser extends AbstractParser<Attributes> {
 
   @override
   ParseResult<Attributes> parse(String text, int offset) {
-    if (text.codeUnitAt(offset) != openBraceCodeUnit) {
+    int off = offset;
+    if (text.codeUnitAt(off) != openBraceCodeUnit) {
       return new ParseResult<Attributes>.failure();
     }
 
-    offset++;
+    off++;
 
     final List<Attribute> attributes = <Attribute>[];
 
@@ -29,51 +30,51 @@ class ExtendedAttributesParser extends AbstractParser<Attributes> {
     */
 
     final int length = text.length;
-    while (offset < length) {
-      final int codeUnit = text.codeUnitAt(offset);
+    while (off < length) {
+      final int codeUnit = text.codeUnitAt(off);
 
       if (codeUnit == closeBraceCodeUnit) {
-        offset++;
+        off++;
         break;
       }
 
       switch (codeUnit) {
         case sharpCodeUnit:
           // Id
-          final int endOffset = _parseIdentifier(text, offset);
+          final int endOffset = _parseIdentifier(text, off);
           attributes.add(astFactory
-              .identifierAttribute(text.substring(offset + 1, endOffset)));
-          offset = endOffset;
+              .identifierAttribute(text.substring(off + 1, endOffset)));
+          off = endOffset;
           break;
 
         case dotCodeUnit:
           // Id
-          final int endOffset = _parseIdentifier(text, offset);
+          final int endOffset = _parseIdentifier(text, off);
           attributes.add(
-              astFactory.classAttribute(text.substring(offset + 1, endOffset)));
-          offset = endOffset;
+              astFactory.classAttribute(text.substring(off + 1, endOffset)));
+          off = endOffset;
           break;
 
         case spaceCodeUnit:
         case tabCodeUnit:
         case newLineCodeUnit:
         case carriageReturnCodeUnit:
-          offset++;
+          off++;
           break;
 
         default:
-          final int endOffset = _parseAttribute(text, offset, attributes);
-          if (endOffset == offset) {
+          final int endOffset = _parseAttribute(text, off, attributes);
+          if (endOffset == off) {
             return new ParseResult<Attributes>.failure();
           }
-          offset = endOffset;
+          off = endOffset;
 
           break;
       }
     }
 
     return new ParseResult<Attributes>.success(
-        astFactory.extendedAttributes(attributes), offset);
+        astFactory.extendedAttributes(attributes), off);
   }
 
   int _parseIdentifier(String text, int offset) {

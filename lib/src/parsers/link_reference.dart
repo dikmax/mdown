@@ -46,8 +46,9 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
   static final RegExp _lineEndRegExp = new RegExp(r'[ \t]*(\r\n|\n|\r|$)');
   @override
   ParseResult<LinkReferenceImpl> parse(String text, int offset) {
+    int off = offset;
     final Match labelAndLinkMatch =
-        _labelAndLinkRegExp.matchAsPrefix(text, offset);
+        _labelAndLinkRegExp.matchAsPrefix(text, off);
     if (labelAndLinkMatch == null) {
       return new ParseResult<LinkReferenceImpl>.failure();
     }
@@ -75,15 +76,15 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
     }
     link = unescapeAndUnreference(link);
 
-    offset = labelAndLinkMatch.end;
+    off = labelAndLinkMatch.end;
 
-    Match lineEndMatch = _lineEndRegExp.matchAsPrefix(text, offset);
+    Match lineEndMatch = _lineEndRegExp.matchAsPrefix(text, off);
 
     final int offsetAfterLink = lineEndMatch?.end ?? -1;
 
     // Trying title
 
-    final Match titleMatch = _titleRegExp.matchAsPrefix(text, offset);
+    final Match titleMatch = _titleRegExp.matchAsPrefix(text, off);
 
     String title;
 
@@ -95,9 +96,9 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
         title = unescapeAndUnreference(title);
       }
 
-      offset = titleMatch.end;
+      off = titleMatch.end;
 
-      lineEndMatch = _lineEndRegExp.matchAsPrefix(text, offset);
+      lineEndMatch = _lineEndRegExp.matchAsPrefix(text, off);
 
       offsetAfterTitle = lineEndMatch?.end ?? -1;
     }
@@ -108,21 +109,21 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
     int offsetAfterAttributes = -1;
 
     if (container.options.linkAttributes) {
-      while (offset < text.length) {
-        final int codeUnit = text.codeUnitAt(offset);
+      while (off < text.length) {
+        final int codeUnit = text.codeUnitAt(off);
         if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
           break;
         }
-        offset++;
+        off++;
       }
-      if (offset < text.length &&
-          text.codeUnitAt(offset) == openBraceCodeUnit) {
+      if (off < text.length &&
+          text.codeUnitAt(off) == openBraceCodeUnit) {
         final ParseResult<Attributes> attributesResult =
-            container.attributesParser.parse(text, offset);
+            container.attributesParser.parse(text, off);
         if (attributesResult.isSuccess) {
-          offset = attributesResult.offset;
+          off = attributesResult.offset;
 
-          lineEndMatch = _lineEndRegExp.matchAsPrefix(text, offset);
+          lineEndMatch = _lineEndRegExp.matchAsPrefix(text, off);
 
           offsetAfterAttributes = lineEndMatch?.end ?? -1;
           if (lineEndMatch != null) {

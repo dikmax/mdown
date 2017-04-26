@@ -552,64 +552,66 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
   }
 
   List<_Marker> _getMarkers(String line, [int indent = 0, int offset = 0]) {
+    int ind = indent;
+    int off = offset;
     final List<_Marker> result = <_Marker>[];
 
     final int length = line.length;
-    while (offset < length) {
-      while (offset < length) {
-        final int codeUnit = line.codeUnitAt(offset);
+    while (off < length) {
+      while (off < length) {
+        final int codeUnit = line.codeUnitAt(off);
         if (codeUnit == spaceCodeUnit) {
-          indent++;
-          offset++;
+          ind++;
+          off++;
         } else if (codeUnit == tabCodeUnit) {
-          indent = ((indent >> 2) + 1) << 2; // (indent / 4 + 1) * 4
-          offset++;
+          ind = ((ind >> 2) + 1) << 2; // (indent / 4 + 1) * 4
+          off++;
         } else {
           break;
         }
       }
 
-      if (offset == length) {
+      if (off == length) {
         break;
       }
 
-      final Match match = _markerRegExp.matchAsPrefix(line, offset);
+      final Match match = _markerRegExp.matchAsPrefix(line, off);
       if (match == null) {
         if (result.isNotEmpty) {
           // Blocks indent should counted from first block indent, but
           // only if it not exceeds 3 spaces.
-          if (indent < result.last.endIndent + 4) {
-            result.last.endIndent = indent;
+          if (ind < result.last.endIndent + 4) {
+            result.last.endIndent = ind;
           }
         }
         break; // No Marker found.
       }
 
-      offset = match.end;
-      final int startIndent = indent;
+      off = match.end;
+      final int startIndent = ind;
       final String markerString = match[0];
-      indent += markerString.length;
-      if (offset < length) {
-        final int codeUnit = line.codeUnitAt(offset);
+      ind += markerString.length;
+      if (off < length) {
+        final int codeUnit = line.codeUnitAt(off);
         if (codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit) {
           result.add(_markerFromString(
-              markerString, startIndent, indent + 1, offset + 1));
+              markerString, startIndent, ind + 1, off + 1));
           if (codeUnit == spaceCodeUnit) {
-            indent++;
-            offset++;
+            ind++;
+            off++;
           } else {
-            indent = ((indent >> 2) + 1) << 2; // (indent / 4 + 1) * 4
-            offset++;
+            ind = ((ind >> 2) + 1) << 2; // (indent / 4 + 1) * 4
+            off++;
           }
         } else if (markerString == '>') {
-          result.add(new _BlockquoteMarker(startIndent, indent + 1, offset));
+          result.add(new _BlockquoteMarker(startIndent, ind + 1, off));
         } else {
           // Can't be a marker
           break;
         }
       } else {
         result.add(
-            _markerFromString(markerString, startIndent, indent + 1, offset));
+            _markerFromString(markerString, startIndent, ind + 1, off));
         break;
       }
     }
@@ -619,13 +621,14 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final _Stack stack = new _Stack();
     final List<BlockNodeImpl> result = <BlockNodeImpl>[];
 
     final int length = text.length;
-    while (offset < length) {
+    while (off < length) {
       final ParseResult<String> lineResult =
-          container.lineParser.parse(text, offset);
+          container.lineParser.parse(text, off);
       assert(lineResult.isSuccess);
 
       Iterable<_Marker> markers = _getMarkers(lineResult.value, 0, 0);
@@ -802,8 +805,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
             // Trying to detect lazy line mode by amount of space.
 
             if (isEmpty) {
-              stack.setAfterEmpty(true, blockquoteIndex + 1);
-              stack.addLine('');
+              stack..setAfterEmpty(true, blockquoteIndex + 1)..addLine('');
               break;
             }
 
@@ -908,7 +910,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
           if (stack.length - 1 >= lazyLineMode) {
             // Lazy line was applied
             stack.setAfterEmpty(false);
-            offset = lineResult.offset;
+            off = lineResult.offset;
             continue;
           }
 
@@ -942,12 +944,10 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
         }
 
         // Adding line to stack
-        stack.addLine(lineRest);
-
-        stack.setAfterEmpty(false);
+        stack..addLine(lineRest)..setAfterEmpty(false);
       }
 
-      offset = lineResult.offset;
+      off = lineResult.offset;
     }
 
     if (stack.isNotEmpty) {
@@ -958,10 +958,10 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
       return const ParseResult<BlockNodeImpl>.failure();
     }
     if (result.length == 1) {
-      return new ParseResult<BlockNodeImpl>.success(result.single, offset);
+      return new ParseResult<BlockNodeImpl>.success(result.single, off);
     }
 
     return new ParseResult<BlockNodeImpl>.success(
-        new CombiningBlockNodeImpl(result), offset);
+        new CombiningBlockNodeImpl(result), off);
   }
 }

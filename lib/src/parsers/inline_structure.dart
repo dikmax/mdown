@@ -316,9 +316,10 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
 
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
-    final _Delim delim = _scanDelims(text, offset);
+    int off = offset;
+    final _Delim delim = _scanDelims(text, off);
 
-    offset += delim.count;
+    off += delim.count;
 
     if (!delim.canOpen) {
       final int charCode = delim.charCode;
@@ -328,7 +329,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
               new SmartCharImpl(charCode == singleQuoteCodeUnit
                   ? SmartCharType.apostrophe
                   : SmartCharType.doubleCloseQuote),
-              offset);
+              off);
         } else {
           return new ParseResult<InlineNodeImpl>.success(
               new CombiningInlineNodeImpl(new List<InlineNodeImpl>.filled(
@@ -336,12 +337,11 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                   new SmartCharImpl(charCode == singleQuoteCodeUnit
                       ? SmartCharType.apostrophe
                       : SmartCharType.doubleCloseQuote))),
-              offset);
+              off);
         }
       } else {
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(new String.fromCharCode(charCode) * delim.count),
-            offset);
+            new StrImpl(new String.fromCharCode(charCode) * delim.count), off);
       }
     }
 
@@ -350,8 +350,8 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
     List<InlineNodeImpl> result = <InlineNodeImpl>[];
 
     final int length = text.length;
-    while (offset < length && stack.isNotEmpty) {
-      final _Delim delim = _scanDelims(text, offset);
+    while (off < length && stack.isNotEmpty) {
+      final _Delim delim = _scanDelims(text, off);
       if (delim != null) {
         final int charCode = delim.charCode;
         if (delim.canClose) {
@@ -373,7 +373,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                     ? SmartCharType.singleCloseQuote
                     : SmartCharType.doubleCloseQuote)));
 
-            offset += delim.count;
+            off += delim.count;
             delim.count = 0;
           } else {
             // Going down through stack, and searching delimiter to close.
@@ -411,12 +411,14 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                             new SubscriptImpl(itemRes)
                           ];
                         } else {
-                          itemRes.insert(0, new StrImpl('~'));
-                          itemRes.add(new StrImpl('~'));
+                          itemRes
+                            ..insert(0, new StrImpl('~'))
+                            ..add(new StrImpl('~'));
                         }
                       } else {
-                        itemRes.insert(0, new StrImpl('~'));
-                        itemRes.add(new StrImpl('~'));
+                        itemRes
+                          ..insert(0, new StrImpl('~'))
+                          ..add(new StrImpl('~'));
                       }
                     }
                     break;
@@ -427,8 +429,9 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                           _successVisitor.visitInlineNodeList(itemRes);
                       itemRes = <InlineNodeImpl>[new SuperscriptImpl(replaced)];
                     } else {
-                      itemRes.insert(0, new StrImpl('^'));
-                      itemRes.add(new StrImpl('^'));
+                      itemRes
+                        ..insert(0, new StrImpl('^'))
+                        ..add(new StrImpl('^'));
                     }
                     break;
 
@@ -446,9 +449,9 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                     }
                     break;
                 }
-                openDelim.inlines = itemRes;
-
-                openDelim.count -= countCloses;
+                openDelim
+                  ..inlines = itemRes
+                  ..count -= countCloses;
                 if (openDelim.count == 0) {
                   final List<InlineNodeImpl> itemRes =
                       _buildStack(stack, stack.length - 1);
@@ -459,7 +462,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                   }
                 }
 
-                offset += countCloses;
+                off += countCloses;
                 delim.count -= countCloses;
               }
               openDelimIndex--;
@@ -489,11 +492,11 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
           }
         }
 
-        offset += delim.count;
+        off += delim.count;
         continue;
       }
 
-      final int codeUnit = text.codeUnitAt(offset);
+      final int codeUnit = text.codeUnitAt(off);
 
       // Special processing for subscript and superscript.
       // They cannot contain unescaped spaces.
@@ -504,13 +507,13 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
             delim.containsSpace = true;
           }
         } else if (codeUnit == backslashCodeUnit) {
-          if (offset + 1 < length) {
-            final int codeUnit2 = text.codeUnitAt(offset + 1);
+          if (off + 1 < length) {
+            final int codeUnit2 = text.codeUnitAt(off + 1);
             if (codeUnit2 == spaceCodeUnit || codeUnit2 == tabCodeUnit) {
               stack.last.inlines.add(codeUnit2 == spaceCodeUnit
                   ? new EscapedSpace()
                   : new EscapedTab());
-              offset += 2;
+              off += 2;
               continue;
             }
           }
@@ -518,21 +521,21 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
       }
 
       if (codeUnit == exclamationMarkCodeUnit &&
-          offset + 1 < length &&
-          text.codeUnitAt(offset + 1) == openBracketCodeUnit) {
+          off + 1 < length &&
+          text.codeUnitAt(off + 1) == openBracketCodeUnit) {
         // Exclamation mark without bracket means nothing.
         final ParseResult<InlineNodeImpl> res =
-            container.linkImageParser.parse(text, offset);
+            container.linkImageParser.parse(text, off);
         if (res.isSuccess) {
           stack.last.inlines.add(res.value);
-          offset = res.offset;
+          off = res.offset;
           continue;
         }
       } else if (_inlineParsers.containsKey(codeUnit)) {
         bool found = false;
         for (AbstractParser<InlineNodeImpl> parser
             in _inlineParsers[codeUnit]) {
-          final ParseResult<InlineNodeImpl> res = parser.parse(text, offset);
+          final ParseResult<InlineNodeImpl> res = parser.parse(text, off);
           if (res.isSuccess) {
             if (res.value != null) {
               if (res.value is CombiningInlineNodeImpl) {
@@ -542,7 +545,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                 stack.last.inlines.add(res.value);
               }
             }
-            offset = res.offset;
+            off = res.offset;
             found = true;
             break;
           }
@@ -554,11 +557,11 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
       }
 
       final ParseResult<InlineNodeImpl> res =
-          container.strParser.parse(text, offset);
+          container.strParser.parse(text, off);
       assert(res.isSuccess);
 
       stack.last.inlines.add(res.value);
-      offset = res.offset;
+      off = res.offset;
     }
 
     result.addAll(_buildStack(stack, 0));
@@ -569,11 +572,11 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
     }
 
     if (result.isEmpty) {
-      return new ParseResult<InlineNodeImpl>.success(null, offset);
+      return new ParseResult<InlineNodeImpl>.success(null, off);
     } else if (result.length == 1) {
-      return new ParseResult<InlineNodeImpl>.success(result.single, offset);
+      return new ParseResult<InlineNodeImpl>.success(result.single, off);
     }
     return new ParseResult<InlineNodeImpl>.success(
-        new CombiningInlineNodeImpl(result), offset);
+        new CombiningInlineNodeImpl(result), off);
   }
 }

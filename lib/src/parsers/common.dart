@@ -112,21 +112,23 @@ final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
 
 String removeIndent(String line, int amount, bool allowLess,
     [int startIndent = 0]) {
+  String result = line;
   int offset = 0;
-  while (offset < amount && offset < line.length) {
-    final int code = line.codeUnitAt(offset);
+  int indent = startIndent;
+  while (offset < amount && offset < result.length) {
+    final int code = result.codeUnitAt(offset);
     if (code == tabCodeUnit) {
-      line = line.replaceFirst(
-          '\t', ' ' * (4 - (startIndent & 3))); // (4 - startIndent % 4)
+      result = result.replaceFirst(
+          '\t', ' ' * (4 - (indent & 3))); // (4 - startIndent % 4)
     } else if (code == spaceCodeUnit) {
       ++offset;
-      ++startIndent;
+      ++indent;
     } else {
       break;
     }
   }
   if (offset >= amount || allowLess) {
-    return line.substring(offset);
+    return result.substring(offset);
   }
   return null;
 }
@@ -188,42 +190,44 @@ String _unescapeUnreferenceReplacement(Match match) {
 }
 
 int skipIndent(String text, int offset) {
+  int off = offset;
+
   // First char
-  int codeUnit = text.codeUnitAt(offset);
+  int codeUnit = text.codeUnitAt(off);
   if (codeUnit != spaceCodeUnit) {
-    return offset;
+    return off;
   }
 
   final int length = text.length;
-  offset++;
-  if (offset == length) {
+  off++;
+  if (off == length) {
     return -1;
   }
 
   // Second char
-  codeUnit = text.codeUnitAt(offset);
+  codeUnit = text.codeUnitAt(off);
   if (codeUnit != spaceCodeUnit) {
-    return offset;
+    return off;
   }
 
-  offset++;
-  if (offset == length) {
+  off++;
+  if (off == length) {
     return -1;
   }
 
   // Third char
-  codeUnit = text.codeUnitAt(offset);
+  codeUnit = text.codeUnitAt(off);
   if (codeUnit != spaceCodeUnit) {
-    return offset;
+    return off;
   }
 
-  offset++;
-  if (offset == length) {
+  off++;
+  if (off == length) {
     return -1;
   }
 
   // Fourth char
-  return offset;
+  return off;
 }
 
 int getBlockFirstChar(String text, int offset) {

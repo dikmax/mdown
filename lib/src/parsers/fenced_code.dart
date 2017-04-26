@@ -4,7 +4,6 @@ import 'package:mdown/ast/ast.dart';
 import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/src/ast/ast.dart';
 import 'package:mdown/src/code_units.dart';
-import 'package:mdown/src/lookup.dart';
 import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
@@ -20,7 +19,9 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
-    ParseResult<String> lineResult = container.lineParser.parse(text, offset);
+    int off = offset;
+
+    ParseResult<String> lineResult = container.lineParser.parse(text, off);
     assert(lineResult.isSuccess);
 
     final Match startRes = _fencedCodeStartTest.firstMatch(lineResult.value);
@@ -37,14 +38,14 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
 
     final List<String> code = <String>[];
 
-    offset = lineResult.offset;
+    off = lineResult.offset;
     final int length = text.length;
-    while (offset < length) {
-      lineResult = container.lineParser.parse(text, offset);
+    while (off < length) {
+      lineResult = container.lineParser.parse(text, off);
       assert(lineResult.isSuccess);
 
       String line = lineResult.value;
-      offset = lineResult.offset;
+      off = lineResult.offset;
 
       final Match endResult = endTest.firstMatch(line);
       if (endResult != null) {
@@ -70,23 +71,25 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
       attributes = attributes ?? _parseInfoString(infoString);
     }
     final CodeBlockImpl codeBlock = new CodeBlockImpl(code, attributes);
-    return new ParseResult<BlockNodeImpl>.success(codeBlock, offset);
+    return new ParseResult<BlockNodeImpl>.success(codeBlock, off);
   }
 
   InfoString _parseInfoString(String infoString) {
+    String infoStringText = infoString;
+
     int infoStringEnd = 0;
-    final int infoStringLength = infoString.length;
+    final int infoStringLength = infoStringText.length;
     while (infoStringEnd < infoStringLength) {
-      final int codeUnit = infoString.codeUnitAt(infoStringEnd);
+      final int codeUnit = infoStringText.codeUnitAt(infoStringEnd);
       if (codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit) {
         break;
       }
       infoStringEnd++;
     }
     if (infoStringEnd != infoStringLength) {
-      infoString = infoString.substring(0, infoStringEnd);
+      infoStringText = infoStringText.substring(0, infoStringEnd);
     }
-    infoString = unescapeAndUnreference(infoString);
-    return astFactory.infoString(infoString);
+    infoStringText = unescapeAndUnreference(infoStringText);
+    return astFactory.infoString(infoStringText);
   }
 }

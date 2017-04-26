@@ -345,9 +345,10 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitExtendedAttributes(ExtendedAttributes node) {
-    _sb.write(node.accept(_idAttributesVisitor));
-    _sb.write(node.accept(_classAttributesVisitor));
-    _sb.write(node.accept(_keyValueAttributesVisitor));
+    _sb
+      ..write(node.accept(_idAttributesVisitor))
+      ..write(node.accept(_classAttributesVisitor))
+      ..write(node.accept(_keyValueAttributesVisitor));
     return null;
   }
 
@@ -381,9 +382,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitImage(Image node) {
-    _sb.write('<img src="');
-    _sb.write(_urlEncode(node?.link));
-    _sb.write('" alt="');
+    _sb..write('<img src="')..write(_urlEncode(node?.link))..write('" alt="');
 
     final _ImageLabelVisitor innerVisitor = new _ImageLabelVisitor();
     node.contents.accept(innerVisitor);

@@ -65,7 +65,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
 
     final String filePath = path.join(sourcePathDir, annotation.path);
 
-    if (!await FileSystemEntity.isFile(filePath)) {
+    if (!FileSystemEntity.isFileSync(filePath)) {
       throw new Exception('Not a file! - $filePath');
     }
 

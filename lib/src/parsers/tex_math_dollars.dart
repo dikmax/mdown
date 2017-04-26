@@ -14,20 +14,21 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
 
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final int length = text.length;
-    offset++;
-    if (offset >= length) {
+    off++;
+    if (off >= length) {
       // Just a `$` at the end of string.
-      return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), offset);
+      return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), off);
     }
-    final int codeUnit = text.codeUnitAt(offset);
+    final int codeUnit = text.codeUnitAt(off);
     final bool displayMath = codeUnit == dollarCodeUnit;
     if (displayMath) {
-      offset += 1;
-      if (offset >= length) {
+      off += 1;
+      if (off >= length) {
         // Just a `$` at the end of string.
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$$'), offset);
+            new StrImpl(r'$$'), off);
       }
     } else {
       if (codeUnit == spaceCodeUnit ||
@@ -36,11 +37,11 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
           codeUnit == carriageReturnCodeUnit ||
           (codeUnit >= zeroCodeUnit && codeUnit <= nineCodeUnit)) {
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$'), offset);
+            new StrImpl(r'$'), off);
       }
     }
 
-    int endOffset = offset;
+    int endOffset = off;
     bool found = false;
     while (endOffset < length) {
       final int codeUnit = text.codeUnitAt(endOffset);
@@ -66,10 +67,10 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
 
     if (!found) {
       return new ParseResult<InlineNodeImpl>.success(
-          new StrImpl(displayMath ? r'$$' : r'$'), offset);
+          new StrImpl(displayMath ? r'$$' : r'$'), off);
     }
 
-    String math = text.substring(offset, endOffset);
+    String math = text.substring(off, endOffset);
     if (displayMath) {
       return new ParseResult<InlineNodeImpl>.success(
           new TexMathDisplayImpl(math), endOffset + 2);
@@ -81,7 +82,7 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
           lastCodeUnit == tabCodeUnit) {
         // Inline math cannot end with space.
         return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$'), offset);
+            new StrImpl(r'$'), off);
       }
 
       math = unescapeAndUnreference(math);

@@ -16,12 +16,13 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final ParseResult<String> firstLineResult =
-        container.lineParser.parse(text, offset);
+        container.lineParser.parse(text, off);
     assert(firstLineResult.isSuccess);
     final String firstLine = firstLineResult.value;
 
-    offset = firstLineResult.offset;
+    off = firstLineResult.offset;
     final int length = text.length;
 
     List<Alignment> alignment;
@@ -39,7 +40,7 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
     if (alignment == null) {
       // First line is probably a header.
       final ParseResult<String> secondLineResult =
-          container.lineParser.parse(text, offset);
+          container.lineParser.parse(text, off);
       if (!secondLineResult.isSuccess) {
         return new ParseResult<BlockNodeImpl>.failure();
       }
@@ -55,7 +56,7 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
         return new ParseResult<BlockNodeImpl>.failure();
       }
 
-      offset = secondLineResult.offset;
+      off = secondLineResult.offset;
       final List<String> secondLineColumns = _splitToColumns(secondLine);
       alignment = _getAlignment(secondLineColumns);
       if (alignment == null) {
@@ -72,9 +73,9 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
 
     final List<List<TableCell>> cells = <List<TableCell>>[];
     // Parsing cells
-    while (offset < length) {
+    while (off < length) {
       final ParseResult<String> lineResult =
-          container.lineParser.parse(text, offset);
+          container.lineParser.parse(text, off);
       if (!lineResult.isSuccess) {
         break;
       }
@@ -90,11 +91,11 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
       }
 
       cells.add(row);
-      offset = lineResult.offset;
+      off = lineResult.offset;
     }
 
     return new ParseResult<BlockNodeImpl>.success(
-        new TableImpl(alignment, null, headers, cells), offset);
+        new TableImpl(alignment, null, headers, cells), off);
   }
 
   List<TableCellImpl> _parseRow(List<String> columns) {

@@ -40,7 +40,8 @@ class ThematicBreakLookup extends Lookup {
 
   @override
   bool isFound(String text, int offset) {
-    final int mainCodeUnit = text.codeUnitAt(offset);
+    int off = offset;
+    final int mainCodeUnit = text.codeUnitAt(off);
     if (mainCodeUnit != starCodeUnit &&
         mainCodeUnit != minusCodeUnit &&
         mainCodeUnit != underscoreCodeUnit) {
@@ -48,11 +49,11 @@ class ThematicBreakLookup extends Lookup {
     }
 
     final int length = text.length;
-    offset += 1;
+    off += 1;
     int count = 1;
 
-    while (offset < length) {
-      final int codeUnit = text.codeUnitAt(offset);
+    while (off < length) {
+      final int codeUnit = text.codeUnitAt(off);
 
       if (codeUnit == mainCodeUnit) {
         ++count;
@@ -63,7 +64,7 @@ class ThematicBreakLookup extends Lookup {
         return false;
       }
 
-      offset += 1;
+      off += 1;
     }
 
     return count >= 3;
@@ -84,70 +85,71 @@ class HtmlBlock1Lookup extends Lookup {
 
   @override
   bool isFound(String text, int offset) {
+    int off = offset;
     final int length = text.length;
 
-    if (offset + 4 > length || text.codeUnitAt(offset) != lessThanCodeUnit) {
+    if (off + 4 > length || text.codeUnitAt(off) != lessThanCodeUnit) {
       // Check for minimal length `<pre`
       return false;
     }
 
-    offset += 1;
+    off += 1;
 
-    int codeUnit = text.codeUnitAt(offset);
+    int codeUnit = text.codeUnitAt(off);
     if (codeUnit == smallPCharCode || codeUnit == bigPCharCode) {
       // Could be <pre
-      codeUnit = text.codeUnitAt(offset + 1);
+      codeUnit = text.codeUnitAt(off + 1);
       if (codeUnit != smallRCharCode && codeUnit != bigRCharCode) {
         return false;
       }
-      codeUnit = text.codeUnitAt(offset + 2);
+      codeUnit = text.codeUnitAt(off + 2);
       if (codeUnit != smallECharCode && codeUnit != bigECharCode) {
         return false;
       }
-      offset = offset + 3;
+      off = off + 3;
     } else if (codeUnit == smallSCharCode || codeUnit == bigSCharCode) {
       // Could be <script or <style
-      codeUnit = text.codeUnitAt(offset + 1);
+      codeUnit = text.codeUnitAt(off + 1);
       if (codeUnit == smallCCharCode || codeUnit == bigCCharCode) {
         // Could be <script
-        if (offset + 6 > length) {
+        if (off + 6 > length) {
           return false;
         }
-        codeUnit = text.codeUnitAt(offset + 2);
+        codeUnit = text.codeUnitAt(off + 2);
         if (codeUnit != smallRCharCode && codeUnit != bigRCharCode) {
           return false;
         }
-        codeUnit = text.codeUnitAt(offset + 3);
+        codeUnit = text.codeUnitAt(off + 3);
         if (codeUnit != smallICharCode && codeUnit != bigICharCode) {
           return false;
         }
-        codeUnit = text.codeUnitAt(offset + 4);
+        codeUnit = text.codeUnitAt(off + 4);
         if (codeUnit != smallPCharCode && codeUnit != bigPCharCode) {
           return false;
         }
-        codeUnit = text.codeUnitAt(offset + 5);
+        codeUnit = text.codeUnitAt(off + 5);
         if (codeUnit != smallTCharCode && codeUnit != bigTCharCode) {
           return false;
         }
-        offset = offset + 6;
+        off = off + 6;
       } else if (codeUnit == smallTCharCode || codeUnit == bigTCharCode) {
         // Could be <style
-        if (offset + 5 > length) {
+        if (off + 5 > length) {
           return false;
         }
-        codeUnit = text.codeUnitAt(offset + 2);
+        codeUnit = text.codeUnitAt(off + 2);
         if (codeUnit != smallYCharCode && codeUnit != bigYCharCode) {
           return false;
         }
-        codeUnit = text.codeUnitAt(offset + 3);
+        codeUnit = text.codeUnitAt(off + 3);
         if (codeUnit != smallLCharCode && codeUnit != bigLCharCode) {
           return false;
         }
-        codeUnit = text.codeUnitAt(offset + 4);
+        codeUnit = text.codeUnitAt(off + 4);
         if (codeUnit != smallECharCode && codeUnit != bigECharCode) {
           return false;
         }
-        offset = offset + 5;
+        off = off + 5;
       } else {
         return false;
       }
@@ -156,11 +158,11 @@ class HtmlBlock1Lookup extends Lookup {
       return false;
     }
 
-    if (offset == length) {
+    if (off == length) {
       return true;
     }
 
-    codeUnit = text.codeUnitAt(offset);
+    codeUnit = text.codeUnitAt(off);
 
     return codeUnit == greaterThanCodeUnit ||
         codeUnit == spaceCodeUnit ||

@@ -19,15 +19,17 @@ class HardLineBreakParser extends AbstractParser<InlineNodeImpl> {
 
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
+    int off = offset;
+
     // Finite Automata
-    final int firstCodeUnit = text.codeUnitAt(offset);
-    offset++;
+    final int firstCodeUnit = text.codeUnitAt(off);
+    off++;
     final int length = text.length;
     int state = firstCodeUnit == spaceCodeUnit
         ? _stateFirstOpenSpace
         : _stateOtherOpenChars;
-    while (offset < length) {
-      final int codeUnit = text.codeUnitAt(offset);
+    while (off < length) {
+      final int codeUnit = text.codeUnitAt(off);
 
       switch (state) {
         case _stateFirstOpenSpace:
@@ -54,7 +56,7 @@ class HardLineBreakParser extends AbstractParser<InlineNodeImpl> {
 
         case _stateCarriageReturn:
           if (codeUnit != newLineCodeUnit) {
-            offset--;
+            off--;
           }
 
           state = _stateDone;
@@ -62,16 +64,16 @@ class HardLineBreakParser extends AbstractParser<InlineNodeImpl> {
       }
 
       if (state == _stateDone || state == _stateFailure) {
-        offset++;
+        off++;
         break;
       }
 
-      offset++;
+      off++;
     }
 
     if (state == _stateDone || state == _stateCarriageReturn) {
       return new ParseResult<InlineNodeImpl>.success(
-          new HardLineBreakImpl(), offset);
+          new HardLineBreakImpl(), off);
     } else {
       return new ParseResult<InlineNodeImpl>.failure();
     }

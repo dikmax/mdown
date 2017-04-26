@@ -20,8 +20,9 @@ class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
 
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
+    int off = offset;
     int fenceSize = 1;
-    offset++;
+    off++;
 
     // Finite Automata
     final int length = text.length;
@@ -29,8 +30,8 @@ class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
     int codeStartOffset = -1;
     int endFenceSize = 0;
     int codeEndOffset = -1;
-    while (offset < length) {
-      final int codeUnit = text.codeUnitAt(offset);
+    while (off < length) {
+      final int codeUnit = text.codeUnitAt(off);
 
       switch (state) {
         case _stateOpenFence:
@@ -39,14 +40,14 @@ class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
             fenceSize++;
           } else {
             state = _stateCode;
-            codeStartOffset = offset;
+            codeStartOffset = off;
           }
           break;
 
         case _stateCode:
           // Parsing code
           if (codeUnit == backtickCodeUnit) {
-            codeEndOffset = offset;
+            codeEndOffset = off;
             endFenceSize = 1;
             state = _stateCloseFence;
           }
@@ -70,7 +71,7 @@ class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
         break;
       }
 
-      offset++;
+      off++;
     }
 
     if (state == _stateDone ||
@@ -79,20 +80,20 @@ class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
           trimAndReplaceSpaces(text.substring(codeStartOffset, codeEndOffset));
       ExtendedAttributes attributes;
       if (container.options.inlineCodeAttributes) {
-        if (offset < length && text.codeUnitAt(offset) == openBraceCodeUnit) {
+        if (off < length && text.codeUnitAt(off) == openBraceCodeUnit) {
           final ParseResult<Attributes> attributesResult =
-              container.attributesParser.parse(text, offset);
+              container.attributesParser.parse(text, off);
           if (attributesResult.isSuccess) {
             attributes = attributesResult.value;
-            offset = attributesResult.offset;
+            off = attributesResult.offset;
           }
         }
       }
       return new ParseResult<InlineNodeImpl>.success(
-          new CodeImpl(code, fenceSize, attributes), offset);
+          new CodeImpl(code, fenceSize, attributes), off);
     }
 
     return new ParseResult<InlineNodeImpl>.success(new StrImpl('`' * fenceSize),
-        codeStartOffset == -1 ? offset : codeStartOffset);
+        codeStartOffset == -1 ? off : codeStartOffset);
   }
 }

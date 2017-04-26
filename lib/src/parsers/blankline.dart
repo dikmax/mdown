@@ -13,13 +13,14 @@ class BlanklineParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final ParseResult<String> lineResult =
-        container.lineParser.parse(text, offset);
+        container.lineParser.parse(text, off);
     assert(lineResult.isSuccess);
 
     final String line = lineResult.value;
 
-    offset = lineResult.offset;
+    off = lineResult.offset;
     if (isOnlyWhitespace(line)) {
       return new ParseResult<BlockNodeImpl>.success(null, lineResult.offset);
     }

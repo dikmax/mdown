@@ -290,46 +290,45 @@ Set<int> _punctuationSet;
 Set<int> get punctuation {
   if (_punctuationSet == null) {
     _punctuationSet = new BitSet(0x3000);
-    _punctuationSet.addAll(<int>[
-      backslashCodeUnit,
-      singleQuoteCodeUnit,
-      exclamationMarkCodeUnit,
-      doubleQuoteCodeUnit,
-      sharpCodeUnit,
-      dollarCodeUnit,
-      percentCodeUnit,
-      ampersandCodeUnit,
-      openParenCodeUnit,
-      closeParenCodeUnit,
-      starCodeUnit,
-      plusCodeUnit,
-      commaCodeUnit,
-      minusCodeUnit,
-      dotCodeUnit,
-      slashCodeUnit,
-      colonCodeUnit,
-      semicolonCodeUnit,
-      lessThanCodeUnit,
-      equalCodeUnit,
-      greaterThanCodeUnit,
-      questionMarkCodeUnit,
-      atSignCodeUnit,
-      openBracketCodeUnit,
-      closeBracketCodeUnit,
-      caretCodeUnit,
-      underscoreCodeUnit,
-      backtickCodeUnit,
-      openBraceCodeUnit,
-      verticalBarCodeUnit,
-      closeBraceCodeUnit,
-      tildeCodeUnit
-    ]);
-    _punctuationSet.addAll(new List<int>.generate(
-        0x70, (int index) => 0x2000 + index,
-        growable: false));
-    _punctuationSet.addAll(new List<int>.generate(
-        0x80, (int index) => 0x2e00 + index,
-        growable: false));
+    _punctuationSet
+      ..addAll(<int>[
+        backslashCodeUnit,
+        singleQuoteCodeUnit,
+        exclamationMarkCodeUnit,
+        doubleQuoteCodeUnit,
+        sharpCodeUnit,
+        dollarCodeUnit,
+        percentCodeUnit,
+        ampersandCodeUnit,
+        openParenCodeUnit,
+        closeParenCodeUnit,
+        starCodeUnit,
+        plusCodeUnit,
+        commaCodeUnit,
+        minusCodeUnit,
+        dotCodeUnit,
+        slashCodeUnit,
+        colonCodeUnit,
+        semicolonCodeUnit,
+        lessThanCodeUnit,
+        equalCodeUnit,
+        greaterThanCodeUnit,
+        questionMarkCodeUnit,
+        atSignCodeUnit,
+        openBracketCodeUnit,
+        closeBracketCodeUnit,
+        caretCodeUnit,
+        underscoreCodeUnit,
+        backtickCodeUnit,
+        openBraceCodeUnit,
+        verticalBarCodeUnit,
+        closeBraceCodeUnit,
+        tildeCodeUnit
+      ])
+      ..addAll(new List<int>.generate(0x70, (int index) => 0x2000 + index,
+          growable: false))
+      ..addAll(new List<int>.generate(0x80, (int index) => 0x2e00 + index,
+          growable: false));
   }
 
   return _punctuationSet;

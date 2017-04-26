@@ -14,8 +14,10 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
+    int off = offset;
+
     // Simple test, that we have indent
-    final int codeUnit = text.codeUnitAt(offset);
+    final int codeUnit = text.codeUnitAt(off);
     if (codeUnit != spaceCodeUnit && codeUnit != tabCodeUnit) {
       return const ParseResult<BlockNodeImpl>.failure();
     }
@@ -26,9 +28,9 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
     List<String> rest = <String>[];
     bool firstLine = true;
     final int length = text.length;
-    while (offset < length) {
+    while (off < length) {
       final ParseResult<String> lineResult =
-          container.lineParser.parse(text, offset);
+          container.lineParser.parse(text, off);
       assert(lineResult.isSuccess);
 
       final String line = lineResult.value;
@@ -56,7 +58,7 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
       }
 
       firstLine = false;
-      offset = lineResult.offset;
+      off = lineResult.offset;
     }
 
     if (result.isEmpty) {
@@ -64,62 +66,63 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
     }
 
     return new ParseResult<BlockNodeImpl>.success(
-        new CodeBlockImpl(result, null), offset);
+        new CodeBlockImpl(result, null), off);
   }
 
   // TODO make it work on text
   static String _codeLine(String text, [int offset = 0]) {
+    int off = offset;
     final int length = text.length;
-    if (length == offset) {
+    if (length == off) {
       return null;
     }
 
     // First char
-    int codeUnit = text.codeUnitAt(offset);
+    int codeUnit = text.codeUnitAt(off);
     if (codeUnit == tabCodeUnit) {
-      return text.substring(offset + 1);
+      return text.substring(off + 1);
     }
     if (codeUnit != spaceCodeUnit) {
       return null;
     }
 
-    offset += 1;
-    if (offset == length) {
+    off += 1;
+    if (off == length) {
       return null;
     }
 
     // Second char
-    codeUnit = text.codeUnitAt(offset);
+    codeUnit = text.codeUnitAt(off);
     if (codeUnit == tabCodeUnit) {
-      return text.substring(offset + 1);
+      return text.substring(off + 1);
     }
     if (codeUnit != spaceCodeUnit) {
       return null;
     }
 
-    offset++;
-    if (offset == length) {
+    off++;
+    if (off == length) {
       return null;
     }
 
     // Third char
-    codeUnit = text.codeUnitAt(offset);
+    codeUnit = text.codeUnitAt(off);
     if (codeUnit == tabCodeUnit) {
-      return text.substring(offset + 1);
+      return text.substring(off + 1);
     }
     if (codeUnit != spaceCodeUnit) {
       return null;
     }
 
-    offset++;
-    if (offset == length) {
+    off++;
+    if (off == length) {
       return null;
     }
 
     // Fourth char
-    codeUnit = text.codeUnitAt(offset);
+    codeUnit = text.codeUnitAt(off);
     if (codeUnit == tabCodeUnit || codeUnit == spaceCodeUnit) {
-      return text.substring(offset + 1);
+      return text.substring(off + 1);
     }
 
     return null;

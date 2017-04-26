@@ -17,8 +17,9 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final ParseResult<String> lineRes =
-        container.lineParser.parse(text, offset);
+        container.lineParser.parse(text, off);
     assert(lineRes.isSuccess);
 
     final Match startMatch = _startRegExp.firstMatch(lineRes.value);
@@ -32,18 +33,17 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
     final RegExp endTest =
         new RegExp(r'^ {0,3}\\end\{' + enviroment + r'\}[ \t]*$');
 
-    final StringBuffer result = new StringBuffer();
-    result.writeln(lineRes.value);
+    final StringBuffer result = new StringBuffer()..writeln(lineRes.value);
 
-    offset = lineRes.offset;
+    off = lineRes.offset;
     final int length = text.length;
     bool found = false;
-    while (offset < length) {
+    while (off < length) {
       final ParseResult<String> lineRes =
-          container.lineParser.parse(text, offset);
+          container.lineParser.parse(text, off);
       assert(lineRes.isSuccess);
 
-      offset = lineRes.offset;
+      off = lineRes.offset;
       result.writeln(lineRes.value);
 
       if (endTest.hasMatch(lineRes.value)) {
@@ -57,6 +57,6 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
     }
 
     return new ParseResult<BlockNodeImpl>.success(
-        new TexRawBlockImpl(result.toString()), offset);
+        new TexRawBlockImpl(result.toString()), off);
   }
 }

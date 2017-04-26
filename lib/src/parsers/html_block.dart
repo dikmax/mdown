@@ -31,7 +31,8 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
-    final int nonIndentOffset = skipIndent(text, offset);
+    int off = offset;
+    final int nonIndentOffset = skipIndent(text, off);
 
     int rule;
     for (int i = 0; i < _starts.length; ++i) {
@@ -44,12 +45,12 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
     if (rule != null) {
       final int length = text.length;
       final StringBuffer result = new StringBuffer();
-      while (offset < length) {
+      while (off < length) {
         final ParseResult<String> lineRes =
-            container.lineParser.parse(text, offset);
+            container.lineParser.parse(text, off);
         assert(lineRes.isSuccess);
 
-        offset = lineRes.offset;
+        off = lineRes.offset;
         result.writeln(lineRes.value);
         if (lineRes.value.contains(_ends[rule])) {
           break;
@@ -57,7 +58,7 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
       }
 
       return new ParseResult<BlockNodeImpl>.success(
-          new HtmlRawBlockImpl(result.toString()), offset);
+          new HtmlRawBlockImpl(result.toString()), off);
     }
 
     final Match htmlBlock6Match =
@@ -70,12 +71,12 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
 
       final int length = text.length;
       final StringBuffer result = new StringBuffer();
-      while (offset < length) {
+      while (off < length) {
         final ParseResult<String> lineRes =
-            container.lineParser.parse(text, offset);
+            container.lineParser.parse(text, off);
         assert(lineRes.isSuccess);
 
-        offset = lineRes.offset;
+        off = lineRes.offset;
         result.writeln(lineRes.value);
         if (isOnlyWhitespace(lineRes.value)) {
           break;
@@ -83,7 +84,7 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
       }
 
       return new ParseResult<BlockNodeImpl>.success(
-          new HtmlRawBlockImpl(result.toString()), offset);
+          new HtmlRawBlockImpl(result.toString()), off);
     }
 
     return new ParseResult<BlockNodeImpl>.failure();

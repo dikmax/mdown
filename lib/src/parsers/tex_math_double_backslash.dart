@@ -13,23 +13,24 @@ class TexMathDoubleBackslashParser extends AbstractParser<InlineNodeImpl> {
 
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
+    int off = offset;
     final int length = text.length;
-    if (offset + 2 >= length ||
-        text.codeUnitAt(offset) != backslashCodeUnit ||
-        text.codeUnitAt(offset + 1) != backslashCodeUnit) {
+    if (off + 2 >= length ||
+        text.codeUnitAt(off) != backslashCodeUnit ||
+        text.codeUnitAt(off + 1) != backslashCodeUnit) {
       return new ParseResult<InlineNodeImpl>.failure();
     }
 
-    offset += 2;
-    final int codeUnit = text.codeUnitAt(offset);
+    off += 2;
+    final int codeUnit = text.codeUnitAt(off);
     if (codeUnit != openParenCodeUnit && codeUnit != openBracketCodeUnit) {
       return new ParseResult<InlineNodeImpl>.failure();
     }
     final bool displayMath = codeUnit == openBracketCodeUnit;
     final int closeCodeUnit =
         displayMath ? closeBracketCodeUnit : closeParenCodeUnit;
-    offset++;
-    int endOffset = offset;
+    off++;
+    int endOffset = off;
     bool found = false;
     while (endOffset < length - 2) {
       if (text.codeUnitAt(endOffset) == backslashCodeUnit &&
@@ -45,7 +46,7 @@ class TexMathDoubleBackslashParser extends AbstractParser<InlineNodeImpl> {
       return new ParseResult<InlineNodeImpl>.failure();
     }
 
-    final String math = text.substring(offset, endOffset);
+    final String math = text.substring(off, endOffset);
     if (displayMath) {
       return new ParseResult<InlineNodeImpl>.success(
           new TexMathDisplayImpl(math), endOffset + 3);

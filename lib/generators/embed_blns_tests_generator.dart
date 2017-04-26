@@ -43,18 +43,16 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
 
     final String sourcePathDir = path.dirname(buildStep.input.id.path);
     final String filePath = path.join(sourcePathDir, annotation.path);
-    final File file = new File(filePath);
-
-    file.writeAsBytesSync(response, mode: FileMode.WRITE);
+    new File(filePath)..writeAsBytesSync(response, mode: FileMode.WRITE);
 
     final dynamic json =
         JSON.decode(UTF8.decode(response, allowMalformed: true));
 
     final List<String> content = _readFile(json);
 
-    final StringBuffer result = new StringBuffer();
-    result.writeln('final List<String> _\$${element.displayName}Tests = '
-        '<String>[');
+    final StringBuffer result = new StringBuffer()
+      ..writeln('final List<String> _\$${element.displayName}Tests = '
+          '<String>[');
     content.forEach((String string) {
       result.writeln("r'''$string''',");
     });
