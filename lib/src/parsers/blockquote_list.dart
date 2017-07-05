@@ -435,7 +435,8 @@ class _InnerBlocksParser extends AbstractParser<Iterable<BlockNodeImpl>> {
 
   @override
   ParseResult<Iterable<BlockNodeImpl>> parse(String text, int offset) {
-    int offset = 0;
+    // ignore: parameter_assignments
+    offset = 0; // Force 0
     final List<BlockNodeImpl> blocks = <BlockNodeImpl>[];
 
     final int length = text.length;

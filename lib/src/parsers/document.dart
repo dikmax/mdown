@@ -201,7 +201,8 @@ class DocumentParser extends AbstractParser<Document> {
 
   @override
   ParseResult<Document> parse(String text, int offset) {
-    int offset = 0;
+    // ignore: parameter_assignments
+    offset = 0; // Force 0
     final List<BlockNodeImpl> blocks = <BlockNodeImpl>[];
 
     final int length = text.length;
