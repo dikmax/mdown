@@ -1,8 +1,8 @@
 library mdown.generators.embed_blns_tests_generator;
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
@@ -25,38 +25,42 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
   }
 
   @override
-  Future<String> generateForAnnotatedElement(
-      Element element, EmbedBlnsTests annotation, BuildStep buildStep) async {
-    if (path.isAbsolute(annotation.path)) {
+  FutureOr<String> generateForAnnotatedElement(
+      Element element, ConstantReader annotation, BuildStep buildStep) async {
+    final String annotationPath = annotation.read('path').stringValue;
+
+    if (path.isAbsolute(annotationPath)) {
       throw new Exception('must be relative path to the source file');
     }
+
+    final String annotationUrl = annotation.read('url').stringValue;
 
     // Downloading source.
     final HttpClient client = new HttpClient();
     final HttpClientRequest request =
-        await client.getUrl(Uri.parse(annotation.url));
+        await client.getUrl(Uri.parse(annotationUrl));
     final List<int> response = await (await request.close()).fold(<int>[],
         (List<int> list, List<int> el) {
       list.addAll(el);
       return list;
     });
 
-    final String sourcePathDir = path.dirname(buildStep.input.id.path);
-    final String filePath = path.join(sourcePathDir, annotation.path);
+    final String sourcePathDir = path.dirname(buildStep.inputId.path);
+    final String filePath = path.join(sourcePathDir, annotationPath);
     new File(filePath)..writeAsBytesSync(response, mode: FileMode.WRITE);
 
-    final dynamic json =
-        JSON.decode(UTF8.decode(response, allowMalformed: true));
+    final dynamic data =
+        json.decode(utf8.decode(response, allowMalformed: true));
 
-    final List<String> content = _readFile(json);
+    final List<String> content = _readFile(data);
 
     final StringBuffer result = new StringBuffer()
       ..writeln('final List<String> _\$${element.displayName}Tests = '
           '<String>[');
-    content.forEach((String string) {
+    for (String string in content) {
       result.writeln("r'''$string''',");
-    });
-    result.writeln("];");
+    }
+    result.writeln('];');
 
     return result.toString();
   }

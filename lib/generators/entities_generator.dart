@@ -17,29 +17,29 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
 
   @override
   Future<String> generateForAnnotatedElement(
-      Element element, Entities annotation, BuildStep buildStep) async {
+      Element element, ConstantReader annotation, BuildStep buildStep) async {
     final RegExp r = new RegExp(r"^&(.*);$");
     final HttpClient client = new HttpClient();
+    final String annotationUrl = annotation.read('url').stringValue;
     final HttpClientRequest request =
-        await client.getUrl(Uri.parse(annotation.url));
+        await client.getUrl(Uri.parse(annotationUrl));
     final HttpClientResponse response = await request.close();
-    final dynamic json =
-        await response.transform(UTF8.decoder).transform(JSON.decoder).first;
+    final dynamic data =
+        await response.transform(utf8.decoder).transform(json.decoder).first;
     String result =
         'final Map<String, String> _\$${element.displayName} = new HashMap<String, String>.from(<String, String>{\n';
-    json.forEach((String k, dynamic v) {
+    data.forEach((String k, dynamic v) {
       final Match match = r.firstMatch(k);
       if (match != null) {
         final String entity = match.group(1);
-        if (entity == "dollar") {
+        if (entity == 'dollar') {
           result += '  "$entity": "\\\$",';
         } else {
-          result += '  "$entity": ${JSON.encode(v['characters'])},';
+          result += '  "$entity": ${json.encode(v['characters'])},';
         }
       }
     });
-    result += '});';
 
-    return result;
+    return '$result});';
   }
 }

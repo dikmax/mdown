@@ -56,14 +56,15 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
 
   @override
   Future<String> generateForAnnotatedElement(
-      Element element, EmbedTests annotation, BuildStep buildStep) async {
-    if (path.isAbsolute(annotation.path)) {
+      Element element, ConstantReader annotation, BuildStep buildStep) async {
+    final String annotationPath = annotation.read('path').stringValue;
+    if (path.isAbsolute(annotationPath)) {
       throw new Exception('must be relative path to the source file');
     }
 
-    final String sourcePathDir = path.dirname(buildStep.input.id.path);
+    final String sourcePathDir = path.dirname(buildStep.inputId.path);
 
-    final String filePath = path.join(sourcePathDir, annotation.path);
+    final String filePath = path.join(sourcePathDir, annotationPath);
 
     if (!FileSystemEntity.isFileSync(filePath)) {
       throw new Exception('Not a file! - $filePath');
@@ -77,8 +78,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     content.forEach((String k, String v) {
       result += "r'''$k''': r'''$v''',\n";
     });
-    result += '};\n';
 
-    return result;
+    return '$result};\n';
   }
 }

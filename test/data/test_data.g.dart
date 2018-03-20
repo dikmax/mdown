@@ -4,7 +4,6 @@ part of mdown.test.data.test_data;
 
 // **************************************************************************
 // Generator: EmbedTestsGenerator
-// Target: final Map<String, String> specification
 // **************************************************************************
 
 final Map<String, String> _$specificationTests = <String, String>{
@@ -3751,11 +3750,6 @@ baz</p>
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> smartPunctuation
-// **************************************************************************
-
 final Map<String, String> _$smartPunctuationTests = <String, String>{
   r'''"Hello," said the spider.
 "'Shelob' is my name."
@@ -3841,11 +3835,6 @@ thirteen———––.</p>
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> regression
-// **************************************************************************
-
 final Map<String, String> _$regressionTests = <String, String>{
   r'''* foo
 →bar
@@ -3860,11 +3849,6 @@ x
 x
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> additionalMarkdownToHtml
-// **************************************************************************
 
 final Map<String, String> _$additionalMarkdownToHtmlTests = <String, String>{
   r'''Simple test
@@ -4251,11 +4235,6 @@ int x = 33;
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> fencedCodeAttributes
-// **************************************************************************
-
 final Map<String, String> _$fencedCodeAttributesTests = <String, String>{
   r'''``` {#id}
 code
@@ -4300,11 +4279,6 @@ code
 </code></pre>
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> headingAttributes
-// **************************************************************************
 
 final Map<String, String> _$headingAttributesTests = <String, String>{
   r'''# header {#id}
@@ -4358,11 +4332,6 @@ final Map<String, String> _$headingAttributesTests = <String, String>{
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> inlineCodeAttributes
-// **************************************************************************
-
 final Map<String, String> _$inlineCodeAttributesTests = <String, String>{
   r'''`code`{#id}
 ''': r'''<p><code id="id">code</code></p>
@@ -4390,11 +4359,6 @@ width="800"}
 ''': r'''<p><code id="id" class="class1 class2" width="800">code</code></p>
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> linkAttributes
-// **************************************************************************
 
 final Map<String, String> _$linkAttributesTests = <String, String>{
   r'''[test](http://test.com/){#id}
@@ -4493,11 +4457,6 @@ width="800"}
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> strikeout
-// **************************************************************************
-
 final Map<String, String> _$strikeoutTests = <String, String>{
   r'''~~Strikeout text~~
 ''': r'''<p><del>Strikeout text</del></p>
@@ -4527,11 +4486,6 @@ final Map<String, String> _$strikeoutTests = <String, String>{
 ''': r'''<p>~~ this ~~ is not one neither is ~this~</p>
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> strikeoutAndSubscript
-// **************************************************************************
 
 final Map<String, String> _$strikeoutAndSubscriptTests = <String, String>{
   r'''~~Strikeout text~~
@@ -4572,11 +4526,6 @@ final Map<String, String> _$strikeoutAndSubscriptTests = <String, String>{
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> subscript
-// **************************************************************************
-
 final Map<String, String> _$subscriptTests = <String, String>{
   r'''H~2~O
 ''': r'''<p>H<sub>2</sub>O</p>
@@ -4609,11 +4558,6 @@ final Map<String, String> _$subscriptTests = <String, String>{
 ''': r'''<p>H~~2~~</p>
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> superscript
-// **************************************************************************
 
 final Map<String, String> _$superscriptTests = <String, String>{
   r'''2^2^=4
@@ -4648,11 +4592,6 @@ final Map<String, String> _$superscriptTests = <String, String>{
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> texMathDollars
-// **************************************************************************
-
 final Map<String, String> _$texMathDollarsTests = <String, String>{
   r'''$a+b=c$
 ''': r'''<p><span class="math inline">\(a+b=c\)</span></p>
@@ -4680,11 +4619,6 @@ final Map<String, String> _$texMathDollarsTests = <String, String>{
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> texMathSingleBackslash
-// **************************************************************************
-
 final Map<String, String> _$texMathSingleBackslashTests = <String, String>{
   r'''$a+b=c$
 ''': r'''<p>$a+b=c$</p>
@@ -4704,11 +4638,6 @@ c\)</span></p>
 ''': r'''<p>(a+b=c]</p>
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> texMathDoubleBackslash
-// **************************************************************************
 
 final Map<String, String> _$texMathDoubleBackslashTests = <String, String>{
   r'''$a+b=c$
@@ -4733,11 +4662,6 @@ c\)</span></p>
 ''',
 };
 
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> texMathCustomClasses
-// **************************************************************************
-
 final Map<String, String> _$texMathCustomClassesTests = <String, String>{
   r'''$a+b=c$
 ''': r'''<p><span class="custom_inline">\(a+b=c\)</span></p>
@@ -4746,11 +4670,6 @@ final Map<String, String> _$texMathCustomClassesTests = <String, String>{
 ''': r'''<p><span class="custom_display">\[a+b=c\]</span></p>
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> rawTex
-// **************************************************************************
 
 final Map<String, String> _$rawTexTests = <String, String>{
   r'''This is the identity matrix:
@@ -4802,11 +4721,6 @@ All odd numbers are prime.
 \end{theorem}</p>
 ''',
 };
-
-// **************************************************************************
-// Generator: EmbedTestsGenerator
-// Target: final Map<String, String> pipeTables
-// **************************************************************************
 
 final Map<String, String> _$pipeTablesTests = <String, String>{
   r'''head | cells
@@ -4869,7 +4783,6 @@ Content in the first column | Content in the second column
 
 // **************************************************************************
 // Generator: EmbedBlnsTestsGenerator
-// Target: final Iterable<String> blns
 // **************************************************************************
 
 final List<String> _$blnsTests = <String>[
