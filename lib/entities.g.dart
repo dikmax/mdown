@@ -4,7 +4,6 @@ part of mdown.entities;
 
 // **************************************************************************
 // Generator: EntitiesGenerator
-// Target: final Map<String, String> htmlEntities
 // **************************************************************************
 
 final Map<String, String> _$htmlEntities =
