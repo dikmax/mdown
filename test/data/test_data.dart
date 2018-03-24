@@ -26,6 +26,12 @@ final Map<String, String> regression = _$regressionTests;
 final Map<String, String> additionalMarkdownToHtml =
     _$additionalMarkdownToHtmlTests;
 
+/// [GitHub-flavoured markdown](https://github.github.com/gfm/spec.txt)
+/// <https://github.github.com/gfm/>
+@EmbedTests('gfm.txt')
+final Map<String, String> gfmSpecification =
+    _$gfmSpecificationTests;
+
 /// Strikeout extension tests
 @EmbedTests('fenced_code_attributes.txt')
 final Map<String, String> fencedCodeAttributes = _$fencedCodeAttributesTests;

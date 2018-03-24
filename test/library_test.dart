@@ -15,6 +15,7 @@ void main() {
   final TestFunc strictTestFunc = generateTestFunc(Options.strict);
   final TestFunc defaultsTestFunc = generateTestFunc(Options.defaults);
   final TestFunc commonmarkTestFunc = generateTestFunc(Options.commonmark);
+  final TestFunc gfmTestFunc = generateTestFunc(Options.gfm);
 
   // CommonMark tests
   tests('CommonMark [strict]', specification, strictTestFunc);
@@ -27,6 +28,9 @@ void main() {
 
   // SmartPunct
   tests('SmartPunct [commonmark]', smartPunctuation, commonmarkTestFunc);
+
+  // GFM
+  // tests('GFM [gfm]', gfmSpecification, gfmTestFunc);
 
   // Fenced code attributes
   final TestFunc fencedCodeAttributesTestFunc =

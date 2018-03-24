@@ -45,10 +45,13 @@ String res = markdownToHtml('Hello world!\n===', options);
 
 There three predefined sets of options:
 
-- `Options.strict`: all extensions are disabled
-- `Options.commonmark`: only `smartPunctuation` extension is enabled.
+- `Options.strict`: all extensions, except `rawHtml` are disabled
+- `Options.commonmark`: only `smartPunctuation` and `rawHtml` extension
+  are enabled.
+- `Options.gfm`: `rawHtml`, `tagFilter`, `pipeTables`.
 - `Options.defaults`: `smartPunctuation`, `strikeout`, `subscript`,
-  `superscript`, `pipeTables`, `texMathDollars`, `rawTex` are enabled.
+  `superscript`, `pipeTables`, `texMathDollars`, `rawTex`, `rawHtml`
+  are enabled.
 
 To get correspondent parser/writer instance use static getter on class:
 
@@ -57,6 +60,18 @@ String res = markdownToHtml('Hello world!\n===', Options.strict);
 ```
 
 If second parameter is not provided, `Options.defaults` is used.
+
+Raw HTML (`Options.rawHtml`)
+----------------------------
+
+Allows to include raw HTML blocks. Official CommonMark extension.
+
+Tag filter (`Options.tagFilter`)
+--------------------------------
+
+Filters `<textarea>`, `<style>`, `<xmp>`, `<iframe>`, `<noembed>`,
+`<noframes>`, `<script>`, `<plaintext>` from HTML output. Works together
+with `Options.rawHtml`. Part of [GitHub Flavored Markdown][gfm].
 
 Smart punctuation (`Options.smartPunctuation`)
 ----------------------------------------------
@@ -186,7 +201,7 @@ Pipe tables (`Options.pipeTables`)
 ----------------------------------
 
 Allows to parse tables where cells are separated with vertical bars
-(`|`). Compatible with GitHub table syntax.
+(`|`). Compatible with [GitHub table syntax][gfm].
 
 ```md
 head | cells
@@ -290,5 +305,6 @@ String res = markdownToHtml('Hello world!\n===', new Options(linkResolver: linkR
 ```
 
 [CommonMark]: http://commonmark.org/
+[gfm]: https://github.github.com/gfm/
 [MathJax]: https://www.mathjax.org/
 [Progit]: https://github.com/progit/progit

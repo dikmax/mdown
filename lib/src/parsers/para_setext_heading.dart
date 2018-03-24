@@ -104,12 +104,14 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
         }
 
         // Special check for html block rule 6.
-        final Match htmlBlock6Match =
-            htmlBlock6Test.matchAsPrefix(lineResult.value, indent);
-        if (htmlBlock6Match != null) {
-          final String tag = htmlBlock6Match[1];
-          if (blockTags.contains(tag.toLowerCase())) {
-            break;
+        if (container.options.rawHtml) {
+          final Match htmlBlock6Match =
+              htmlBlock6Test.matchAsPrefix(lineResult.value, indent);
+          if (htmlBlock6Match != null) {
+            final String tag = htmlBlock6Match[1];
+            if (blockTags.contains(tag.toLowerCase())) {
+              break;
+            }
           }
         }
 

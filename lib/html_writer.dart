@@ -18,6 +18,13 @@ String _urlEncode(String url) {
       onMatch: (Match m) => m.group(0), onNonMatch: _htmlEscape);
 }
 
+RegExp _forbiddenTagsRegExp = new RegExp(
+    r'<(title|textarea|style|xmp|iframe|noembed|noframes|script|plaintext)',
+    caseSensitive: false);
+
+String _tagFilter(String contents) => contents.replaceAllMapped(
+    _forbiddenTagsRegExp, (Match match) => '&lt;${match[1]}');
+
 String _htmlEscape(String str) {
   final List<int> charCodes = <int>[];
   final int length = str.length;
@@ -361,13 +368,13 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitHtmlRawBlock(HtmlRawBlock node) {
-    _sb.write(node.contents);
+    _sb.write(_options.tagFilter ? _tagFilter(node.contents) : node.contents);
     return null;
   }
 
   @override
   Null visitHtmlRawInline(HtmlRawInline node) {
-    _sb.write(node.contents);
+    _sb.write(_options.tagFilter ? _tagFilter(node.contents) : node.contents);
     return null;
   }
 
