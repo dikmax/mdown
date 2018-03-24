@@ -18,13 +18,13 @@ class TexMathDoubleBackslashParser extends AbstractParser<InlineNodeImpl> {
     if (off + 2 >= length ||
         text.codeUnitAt(off) != backslashCodeUnit ||
         text.codeUnitAt(off + 1) != backslashCodeUnit) {
-      return new ParseResult<InlineNodeImpl>.failure();
+      return const ParseResult<InlineNodeImpl>.failure();
     }
 
     off += 2;
     final int codeUnit = text.codeUnitAt(off);
     if (codeUnit != openParenCodeUnit && codeUnit != openBracketCodeUnit) {
-      return new ParseResult<InlineNodeImpl>.failure();
+      return const ParseResult<InlineNodeImpl>.failure();
     }
     final bool displayMath = codeUnit == openBracketCodeUnit;
     final int closeCodeUnit =
@@ -43,7 +43,7 @@ class TexMathDoubleBackslashParser extends AbstractParser<InlineNodeImpl> {
     }
 
     if (!found) {
-      return new ParseResult<InlineNodeImpl>.failure();
+      return const ParseResult<InlineNodeImpl>.failure();
     }
 
     final String math = text.substring(off, endOffset);

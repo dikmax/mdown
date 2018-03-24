@@ -9,7 +9,7 @@ linter:
     - always_require_non_null_named_parameters
     - always_specify_types
     - annotate_overrides
-    - avoid_annotating_with_dynamic
+    # - avoid_annotating_with_dynamic
     - avoid_as
     - avoid_catches_without_on_clauses
     - avoid_catching_errors
@@ -76,7 +76,7 @@ linter:
     - prefer_foreach
     - prefer_function_declarations_over_variables
     - prefer_initializing_formals
-    - prefer_interpolation_to_compose_strings
+    # - prefer_interpolation_to_compose_strings
     - prefer_is_empty
     - prefer_is_not_empty
     - prefer_single_quotes

@@ -26,7 +26,7 @@ class _Delim {
   bool containsSpace = false;
   List<InlineNodeImpl> inlines = <InlineNodeImpl>[];
 
-  _Delim(this.charCode, this.count, this.canOpen, this.canClose);
+  _Delim(this.charCode, this.count, {this.canOpen, this.canClose});
 
   int countCloses(_Delim delim) {
     if (charCode != delim.charCode) {
@@ -65,7 +65,6 @@ class EscapedSpace extends InlineNodeImpl {
 /// Tab inline
 class EscapedTab extends InlineNodeImpl {
   @override
-  // ignore: avoid_as
   R accept<R>(AstVisitor<R> visitor) {
     if (visitor is ExcapedInlinesVisitor) {
       final ExcapedInlinesVisitor<R> v = visitor;
@@ -93,15 +92,16 @@ abstract class ExcapedInlinesVisitor<R> extends AstVisitor<R> {
 /// Replaces [EscapedSpace] and [EscapedTab] with correspondent inlines.
 class ReplaceEscapedVisitor extends ListReplacingAstVisitor
     implements ExcapedInlinesVisitor<List<AstNodeImpl>> {
-  final bool _success;
+  /// Is parsing was successful.
+  final bool success;
 
-  /// Constructs new visitor. Set [_success] to true if parsing was successful.
-  ReplaceEscapedVisitor(this._success);
+  /// Constructs new visitor. Set [success] to true if parsing was successful.
+  ReplaceEscapedVisitor({this.success});
 
   @override
   List<AstNodeImpl> visitEscapedSpace(EscapedSpace node) {
     final List<InlineNodeImpl> result = <InlineNodeImpl>[];
-    if (!_success) {
+    if (!success) {
       result.add(new StrImpl('\\'));
     }
     result.add(new SpaceImpl(1));
@@ -112,7 +112,7 @@ class ReplaceEscapedVisitor extends ListReplacingAstVisitor
   @override
   List<AstNodeImpl> visitEscapedTab(EscapedTab node) {
     final List<InlineNodeImpl> result = <InlineNodeImpl>[];
-    if (!_success) {
+    if (!success) {
       result.add(new StrImpl('\\'));
     }
     result.add(new TabImpl(1));
@@ -122,10 +122,10 @@ class ReplaceEscapedVisitor extends ListReplacingAstVisitor
 }
 
 final ReplacingAstVisitor _failureVisitor =
-    new ReplacingAstVisitor(new ReplaceEscapedVisitor(false));
+    new ReplacingAstVisitor(new ReplaceEscapedVisitor(success: false));
 
 final ReplacingAstVisitor _successVisitor =
-    new ReplacingAstVisitor(new ReplaceEscapedVisitor(true));
+    new ReplacingAstVisitor(new ReplaceEscapedVisitor(success: true));
 
 /// Parsing emphasis, strongs, smartquotes, etc.
 class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
@@ -137,11 +137,10 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
 
   /// Constructor.
   InlineStructureParser(ParsersContainer container) : super(container) {
-    this._delimitersChars = new BitSet(256);
-    this._delimitersChars.addAll(<int>[starCodeUnit, underscoreCodeUnit]);
+    _delimitersChars = new BitSet(256)
+      ..addAll(<int>[starCodeUnit, underscoreCodeUnit]);
 
-    this._intrawordDelimetersChars = new BitSet(256);
-    this._intrawordDelimetersChars.add(starCodeUnit);
+    _intrawordDelimetersChars = new BitSet(256)..add(starCodeUnit);
 
     if (container.options.smartPunctuation) {
       _delimitersChars..add(singleQuoteCodeUnit)..add(doubleQuoteCodeUnit);
@@ -240,7 +239,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
         (charCode == tildeCodeUnit && !container.options.strikeout ||
             charCode == caretCodeUnit)) {
       // Subscript and superscript can only go alone.
-      return new _Delim(charCode, count, false, false);
+      return new _Delim(charCode, count, canOpen: false, canClose: false);
     }
 
     int codeUnitBefore = newLineCodeUnit;
@@ -284,7 +283,7 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
       canClose = canClose && (!leftFlanking || punctuationAfter);
     }
 
-    return new _Delim(charCode, count, canOpen, canClose);
+    return new _Delim(charCode, count, canOpen: canOpen, canClose: canClose);
   }
 
   List<InlineNodeImpl> _buildStack(List<_Delim> stack, int skip) {

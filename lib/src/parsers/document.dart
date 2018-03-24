@@ -14,12 +14,12 @@ import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/common.dart';
 import 'package:mdown/src/parsers/container.dart';
 
-class ListInlineParsingVisitor extends ListReplacingAstVisitor {}
-
+/// Visitor for parsing inlines inside blocks
 class InlineParsingVisitor extends ReplacingAstVisitor
     implements UnparsedInlinesVisitor<AstNodeImpl> {
   final DocumentParser _documentParser;
 
+  /// Constructor.
   InlineParsingVisitor(this._documentParser);
 
   @override
@@ -224,6 +224,7 @@ class DocumentParser extends AbstractParser<Document> {
           if (!container.references.containsKey(referenceString)) {
             container.references[referenceString] = res.value;
           }
+          // ignore: parameter_assignments
           offset = res.offset;
           continue;
         }
@@ -240,6 +241,7 @@ class DocumentParser extends AbstractParser<Document> {
                 blocks.add(res.value);
               }
             }
+            // ignore: parameter_assignments
             offset = res.offset;
             found = true;
             break;
@@ -262,6 +264,7 @@ class DocumentParser extends AbstractParser<Document> {
               blocks.add(res.value);
             }
           }
+          // ignore: parameter_assignments
           offset = res.offset;
           break;
         }
@@ -273,7 +276,7 @@ class DocumentParser extends AbstractParser<Document> {
     final List<BlockNodeImpl> blocksWithInlines =
         new List<BlockNodeImpl>(blocksLength);
     for (int i = 0; i < blocksLength; ++i) {
-      blocksWithInlines[i] = blocks[i].accept<AstNode>(visitor) as BlockNode;
+      blocksWithInlines[i] = blocks[i].accept<AstNode>(visitor);
     }
 
     final Document result = astFactory.document(blocksWithInlines);

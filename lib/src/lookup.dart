@@ -2,17 +2,23 @@ library mdown.src.lookup;
 
 import 'package:mdown/src/code_units.dart';
 
+/// Lookup class to check if some pattern appears on defined offset in string.
 abstract class Lookup {
+  /// Constructor
   const Lookup();
 
+  /// Constructs lookup class from RegExp.
   factory Lookup.regExp(Pattern pattern) => new PatternLookup(pattern);
 
+  /// Abstract method, that returns true, when pattern is found on offset.
   bool isFound(String text, int offset);
 }
 
+/// RegExp lookup.
 class PatternLookup extends Lookup {
   final Pattern _pattern;
 
+  /// Constructs lookup with [_pattern].
   PatternLookup(this._pattern);
 
   @override
@@ -26,11 +32,11 @@ class BlockquoteSimpleLookup extends Lookup {
   const BlockquoteSimpleLookup();
 
   @override
-  bool isFound(String text, int offset) {
-    return text.codeUnitAt(offset) == greaterThanCodeUnit;
-  }
+  bool isFound(String text, int offset) =>
+      text.codeUnitAt(offset) == greaterThanCodeUnit;
 }
 
+/// Instance of [BlockquoteSimpleLookup].
 const Lookup blockquoteSimpleLookup = const BlockquoteSimpleLookup();
 
 /// Simple lookup for thematic break.
@@ -71,10 +77,14 @@ class ThematicBreakLookup extends Lookup {
   }
 }
 
+/// Instance of [ThematicBreakLookup].
 const Lookup thematicBreakLookup = const ThematicBreakLookup();
 
+/// Lookup for atx heading.
 final Lookup atxHeadingLookup =
     new Lookup.regExp(new RegExp('(#{1,6})(?:[ \t]|\$)'));
+
+/// Lookup for fenced code start.
 final Lookup fencedCodeStartLookup =
     new Lookup.regExp(new RegExp('(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$'));
 
@@ -172,6 +182,7 @@ class HtmlBlock1Lookup extends Lookup {
   }
 }
 
+/// Instance of [HtmlBlock1Lookup].
 const Lookup htmlBlock1Lookup = const HtmlBlock1Lookup();
 
 /// Lookup for HTML block type 2: <!--
@@ -192,10 +203,12 @@ class HtmlBlock2Lookup extends Lookup {
   }
 }
 
+/// Instance of [HtmlBlock2Lookup].
 const Lookup htmlBlock2Lookup = const HtmlBlock2Lookup();
 
 /// Lookup for HTML block type 3: <?
 class HtmlBlock3Lookup extends Lookup {
+  /// Const constructor.
   const HtmlBlock3Lookup();
 
   @override
@@ -209,6 +222,7 @@ class HtmlBlock3Lookup extends Lookup {
   }
 }
 
+/// Instance of [HtmlBlock3Lookup].
 const Lookup htmlBlock3Lookup = const HtmlBlock3Lookup();
 
 /// Lookup for HTML block type 4: <!
@@ -227,6 +241,7 @@ class HtmlBlock4Lookup extends Lookup {
   }
 }
 
+/// Instance of [HtmlBlock4Lookup].
 const Lookup htmlBlock4Lookup = const HtmlBlock4Lookup();
 
 /// Lookup for HTML block type 5: `<![CDATA[`
@@ -252,4 +267,5 @@ class HtmlBlock5Lookup extends Lookup {
   }
 }
 
+/// Instance of [HtmlBlock5Lookup].
 const Lookup htmlBlock5Lookup = const HtmlBlock5Lookup();

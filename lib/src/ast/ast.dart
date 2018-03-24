@@ -63,6 +63,7 @@ abstract class AstNodeImpl implements AstNode {
     while (node != null && !predicate(node)) {
       node = node.parent;
     }
+    // ignore: avoid_as
     return node == this ? null : node as E;
   }
 
@@ -124,9 +125,7 @@ class AutolinkEmailImpl extends AutolinkImpl implements AutolinkEmail {
         super('mailto:$email', email);
 
   @override
-  R accept<R>(AstVisitor<R> visitor) {
-    return visitor.visitAutolinkEmail(this);
-  }
+  R accept<R>(AstVisitor<R> visitor) => visitor.visitAutolinkEmail(this);
 
   @override
   String get email => _email;
@@ -235,7 +234,7 @@ class CodeBlockImpl extends BlockNodeImpl implements CodeBlock {
 
   @override
   void visitChildren<R>(AstVisitor<R> visitor) {
-    this._attributes?.accept(visitor);
+    _attributes?.accept(visitor);
   }
 
   @override
@@ -273,7 +272,7 @@ class DocumentImpl extends AstNodeImpl implements Document {
 
   /// Constructs Document instance.
   DocumentImpl(Iterable<BlockNode> contents) {
-    this._contents = new NodeListImpl<BlockNode>(this, contents);
+    _contents = new NodeListImpl<BlockNode>(this, contents);
   }
 
   @override
@@ -307,7 +306,7 @@ class ExtendedAttributesImpl extends AttributesImpl
 
   /// Constructs ExtendedAttributes instance.
   ExtendedAttributesImpl(Iterable<Attribute> attributes) {
-    this._attributes = new NodeListImpl<Attribute>(this, attributes);
+    _attributes = new NodeListImpl<Attribute>(this, attributes);
   }
 
   @override
@@ -1127,13 +1126,13 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
   @deprecated // Never intended for public use.
   @override
   set length(int newLength) {
-    throw new UnsupportedError("Cannot resize NodeList.");
+    throw new UnsupportedError('Cannot resize NodeList.');
   }
 
   @override
   E operator [](int index) {
     if (index < 0 || index >= _elements.length) {
-      throw new RangeError("Index: $index, Size: ${_elements.length}");
+      throw new RangeError('Index: $index, Size: ${_elements.length}');
     }
     return _elements[index];
   }
@@ -1141,8 +1140,9 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
   @override
   void operator []=(int index, E node) {
     if (index < 0 || index >= _elements.length) {
-      throw new RangeError("Index: $index, Size: ${_elements.length}");
+      throw new RangeError('Index: $index, Size: ${_elements.length}');
     }
+    // ignore: avoid_as
     _owner._becomeParentOf(node as AstNodeImpl);
     _elements[index] = node;
   }
@@ -1166,6 +1166,7 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
     if (nodes != null && nodes.isNotEmpty) {
       for (E node in nodes) {
         _elements.add(node);
+        // ignore: avoid_as
         _owner._becomeParentOf(node as AstNodeImpl);
       }
       return true;
@@ -1182,8 +1183,9 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
   void insert(int index, E node) {
     final int length = _elements.length;
     if (index < 0 || index > length) {
-      throw new RangeError("Index: $index, Size: ${_elements.length}");
+      throw new RangeError('Index: $index, Size: ${_elements.length}');
     }
+    // ignore: avoid_as
     _owner._becomeParentOf(node as AstNodeImpl);
     if (index + 1 == length) {
       _elements.add(node);
@@ -1195,7 +1197,7 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
   @override
   E removeAt(int index) {
     if (index < 0 || index >= _elements.length) {
-      throw new RangeError("Index: $index, Size: ${_elements.length}");
+      throw new RangeError('Index: $index, Size: ${_elements.length}');
     }
     final E removedNode = _elements[index];
     _elements.removeAt(index);

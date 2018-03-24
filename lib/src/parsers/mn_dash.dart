@@ -33,14 +33,13 @@ class MNDashParser extends AbstractParser<InlineNodeImpl> {
       } else if (count % 3 == 2) {
         result = new List<InlineNodeImpl>.filled(
             count ~/ 3, new SmartCharImpl(SmartCharType.mdash),
-            growable: true);
-        result.add(new SmartCharImpl(SmartCharType.ndash));
+            growable: true)
+          ..add(new SmartCharImpl(SmartCharType.ndash));
       } else {
         // count % 3 == 1
         result = new List<InlineNodeImpl>.filled(
             (count - 4) ~/ 3, new SmartCharImpl(SmartCharType.mdash),
-            growable: true);
-        result
+            growable: true)
           ..add(new SmartCharImpl(SmartCharType.ndash))
           ..add(new SmartCharImpl(SmartCharType.ndash));
       }
@@ -51,6 +50,6 @@ class MNDashParser extends AbstractParser<InlineNodeImpl> {
           new CombiningInlineNodeImpl(result), off);
     }
 
-    return new ParseResult<InlineNodeImpl>.failure();
+    return const ParseResult<InlineNodeImpl>.failure();
   }
 }

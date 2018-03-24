@@ -50,19 +50,19 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
     final Match labelAndLinkMatch =
         _labelAndLinkRegExp.matchAsPrefix(text, off);
     if (labelAndLinkMatch == null) {
-      return new ParseResult<LinkReferenceImpl>.failure();
+      return const ParseResult<LinkReferenceImpl>.failure();
     }
 
     final String label = labelAndLinkMatch[1].trim();
     if (label.isEmpty) {
       // Label cannot be empty
-      return new ParseResult<LinkReferenceImpl>.failure();
+      return const ParseResult<LinkReferenceImpl>.failure();
     }
 
     String link = labelAndLinkMatch[2];
     if (link == '') {
       // Target cannot be empty
-      return new ParseResult<LinkReferenceImpl>.failure();
+      return const ParseResult<LinkReferenceImpl>.failure();
     }
     if (link.codeUnitAt(0) == lessThanCodeUnit) {
       final int linkLength = link.length;
@@ -116,8 +116,7 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
         }
         off++;
       }
-      if (off < text.length &&
-          text.codeUnitAt(off) == openBraceCodeUnit) {
+      if (off < text.length && text.codeUnitAt(off) == openBraceCodeUnit) {
         final ParseResult<Attributes> attributesResult =
             container.attributesParser.parse(text, off);
         if (attributesResult.isSuccess) {
@@ -147,11 +146,10 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
     }
     if (offsetAfterLink != -1) {
       return new ParseResult<LinkReferenceImpl>.success(
-          new LinkReferenceImpl(label,
-              astFactory.target(link, null), null),
+          new LinkReferenceImpl(label, astFactory.target(link, null), null),
           offsetAfterLink);
     }
 
-    return new ParseResult<LinkReferenceImpl>.failure();
+    return const ParseResult<LinkReferenceImpl>.failure();
   }
 }

@@ -45,7 +45,7 @@ class _ExampleDescription extends t.Matcher {
       bool verbose) {
     final t.Description d = inner.describeMismatch(
         item, mismatchDescription, matchState, verbose)
-      ..add("\n  Source: \n" + example);
+      ..add('\n  Source: \n$example');
     return d;
   }
 }
@@ -60,9 +60,9 @@ String _tidy(String html) {
   bool inPre = false;
   final List<String> result = <String>[];
   for (String line in lines) {
-    if (line.contains("<pre")) {
+    if (line.contains('<pre')) {
       inPre = true;
-    } else if (line.contains("</pre")) {
+    } else if (line.contains('</pre')) {
       inPre = false;
     }
     if (inPre) {
@@ -95,8 +95,8 @@ TestFunc generateTestFunc(Options options, [FilterFunc filter = emptyFilter]) {
   return (int num, String mdOrig, String html) {
     if (filter(num)) {
       t.test('$num', () {
-        final String md = mdOrig.replaceAll("→", "\t").replaceAll("␣", " ");
-        html = html.replaceAll("→", "\t").replaceAll("␣", " ");
+        final String md = mdOrig.replaceAll('→', '\t').replaceAll('␣', ' ');
+        html = html.replaceAll('→', '\t').replaceAll('␣', ' ');
 
         final Document doc = parser.parse(md);
         t.expect(_tidy(writer.write(doc)),

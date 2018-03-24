@@ -11,10 +11,10 @@ import 'package:mdown/generators/embed_blns_tests_generator.dart';
 
 /// Main method for generated code builder.
 Future<void> main(List<String> args) async {
-  await build([
+  await build(<BuilderApplication>[
     new BuilderApplication.forBuilder(
         'tests',
-        [
+        <BuilderFactory>[
           (BuilderOptions options) => new PartBuilder(const <Generator>[
                 const EmbedTestsGenerator(),
                 const EmbedBlnsTestsGenerator(),

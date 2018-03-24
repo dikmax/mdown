@@ -22,6 +22,7 @@ class _StackItem {
   _ExtendedBlock block;
   _Marker marker;
   AbstractParser<Iterable<BlockNodeImpl>> innerBlocksParser;
+
   // Do not merge.
   bool afterEmpty = false;
 
@@ -42,12 +43,16 @@ class _StackItem {
     Iterable<BlockNodeImpl> blocks = result.value;
     final bool endsWithBlankline = blocks.last == null;
 
-    while (blocks.isNotEmpty && blocks.last == null) {
+    while (blocks is List<BlockNodeImpl> &&
+        blocks.isNotEmpty &&
+        blocks.last == null) {
       final List<BlockNodeImpl> b = blocks;
+      // ignore: cascade_invocations
       b.removeLast();
     }
 
     if (!marker.isBlockquote && blocks.isNotEmpty && block is ListBlockImpl) {
+      // ignore: avoid_as
       final ListBlockImpl listBlock = block as ListBlock;
 
       if (listBlock.items.isNotEmpty &&
@@ -63,7 +68,7 @@ class _StackItem {
     blocks = blocks.where(_isNotBlockALinkReference);
 
     final BlockNode last = block.last;
-    if (!this.afterEmpty && last is ParaImpl && blocks.first is ParaImpl) {
+    if (!afterEmpty && last is ParaImpl && blocks.first is ParaImpl) {
       // Merge paragraph.
       final UnparsedInlines inlines = last.contents;
       final ParaImpl para = blocks.first;
@@ -89,7 +94,7 @@ class _StackItem {
   }
 
   bool addLazyLine(String line) {
-    if (this.unparsedContent == '\n' || this.unparsedContent.endsWith('\n\n')) {
+    if (unparsedContent == '\n' || unparsedContent.endsWith('\n\n')) {
       return false;
     }
     parse();
@@ -103,6 +108,7 @@ class _StackItem {
         return false;
       }
       final UnparsedInlines contents = last.contents;
+      // ignore: cascade_invocations
       contents.contents += '\n' + line;
       return true;
     }
@@ -110,10 +116,10 @@ class _StackItem {
     return false;
   }
 
-  void setTight(bool tight) {
+  void setTight({bool tight}) {
     if (!marker.isBlockquote) {
-      final ListBlockImpl listBlock = block as ListBlockImpl;
-      listBlock.tight = tight;
+      // ignore: avoid_as
+      (block as ListBlockImpl).tight = tight;
     }
   }
 
@@ -189,7 +195,7 @@ class _Stack extends ListBase<_StackItem> {
 
       removeLast();
 
-      if (this.isNotEmpty) {
+      if (isNotEmpty) {
         last = this.last;
         last.block.addToEnd(<BlockNodeImpl>[lastBlock]);
         if (moveBlankLineUp) {
@@ -201,7 +207,7 @@ class _Stack extends ListBase<_StackItem> {
     }
   }
 
-  void setAfterEmpty(bool afterEmpty, [int skip = 0]) {
+  void setAfterEmpty({bool afterEmpty, int skip = 0}) {
     Iterable<_StackItem> stack = _stack;
     if (skip > 0) {
       stack = _stack.skip(skip);
@@ -211,10 +217,10 @@ class _Stack extends ListBase<_StackItem> {
     }
   }
 
-  void setTight(bool tight) {
+  void setTight({bool tight}) {
     assert(_stack.isNotEmpty);
 
-    _stack.last.setTight(tight);
+    _stack.last.setTight(tight: tight);
   }
 }
 
@@ -222,7 +228,9 @@ class _Stack extends ListBase<_StackItem> {
 
 abstract class _ExtendedBlock extends BlockNode {
   void addToEnd(Iterable<BlockNodeImpl> blocks);
+
   void addItem();
+
   BlockNode get last;
 }
 
@@ -231,9 +239,7 @@ class _ExtendedBlockquote extends BlockquoteImpl implements _ExtendedBlock {
 
   @override
   void addToEnd(Iterable<BlockNodeImpl> blocks) {
-    final List<BlockNode> c = contents;
-
-    c.addAll(blocks);
+    contents.addAll(blocks);
   }
 
   @override
@@ -244,8 +250,8 @@ class _ExtendedBlockquote extends BlockquoteImpl implements _ExtendedBlock {
 }
 
 class _ExtendedOrderedList extends OrderedListImpl implements _ExtendedBlock {
-  _ExtendedOrderedList(Iterable<ListItem> items, bool tight, int startIndex,
-      IndexSeparator indexSeparator)
+  _ExtendedOrderedList(Iterable<ListItem> items,
+      {bool tight, int startIndex, IndexSeparator indexSeparator})
       : super(items, tight, startIndex, indexSeparator);
 
   @override
@@ -254,15 +260,12 @@ class _ExtendedOrderedList extends OrderedListImpl implements _ExtendedBlock {
 
     final ListItem item = items.last;
 
-    final List<BlockNode> c = item.contents;
-    c.addAll(blocks);
+    item.contents.addAll(blocks);
   }
 
   @override
   void addItem() {
-    assert(this.items.isNotEmpty);
-
-    final NodeList<ListItem> items = this.items;
+    assert(items.isNotEmpty);
 
     items.add(astFactory.listItem(<BlockNodeImpl>[]));
   }
@@ -275,8 +278,8 @@ class _ExtendedOrderedList extends OrderedListImpl implements _ExtendedBlock {
 
 class _ExtendedUnorderedList extends UnorderedListImpl
     implements _ExtendedBlock {
-  _ExtendedUnorderedList(
-      Iterable<ListItem> items, bool tight, BulletType bulletType)
+  _ExtendedUnorderedList(Iterable<ListItem> items,
+      {bool tight, BulletType bulletType})
       : super(items, tight, bulletType);
 
   @override
@@ -285,16 +288,12 @@ class _ExtendedUnorderedList extends UnorderedListImpl
 
     final ListItem item = items.last;
 
-    final List<BlockNode> c = item.contents;
-
-    c.addAll(blocks);
+    item.contents.addAll(blocks);
   }
 
   @override
   void addItem() {
-    assert(this.items.isNotEmpty);
-
-    final NodeList<ListItem> items = this.items;
+    assert(items.isNotEmpty);
 
     items.add(astFactory.listItem(<BlockNodeImpl>[]));
   }
@@ -312,7 +311,8 @@ abstract class _Marker {
   bool isBlockquote;
   bool isList;
 
-  _Marker(this.startIndent, this.endIndent, this.offset, bool blockquote)
+  _Marker(this.startIndent, this.endIndent, this.offset, {bool blockquote})
+      // ignore: prefer_initializing_formals
       : isBlockquote = blockquote,
         isList = !blockquote;
 
@@ -323,12 +323,11 @@ abstract class _Marker {
 
 class _BlockquoteMarker extends _Marker {
   _BlockquoteMarker(int startIndent, int endIndent, int offset)
-      : super(startIndent, endIndent, offset, true);
+      : super(startIndent, endIndent, offset, blockquote: true);
 
   @override
-  _ExtendedBlock createBlock([Iterable<BlockNodeImpl> contents]) {
-    return new _ExtendedBlockquote(contents ?? <BlockNodeImpl>[]);
-  }
+  _ExtendedBlock createBlock([Iterable<BlockNodeImpl> contents]) =>
+      new _ExtendedBlockquote(contents ?? <BlockNodeImpl>[]);
 
   @override
   bool isSame(_Marker marker) => marker.isBlockquote;
@@ -338,14 +337,14 @@ class _UnorderedListMarker extends _Marker {
   BulletType bullet;
 
   _UnorderedListMarker(this.bullet, int startIndent, int endIndent, int offset)
-      : super(startIndent, endIndent, offset, false);
+      : super(startIndent, endIndent, offset, blockquote: false);
 
   @override
   _ExtendedBlock createBlock([Iterable<BlockNodeImpl> contents]) {
     final List<ListItem> items = <ListItem>[
       astFactory.listItem(contents ?? <BlockNodeImpl>[])
     ];
-    return new _ExtendedUnorderedList(items, true, bullet);
+    return new _ExtendedUnorderedList(items, tight: true, bulletType: bullet);
   }
 
   @override
@@ -359,7 +358,7 @@ class _OrderedListMarker extends _Marker {
 
   _OrderedListMarker(this.indexSeparator, this.startIndex, int startIndent,
       int endIndent, int offset)
-      : super(startIndent, endIndent, offset, false);
+      : super(startIndent, endIndent, offset, blockquote: false);
 
   @override
   _ExtendedBlock createBlock([Iterable<BlockNodeImpl> contents]) {
@@ -367,14 +366,13 @@ class _OrderedListMarker extends _Marker {
       astFactory.listItem(contents ?? <BlockNodeImpl>[])
     ];
 
-    return new _ExtendedOrderedList(items, true, startIndex, indexSeparator);
+    return new _ExtendedOrderedList(items,
+        tight: true, startIndex: startIndex, indexSeparator: indexSeparator);
   }
 
   @override
-  bool isSame(_Marker marker) {
-    return marker is _OrderedListMarker &&
-        marker.indexSeparator == indexSeparator;
-  }
+  bool isSame(_Marker marker) =>
+      marker is _OrderedListMarker && marker.indexSeparator == indexSeparator;
 }
 
 // Parser
@@ -434,9 +432,8 @@ class _InnerBlocksParser extends AbstractParser<Iterable<BlockNodeImpl>> {
   }
 
   @override
-  ParseResult<Iterable<BlockNodeImpl>> parse(String text, int offset) {
-    // ignore: parameter_assignments
-    offset = 0; // Force 0
+  ParseResult<Iterable<BlockNodeImpl>> parse(String text, int off) {
+    int offset = 0; // Force 0
     final List<BlockNodeImpl> blocks = <BlockNodeImpl>[];
 
     final int length = text.length;
@@ -559,6 +556,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
     final int length = line.length;
     while (off < length) {
+      // ignore: invariant_booleans
       while (off < length) {
         final int codeUnit = line.codeUnitAt(off);
         if (codeUnit == spaceCodeUnit) {
@@ -572,6 +570,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
         }
       }
 
+      // ignore: invariant_booleans
       if (off == length) {
         break;
       }
@@ -595,8 +594,8 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
       if (off < length) {
         final int codeUnit = line.codeUnitAt(off);
         if (codeUnit == spaceCodeUnit || codeUnit == tabCodeUnit) {
-          result.add(_markerFromString(
-              markerString, startIndent, ind + 1, off + 1));
+          result.add(
+              _markerFromString(markerString, startIndent, ind + 1, off + 1));
           if (codeUnit == spaceCodeUnit) {
             ind++;
             off++;
@@ -611,8 +610,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
           break;
         }
       } else {
-        result.add(
-            _markerFromString(markerString, startIndent, ind + 1, off));
+        result.add(_markerFromString(markerString, startIndent, ind + 1, off));
         break;
       }
     }
@@ -737,8 +735,8 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
           // Checking for thematic break;
           final int thematicTestIndent = skipIndent(thematicTest, 0);
-          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent)
-              && thematicTestIndent < stack.last.marker.endIndent) {
+          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent) &&
+              thematicTestIndent < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             stack.flush(stackIndex, result);
             markers = markers.take(markersIndex);
@@ -753,7 +751,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
             stack.flush(stackIndex + 1, result);
             if (stack.last.afterEmpty) {
               // We have empty line between list items, list is loose.
-              stack.setTight(false);
+              stack.setTight(tight: false);
             }
             // And adding new item.
             stack.addItem(marker);
@@ -772,6 +770,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
       // Here we've processed whole stack or whole markers list, or both
 
+      // ignore: invariant_booleans
       if (markers.isEmpty && stack.isEmpty) {
         // No marker found and we at the top.
         // Most likely thematic break had broke parsing.
@@ -789,6 +788,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
             : lineResult.value;
         isEmpty = isOnlyWhitespace(lineRest);
 
+        // ignore: invariant_booleans
         while (stackIndex < stack.length) {
           final _StackItem stackItem = stack[stackIndex];
 
@@ -806,7 +806,9 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
             // Trying to detect lazy line mode by amount of space.
 
             if (isEmpty) {
-              stack..setAfterEmpty(true, blockquoteIndex + 1)..addLine('');
+              stack
+                ..setAfterEmpty(afterEmpty: true, skip: blockquoteIndex + 1)
+                ..addLine('');
               break;
             }
 
@@ -816,7 +818,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
             }
 
             final String lineRestWithoutIndent =
-                removeIndent(lineRest, stackMarkerIndent, false);
+                removeIndent(lineRest, stackMarkerIndent, allowLess: false);
             if (lineRestWithoutIndent == null) {
               // Where's not enough space for strict line.
               lazyLineMode = stackIndex;
@@ -847,8 +849,8 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
           // Checking for thematic break;
           final int thematicTestIndent = skipIndent(thematicTest, 0);
-          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent)
-              && thematicTestIndent < stack.last.marker.endIndent) {
+          if (thematicBreakLookup.isFound(thematicTest, thematicTestIndent) &&
+              thematicTestIndent < stack.last.marker.endIndent) {
             // This line should be treated as standalone thematic break.
             break;
           }
@@ -858,7 +860,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
           }
 
           if (stack.isNotEmpty && stack.last.afterEmpty) {
-            stack.last.setTight(false);
+            stack.last.setTight(tight: false);
           }
 
           stack.add(new _StackItem(marker, _innerBlocksParser));
@@ -910,7 +912,7 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
           }
           if (stack.length - 1 >= lazyLineMode) {
             // Lazy line was applied
-            stack.setAfterEmpty(false);
+            stack.setAfterEmpty(afterEmpty: false);
             off = lineResult.offset;
             continue;
           }
@@ -938,14 +940,16 @@ class BlockquoteListParser extends AbstractParser<BlockNodeImpl> {
 
         // If contains tab for indented code line, then replace with spaces.
         final int startCodeIndent = stack.last.marker.endIndent;
-        final String lineRestWithoutCodeIndent =
-            removeIndent(lineRest, 4, false, startCodeIndent);
+        final String lineRestWithoutCodeIndent = removeIndent(lineRest, 4,
+            allowLess: false, startIndent: startCodeIndent);
         if (lineRestWithoutCodeIndent != null) {
           lineRest = (' ' * 4) + lineRestWithoutCodeIndent;
         }
 
         // Adding line to stack
-        stack..addLine(lineRest)..setAfterEmpty(false);
+        stack
+          ..addLine(lineRest)
+          ..setAfterEmpty(afterEmpty: false);
       }
 
       off = lineResult.offset;

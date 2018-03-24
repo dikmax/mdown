@@ -86,13 +86,13 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
       off++;
     }
     if (off == length) {
-      return new ParseResult<Target>.failure();
+      return const ParseResult<Target>.failure();
     }
 
     // Parsing href
     final Match hrefMatch = _hrefRegExp.matchAsPrefix(text, off);
     if (hrefMatch == null) {
-      return new ParseResult<Target>.failure();
+      return const ParseResult<Target>.failure();
     }
 
     String href = hrefMatch[0];
@@ -118,11 +118,10 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
       off++;
     }
     if (off == length) {
-      return new ParseResult<Target>.failure();
+      return const ParseResult<Target>.failure();
     }
 
-    final TargetImpl result =
-        astFactory.target(href, null);
+    final TargetImpl result = astFactory.target(href, null);
 
     // Maybe parsing title.
     int codeUnit = text.codeUnitAt(off);
@@ -143,12 +142,12 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
           break;
         } else if (codeUnit == openParenCodeUnit &&
             endCodeUnit == closeParenCodeUnit) {
-          return new ParseResult<Target>.failure();
+          return const ParseResult<Target>.failure();
         }
       }
 
       if (off >= length) {
-        return new ParseResult<Target>.failure();
+        return const ParseResult<Target>.failure();
       }
 
       String title = text.substring(startOffset, off - 1);
@@ -156,6 +155,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
       result.title = title;
 
       // Skip whitespace.
+      // ignore: invariant_booleans
       while (off < length) {
         final int codeUnit = text.codeUnitAt(off);
         if (codeUnit != spaceCodeUnit &&
@@ -167,14 +167,14 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
         off++;
       }
       if (off == length) {
-        return new ParseResult<Target>.failure();
+        return const ParseResult<Target>.failure();
       }
 
       codeUnit = text.codeUnitAt(off);
     }
 
     if (codeUnit != closeParenCodeUnit) {
-      return new ParseResult<Target>.failure();
+      return const ParseResult<Target>.failure();
     }
 
     off++;
@@ -191,16 +191,16 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
     if (text.codeUnitAt(off) == exclamationMarkCodeUnit) {
       off++;
       if (off == length) {
-        return new ParseResult<InlineNodeImpl>.failure();
+        return const ParseResult<InlineNodeImpl>.failure();
       }
       isImage = true;
     }
     if (text.codeUnitAt(off) != openBracketCodeUnit) {
-      return new ParseResult<InlineNodeImpl>.failure();
+      return const ParseResult<InlineNodeImpl>.failure();
     }
     off++;
     if (off == length) {
-      return new ParseResult<InlineNodeImpl>.failure();
+      return const ParseResult<InlineNodeImpl>.failure();
     }
 
     final int startOffset = off;
@@ -238,7 +238,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
         // Escaped char
         off += 2;
         if (off > length) {
-          off == length;
+          off = length;
           break;
         }
         continue;
@@ -291,8 +291,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
         // Test link in parens.
         final int codeUnit = text.codeUnitAt(off);
         if (codeUnit == openParenCodeUnit) {
-          final ParseResult<Target> targetResult =
-              _parseTarget(text, off + 1);
+          final ParseResult<Target> targetResult = _parseTarget(text, off + 1);
           if (targetResult.isSuccess) {
             final Target target = targetResult.value;
 
@@ -304,8 +303,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
             off = targetResult.offset;
             ExtendedAttributes attributes;
             if (container.options.linkAttributes) {
-              if (off < length &&
-                  text.codeUnitAt(off) == openBraceCodeUnit) {
+              if (off < length && text.codeUnitAt(off) == openBraceCodeUnit) {
                 final ParseResult<Attributes> attributesResult =
                     container.attributesParser.parse(text, off);
                 if (attributesResult.isSuccess) {
@@ -353,8 +351,7 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
                       labelInlines, reference, attributes)
                   : astFactory.referenceLink(
                       labelInlines, reference, attributes);
-              return new ParseResult<InlineNodeImpl>.success(
-                  result, off + 2);
+              return new ParseResult<InlineNodeImpl>.success(result, off + 2);
             }
             return new ParseResult<InlineNodeImpl>.success(
                 new StrImpl(isImage ? '![' : '['), startOffset);

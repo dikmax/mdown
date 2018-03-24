@@ -66,7 +66,7 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
     if (htmlBlock6Match != null) {
       final String tag = htmlBlock6Match[1];
       if (!blockTags.contains(tag.toLowerCase())) {
-        return new ParseResult<BlockNodeImpl>.failure();
+        return const ParseResult<BlockNodeImpl>.failure();
       }
 
       final int length = text.length;
@@ -87,6 +87,6 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
           new HtmlRawBlockImpl(result.toString()), off);
     }
 
-    return new ParseResult<BlockNodeImpl>.failure();
+    return const ParseResult<BlockNodeImpl>.failure();
   }
 }

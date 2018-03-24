@@ -6,22 +6,22 @@ import 'package:mdown/entities.dart';
 import 'package:mdown/src/bit_set.dart';
 import 'package:mdown/src/code_units.dart';
 
+/// List of all escapable characters
 const String escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+/// Cache of codes set.
 Set<int> _escapableCodesSet;
 
-Set<int> get escapableCodes {
-  if (_escapableCodesSet == null) {
-    _escapableCodesSet = new BitSet(256);
-    _escapableCodesSet
-        .addAll(escapable.split('').map((String s) => s.codeUnitAt(0)));
-  }
+/// Getter for set of escapable codes.
+Set<int> get escapableCodes => _escapableCodesSet ??= new BitSet(256)
+  ..addAll(escapable.split('').map((String s) => s.codeUnitAt(0)));
 
-  return _escapableCodesSet;
-}
-
+/// RegExp for testing 6th rule of html parsing. See CommonMark spec.
 final Pattern htmlBlock6Test = new RegExp(
   r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 );
+
+/// List of block html tags.
 final Set<String> blockTags = new HashSet<String>.from(<String>[
   'address',
   'article',
@@ -89,29 +89,44 @@ final Set<String> blockTags = new HashSet<String>.from(<String>[
   'ul'
 ]);
 
+/// RegExp for parsing html tag name
 const String htmlTagName = '[A-Za-z][A-Za-z0-9-]*';
+
+/// RegExp for parsing html attribute name
 const String htmlAttributeName = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
+
+/// RegExp for parsing html unquoted attribute value
 const String htmlUnquotedValue = "[^\"'=<>`\\x00-\\x20]+";
+
+/// RegExp for parsing html single-quoted attribute value
 const String htmlSingleQuotedValue = "'[^']*'";
+
+/// RegExp for parsing html double-quoted attribute value
 const String htmlDoubleQuotedValue = '"[^"]*"';
-const String htmlAttributeValue = "(?:" +
-    htmlUnquotedValue +
-    "|" +
-    htmlSingleQuotedValue +
-    "|" +
-    htmlDoubleQuotedValue +
-    ")";
-const String htmlAttributeValueSpec =
-    "(?:" + "\\s*=" + "\\s*" + htmlAttributeValue + ")";
+
+/// RegExp for parsing html attribute value
+const String htmlAttributeValue =
+    '(?:$htmlUnquotedValue|$htmlSingleQuotedValue|$htmlDoubleQuotedValue)';
+
+/// RegExp for parsing html attribute value by specification
+/// (with `=`)
+const String htmlAttributeValueSpec = '(?:\\s*=\\s*$htmlAttributeValue)';
+
+/// RegExp for parsing html attribute
 const String htmlAttribute =
-    "(?:" + "\\s+" + htmlAttributeName + htmlAttributeValueSpec + "?)";
-const String htmlOpenTag = "<" + htmlTagName + htmlAttribute + "*" + "\\s*/?>";
-const String htmlCloseTag = "</" + htmlTagName + "\\s*>";
+    '(?:\\s+$htmlAttributeName$htmlAttributeValueSpec?)';
+
+/// RegExp for parsing html open tag
+const String htmlOpenTag = '<$htmlTagName$htmlAttribute*\\s*/?>';
+
+/// RegExp for parsing html close tag
+const String htmlCloseTag = '</$htmlTagName\\s*>';
 
 final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
 
-String removeIndent(String line, int amount, bool allowLess,
-    [int startIndent = 0]) {
+/// Removes indent from line
+String removeIndent(String line, int amount,
+    {bool allowLess, int startIndent = 0}) {
   String result = line;
   int offset = 0;
   int indent = startIndent;
@@ -133,20 +148,28 @@ String removeIndent(String line, int amount, bool allowLess,
   return null;
 }
 
+/// Trim string and replace multiple spaces with one.
 String trimAndReplaceSpaces(String s) =>
     s.trim().replaceAll(_clashSpaceRegExp, ' ');
 
+/// Normalize link or image reference name
 String normalizeReference(String s) => trimAndReplaceSpaces(s).toUpperCase();
 
-final RegExp escapeRegExp =
-    new RegExp(r'\\([!"#$%&' + "'" + r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');
+/// Escape RegExp
+// ignore: prefer_adjacent_string_concatenation
+final RegExp escapeRegExp = new RegExp(r'\\([!"#$%&' +
+    "'" +
+    r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');
 
+/// Entity RegExp
 final RegExp entityRegExp = new RegExp(
     '&(?:#[xX]([A-Fa-f0-9]{1,8})|#([0-9]{1,8})|([A-Za-z][A-Za-z0-9]{1,31}));');
 
+/// Regexp for finding escapes and references.
 final RegExp unescapeUnreferenceRegExp =
     new RegExp(escapeRegExp.pattern + '|' + entityRegExp.pattern);
 
+/// RegExp for unescaped reference
 final RegExp unescapeUnrefereceTest = new RegExp(r'[\\&]');
 
 /// Unescapes (`\!` -> `!`) and unreferences (`&amp;` -> `&`) string.
@@ -189,6 +212,7 @@ String _unescapeUnreferenceReplacement(Match match) {
   return match[0];
 }
 
+/// Returns new offset without indent.
 int skipIndent(String text, int offset) {
   int off = offset;
 
@@ -230,12 +254,14 @@ int skipIndent(String text, int offset) {
   return off;
 }
 
+/// Gets first non-indent char.
 int getBlockFirstChar(String text, int offset) {
   final int nonIndentOffset = skipIndent(text, offset);
 
   return nonIndentOffset != -1 ? text.codeUnitAt(nonIndentOffset) : -1;
 }
 
+/// Trims string left (only tabs and spaces)
 String trimLeft(String text) {
   int offset = 0;
   final int length = text.length;
@@ -252,6 +278,7 @@ String trimLeft(String text) {
   return '';
 }
 
+/// Checks if string consist of only whitespaces.
 bool isOnlyWhitespace(String text) {
   int offset = 0;
   final int length = text.length;

@@ -1,13 +1,13 @@
 library mdown.test.reference_resolver;
 
-@t.Skip("Not implemented")
+@t.Skip('Not implemented')
 import 'package:test/test.dart' as t;
 
 import 'package:mdown/mdown.dart';
 import 'package:mdown/ast/standard_ast_factory.dart';
 
 Target _linkResolver(String normalizedReference, String reference) {
-  if (reference == "reference") {
+  if (reference == 'reference') {
     return astFactory.target(reference, null);
   } else {
     return null;
@@ -48,18 +48,18 @@ This is a [link].
 void referenceResolverTests() {
   const Options options = const Options(linkResolver: _linkResolver);
 
-  t.group("Custom reference resolver test", () {
-    t.test("Should leave defined links as is", () {
+  t.group('Custom reference resolver test', () {
+    t.test('Should leave defined links as is', () {
       final String d1 = markdownToHtml(_md1Test, options);
       final String d2 = markdownToHtml(_md1Pattern);
       t.expect(d1, t.equals(d2));
     });
-    t.test("May resolve undefined links", () {
+    t.test('May resolve undefined links', () {
       final String d1 = markdownToHtml(_md2Test, options);
       final String d2 = markdownToHtml(_md2Pattern);
       t.expect(d1, t.equals(d2));
     });
-    t.test("May not resolve undefined links", () {
+    t.test('May not resolve undefined links', () {
       final String d1 = markdownToHtml(_md3Test, options);
       final String d2 = markdownToHtml(_md3Pattern);
       t.expect(d1, t.equals(d2));

@@ -33,6 +33,6 @@ class InlineHtmlParser extends AbstractParser<InlineNodeImpl> {
       }
     }
 
-    return new ParseResult<InlineNodeImpl>.failure();
+    return const ParseResult<InlineNodeImpl>.failure();
   }
 }

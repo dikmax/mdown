@@ -162,8 +162,7 @@ class AstFactoryImpl implements AstFactory {
       new TableCellImpl(contents);
 
   @override
-  Target target(String link, String title) =>
-      new TargetImpl(link, title);
+  Target target(String link, String title) => new TargetImpl(link, title);
 
   @override
   TexMathDisplay texMathDisplay(String contents) =>

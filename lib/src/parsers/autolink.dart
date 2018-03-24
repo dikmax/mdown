@@ -38,6 +38,6 @@ class AutolinkParser extends AbstractParser<InlineNodeImpl> {
           new AutolinkEmailImpl(email), emailMatch.end);
     }
 
-    return new ParseResult<InlineNodeImpl>.failure();
+    return const ParseResult<InlineNodeImpl>.failure();
   }
 }

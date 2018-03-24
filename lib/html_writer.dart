@@ -12,13 +12,10 @@ final RegExp _htmlEntityRegExp = new RegExp(
     caseSensitive: false);
 
 String _urlEncode(String url) {
-  String result = url.splitMapJoin(_urlEncodeRegExp,
-      onMatch: (Match m) => m.group(0),
-      onNonMatch: (String s) => Uri.encodeFull(s));
-  result = result.splitMapJoin(_htmlEntityRegExp,
-      onMatch: (Match m) => m.group(0),
-      onNonMatch: (String s) => _htmlEscape(s));
-  return result;
+  final String result = url.splitMapJoin(_urlEncodeRegExp,
+      onMatch: (Match m) => m.group(0), onNonMatch: Uri.encodeFull);
+  return result.splitMapJoin(_htmlEntityRegExp,
+      onMatch: (Match m) => m.group(0), onNonMatch: _htmlEscape);
 }
 
 String _htmlEscape(String str) {
@@ -72,8 +69,8 @@ String _htmlEscape(String str) {
 class _InfoStringVisitor extends SimpleAstVisitor<String> {
   @override
   String visitInfoString(InfoString node) {
-    if (node.language == "") {
-      return "";
+    if (node.language == '') {
+      return '';
     }
     return ' class="language-${_htmlEscape(node.language)}"';
   }
@@ -83,9 +80,8 @@ final _InfoStringVisitor _infoStringVisitor = new _InfoStringVisitor();
 
 class _IdAttributesVisitor extends SimpleAstVisitor<String> {
   @override
-  String visitIdentifierAttribute(IdentifierAttribute node) {
-    return ' id=\"${node.identifier}\"';
-  }
+  String visitIdentifierAttribute(IdentifierAttribute node) =>
+      ' id=\"${node.identifier}\"';
 
   @override
   String visitExtendedAttributes(ExtendedAttributes node) {
@@ -105,9 +101,7 @@ final _IdAttributesVisitor _idAttributesVisitor = new _IdAttributesVisitor();
 
 class _ClassAttributesVisitor extends SimpleAstVisitor<String> {
   @override
-  String visitClassAttribute(ClassAttribute node) {
-    return node.className;
-  }
+  String visitClassAttribute(ClassAttribute node) => node.className;
 
   @override
   String visitExtendedAttributes(ExtendedAttributes node) {
@@ -127,9 +121,8 @@ _ClassAttributesVisitor _classAttributesVisitor = new _ClassAttributesVisitor();
 
 class _KeyValueAttributesVisitor extends SimpleAstVisitor<String> {
   @override
-  String visitKeyValueAttribute(KeyValueAttribute node) {
-    return ' ${node.key}="${node.value}"';
-  }
+  String visitKeyValueAttribute(KeyValueAttribute node) =>
+      ' ${node.key}="${node.value}"';
 
   @override
   String visitExtendedAttributes(ExtendedAttributes node) {
@@ -167,7 +160,7 @@ class _ImageLabelVisitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitHardLineBreak(HardLineBreak node) {
-    _sb.write(" ");
+    _sb.write(' ');
     return null;
   }
 
@@ -233,7 +226,7 @@ class _ImageLabelVisitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitSpace(Space node) {
-    _sb.write(" " * node.amount);
+    _sb.write(' ' * node.amount);
     return null;
   }
 
@@ -245,7 +238,7 @@ class _ImageLabelVisitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitTab(Tab node) {
-    _sb.write("\t" * node.amount);
+    _sb.write('\t' * node.amount);
     return null;
   }
 
@@ -308,24 +301,24 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitCode(Code node) {
-    _sb.write("<code");
+    _sb.write('<code');
     node.attributes?.accept(this);
-    _sb..write(">")..write(_htmlEscape(node.contents))..write("</code>");
+    _sb..write('>')..write(_htmlEscape(node.contents))..write('</code>');
     return null;
   }
 
   @override
   Null visitCodeBlock(CodeBlock node) {
-    _sb.write("<pre");
+    _sb.write('<pre');
     node.attributes?.accept(this);
     _sb
-      ..write("><code")
+      ..write('><code')
       ..write(node.attributes?.accept(_infoStringVisitor) ?? '')
-      ..write(">");
+      ..write('>');
     for (String line in node.contents) {
       _sb.writeln(_htmlEscape(line));
     }
-    _sb.write("</code></pre>");
+    _sb.write('</code></pre>');
     return null;
   }
 
@@ -337,9 +330,9 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitEmphasis(Emphasis node) {
-    _sb.write("<em>");
+    _sb.write('<em>');
     node.contents.accept(this);
-    _sb.write("</em>");
+    _sb.write('</em>');
     return null;
   }
 
@@ -354,17 +347,17 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitHardLineBreak(HardLineBreak node) {
-    _sb.write("<br/>\n");
+    _sb.write('<br/>\n');
     return null;
   }
 
   @override
   Null visitHeading(Heading node) {
-    _sb..write("<h")..write(node.level);
+    _sb..write('<h')..write(node.level);
     node.attributes?.accept(this);
-    _sb.write(">");
+    _sb.write('>');
     node.contents?.accept(this);
-    _sb..write("</h")..write(node.level)..write('>');
+    _sb..write('</h')..write(node.level)..write('>');
     return null;
   }
 
@@ -392,7 +385,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
       _sb..write(' title="')..write(_htmlEscape(node.title))..write('"');
     }
     node.attributes?.accept(this);
-    _sb.write(" />");
+    _sb.write(' />');
     return null;
   }
 
@@ -418,9 +411,9 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
     if (node.parent is ListBlock) {
       final ListBlock listBlock = node.parent;
       if (listBlock.tight) {
-        _sb.write("<li>");
+        _sb.write('<li>');
         _writeBlocks(node.contents, tight: true);
-        _sb.write("</li>\n");
+        _sb.write('</li>\n');
       } else {
         if (node.contents.isEmpty) {
           _sb.write('<li></li>\n');
@@ -442,22 +435,22 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitOrderedList(OrderedList node) {
-    _sb.write("<ol");
+    _sb.write('<ol');
     if (node.startIndex != 1) {
       _sb.write(' start="${node.startIndex}"');
     }
-    _sb.write(">\n");
+    _sb.write('>\n');
     node.visitChildren(this);
-    _sb.write("</ol>");
+    _sb.write('</ol>');
 
     return null;
   }
 
   @override
   Null visitPara(Para node) {
-    _sb.write("<p>");
+    _sb.write('<p>');
     node.visitChildren(this);
-    _sb.write("</p>");
+    _sb.write('</p>');
     return null;
   }
 
@@ -499,7 +492,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitSpace(Space node) {
-    _sb.write(" " * node.amount);
+    _sb.write(' ' * node.amount);
     return null;
   }
 
@@ -519,68 +512,68 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitSubscript(Subscript node) {
-    _sb.write("<sub>");
+    _sb.write('<sub>');
     node.contents.accept(this);
-    _sb.write("</sub>");
+    _sb.write('</sub>');
     return null;
   }
 
   @override
   Null visitSuperscript(Superscript node) {
-    _sb.write("<sup>");
+    _sb.write('<sup>');
     node.contents.accept(this);
-    _sb.write("</sup>");
+    _sb.write('</sup>');
     return null;
   }
 
   @override
   Null visitStrong(Strong node) {
-    _sb.write("<strong>");
+    _sb.write('<strong>');
     node.contents.accept(this);
-    _sb.write("</strong>");
+    _sb.write('</strong>');
     return null;
   }
 
   @override
   Null visitTab(Tab node) {
-    _sb.write("\t" * node.amount);
+    _sb.write('\t' * node.amount);
     return null;
   }
 
   @override
   Null visitTable(Table node) {
-    _sb.write("<table>");
+    _sb.write('<table>');
     final int alignmentLength = node.alignment.length;
     if (node.headers != null) {
-      _sb.write("<thead><tr>");
+      _sb.write('<thead><tr>');
       final int length = node.headers.length;
       for (int i = 0; i < length; i += 1) {
-        _sb.write("<th");
+        _sb.write('<th');
         if (i < alignmentLength) {
           _sb.write(alignmentToStyleString(node.alignment[i]));
         }
-        _sb.write(">");
+        _sb.write('>');
         node.headers[i].accept(this);
-        _sb.write("</th>");
+        _sb.write('</th>');
       }
-      _sb.write("</tr></thead>");
+      _sb.write('</tr></thead>');
     }
-    _sb.write("<tbody>");
+    _sb.write('<tbody>');
     for (TableRow row in node.contents) {
-      _sb.write("<tr>");
+      _sb.write('<tr>');
       final int length = row.contents.length;
       for (int i = 0; i < length; i += 1) {
-        _sb.write("<td");
+        _sb.write('<td');
         if (i < alignmentLength) {
           _sb.write(alignmentToStyleString(node.alignment[i]));
         }
-        _sb.write(">");
+        _sb.write('>');
         row.contents[i].accept(this);
-        _sb.write("</td>");
+        _sb.write('</td>');
       }
-      _sb.write("</tr>");
+      _sb.write('</tr>');
     }
-    _sb.write("</tbody></table>");
+    _sb.write('</tbody></table>');
     return null;
   }
 
@@ -626,15 +619,15 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitThematicBreak(ThematicBreak node) {
-    _sb.write("<hr/>");
+    _sb.write('<hr/>');
     return null;
   }
 
   @override
   Null visitUnorderedList(UnorderedList node) {
-    _sb.write("<ul>\n");
+    _sb.write('<ul>\n');
     node.visitChildren(this);
-    _sb.write("</ul>");
+    _sb.write('</ul>');
 
     return null;
   }

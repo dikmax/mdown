@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 /// Main method for custom tests reporter
 void main() {
@@ -8,7 +8,7 @@ void main() {
 
   final Map<int, dynamic> tests = new HashMap<int, dynamic>();
   while ((line = stdin.readLineSync()) != null) {
-    final dynamic res = JSON.decode(line);
+    final dynamic res = json.decode(line);
     final String type = res['type'];
     if (type == 'done') {
       break;

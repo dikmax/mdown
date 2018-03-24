@@ -8,6 +8,7 @@ dartanalyzer --strong --fatal-warnings \
   lib/mdown.dart \
   test/library_test.dart \
   tool/build.dart \
+  tool/build_entities.dart \
   tool/reporter.dart
 
 # Run the tests.

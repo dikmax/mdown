@@ -27,8 +27,7 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
       off += 1;
       if (off >= length) {
         // Just a `$` at the end of string.
-        return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$$'), off);
+        return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$$'), off);
       }
     } else {
       if (codeUnit == spaceCodeUnit ||
@@ -36,8 +35,7 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
           codeUnit == newLineCodeUnit ||
           codeUnit == carriageReturnCodeUnit ||
           (codeUnit >= zeroCodeUnit && codeUnit <= nineCodeUnit)) {
-        return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$'), off);
+        return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), off);
       }
     }
 
@@ -81,8 +79,7 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
           lastCodeUnit == spaceCodeUnit ||
           lastCodeUnit == tabCodeUnit) {
         // Inline math cannot end with space.
-        return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(r'$'), off);
+        return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), off);
       }
 
       math = unescapeAndUnreference(math);

@@ -193,7 +193,6 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
       return new ParseResult<BlockNodeImpl>.success(
           new CombiningBlockNodeImpl(result), off);
     }
-    return new ParseResult<BlockNodeImpl>.success(
-        new ParaImpl(inlines), off);
+    return new ParseResult<BlockNodeImpl>.success(new ParaImpl(inlines), off);
   }
 }

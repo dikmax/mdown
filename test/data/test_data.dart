@@ -88,4 +88,4 @@ final Map<String, String> pipeTables = _$pipeTablesTests;
 @EmbedBlnsTests('blns.base64.json',
     'https://raw.githubusercontent.com/minimaxir/big-list-of-naughty-strings/master/blns.base64.json')
 final Iterable<String> blns = _$blnsTests
-    .map((String str) => UTF8.decode(BASE64.decode(str), allowMalformed: true));
+    .map((String str) => utf8.decode(base64.decode(str), allowMalformed: true));

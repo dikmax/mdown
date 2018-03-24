@@ -15,7 +15,7 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
   FencedCodeParser(ParsersContainer container) : super(container);
 
   static final RegExp _fencedCodeStartTest =
-    new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
+      new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
@@ -53,7 +53,7 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
       }
 
       if (indent > 0) {
-        line = removeIndent(line, indent, true);
+        line = removeIndent(line, indent, allowLess: true);
       }
 
       code.add(line);

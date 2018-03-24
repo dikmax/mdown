@@ -248,88 +248,75 @@ const int nonBreakableSpaceCodeUnit = 160;
 Set<int> _spacesSet;
 
 /// Unicode space chars.
-Set<int> get spaces {
-  if (_spacesSet == null) {
-    _spacesSet = new BitSet(65536);
-    _spacesSet.addAll(<int>[
-      formFeedCodeUnit,
-      spaceCodeUnit,
-      newLineCodeUnit,
-      carriageReturnCodeUnit,
-      tabCodeUnit,
-      verticalTabCodeUnit,
-      nonBreakableSpaceCodeUnit,
-      0x1680,
-      0x180e,
-      0x2000,
-      0x2001,
-      0x2002,
-      0x2003,
-      0x2004,
-      0x2005,
-      0x2006,
-      0x2007,
-      0x2008,
-      0x2009,
-      0x200a,
-      0x2028,
-      0x2029,
-      0x202f,
-      0x205f,
-      0x3000,
-      0xfeff,
-    ]);
-  }
-
-  return _spacesSet;
-}
+Set<int> get spaces => _spacesSet ??= new BitSet(65536)
+  ..addAll(<int>[
+    formFeedCodeUnit,
+    spaceCodeUnit,
+    newLineCodeUnit,
+    carriageReturnCodeUnit,
+    tabCodeUnit,
+    verticalTabCodeUnit,
+    nonBreakableSpaceCodeUnit,
+    0x1680,
+    0x180e,
+    0x2000,
+    0x2001,
+    0x2002,
+    0x2003,
+    0x2004,
+    0x2005,
+    0x2006,
+    0x2007,
+    0x2008,
+    0x2009,
+    0x200a,
+    0x2028,
+    0x2029,
+    0x202f,
+    0x205f,
+    0x3000,
+    0xfeff,
+  ]);
 
 Set<int> _punctuationSet;
 
 /// Unicode puctuation chars.
-Set<int> get punctuation {
-  if (_punctuationSet == null) {
-    _punctuationSet = new BitSet(0x3000);
-    _punctuationSet
-      ..addAll(<int>[
-        backslashCodeUnit,
-        singleQuoteCodeUnit,
-        exclamationMarkCodeUnit,
-        doubleQuoteCodeUnit,
-        sharpCodeUnit,
-        dollarCodeUnit,
-        percentCodeUnit,
-        ampersandCodeUnit,
-        openParenCodeUnit,
-        closeParenCodeUnit,
-        starCodeUnit,
-        plusCodeUnit,
-        commaCodeUnit,
-        minusCodeUnit,
-        dotCodeUnit,
-        slashCodeUnit,
-        colonCodeUnit,
-        semicolonCodeUnit,
-        lessThanCodeUnit,
-        equalCodeUnit,
-        greaterThanCodeUnit,
-        questionMarkCodeUnit,
-        atSignCodeUnit,
-        openBracketCodeUnit,
-        closeBracketCodeUnit,
-        caretCodeUnit,
-        underscoreCodeUnit,
-        backtickCodeUnit,
-        openBraceCodeUnit,
-        verticalBarCodeUnit,
-        closeBraceCodeUnit,
-        tildeCodeUnit
-      ])
-      ..addAll(new List<int>.generate(0x70, (int index) => 0x2000 + index,
-          growable: false))
-      ..addAll(new List<int>.generate(0x80, (int index) => 0x2e00 + index,
-          growable: false));
-  }
-
-  return _punctuationSet;
-}
+Set<int> get punctuation => _punctuationSet ??= new BitSet(0x3000)
+  ..addAll(<int>[
+    backslashCodeUnit,
+    singleQuoteCodeUnit,
+    exclamationMarkCodeUnit,
+    doubleQuoteCodeUnit,
+    sharpCodeUnit,
+    dollarCodeUnit,
+    percentCodeUnit,
+    ampersandCodeUnit,
+    openParenCodeUnit,
+    closeParenCodeUnit,
+    starCodeUnit,
+    plusCodeUnit,
+    commaCodeUnit,
+    minusCodeUnit,
+    dotCodeUnit,
+    slashCodeUnit,
+    colonCodeUnit,
+    semicolonCodeUnit,
+    lessThanCodeUnit,
+    equalCodeUnit,
+    greaterThanCodeUnit,
+    questionMarkCodeUnit,
+    atSignCodeUnit,
+    openBracketCodeUnit,
+    closeBracketCodeUnit,
+    caretCodeUnit,
+    underscoreCodeUnit,
+    backtickCodeUnit,
+    openBraceCodeUnit,
+    verticalBarCodeUnit,
+    closeBraceCodeUnit,
+    tildeCodeUnit
+  ])
+  ..addAll(new List<int>.generate(0x70, (int index) => 0x2000 + index,
+      growable: false))
+  ..addAll(new List<int>.generate(0x80, (int index) => 0x2e00 + index,
+      growable: false));

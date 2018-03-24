@@ -10,18 +10,18 @@ void serviceTests() {
   t.group('README examples test', () {
     t.test('Basic usage', () {
       t.expect(
-          markdownToHtml('# Hello world!'), t.equals("<h1>Hello world!</h1>"));
+          markdownToHtml('# Hello world!'), t.equals('<h1>Hello world!</h1>'));
     });
 
     t.test('Extensions 1', () {
-      final Options options = const Options(superscript: true);
+      const Options options = const Options(superscript: true);
       final String res = markdownToHtml('Hello world!\n===', options);
-      t.expect(res, t.equals("<h1>Hello world!</h1>"));
+      t.expect(res, t.equals('<h1>Hello world!</h1>'));
     });
 
     t.test('Extensions 2', () {
       final String res = markdownToHtml('Hello world!\n===', Options.strict);
-      t.expect(res, t.equals("<h1>Hello world!</h1>"));
+      t.expect(res, t.equals('<h1>Hello world!</h1>'));
     });
 
     t.test('Fenced code attributes', () {
@@ -59,13 +59,13 @@ void serviceTests() {
     });
 
     t.test('Link resolver', () {
-      final String library = "mdown";
-      final String version = "0.11.0";
+      const String library = 'mdown';
+      const String version = '0.11.0';
       Target linkResolver(String normalizedReference, String reference) {
-        if (reference.startsWith("new ")) {
+        if (reference.startsWith('new ')) {
           final String className = reference.substring(4);
           return astFactory.target(
-              "http://www.dartdocs.org/documentation/$library/$version/index.html#$library/$library.$className@id_$className-",
+              'http://www.dartdocs.org/documentation/$library/$version/index.html#$library/$library.$className@id_$className-',
               null);
         } else {
           return null;
@@ -74,7 +74,7 @@ void serviceTests() {
 
       final String res = markdownToHtml(
           'Hello world!\n===', new Options(linkResolver: linkResolver));
-      t.expect(res, t.equals("<h1>Hello world!</h1>"));
+      t.expect(res, t.equals('<h1>Hello world!</h1>'));
     });
   });
 }

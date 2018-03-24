@@ -42,18 +42,18 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
       final ParseResult<String> secondLineResult =
           container.lineParser.parse(text, off);
       if (!secondLineResult.isSuccess) {
-        return new ParseResult<BlockNodeImpl>.failure();
+        return const ParseResult<BlockNodeImpl>.failure();
       }
 
       final String secondLine = secondLineResult.value;
       if (secondLine.isEmpty) {
-        return new ParseResult<BlockNodeImpl>.failure();
+        return const ParseResult<BlockNodeImpl>.failure();
       }
       final int secondLineFirstChar = getBlockFirstChar(secondLine, 0);
       if (secondLineFirstChar != verticalBarCodeUnit &&
           secondLineFirstChar != minusCodeUnit &&
           secondLineFirstChar != colonCodeUnit) {
-        return new ParseResult<BlockNodeImpl>.failure();
+        return const ParseResult<BlockNodeImpl>.failure();
       }
 
       off = secondLineResult.offset;
@@ -61,13 +61,13 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
       alignment = _getAlignment(secondLineColumns);
       if (alignment == null) {
         // No description here too.
-        return new ParseResult<BlockNodeImpl>.failure();
+        return const ParseResult<BlockNodeImpl>.failure();
       }
 
       headers = _parseRow(firstLineColumns ?? _splitToColumns(firstLine));
       if (headers == null) {
         // No headers on first line.
-        return new ParseResult<BlockNodeImpl>.failure();
+        return const ParseResult<BlockNodeImpl>.failure();
       }
     }
 

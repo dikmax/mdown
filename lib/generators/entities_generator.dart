@@ -18,7 +18,7 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
   @override
   Future<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) async {
-    final RegExp r = new RegExp(r"^&(.*);$");
+    final RegExp r = new RegExp(r'^&(.*);$');
     final HttpClient client = new HttpClient();
     final String annotationUrl = annotation.read('url').stringValue;
     final HttpClientRequest request =
@@ -26,20 +26,42 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
     final HttpClientResponse response = await request.close();
     final dynamic data =
         await response.transform(utf8.decoder).transform(json.decoder).first;
-    String result =
-        'final Map<String, String> _\$${element.displayName} = new HashMap<String, String>.from(<String, String>{\n';
+    final StringBuffer result =
+        new StringBuffer('final Map<String, String> _\$${
+            element
+                .displayName} = new HashMap<String, String>.from(<String, String>{\n');
+
     data.forEach((String k, dynamic v) {
       final Match match = r.firstMatch(k);
       if (match != null) {
         final String entity = match.group(1);
-        if (entity == 'dollar') {
-          result += '  "$entity": "\\\$",';
-        } else {
-          result += '  "$entity": ${json.encode(v['characters'])},';
+        result.write("'$entity': '");
+        switch (entity) {
+          case 'dollar':
+            result.write(r'\$');
+            break;
+
+          case 'apos':
+            result.write(r"\'");
+            break;
+
+          case 'bsol':
+            result.write(r'\\');
+            break;
+
+          case 'NewLine':
+            result.write(r'\n');
+            break;
+
+          default:
+            result.write(v['characters']);
         }
+
+        result.write("',");
       }
     });
 
-    return '$result});';
+    result.write('});');
+    return result.toString();
   }
 }

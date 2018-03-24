@@ -51,7 +51,12 @@ class BitSet extends SetMixin<int> {
   int get length => null;
 
   @override
-  int lookup(Object element) => contains(element) ? element as int : null;
+  int lookup(Object element) {
+    if (element is! int) {
+      throw new ArgumentError();
+    }
+    return contains(element) ? element : null;
+  }
 
   @override
   bool remove(Object element) {

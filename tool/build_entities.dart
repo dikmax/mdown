@@ -10,10 +10,10 @@ import 'package:mdown/generators/entities_generator.dart';
 
 /// Main method for generated code builder.
 Future<void> main(List<String> args) async {
-  await build([
+  await build(<BuilderApplication>[
     new BuilderApplication.forBuilder(
         'entities',
-        [
+        <BuilderFactory>[
           (BuilderOptions options) =>
               new PartBuilder(const <Generator>[const EntitiesGenerator()])
         ],

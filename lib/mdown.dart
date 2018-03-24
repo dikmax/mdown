@@ -13,8 +13,7 @@ export 'package:mdown/options.dart';
 String markdownToHtml(String markdown, [Options options]) {
   String result;
   if (options == null) {
-    result =
-        HtmlWriter.defaults.write(MarkdownParser.defaults.parse(markdown));
+    result = HtmlWriter.defaults.write(MarkdownParser.defaults.parse(markdown));
   } else {
     result = new HtmlWriter(options)
         .write(new MarkdownParser(options).parse(markdown));

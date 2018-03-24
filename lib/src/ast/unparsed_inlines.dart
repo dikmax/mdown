@@ -19,9 +19,11 @@ class UnparsedInlinesImpl extends InlineNodeImpl implements UnparsedInlines {
   UnparsedInlinesImpl(this._contents);
 
   @override
+  // ignore: unnecessary_getters_setters
   String get contents => _contents;
 
   @override
+  // ignore: unnecessary_getters_setters
   set contents(String contents) {
     _contents = contents;
   }
@@ -45,5 +47,6 @@ class UnparsedInlinesImpl extends InlineNodeImpl implements UnparsedInlines {
 
 /// Extended visitor for UnparsedInlines.
 abstract class UnparsedInlinesVisitor<R> extends AstVisitor<R> {
+  /// Visits all unparsed inlines.
   R visitUnparsedInlines(UnparsedInlines node);
 }

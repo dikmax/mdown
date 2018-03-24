@@ -11,20 +11,19 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
   RawTexParser(ParsersContainer container) : super(container);
 
   static final RegExp _startRegExp =
-      new RegExp(r'^ {0,3}\\begin\{([A-Za-z0-9_\-+*]+)\}');
+      new RegExp(r'^ {0,3}\\begin{([A-Za-z0-9_\-+*]+)\}');
 
   static String _escapeReplacement(Match match) => r'\' + match[0];
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
     int off = offset;
-    final ParseResult<String> lineRes =
-        container.lineParser.parse(text, off);
+    final ParseResult<String> lineRes = container.lineParser.parse(text, off);
     assert(lineRes.isSuccess);
 
     final Match startMatch = _startRegExp.firstMatch(lineRes.value);
     if (startMatch == null) {
-      return new ParseResult<BlockNodeImpl>.failure();
+      return const ParseResult<BlockNodeImpl>.failure();
     }
 
     String enviroment = startMatch[1];
@@ -39,8 +38,7 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
     final int length = text.length;
     bool found = false;
     while (off < length) {
-      final ParseResult<String> lineRes =
-          container.lineParser.parse(text, off);
+      final ParseResult<String> lineRes = container.lineParser.parse(text, off);
       assert(lineRes.isSuccess);
 
       off = lineRes.offset;
@@ -53,7 +51,7 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
     }
 
     if (!found) {
-      return new ParseResult<BlockNodeImpl>.failure();
+      return const ParseResult<BlockNodeImpl>.failure();
     }
 
     return new ParseResult<BlockNodeImpl>.success(

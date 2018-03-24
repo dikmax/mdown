@@ -37,6 +37,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       } else {
         changed = true;
         for (AstNodeImpl node in replacement) {
+          // ignore: avoid_as
           result.add(node as InlineNodeImpl);
         }
       }
@@ -59,6 +60,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       } else {
         changed = true;
         for (AstNodeImpl node in replacement) {
+          // ignore: avoid_as
           result.add(node as BlockNodeImpl);
         }
       }
@@ -78,6 +80,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       } else {
         changed = true;
         for (AstNodeImpl node in replacement) {
+          // ignore: avoid_as
           result.add(node as TableCellImpl);
         }
       }
@@ -97,6 +100,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       } else {
         changed = true;
         for (AstNodeImpl node in replacement) {
+          // ignore: avoid_as
           result.add(node as TableRowImpl);
         }
       }
@@ -119,6 +123,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       } else {
         changed = true;
         for (AstNodeImpl node in replacement) {
+          // ignore: avoid_as
           result.add(node as AttributeImpl);
         }
       }
@@ -141,6 +146,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       } else {
         changed = true;
         for (AstNodeImpl node in replacement) {
+          // ignore: avoid_as
           result.add(node as ListItemImpl);
         }
       }
@@ -153,10 +159,13 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
       _visitListItemNodeList(list) ?? list;
 
   @override
-  AutolinkImpl visitAutolink(Autolink node) => node as AutolinkImpl;
+  AutolinkImpl visitAutolink(Autolink node) =>
+      // ignore: avoid_as
+      node as AutolinkImpl;
 
   @override
   AutolinkEmailImpl visitAutolinkEmail(AutolinkEmail node) =>
+      // ignore: avoid_as
       node as AutolinkEmailImpl;
 
   @override
@@ -173,6 +182,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
   @override
   ClassAttributeImpl visitClassAttribute(ClassAttribute node) =>
+      // ignore: avoid_as
       node as ClassAttributeImpl;
 
   @override
@@ -214,6 +224,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
   @override
   HardLineBreakImpl visitHardLineBreak(HardLineBreak node) =>
+      // ignore: avoid_as
       node as HardLineBreakImpl;
 
   @override
@@ -229,18 +240,23 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
   @override
   HtmlRawBlockImpl visitHtmlRawBlock(HtmlRawBlock node) =>
+      // ignore: avoid_as
       node as HtmlRawBlockImpl;
 
   @override
   HtmlRawInlineImpl visitHtmlRawInline(HtmlRawInline node) =>
+      // ignore: avoid_as
       node as HtmlRawInlineImpl;
 
   @override
   IdentifierAttributeImpl visitIdentifierAttribute(IdentifierAttribute node) =>
+      // ignore: avoid_as
       node as IdentifierAttributeImpl;
 
   @override
-  InfoStringImpl visitInfoString(InfoString node) => node as InfoStringImpl;
+  InfoStringImpl visitInfoString(InfoString node) =>
+      // ignore: avoid_as
+      node as InfoStringImpl;
 
   @override
   InlineImageImpl visitInlineImage(InlineImage node) {
@@ -272,6 +288,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
   @override
   KeyValueAttributeImpl visitKeyValueAttribute(KeyValueAttribute node) =>
+      // ignore: avoid_as
       node as KeyValueAttributeImpl;
 
   @override
@@ -293,6 +310,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
   @override
   NonBreakableSpaceImpl visitNonBreakableSpace(NonBreakableSpace node) =>
+      // ignore: avoid_as
       node as NonBreakableSpaceImpl;
 
   @override
@@ -350,17 +368,24 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   }
 
   @override
-  SmartCharImpl visitSmartChar(SmartChar node) => node as SmartCharImpl;
+  SmartCharImpl visitSmartChar(SmartChar node) =>
+      // ignore: avoid_as
+      node as SmartCharImpl;
 
   @override
   SoftLineBreakImpl visitSoftLineBreak(SoftLineBreak node) =>
+      // ignore: avoid_as
       node as SoftLineBreakImpl;
 
   @override
-  SpaceImpl visitSpace(Space node) => node as SpaceImpl;
+  SpaceImpl visitSpace(Space node) =>
+      // ignore: avoid_as
+      node as SpaceImpl;
 
   @override
-  StrImpl visitStr(Str node) => node as StrImpl;
+  StrImpl visitStr(Str node) =>
+      // ignore: avoid_as
+      node as StrImpl;
 
   @override
   StrikeoutImpl visitStrikeout(Strikeout node) {
@@ -387,7 +412,9 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   }
 
   @override
-  TabImpl visitTab(Tab node) => node as TabImpl;
+  TabImpl visitTab(Tab node) =>
+      // ignore: avoid_as
+      node as TabImpl;
 
   @override
   TableImpl visitTable(Table node) {
@@ -397,7 +424,9 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
     return caption != node.caption || headers != null || contents != null
         ? new TableImpl.rows(node.alignment, caption, headers ?? node.headers,
             contents ?? node.contents)
-        : node as TableImpl;
+        :
+        // ignore: avoid_as
+        node as TableImpl;
   }
 
   @override
@@ -409,25 +438,36 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   TableRowImpl visitTableRow(TableRow node) {
     final List<TableCellImpl> contents = _visitCellNodeList(node.contents);
-    return contents != null ? new TableRowImpl(contents) : node as TableRowImpl;
+    return contents != null
+        ? new TableRowImpl(contents)
+        :
+        // ignore: avoid_as
+        node as TableRowImpl;
   }
 
   @override
-  TargetImpl visitTarget(Target node) => node as TargetImpl;
+  TargetImpl visitTarget(Target node) =>
+      // ignore: avoid_as
+      node as TargetImpl;
 
   @override
   TexMathDisplayImpl visitTexMathDisplay(TexMathDisplay node) =>
+      // ignore: avoid_as
       node as TexMathDisplayImpl;
 
   @override
   TexMathInlineImpl visitTexMathInline(TexMathInline node) =>
+      // ignore: avoid_as
       node as TexMathInlineImpl;
 
   @override
-  TexRawBlockImpl visitTexRawBlock(TexRawBlock node) => node as TexRawBlockImpl;
+  TexRawBlockImpl visitTexRawBlock(TexRawBlock node) =>
+      // ignore: avoid_as
+      node as TexRawBlockImpl;
 
   @override
   ThematicBreakImpl visitThematicBreak(ThematicBreak node) =>
+      // ignore: avoid_as
       node as ThematicBreakImpl;
 
   @override

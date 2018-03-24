@@ -7,7 +7,7 @@ import 'package:mdown/src/parse_result.dart';
 import 'package:mdown/src/parsers/abstract.dart';
 import 'package:mdown/src/parsers/container.dart';
 
-/// Parser for extended attiributes.
+/// Parser for extended attributes.
 class ExtendedAttributesParser extends AbstractParser<Attributes> {
   /// Constructor.
   ExtendedAttributesParser(ParsersContainer container) : super(container);
@@ -16,18 +16,12 @@ class ExtendedAttributesParser extends AbstractParser<Attributes> {
   ParseResult<Attributes> parse(String text, int offset) {
     int off = offset;
     if (text.codeUnitAt(off) != openBraceCodeUnit) {
-      return new ParseResult<Attributes>.failure();
+      return const ParseResult<Attributes>.failure();
     }
 
     off++;
 
     final List<Attribute> attributes = <Attribute>[];
-
-    /*
-    String id;
-    final List<String> classes = <String>[];
-    final Multimap<String, String> attributes = new Multimap<String, String>();
-    */
 
     final int length = text.length;
     while (off < length) {
@@ -65,7 +59,7 @@ class ExtendedAttributesParser extends AbstractParser<Attributes> {
         default:
           final int endOffset = _parseAttribute(text, off, attributes);
           if (endOffset == off) {
-            return new ParseResult<Attributes>.failure();
+            return const ParseResult<Attributes>.failure();
           }
           off = endOffset;
 

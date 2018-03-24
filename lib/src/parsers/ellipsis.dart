@@ -22,6 +22,6 @@ class EllipsisParser extends AbstractParser<InlineNodeImpl> {
           new SmartCharImpl(SmartCharType.ellipsis), offset + 3);
     }
 
-    return new ParseResult<InlineNodeImpl>.failure();
+    return const ParseResult<InlineNodeImpl>.failure();
   }
 }
