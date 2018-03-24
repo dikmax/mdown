@@ -70,6 +70,86 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
     }
   }
 
+  ParseResult<String> _parseDestination(String text, int offset) {
+    int off = offset;
+    final int length = text.length;
+
+    if (off == length) {
+      return const ParseResult<String>.failure();
+    }
+
+    if (text.codeUnitAt(offset) == lessThanCodeUnit) {
+      // Parsing link in brackets.
+      off++;
+      while (off < length) {
+        final int codeUnit = text.codeUnitAt(off);
+        if (codeUnit == greaterThanCodeUnit) {
+          off++;
+          return new ParseResult<String>.success(
+              text.substring(offset + 1, off - 1), off);
+        }
+        if (codeUnit == backslashCodeUnit) {
+          // Escaped char
+          off++;
+          if (off == length) {
+            break;
+          }
+
+          final int nextCodeUnit = text.codeUnitAt(off);
+          if (nextCodeUnit == spaceCodeUnit ||
+              nextCodeUnit == tabCodeUnit ||
+              nextCodeUnit == newLineCodeUnit ||
+              nextCodeUnit == carriageReturnCodeUnit) {
+            break;
+          }
+        } else if (codeUnit == spaceCodeUnit ||
+            codeUnit == tabCodeUnit ||
+            codeUnit == newLineCodeUnit ||
+            codeUnit == carriageReturnCodeUnit ||
+            codeUnit == lessThanCodeUnit) {
+          break;
+        }
+        off++;
+      }
+    }
+
+    // Destination without < >.
+
+    // Start from scratch
+    off = offset;
+    int parensDepth = 0;
+    while (off < length) {
+      final int codeUnit = text.codeUnitAt(off);
+      if (codeUnit <= spaceCodeUnit) {
+        // Space or control. Stop here.
+        break;
+      }
+      if (codeUnit == backslashCodeUnit) {
+        // Escaped char
+        off++;
+        if (off == length) {
+          break;
+        }
+
+        final int nextCodeUnit = text.codeUnitAt(off);
+        if (nextCodeUnit <= spaceCodeUnit) {
+          break;
+        }
+      }
+      if (codeUnit == openParenCodeUnit) {
+        parensDepth++;
+      } else if (codeUnit == closeParenCodeUnit) {
+        if (parensDepth == 0) {
+          break;
+        }
+        parensDepth--;
+      }
+      off++;
+    }
+
+    return new ParseResult<String>.success(text.substring(offset, off), off);
+  }
+
   ParseResult<Target> _parseTarget(String text, int offset) {
     int off = offset;
     final int length = text.length;
@@ -90,21 +170,23 @@ class LinkImageParser extends AbstractParser<InlineNodeImpl> {
     }
 
     // Parsing href
-    final Match hrefMatch = _hrefRegExp.matchAsPrefix(text, off);
-    if (hrefMatch == null) {
+    final ParseResult<String> destinationRes = _parseDestination(text, off);
+    if (!destinationRes.isSuccess) {
       return const ParseResult<Target>.failure();
     }
 
-    String href = hrefMatch[0];
+    String href = destinationRes.value;
+    /*
     final int hrefLength = href.length;
     if (hrefLength > 0 &&
         href.codeUnitAt(0) == lessThanCodeUnit &&
         href.codeUnitAt(hrefLength - 1) == greaterThanCodeUnit) {
-      href = href.substring(1, href.length - 1);
+      href = href.substring(1, hrefLength - 1);
     }
+    */
     href = unescapeAndUnreference(href);
 
-    off = hrefMatch.end;
+    off = destinationRes.offset;
 
     // Skip whitespace.
     while (off < length) {

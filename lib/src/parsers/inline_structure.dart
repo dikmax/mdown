@@ -281,6 +281,13 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
         charCode == doubleQuoteCodeUnit) {
       canOpen = canOpen && (!rightFlanking || punctuationBefore);
       canClose = canClose && (!leftFlanking || punctuationAfter);
+
+      // Single quote cannot open after `]` or `)`.
+      if (charCode == singleQuoteCodeUnit &&
+          (codeUnitBefore == closeParenCodeUnit ||
+              codeUnitBefore == closeBracketCodeUnit)) {
+        canOpen = false;
+      }
     }
 
     return new _Delim(charCode, count, canOpen: canOpen, canClose: canClose);
@@ -437,15 +444,17 @@ class InlineStructureParser extends AbstractParser<InlineNodeImpl> {
                   case underscoreCodeUnit:
                   case starCodeUnit:
                     int delimsLeft = countCloses;
+
+                    while (delimsLeft > 1) {
+                      itemRes = <InlineNodeImpl>[new StrongImpl(itemRes)];
+                      delimsLeft -= 2;
+                    }
+
                     if ((delimsLeft & 1) == 1) {
                       itemRes = <InlineNodeImpl>[new EmphasisImpl(itemRes)];
                       delimsLeft--;
                     }
 
-                    while (delimsLeft > 0) {
-                      itemRes = <InlineNodeImpl>[new StrongImpl(itemRes)];
-                      delimsLeft -= 2;
-                    }
                     break;
                 }
                 openDelim

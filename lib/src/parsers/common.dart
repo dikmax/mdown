@@ -156,9 +156,8 @@ String trimAndReplaceSpaces(String s) =>
 String normalizeReference(String s) => trimAndReplaceSpaces(s).toUpperCase();
 
 /// Escape RegExp
-// ignore: prefer_adjacent_string_concatenation
-final RegExp escapeRegExp = new RegExp(r'\\([!"#$%&' +
-    "'" +
+final RegExp escapeRegExp = new RegExp(r'\\([!"#$%&'
+    "'"
     r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');
 
 /// Entity RegExp

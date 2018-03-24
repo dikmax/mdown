@@ -10,18 +10,18 @@ void serviceTests() {
   t.group('README examples test', () {
     t.test('Basic usage', () {
       t.expect(
-          markdownToHtml('# Hello world!'), t.equals('<h1>Hello world!</h1>'));
+          markdownToHtml('# Hello world!'), t.equals('<h1>Hello world!</h1>\n'));
     });
 
     t.test('Extensions 1', () {
       const Options options = const Options(superscript: true);
-      final String res = markdownToHtml('Hello world!\n===', options);
-      t.expect(res, t.equals('<h1>Hello world!</h1>'));
+      final String res = markdownToHtml('Hello world!\n===\n', options);
+      t.expect(res, t.equals('<h1>Hello world!</h1>\n'));
     });
 
     t.test('Extensions 2', () {
       final String res = markdownToHtml('Hello world!\n===', Options.strict);
-      t.expect(res, t.equals('<h1>Hello world!</h1>'));
+      t.expect(res, t.equals('<h1>Hello world!</h1>\n'));
     });
 
     t.test('Fenced code attributes', () {
@@ -31,7 +31,7 @@ void serviceTests() {
       t.expect(
           res,
           t.equals('<pre id="someId" class="class1 class2" key="value">'
-              '<code>code\n</code></pre>'));
+              '<code>code\n</code></pre>\n'));
     });
 
     t.test('Heading attributes', () {
@@ -43,7 +43,7 @@ void serviceTests() {
       t.expect(
           res,
           t.equals('<h1 id="someId">Heading 1</h1>\n'
-              '<h2 class="someClass">Heading 2</h2>'));
+              '<h2 class="someClass">Heading 2</h2>\n'));
     });
 
     t.test('Link attributes', () {
@@ -55,7 +55,7 @@ void serviceTests() {
       t.expect(
           res,
           t.equals('<p><img src="image.jpg" alt="" width="800" height="600" /></p>\n'
-            '<p><a href="http://test.com/" id="id">test</a></p>'));
+            '<p><a href="http://test.com/" id="id">test</a></p>\n'));
     });
 
     t.test('Link resolver', () {
@@ -74,7 +74,7 @@ void serviceTests() {
 
       final String res = markdownToHtml(
           'Hello world!\n===', new Options(linkResolver: linkResolver));
-      t.expect(res, t.equals('<h1>Hello world!</h1>'));
+      t.expect(res, t.equals('<h1>Hello world!</h1>\n'));
     });
   });
 }

@@ -76,11 +76,11 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
             container.lineParser.parse(text, off);
         assert(lineRes.isSuccess);
 
-        off = lineRes.offset;
-        result.writeln(lineRes.value);
         if (isOnlyWhitespace(lineRes.value)) {
           break;
         }
+        off = lineRes.offset;
+        result.writeln(lineRes.value);
       }
 
       return new ParseResult<BlockNodeImpl>.success(

@@ -4,7 +4,7 @@ mdown
 [![Build Status](https://travis-ci.org/dikmax/mdown.svg?branch=master)](https://travis-ci.org/dikmax/mdown)
 [![codecov](https://codecov.io/gh/dikmax/mdown/branch/master/graph/badge.svg)](https://codecov.io/gh/dikmax/mdown)
 [![Pub](https://img.shields.io/pub/v/mdown.svg)](https://pub.dartlang.org/packages/mdown)
-[![CommonMark spec](https://img.shields.io/badge/commonmark-0.27-green.svg)](http://spec.commonmark.org/)
+[![CommonMark spec](https://img.shields.io/badge/commonmark-0.28-green.svg)](http://spec.commonmark.org/)
 
 ***mdown*** is fast and [CommonMark][]-compliant Markdown parser.
 

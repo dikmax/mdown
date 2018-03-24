@@ -609,6 +609,11 @@ bar
  &gt;
 </code></pre>
 ''',
+  r'''``
+foo
+``
+''': r'''<p><code>foo</code></p>
+''',
   r'''```
 aaa
 ~~~
@@ -797,6 +802,20 @@ foo</p>
 ```
 ''': r'''<pre><code>``` aaa
 </code></pre>
+''',
+  r'''<table><tr><td>
+<pre>
+**Hello**,
+
+_world_.
+</pre>
+</td></tr></table>
+''': r'''<table><tr><td>
+<pre>
+**Hello**,
+<p><em>world</em>.
+</pre></p>
+</td></tr></table>
 ''',
   r'''<table>
   <tr>
@@ -2617,11 +2636,6 @@ foo
   r'''` `` `
 ''': r'''<p><code>``</code></p>
 ''',
-  r'''``
-foo
-``
-''': r'''<p><code>foo</code></p>
-''',
   r'''`foo   bar
   baz`
 ''': r'''<p><code>foo bar baz</code></p>
@@ -2658,6 +2672,9 @@ foo
 ''',
   r'''`foo
 ''': r'''<p>`foo</p>
+''',
+  r'''`foo``bar``
+''': r'''<p>`foo<code>bar</code></p>
 ''',
   r'''*foo bar*
 ''': r'''<p><em>foo bar</em></p>
@@ -3011,10 +3028,10 @@ bim</em> bop</strong></p>
 ''': r'''<p><strong><strong><strong>foo</strong></strong></strong></p>
 ''',
   r'''***foo***
-''': r'''<p><strong><em>foo</em></strong></p>
+''': r'''<p><em><strong>foo</strong></em></p>
 ''',
   r'''_____foo_____
-''': r'''<p><strong><strong><em>foo</em></strong></strong></p>
+''': r'''<p><em><strong><strong>foo</strong></strong></em></p>
 ''',
   r'''*foo _bar* baz_
 ''': r'''<p><em>foo _bar</em> baz_</p>
@@ -3086,17 +3103,14 @@ bar>)</p>
   r'''[link](\(foo\))
 ''': r'''<p><a href="(foo)">link</a></p>
 ''',
-  r'''[link]((foo)and(bar))
-''': r'''<p><a href="(foo)and(bar)">link</a></p>
-''',
   r'''[link](foo(and(bar)))
-''': r'''<p>[link](foo(and(bar)))</p>
-''',
-  r'''[link](foo(and\(bar\)))
 ''': r'''<p><a href="foo(and(bar))">link</a></p>
 ''',
-  r'''[link](<foo(and(bar))>)
-''': r'''<p><a href="foo(and(bar))">link</a></p>
+  r'''[link](foo\(and\(bar\))
+''': r'''<p><a href="foo(and(bar)">link</a></p>
+''',
+  r'''[link](<foo(and(bar)>)
+''': r'''<p><a href="foo(and(bar)">link</a></p>
 ''',
   r'''[link](foo\)\:)
 ''': r'''<p><a href="foo):">link</a></p>
@@ -3523,7 +3537,7 @@ bar>)</p>
 [foo]: /url "title"
 ''': r'''<p><img src="/url" alt="Foo" title="title" /></p>
 ''',
-  r'''\!\[foo]
+  r'''!\[foo]
 
 [foo]: /url "title"
 ''': r'''<p>![foo]</p>
@@ -3784,6 +3798,9 @@ So is ‘pine.’</p>
 "Second paragraph by same speaker, in fiction."
 ''': r'''<p>“A paragraph with no closing quote.</p>
 <p>“Second paragraph by same speaker, in fiction.”</p>
+''',
+  r'''[a]'s b'
+''': r'''<p>[a]’s b’</p>
 ''',
   r'''\"This is not smart.\"
 This isn\'t either.

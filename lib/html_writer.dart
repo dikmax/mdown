@@ -275,7 +275,9 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
         block.accept(this);
       }
       while (iterator.moveNext()) {
-        _sb.writeln();
+        if (tight) {
+          _sb.writeln();
+        }
         final BlockNode block = iterator.current;
         if (tight && block is Para) {
           block.contents.accept(this);
@@ -284,17 +286,13 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
         }
       }
     }
-
-    if (tight && nodes.isNotEmpty && nodes.last is! Para) {
-      _sb.writeln();
-    }
   }
 
   @override
   Null visitBlockquote(Blockquote node) {
     _sb.write('<blockquote>\n');
     _writeBlocks(node.contents);
-    _sb.write('\n</blockquote>');
+    _sb.write('</blockquote>\n');
 
     return null;
   }
@@ -318,7 +316,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
     for (String line in node.contents) {
       _sb.writeln(_htmlEscape(line));
     }
-    _sb.write('</code></pre>');
+    _sb.write('</code></pre>\n');
     return null;
   }
 
@@ -357,7 +355,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
     node.attributes?.accept(this);
     _sb.write('>');
     node.contents?.accept(this);
-    _sb..write('</h')..write(node.level)..write('>');
+    _sb..write('</h')..write(node.level)..write('>\n');
     return null;
   }
 
@@ -420,7 +418,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
         } else {
           _sb.write('<li>\n');
           _writeBlocks(node.contents, tight: false);
-          _sb.write('\n</li>\n');
+          _sb.write('</li>\n');
         }
       }
     }
@@ -441,7 +439,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
     }
     _sb.write('>\n');
     node.visitChildren(this);
-    _sb.write('</ol>');
+    _sb.write('</ol>\n');
 
     return null;
   }
@@ -450,7 +448,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
   Null visitPara(Para node) {
     _sb.write('<p>');
     node.visitChildren(this);
-    _sb.write('</p>');
+    _sb.write('</p>\n');
     return null;
   }
 
@@ -573,7 +571,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
       }
       _sb.write('</tr>');
     }
-    _sb.write('</tbody></table>');
+    _sb.write('</tbody></table>\n');
     return null;
   }
 
@@ -619,7 +617,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
 
   @override
   Null visitThematicBreak(ThematicBreak node) {
-    _sb.write('<hr/>');
+    _sb.write('<hr/>\n');
     return null;
   }
 
@@ -627,7 +625,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
   Null visitUnorderedList(UnorderedList node) {
     _sb.write('<ul>\n');
     node.visitChildren(this);
-    _sb.write('</ul>');
+    _sb.write('</ul>\n');
 
     return null;
   }

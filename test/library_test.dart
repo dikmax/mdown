@@ -94,7 +94,7 @@ void main() {
   tests('TeX math single backslash', texMathSingleBackslash, texSingleTestFunc);
 
   final Set<int> texMathSingleBackslashContradictions =
-      new Set<int>.from(<int>[287, 481, 497]);
+      new Set<int>.from(<int>[289]);
   final TestFunc texSingleSpecTestFunc = generateTestFunc(
       const Options(texMathSingleBackslash: true),
       (int num) => !texMathSingleBackslashContradictions.contains(num));
