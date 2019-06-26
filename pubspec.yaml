@@ -4,12 +4,12 @@ description: Fast CommonMark-compliant markdown parser
 author: Maxim Dikun <dikmax@gmail.com>
 homepage: https://github.com/dikmax/mdown
 environment:
-  sdk: ">=2.0.0-dev.40.0 <2.0.0"
+  sdk: ">=2.3.0 <3.0.0"
 dependencies:
 dev_dependencies:
-  build: '^0.12.0+2'
-  build_config: '^0.2.5'
-  build_runner: '^0.8.0'
-  coverage: '^0.10.0'
-  test: '^0.12.32+1'
-  source_gen: '>=0.7.6 <0.8.0'
+  build: '^1.1.4'
+  build_config: '^0.4.0'
+  build_runner: '^1.6.1'
+  coverage: '^0.12.4'
+  test: '^1.6.4'
+  source_gen: '^0.9.0'

@@ -1,0 +1,35 @@
+targets:
+  $default:
+    builders:
+      mdown|embed_tests:
+        generate_for:
+          - test/data/test_data.dart
+      mdown|embed_blns_tests:
+        generate_for:
+          - test/data/test_data.dart
+      mdown|entities:
+        generate_for:
+          - lib/entities.dart
+
+builders:
+  embed_tests:
+    import: "package:mdown/builder.dart"
+    builder_factories: ["embedTestsBuilder"]
+    build_extensions: {".dart": ["tests.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+  embed_blns_tests:
+    import: "package:mdown/builder.dart"
+    builder_factories: ["embedBlnsTestsBuilder"]
+    build_extensions: {".dart": ["blns_tests.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+  entities:
+    import: "package:mdown/builder.dart"
+    builder_factories: ["entitiesBuilder"]
+    build_extensions: {".dart": ["entities.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]

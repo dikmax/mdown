@@ -3,7 +3,7 @@
 part of mdown.entities;
 
 // **************************************************************************
-// Generator: EntitiesGenerator
+// EntitiesGenerator
 // **************************************************************************
 
 final Map<String, String> _$htmlEntities =

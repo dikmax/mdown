@@ -16,7 +16,7 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
   /// Constructor
   const EmbedBlnsTestsGenerator();
 
-  List<String> _readFile(dynamic json) {
+  Iterable<String> _readFile(dynamic json) {
     if (json is Iterable) {
       return json.map((dynamic el) => el.toString());
     }
@@ -52,7 +52,7 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
     final dynamic data =
         json.decode(utf8.decode(response, allowMalformed: true));
 
-    final List<String> content = _readFile(data);
+    final Iterable<String> content = _readFile(data);
 
     final StringBuffer result = new StringBuffer()
       ..writeln('final List<String> _\$${element.displayName}Tests = '
