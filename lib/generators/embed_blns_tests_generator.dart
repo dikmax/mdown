@@ -47,7 +47,7 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
 
     final String sourcePathDir = path.dirname(buildStep.inputId.path);
     final String filePath = path.join(sourcePathDir, annotationPath);
-    new File(filePath)..writeAsBytesSync(response, mode: FileMode.WRITE);
+    new File(filePath)..writeAsBytesSync(response, mode: FileMode.write);
 
     final dynamic data =
         json.decode(utf8.decode(response, allowMalformed: true));

@@ -22,12 +22,6 @@ class _LinkStackItem {
 
 /// Parser for links and images.
 class LinkImageParser extends AbstractParser<InlineNodeImpl> {
-  static final RegExp _hrefRegExp = new RegExp(
-      // Link in <>
-      r'<(?:[^\\> \t\r\n]|\\.|\\)*>|'
-      // Link without
-      r'(?:[^ \t\r\n\(\)\\]+|\((?:[^ \t\r\n\(\)\\]|\\.|\\)*\)|\\.|\\)*');
-
   static final RegExp _referenceRegExp = new RegExp(r'\[((?:[^\]]|\\\])+)\]');
 
   Map<int, List<AbstractParser<InlineNodeImpl>>> _higherPriorityInlineParsers;

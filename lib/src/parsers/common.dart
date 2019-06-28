@@ -196,10 +196,10 @@ String _unescapeUnreferenceReplacement(Match match) {
     int code;
     if (match[2] != null) {
       // Hex entity
-      code = int.parse(match[2], radix: 16, onError: (_) => 0);
+      code = int.tryParse(match[2], radix: 16) ?? 0;
     } else {
       // Decimal entity
-      code = int.parse(match[3], radix: 10, onError: (_) => 0);
+      code = int.tryParse(match[3], radix: 10) ?? 0;
     }
 
     if (code > 1114111 || code == 0) {

@@ -31,9 +31,9 @@ class EntityParser extends AbstractParser<InlineNodeImpl> {
       } else {
         int code;
         if (match[1] != null) {
-          code = int.parse(match[1], radix: 16, onError: (_) => 0);
+          code = int.tryParse(match[1], radix: 16) ?? 0;
         } else {
-          code = int.parse(match[2], radix: 10, onError: (_) => 0);
+          code = int.tryParse(match[2], radix: 10) ?? 0;
         }
 
         if (code > 1114111 || code == 0) {
