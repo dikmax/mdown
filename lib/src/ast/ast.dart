@@ -7,33 +7,29 @@ import 'package:mdown/ast/standard_ast_factory.dart';
 import 'package:mdown/ast/visitor.dart';
 import 'package:mdown/src/parsers/common.dart';
 
-class _ContainsLinkVisitor extends RecursiveAstVisitor<Null> {
+class _ContainsLinkVisitor extends RecursiveAstVisitor<void> {
   bool _result = false;
 
   bool get result => _result;
 
   @override
-  Null visitAutolink(Autolink node) {
+  void visitAutolink(Autolink node) {
     _result = true;
-    return null;
   }
 
   @override
-  Null visitReferenceLink(ReferenceLink node) {
+  void visitReferenceLink(ReferenceLink node) {
     _result = true;
-    return null;
   }
 
   @override
-  Null visitInlineLink(InlineLink node) {
+  void visitInlineLink(InlineLink node) {
     _result = true;
-    return null;
   }
 
   @override
-  Null visitAutolinkEmail(AutolinkEmail node) {
+  void visitAutolinkEmail(AutolinkEmail node) {
     _result = true;
-    return null;
   }
 }
 
@@ -91,14 +87,14 @@ abstract class AttributesImpl extends AstNodeImpl implements Attributes {}
 
 /// Default Autolink implementation.
 class AutolinkImpl extends LinkImpl implements Autolink {
-  /// Link
-  final String _link;
-
   /// Constructs instance of Autolink.
   AutolinkImpl(this._link, [String text]) : super(null) {
-    _contents = new NodeListImpl<InlineNode>(
+    _contents = NodeListImpl<InlineNode>(
         this, <InlineNode>[astFactory.str(text ?? _link)]);
   }
+
+  /// Link
+  final String _link;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitAutolink(this);
@@ -109,20 +105,20 @@ class AutolinkImpl extends LinkImpl implements Autolink {
   @override
   ExtendedAttributes get attributes => null;
 
-  // TODO: implement title
+  // TODO(dikmax): implement title
   @override
   String get title => null;
 }
 
 /// Default AutolinkEmail implementation.
 class AutolinkEmailImpl extends AutolinkImpl implements AutolinkEmail {
-  /// Email
-  final String _email;
-
   /// Constructs instance of AutolinkEmail.
   AutolinkEmailImpl(String email)
       : _email = email,
         super('mailto:$email', email);
+
+  /// Email
+  final String _email;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitAutolinkEmail(this);
@@ -146,13 +142,13 @@ abstract class BlockNodeImpl extends AstNodeImpl implements BlockNode {}
 
 /// Default Blockquote implementation.
 class BlockquoteImpl extends BlockNodeImpl implements Blockquote {
-  /// Blockquote contents.
-  NodeList<BlockNodeImpl> _contents;
-
   /// Constructs instance of Blockquote.
   BlockquoteImpl(Iterable<BlockNodeImpl> contents) {
-    _contents = new NodeListImpl<BlockNodeImpl>(this, contents);
+    _contents = NodeListImpl<BlockNodeImpl>(this, contents);
   }
+
+  /// Blockquote contents.
+  NodeList<BlockNodeImpl> _contents;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitBlockquote(this);
@@ -174,10 +170,10 @@ abstract class CharImpl extends InlineNodeImpl implements Char {}
 
 /// Default ClassAttribute implementation.
 class ClassAttributeImpl extends AttributeImpl implements ClassAttribute {
-  final String _className;
-
   /// Constructs instance of ClassAttribute.
   ClassAttributeImpl(this._className);
+
+  final String _className;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitClassAttribute(this);
@@ -188,14 +184,14 @@ class ClassAttributeImpl extends AttributeImpl implements ClassAttribute {
 
 /// Default Code implementation.
 class CodeImpl extends InlineNodeImpl implements Code {
+  /// Constructs Code instance.
+  CodeImpl(this._contents, this._fenceSize, this._attributes);
+
   final String _contents;
 
   final int _fenceSize;
 
   final ExtendedAttributes _attributes;
-
-  /// Constructs Code instance.
-  CodeImpl(this._contents, this._fenceSize, this._attributes);
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitCode(this);
@@ -220,11 +216,11 @@ class CodeImpl extends InlineNodeImpl implements Code {
 
 /// Default CodeBlock implementation.
 class CodeBlockImpl extends BlockNodeImpl implements CodeBlock {
-  final Iterable<String> _contents;
-  final Attributes _attributes;
-
   /// Constructs CodeBlock instance.
   CodeBlockImpl(this._contents, this._attributes);
+
+  final Iterable<String> _contents;
+  final Attributes _attributes;
 
   @override
   Iterable<String> get contents => _contents;
@@ -247,12 +243,12 @@ class CodeBlockImpl extends BlockNodeImpl implements CodeBlock {
 /// Default CompositeInline implementation.
 abstract class CompositeInlineImpl extends InlineNodeImpl
     implements CompositeInline {
-  NodeList<InlineNode> _contents;
-
   /// Constructs instance of CompositeInline.
   CompositeInlineImpl(Iterable<InlineNode> contents) {
-    _contents = new NodeListImpl<InlineNode>(this, contents);
+    _contents = NodeListImpl<InlineNode>(this, contents);
   }
+
+  NodeList<InlineNode> _contents;
 
   @override
   NodeList<InlineNode> get contents => _contents;
@@ -268,12 +264,12 @@ abstract class CompositeInlineImpl extends InlineNodeImpl
 
 /// Default Document implementation.
 class DocumentImpl extends AstNodeImpl implements Document {
-  NodeList<BlockNode> _contents;
-
   /// Constructs Document instance.
   DocumentImpl(Iterable<BlockNode> contents) {
-    _contents = new NodeListImpl<BlockNode>(this, contents);
+    _contents = NodeListImpl<BlockNode>(this, contents);
   }
+
+  NodeList<BlockNode> _contents;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitDocument(this);
@@ -302,12 +298,12 @@ class EmphasisImpl extends CompositeInlineImpl implements Emphasis {
 /// Default ExtendedAttributes implementation.
 class ExtendedAttributesImpl extends AttributesImpl
     implements ExtendedAttributes {
-  NodeList<Attribute> _attributes;
-
   /// Constructs ExtendedAttributes instance.
   ExtendedAttributesImpl(Iterable<Attribute> attributes) {
-    _attributes = new NodeListImpl<Attribute>(this, attributes);
+    _attributes = NodeListImpl<Attribute>(this, attributes);
   }
+
+  NodeList<Attribute> _attributes;
 
   @override
   E accept<E>(AstVisitor<E> visitor) => visitor.visitExtendedAttributes(this);
@@ -338,14 +334,14 @@ class HardLineBreakImpl extends InlineNodeImpl implements HardLineBreak {
 
 /// Default Heading implementation.
 class HeadingImpl extends BlockNodeImpl implements Heading {
+  /// Constructs instance of Heading.
+  HeadingImpl(this._contents, this._level, this._attributes);
+
   ExtendedAttributes _attributes;
 
   BaseInline _contents;
 
   final int _level;
-
-  /// Constructs instance of Heading.
-  HeadingImpl(this._contents, this._level, this._attributes);
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitHeading(this);
@@ -390,10 +386,10 @@ class HtmlRawInlineImpl extends RawInlineImpl implements HtmlRawInline {
 /// Default IdentifierAttribute implementation.
 class IdentifierAttributeImpl extends AttributeImpl
     implements IdentifierAttribute {
-  final String _identifier;
-
   /// Constructs instance of IdentifierAttribute.
   IdentifierAttributeImpl(this._identifier);
+
+  final String _identifier;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitIdentifierAttribute(this);
@@ -410,10 +406,10 @@ abstract class ImageImpl extends CompositeInlineImpl implements Image {
 
 /// Default InfoString implementation.
 class InfoStringImpl extends AttributesImpl implements InfoString {
-  final String _language;
-
   /// Constructs InfoString
   InfoStringImpl(this._language);
+
+  final String _language;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitInfoString(this);
@@ -430,13 +426,13 @@ class InfoStringImpl extends AttributesImpl implements InfoString {
 
 /// Default InlineImage implementation
 class InlineImageImpl extends ImageImpl implements InlineImage {
-  final Target _target;
-
-  final ExtendedAttributes _attributes;
-
   /// Constructs InlineImage instance.
   InlineImageImpl(Iterable<InlineNode> contents, this._target, this._attributes)
       : super(contents);
+
+  final Target _target;
+
+  final ExtendedAttributes _attributes;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitInlineImage(this);
@@ -456,13 +452,13 @@ class InlineImageImpl extends ImageImpl implements InlineImage {
 
 /// Default InlineLink implementation
 class InlineLinkImpl extends LinkImpl implements InlineLink {
-  final Target _target;
-
-  final ExtendedAttributes _attributes;
-
   /// Constructs InlineImage instance.
   InlineLinkImpl(Iterable<InlineNode> contents, this._target, this._attributes)
       : super(contents);
+
+  final Target _target;
+
+  final ExtendedAttributes _attributes;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitInlineLink(this);
@@ -486,7 +482,7 @@ abstract class InlineNodeImpl extends AstNodeImpl implements InlineNode {
 
   bool get containsLink {
     if (_containsLink == null) {
-      final _ContainsLinkVisitor visitor = new _ContainsLinkVisitor();
+      final _ContainsLinkVisitor visitor = _ContainsLinkVisitor();
       accept(visitor);
       _containsLink = visitor.result;
     }
@@ -497,12 +493,12 @@ abstract class InlineNodeImpl extends AstNodeImpl implements InlineNode {
 
 /// Default KeyValueAttribute implementation.
 class KeyValueAttributeImpl extends AttributeImpl implements KeyValueAttribute {
+  /// Constructs KeyValueAttribute instance.
+  KeyValueAttributeImpl(this._key, this._value);
+
   final String _key;
 
   final String _value;
-
-  /// Constructs KeyValueAttribute instance.
-  KeyValueAttributeImpl(this._key, this._value);
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitKeyValueAttribute(this);
@@ -525,15 +521,15 @@ abstract class LinkImpl extends CompositeInlineImpl implements Link {
 
 /// Default LinkReference implementation.
 class LinkReferenceImpl extends BlockNodeImpl implements LinkReference {
-  final String _reference;
-  String _normalizedReference;
-  final Target _target;
-  final ExtendedAttributes _attributes;
-
   /// Constructs LinkReference instance.
   LinkReferenceImpl(this._reference, this._target, this._attributes) {
     _normalizedReference = normalizeReference(_reference);
   }
+
+  final String _reference;
+  String _normalizedReference;
+  final Target _target;
+  final ExtendedAttributes _attributes;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitLinkReference(this);
@@ -562,13 +558,13 @@ class LinkReferenceImpl extends BlockNodeImpl implements LinkReference {
 
 /// Default ListBlock implementation.
 abstract class ListBlockImpl extends BlockNodeImpl implements ListBlock {
-  NodeList<ListItem> _items;
-  bool _tight;
-
   /// Constructs ListBlock instance.
   ListBlockImpl(Iterable<ListItem> items, this._tight) {
-    _items = new NodeListImpl<ListItem>(this, items);
+    _items = NodeListImpl<ListItem>(this, items);
   }
+
+  NodeList<ListItem> _items;
+  bool _tight;
 
   @override
   Iterable<AstNode> get childEntities => _items;
@@ -591,12 +587,12 @@ abstract class ListBlockImpl extends BlockNodeImpl implements ListBlock {
 
 /// Default ListItem implementation.
 class ListItemImpl extends AstNodeImpl implements ListItem {
-  NodeList<BlockNode> _contents;
-
   /// Constructs ListItem instance.
   ListItemImpl(Iterable<BlockNode> contents) {
-    _contents = new NodeListImpl<BlockNode>(this, contents);
+    _contents = NodeListImpl<BlockNode>(this, contents);
   }
+
+  NodeList<BlockNode> _contents;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitListItem(this);
@@ -625,14 +621,14 @@ class NonBreakableSpaceImpl extends WhitespaceImpl
 
 /// Default OrderedList implementation.
 class OrderedListImpl extends ListBlockImpl implements OrderedList {
-  final IndexSeparator _indexSeparator;
-
-  final int _startIndex;
-
   /// Constructs OrderedList instance.
   OrderedListImpl(Iterable<ListItem> items, bool tight, this._startIndex,
       this._indexSeparator)
       : super(items, tight);
+
+  final IndexSeparator _indexSeparator;
+
+  final int _startIndex;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitOrderedList(this);
@@ -646,10 +642,10 @@ class OrderedListImpl extends ListBlockImpl implements OrderedList {
 
 /// Default Para implementation.
 class ParaImpl extends BlockNodeImpl implements Para {
-  final BaseInline _contents;
-
   /// Constructs Para instance.
   ParaImpl(this._contents);
+
+  final BaseInline _contents;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitPara(this);
@@ -668,10 +664,10 @@ class ParaImpl extends BlockNodeImpl implements Para {
 
 /// Default RawBlock implementation.
 abstract class RawBlockImpl extends BlockNodeImpl implements RawBlock {
-  final String _contents;
-
   /// Constructs RawBlock instance.
   RawBlockImpl(this._contents);
+
+  final String _contents;
 
   @override
   Iterable<AstNode> get childEntities => null;
@@ -685,10 +681,10 @@ abstract class RawBlockImpl extends BlockNodeImpl implements RawBlock {
 
 /// Default RawInline implementation.
 abstract class RawInlineImpl extends InlineNodeImpl implements RawInline {
-  final String _contents;
-
   /// Constructs RawBlock instance.
   RawInlineImpl(this._contents);
+
+  final String _contents;
 
   @override
   Iterable<AstNode> get childEntities => null;
@@ -702,11 +698,11 @@ abstract class RawInlineImpl extends InlineNodeImpl implements RawInline {
 
 /// Default Reference implementation.
 class ReferenceImpl extends AstNodeImpl implements Reference {
-  final String _reference;
-  final Target _target;
-
   /// Constructs Reference instance.
   ReferenceImpl(this._reference, this._target);
+
+  final String _reference;
+  final Target _target;
 
   @override
   Iterable<AstNode> get childEntities => null;
@@ -726,14 +722,14 @@ class ReferenceImpl extends AstNodeImpl implements Reference {
 
 /// Default ReferenceImage implementation.
 class ReferenceImageImpl extends ImageImpl implements ReferenceImage {
-  final Reference _reference;
-
-  final ExtendedAttributes _attributes;
-
   /// Constructs ReferenceImage instance.
   ReferenceImageImpl(
       Iterable<InlineNode> contents, this._reference, this._attributes)
       : super(contents);
+
+  final Reference _reference;
+
+  final ExtendedAttributes _attributes;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitReferenceImage(this);
@@ -753,14 +749,14 @@ class ReferenceImageImpl extends ImageImpl implements ReferenceImage {
 
 /// Default ReferenceLink implementation.
 class ReferenceLinkImpl extends LinkImpl implements ReferenceLink {
-  final ExtendedAttributes _attributes;
-
-  final Reference _reference;
-
   /// Constructs ReferenceLink instance.
   ReferenceLinkImpl(
       Iterable<InlineNode> contents, this._reference, this._attributes)
       : super(contents);
+
+  final ExtendedAttributes _attributes;
+
+  final Reference _reference;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitReferenceLink(this);
@@ -780,10 +776,10 @@ class ReferenceLinkImpl extends LinkImpl implements ReferenceLink {
 
 /// Default SmartChar implementation.
 class SmartCharImpl extends CharImpl implements SmartChar {
-  final SmartCharType _type;
-
   /// Constructs SmartChar instance.
   SmartCharImpl(this._type);
+
+  final SmartCharType _type;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitSmartChar(this);
@@ -821,10 +817,10 @@ class SpaceImpl extends WhitespaceImpl implements Space {
 
 /// Default Str implementation.
 class StrImpl extends InlineNodeImpl implements Str {
-  final String _contents;
-
   /// Constructs Str instance.
   StrImpl(this._contents);
+
+  final String _contents;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitStr(this);
@@ -886,26 +882,26 @@ class TabImpl extends WhitespaceImpl implements Tab {
 
 /// Default Table implementation
 class TableImpl extends BlockNodeImpl implements Table {
-  final List<Alignment> _alignment;
-  final BaseInline _caption;
-  NodeList<TableRowImpl> _contents;
-  NodeList<TableCellImpl> _headers;
-
   /// Constructs Table instance
   factory TableImpl(
           List<Alignment> alignment,
           BaseInline caption,
           Iterable<TableCell> headers,
           Iterable<Iterable<TableCell>> contents) =>
-      new TableImpl.rows(alignment, caption, headers,
-          contents.map((Iterable<TableCell> item) => new TableRowImpl(item)));
+      TableImpl.rows(alignment, caption, headers,
+          contents.map((Iterable<TableCell> item) => TableRowImpl(item)));
 
   /// Constructs Table instance from rows
   TableImpl.rows(this._alignment, this._caption, Iterable<TableCell> headers,
       Iterable<TableRow> contents) {
-    _headers = new NodeListImpl<TableCellImpl>(this, headers);
-    _contents = new NodeListImpl<TableRowImpl>(this, contents);
+    _headers = NodeListImpl<TableCell>(this, headers);
+    _contents = NodeListImpl<TableRow>(this, contents);
   }
+
+  final List<Alignment> _alignment;
+  final BaseInline _caption;
+  NodeListImpl<TableRow> _contents;
+  NodeListImpl<TableCell> _headers;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitTable(this);
@@ -917,12 +913,8 @@ class TableImpl extends BlockNodeImpl implements Table {
   BaseInline get caption => _caption;
 
   @override
-  Iterable<AstNode> get childEntities {
-    final List<AstNode> result = <AstNode>[_caption]
-      ..addAll(_headers)
-      ..addAll(_contents);
-    return result;
-  }
+  Iterable<AstNode> get childEntities =>
+      <AstNode>[_caption, ..._headers, ..._contents];
 
   @override
   NodeList<TableRow> get contents => _contents;
@@ -940,13 +932,13 @@ class TableImpl extends BlockNodeImpl implements Table {
 
 /// Default TableCell implementation
 class TableCellImpl extends AstNodeImpl implements TableCell {
-  /// Cell contents.
-  NodeList<BlockNodeImpl> _contents;
-
   /// Constructs instance of TableCell.
   TableCellImpl(Iterable<BlockNodeImpl> contents) {
-    _contents = new NodeListImpl<BlockNodeImpl>(this, contents);
+    _contents = NodeListImpl<BlockNodeImpl>(this, contents);
   }
+
+  /// Cell contents.
+  NodeList<BlockNodeImpl> _contents;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitTableCell(this);
@@ -965,12 +957,12 @@ class TableCellImpl extends AstNodeImpl implements TableCell {
 
 /// Default TableRow implementation.
 class TableRowImpl extends AstNodeImpl implements TableRow {
-  NodeList<TableCellImpl> _contents;
-
   /// Constructs instance of TableRow.
   TableRowImpl(Iterable<TableCellImpl> contents) {
-    _contents = new NodeListImpl<TableCellImpl>(this, contents);
+    _contents = NodeListImpl<TableCellImpl>(this, contents);
   }
+
+  NodeList<TableCellImpl> _contents;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitTableRow(this);
@@ -989,11 +981,11 @@ class TableRowImpl extends AstNodeImpl implements TableRow {
 
 /// Default Target implementation.
 class TargetImpl extends AstNodeImpl implements Target {
-  final String _link;
-  String _title;
-
   /// Constructs Target instance.
   TargetImpl(this._link, this._title);
+
+  final String _link;
+  String _title;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitTarget(this);
@@ -1071,11 +1063,11 @@ class ThematicBreakImpl extends BlockNodeImpl implements ThematicBreak {
 
 /// Default UnorderedList implementation.
 class UnorderedListImpl extends ListBlockImpl implements UnorderedList {
-  final BulletType _bulletType;
-
   /// Constructs OrderedList instance.
   UnorderedListImpl(Iterable<ListItem> items, bool tight, this._bulletType)
       : super(items, tight);
+
+  final BulletType _bulletType;
 
   @override
   R accept<R>(AstVisitor<R> visitor) => visitor.visitUnorderedList(this);
@@ -1086,10 +1078,10 @@ class UnorderedListImpl extends ListBlockImpl implements UnorderedList {
 
 /// Default Whitespace implementation.
 abstract class WhitespaceImpl extends CharImpl implements Whitespace {
-  final int _amount;
-
   /// Constructs Whitespace instance.
   WhitespaceImpl(this._amount);
+
+  final int _amount;
 
   @override
   Iterable<AstNode> get childEntities => null;
@@ -1104,12 +1096,6 @@ abstract class WhitespaceImpl extends CharImpl implements Whitespace {
 /// Default NodeList implementation
 class NodeListImpl<E extends AstNode> extends ListBase<E>
     implements NodeList<E> {
-  /// The node that is the parent of each of the elements in the list.
-  AstNodeImpl _owner;
-
-  /// The elements contained in the list.
-  List<E> _elements = <E>[];
-
   /// Initialize a newly created list of nodes such that all of the nodes that
   /// are added to the list will have their parent set to the given [owner]. The
   /// list will initially be populated with the given [elements].
@@ -1117,22 +1103,28 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
     addAll(elements);
   }
 
+  /// The node that is the parent of each of the elements in the list.
+  AstNodeImpl _owner;
+
+  /// The elements contained in the list.
+  List<E> _elements = <E>[];
+
   @override
   AstNode get owner => _owner;
 
   @override
   int get length => _elements.length;
 
-  @deprecated // Never intended for public use.
+  @Deprecated('Never intended for public use.')
   @override
   set length(int newLength) {
-    throw new UnsupportedError('Cannot resize NodeList.');
+    throw UnsupportedError('Cannot resize NodeList.');
   }
 
   @override
   E operator [](int index) {
     if (index < 0 || index >= _elements.length) {
-      throw new RangeError('Index: $index, Size: ${_elements.length}');
+      throw RangeError('Index: $index, Size: ${_elements.length}');
     }
     return _elements[index];
   }
@@ -1140,7 +1132,7 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
   @override
   void operator []=(int index, E node) {
     if (index < 0 || index >= _elements.length) {
-      throw new RangeError('Index: $index, Size: ${_elements.length}');
+      throw RangeError('Index: $index, Size: ${_elements.length}');
     }
     // ignore: avoid_as
     _owner._becomeParentOf(node as AstNodeImpl);
@@ -1149,7 +1141,7 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
 
   @override
   R accept<R>(AstVisitor<R> visitor) {
-    for (E element in _elements) {
+    for (final E element in _elements) {
       element.accept(visitor);
     }
 
@@ -1157,14 +1149,14 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
   }
 
   @override
-  void add(E node) {
-    insert(length, node);
+  void add(E element) {
+    insert(length, element);
   }
 
   @override
-  bool addAll(Iterable<E> nodes) {
-    if (nodes != null && nodes.isNotEmpty) {
-      for (E node in nodes) {
+  bool addAll(Iterable<E> iterable) {
+    if (iterable != null && iterable.isNotEmpty) {
+      for (final E node in iterable) {
         _elements.add(node);
         // ignore: avoid_as
         _owner._becomeParentOf(node as AstNodeImpl);
@@ -1180,24 +1172,24 @@ class NodeListImpl<E extends AstNode> extends ListBase<E>
   }
 
   @override
-  void insert(int index, E node) {
+  void insert(int index, E element) {
     final int length = _elements.length;
     if (index < 0 || index > length) {
-      throw new RangeError('Index: $index, Size: ${_elements.length}');
+      throw RangeError('Index: $index, Size: ${_elements.length}');
     }
     // ignore: avoid_as
-    _owner._becomeParentOf(node as AstNodeImpl);
+    _owner._becomeParentOf(element as AstNodeImpl);
     if (index + 1 == length) {
-      _elements.add(node);
+      _elements.add(element);
     } else {
-      _elements.insert(index, node);
+      _elements.insert(index, element);
     }
   }
 
   @override
   E removeAt(int index) {
     if (index < 0 || index >= _elements.length) {
-      throw new RangeError('Index: $index, Size: ${_elements.length}');
+      throw RangeError('Index: $index, Size: ${_elements.length}');
     }
     final E removedNode = _elements[index];
     _elements.removeAt(index);

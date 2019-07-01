@@ -9,7 +9,7 @@ import 'data/test_data.dart';
 void blnsTests() {
   t.group('Big list of naughty strings', () {
     int num = 0;
-    for (String string in blns) {
+    for (final String string in blns) {
       ++num;
       t.test(num.toString(), () {
         final String result = '<p>$string</p>\n';

@@ -20,13 +20,12 @@ class EntityParser extends AbstractParser<InlineNodeImpl> {
       if (match[3] != null) {
         final String code = match[3];
         if (code == 'nbsp') {
-          return new ParseResult<InlineNodeImpl>.success(
-              new NonBreakableSpaceImpl(1), match.end);
+          return ParseResult<InlineNodeImpl>.success(
+              NonBreakableSpaceImpl(1), match.end);
         }
         final String str = htmlEntities[match[3]];
         if (str != null) {
-          return new ParseResult<InlineNodeImpl>.success(
-              new StrImpl(str), match.end);
+          return ParseResult<InlineNodeImpl>.success(StrImpl(str), match.end);
         }
       } else {
         int code;
@@ -41,11 +40,11 @@ class EntityParser extends AbstractParser<InlineNodeImpl> {
         }
 
         if (code == nonBreakableSpaceCodeUnit) {
-          return new ParseResult<InlineNodeImpl>.success(
-              new NonBreakableSpaceImpl(1), match.end);
+          return ParseResult<InlineNodeImpl>.success(
+              NonBreakableSpaceImpl(1), match.end);
         }
-        return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(new String.fromCharCode(code)), match.end);
+        return ParseResult<InlineNodeImpl>.success(
+            StrImpl(String.fromCharCode(code)), match.end);
       }
     }
 

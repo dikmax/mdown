@@ -13,16 +13,16 @@ const String escapable = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 Set<int> _escapableCodesSet;
 
 /// Getter for set of escapable codes.
-Set<int> get escapableCodes => _escapableCodesSet ??= new BitSet(256)
+Set<int> get escapableCodes => _escapableCodesSet ??= BitSet(256)
   ..addAll(escapable.split('').map((String s) => s.codeUnitAt(0)));
 
 /// RegExp for testing 6th rule of html parsing. See CommonMark spec.
-final Pattern htmlBlock6Test = new RegExp(
+final Pattern htmlBlock6Test = RegExp(
   r'</?([a-zA-Z1-6]+)(?:\s|/?>|$)',
 );
 
 /// List of block html tags.
-final Set<String> blockTags = new HashSet<String>.from(<String>[
+final Set<String> blockTags = HashSet<String>.from(<String>[
   'address',
   'article',
   'aside',
@@ -122,7 +122,7 @@ const String htmlOpenTag = '<$htmlTagName$htmlAttribute*\\s*/?>';
 /// RegExp for parsing html close tag
 const String htmlCloseTag = '</$htmlTagName\\s*>';
 
-final RegExp _clashSpaceRegExp = new RegExp('[ \t\r\n]+');
+final RegExp _clashSpaceRegExp = RegExp('[ \t\r\n]+');
 
 /// Removes indent from line
 String removeIndent(String line, int amount,
@@ -156,20 +156,20 @@ String trimAndReplaceSpaces(String s) =>
 String normalizeReference(String s) => trimAndReplaceSpaces(s).toUpperCase();
 
 /// Escape RegExp
-final RegExp escapeRegExp = new RegExp(r'\\([!"#$%&'
+final RegExp escapeRegExp = RegExp(r'\\([!"#$%&'
     "'"
     r'()*+,\-./:;<=>?@\[\\\]^_`{|}~])');
 
 /// Entity RegExp
-final RegExp entityRegExp = new RegExp(
+final RegExp entityRegExp = RegExp(
     '&(?:#[xX]([A-Fa-f0-9]{1,8})|#([0-9]{1,8})|([A-Za-z][A-Za-z0-9]{1,31}));');
 
 /// Regexp for finding escapes and references.
 final RegExp unescapeUnreferenceRegExp =
-    new RegExp(escapeRegExp.pattern + '|' + entityRegExp.pattern);
+    RegExp(escapeRegExp.pattern + '|' + entityRegExp.pattern);
 
 /// RegExp for unescaped reference
-final RegExp unescapeUnrefereceTest = new RegExp(r'[\\&]');
+final RegExp unescapeUnrefereceTest = RegExp(r'[\\&]');
 
 /// Unescapes (`\!` -> `!`) and unreferences (`&amp;` -> `&`) string.
 String unescapeAndUnreference(String s) {
@@ -205,7 +205,7 @@ String _unescapeUnreferenceReplacement(Match match) {
     if (code > 1114111 || code == 0) {
       code = 0xFFFD;
     }
-    return new String.fromCharCode(code);
+    return String.fromCharCode(code);
   }
 
   return match[0];

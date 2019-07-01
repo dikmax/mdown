@@ -11,7 +11,7 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
   RawTexParser(ParsersContainer container) : super(container);
 
   static final RegExp _startRegExp =
-      new RegExp(r'^ {0,3}\\begin{([A-Za-z0-9_\-+*]+)\}');
+      RegExp(r'^ {0,3}\\begin{([A-Za-z0-9_\-+*]+)\}');
 
   static String _escapeReplacement(Match match) => r'\' + match[0];
 
@@ -19,27 +19,27 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
     int off = offset;
     final ParseResult<String> lineRes = container.lineParser.parse(text, off);
-    assert(lineRes.isSuccess);
+    assert(lineRes.isSuccess, 'lineParser should always succeed');
 
     final Match startMatch = _startRegExp.firstMatch(lineRes.value);
     if (startMatch == null) {
       return const ParseResult<BlockNodeImpl>.failure();
     }
 
-    String enviroment = startMatch[1];
-    enviroment =
-        enviroment.replaceAllMapped(new RegExp(r'[+*]'), _escapeReplacement);
+    String environment = startMatch[1];
+    environment =
+        environment.replaceAllMapped(RegExp(r'[+*]'), _escapeReplacement);
     final RegExp endTest =
-        new RegExp(r'^ {0,3}\\end\{' + enviroment + r'\}[ \t]*$');
+        RegExp(r'^ {0,3}\\end\{' + environment + r'\}[ \t]*$');
 
-    final StringBuffer result = new StringBuffer()..writeln(lineRes.value);
+    final StringBuffer result = StringBuffer()..writeln(lineRes.value);
 
     off = lineRes.offset;
     final int length = text.length;
     bool found = false;
     while (off < length) {
       final ParseResult<String> lineRes = container.lineParser.parse(text, off);
-      assert(lineRes.isSuccess);
+      assert(lineRes.isSuccess, 'lineParser should always succeed');
 
       off = lineRes.offset;
       result.writeln(lineRes.value);
@@ -54,7 +54,7 @@ class RawTexParser extends AbstractParser<BlockNodeImpl> {
       return const ParseResult<BlockNodeImpl>.failure();
     }
 
-    return new ParseResult<BlockNodeImpl>.success(
-        new TexRawBlockImpl(result.toString()), off);
+    return ParseResult<BlockNodeImpl>.success(
+        TexRawBlockImpl(result.toString()), off);
   }
 }

@@ -48,11 +48,11 @@ class TexMathDoubleBackslashParser extends AbstractParser<InlineNodeImpl> {
 
     final String math = text.substring(off, endOffset);
     if (displayMath) {
-      return new ParseResult<InlineNodeImpl>.success(
-          new TexMathDisplayImpl(math), endOffset + 3);
+      return ParseResult<InlineNodeImpl>.success(
+          TexMathDisplayImpl(math), endOffset + 3);
     } else {
-      return new ParseResult<InlineNodeImpl>.success(
-          new TexMathInlineImpl(math), endOffset + 3);
+      return ParseResult<InlineNodeImpl>.success(
+          TexMathInlineImpl(math), endOffset + 3);
     }
   }
 }

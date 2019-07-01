@@ -21,8 +21,8 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
   ];
 
   static final List<Pattern> _ends = <Pattern>[
-    // TODO replace regexp
-    new RegExp(r'</(script|pre|style)>', caseSensitive: false),
+    // TODO(dikmax): replace regexp
+    RegExp(r'</(script|pre|style)>', caseSensitive: false),
     '-->',
     '?>',
     '>',
@@ -44,11 +44,11 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
 
     if (rule != null) {
       final int length = text.length;
-      final StringBuffer result = new StringBuffer();
+      final StringBuffer result = StringBuffer();
       while (off < length) {
         final ParseResult<String> lineRes =
             container.lineParser.parse(text, off);
-        assert(lineRes.isSuccess);
+        assert(lineRes.isSuccess, 'lineParser should always succeed');
 
         off = lineRes.offset;
         result.writeln(lineRes.value);
@@ -57,8 +57,8 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
         }
       }
 
-      return new ParseResult<BlockNodeImpl>.success(
-          new HtmlRawBlockImpl(result.toString()), off);
+      return ParseResult<BlockNodeImpl>.success(
+          HtmlRawBlockImpl(result.toString()), off);
     }
 
     final Match htmlBlock6Match =
@@ -70,11 +70,11 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
       }
 
       final int length = text.length;
-      final StringBuffer result = new StringBuffer();
+      final StringBuffer result = StringBuffer();
       while (off < length) {
         final ParseResult<String> lineRes =
             container.lineParser.parse(text, off);
-        assert(lineRes.isSuccess);
+        assert(lineRes.isSuccess, 'lineParser should always succeed');
 
         if (isOnlyWhitespace(lineRes.value)) {
           break;
@@ -83,8 +83,8 @@ class HtmlBlockParser extends AbstractParser<BlockNodeImpl> {
         result.writeln(lineRes.value);
       }
 
-      return new ParseResult<BlockNodeImpl>.success(
-          new HtmlRawBlockImpl(result.toString()), off);
+      return ParseResult<BlockNodeImpl>.success(
+          HtmlRawBlockImpl(result.toString()), off);
     }
 
     return const ParseResult<BlockNodeImpl>.failure();

@@ -14,7 +14,7 @@ void serviceTests() {
     });
 
     t.test('Extensions 1', () {
-      const Options options = const Options(superscript: true);
+      const Options options = Options(superscript: true);
       final String res = markdownToHtml('Hello world!\n===\n', options);
       t.expect(res, t.equals('<h1>Hello world!</h1>\n'));
     });
@@ -73,7 +73,7 @@ void serviceTests() {
       }
 
       final String res = markdownToHtml(
-          'Hello world!\n===', new Options(linkResolver: linkResolver));
+          'Hello world!\n===', Options(linkResolver: linkResolver));
       t.expect(res, t.equals('<h1>Hello world!</h1>\n'));
     });
   });

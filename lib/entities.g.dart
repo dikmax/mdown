@@ -7,7 +7,7 @@ part of mdown.entities;
 // **************************************************************************
 
 final Map<String, String> _$htmlEntities =
-    new HashMap<String, String>.from(<String, String>{
+    HashMap<String, String>.from(<String, String>{
   'AElig': 'Æ',
   'AMP': '&',
   'Aacute': 'Á',

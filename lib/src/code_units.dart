@@ -248,7 +248,7 @@ const int nonBreakableSpaceCodeUnit = 160;
 Set<int> _spacesSet;
 
 /// Unicode space chars.
-Set<int> get spaces => _spacesSet ??= new BitSet(65536)
+Set<int> get spaces => _spacesSet ??= BitSet(65536)
   ..addAll(<int>[
     formFeedCodeUnit,
     spaceCodeUnit,
@@ -281,7 +281,7 @@ Set<int> get spaces => _spacesSet ??= new BitSet(65536)
 Set<int> _punctuationSet;
 
 /// Unicode puctuation chars.
-Set<int> get punctuation => _punctuationSet ??= new BitSet(0x3000)
+Set<int> get punctuation => _punctuationSet ??= BitSet(0x3000)
   ..addAll(<int>[
     backslashCodeUnit,
     singleQuoteCodeUnit,
@@ -316,7 +316,7 @@ Set<int> get punctuation => _punctuationSet ??= new BitSet(0x3000)
     closeBraceCodeUnit,
     tildeCodeUnit
   ])
-  ..addAll(new List<int>.generate(0x70, (int index) => 0x2000 + index,
-      growable: false))
-  ..addAll(new List<int>.generate(0x80, (int index) => 0x2e00 + index,
-      growable: false));
+  ..addAll(
+      List<int>.generate(0x70, (int index) => 0x2000 + index, growable: false))
+  ..addAll(
+      List<int>.generate(0x80, (int index) => 0x2e00 + index, growable: false));

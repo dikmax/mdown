@@ -19,24 +19,24 @@ class ListReplacingAstVisitor extends UnifyingAstVisitor<List<AstNodeImpl>> {
 }
 
 class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
-  ListReplacingAstVisitor _childVisitor;
-
   ReplacingAstVisitor([this._childVisitor]) {
-    _childVisitor ??= new ListReplacingAstVisitor();
+    _childVisitor ??= ListReplacingAstVisitor();
     _childVisitor.outerVisitor = this;
   }
+
+  ListReplacingAstVisitor _childVisitor;
 
   List<InlineNodeImpl> _visitInlineNodeList(Iterable<InlineNode> list) {
     final List<InlineNodeImpl> result = <InlineNodeImpl>[];
     bool changed = false;
-    for (InlineNode child in list) {
+    for (final InlineNode child in list) {
       final List<AstNodeImpl> replacement =
           child.accept<List<AstNodeImpl>>(_childVisitor);
       if (replacement == null) {
         result.add(child);
       } else {
         changed = true;
-        for (AstNodeImpl node in replacement) {
+        for (final AstNodeImpl node in replacement) {
           // ignore: avoid_as
           result.add(node as InlineNodeImpl);
         }
@@ -52,14 +52,14 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   List<BlockNodeImpl> _visitBlockNodeList(Iterable<BlockNode> list) {
     final List<BlockNodeImpl> result = <BlockNodeImpl>[];
     bool changed = false;
-    for (BlockNode child in list) {
+    for (final BlockNode child in list) {
       final List<AstNodeImpl> replacement =
           child.accept<List<AstNodeImpl>>(_childVisitor);
       if (replacement == null) {
         result.add(child);
       } else {
         changed = true;
-        for (AstNodeImpl node in replacement) {
+        for (final AstNodeImpl node in replacement) {
           // ignore: avoid_as
           result.add(node as BlockNodeImpl);
         }
@@ -72,14 +72,14 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   List<TableCellImpl> _visitCellNodeList(Iterable<TableCell> list) {
     final List<TableCellImpl> result = <TableCellImpl>[];
     bool changed = false;
-    for (TableCell child in list) {
+    for (final TableCell child in list) {
       final List<AstNodeImpl> replacement =
           child.accept<List<AstNodeImpl>>(_childVisitor);
       if (replacement == null) {
         result.add(child);
       } else {
         changed = true;
-        for (AstNodeImpl node in replacement) {
+        for (final AstNodeImpl node in replacement) {
           // ignore: avoid_as
           result.add(node as TableCellImpl);
         }
@@ -92,14 +92,14 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   List<TableRowImpl> _visitRowNodeList(Iterable<TableRow> list) {
     final List<TableRowImpl> result = <TableRowImpl>[];
     bool changed = false;
-    for (TableRow child in list) {
+    for (final TableRow child in list) {
       final List<AstNodeImpl> replacement =
           child.accept<List<AstNodeImpl>>(_childVisitor);
       if (replacement == null) {
         result.add(child);
       } else {
         changed = true;
-        for (AstNodeImpl node in replacement) {
+        for (final AstNodeImpl node in replacement) {
           // ignore: avoid_as
           result.add(node as TableRowImpl);
         }
@@ -115,14 +115,14 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   List<AttributeImpl> _visitAttributeNodeList(Iterable<Attribute> list) {
     final List<AttributeImpl> result = <AttributeImpl>[];
     bool changed = false;
-    for (Attribute child in list) {
+    for (final Attribute child in list) {
       final List<AstNodeImpl> replacement =
           child.accept<List<AstNodeImpl>>(_childVisitor);
       if (replacement == null) {
         result.add(child);
       } else {
         changed = true;
-        for (AstNodeImpl node in replacement) {
+        for (final AstNodeImpl node in replacement) {
           // ignore: avoid_as
           result.add(node as AttributeImpl);
         }
@@ -138,14 +138,14 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   List<ListItemImpl> _visitListItemNodeList(Iterable<ListItem> list) {
     final List<ListItemImpl> result = <ListItemImpl>[];
     bool changed = false;
-    for (ListItem child in list) {
+    for (final ListItem child in list) {
       final List<AstNodeImpl> replacement =
           child.accept<List<AstNodeImpl>>(_childVisitor);
       if (replacement == null) {
         result.add(child);
       } else {
         changed = true;
-        for (AstNodeImpl node in replacement) {
+        for (final AstNodeImpl node in replacement) {
           // ignore: avoid_as
           result.add(node as ListItemImpl);
         }
@@ -171,13 +171,13 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   BaseCompositeInlineImpl visitBaseCompositeInline(BaseCompositeInline node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null ? new BaseCompositeInlineImpl(contents) : node;
+    return contents != null ? BaseCompositeInlineImpl(contents) : node;
   }
 
   @override
   BlockquoteImpl visitBlockquote(Blockquote node) {
     final List<BlockNodeImpl> contents = _visitBlockNodeList(node.contents);
-    return contents != null ? new BlockquoteImpl(contents) : node;
+    return contents != null ? BlockquoteImpl(contents) : node;
   }
 
   @override
@@ -192,7 +192,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
     return attributes == node.attributes
         ? node
-        : new CodeImpl(node.contents, node.fenceSize, attributes);
+        : CodeImpl(node.contents, node.fenceSize, attributes);
   }
 
   @override
@@ -201,25 +201,25 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
     return attributes == node.attributes
         ? node
-        : new CodeBlockImpl(node.contents, attributes);
+        : CodeBlockImpl(node.contents, attributes);
   }
 
   @override
   DocumentImpl visitDocument(Document node) {
     final List<BlockNode> contents = _visitBlockNodeList(node.contents);
-    return contents != null ? new DocumentImpl(contents) : node;
+    return contents != null ? DocumentImpl(contents) : node;
   }
 
   @override
   EmphasisImpl visitEmphasis(Emphasis node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null ? new EmphasisImpl(contents) : node;
+    return contents != null ? EmphasisImpl(contents) : node;
   }
 
   @override
   ExtendedAttributesImpl visitExtendedAttributes(ExtendedAttributes node) {
     final List<Attribute> attributes = _visitAttributeNodeList(node.attributes);
-    return attributes != null ? new ExtendedAttributesImpl(attributes) : node;
+    return attributes != null ? ExtendedAttributesImpl(attributes) : node;
   }
 
   @override
@@ -235,7 +235,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
     return contents == node.contents && attributes == node.attributes
         ? node
-        : new HeadingImpl(contents, node.level, attributes);
+        : HeadingImpl(contents, node.level, attributes);
   }
 
   @override
@@ -269,7 +269,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
             target == node.target &&
             contents == null
         ? node
-        : new InlineImageImpl(contents ?? node.contents, target, attributes);
+        : InlineImageImpl(contents ?? node.contents, target, attributes);
   }
 
   @override
@@ -283,7 +283,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
             target == node.target &&
             contents == null
         ? node
-        : new InlineLinkImpl(contents ?? node.contents, target, attributes);
+        : InlineLinkImpl(contents ?? node.contents, target, attributes);
   }
 
   @override
@@ -299,13 +299,13 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
 
     return attributes == node.attributes && target == node.target
         ? node
-        : new LinkReferenceImpl(node.reference, target, attributes);
+        : LinkReferenceImpl(node.reference, target, attributes);
   }
 
   @override
   ListItemImpl visitListItem(ListItem node) {
     final List<BlockNode> contents = _visitBlockNodeList(node.contents);
-    return contents != null ? new ListItemImpl(contents) : node;
+    return contents != null ? ListItemImpl(contents) : node;
   }
 
   @override
@@ -317,7 +317,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   OrderedListImpl visitOrderedList(OrderedList node) {
     final List<ListItem> items = _visitListItemNodeList(node.items);
     return items != null
-        ? new OrderedListImpl(
+        ? OrderedListImpl(
             items, node.tight, node.startIndex, node.indexSeparator)
         : node;
   }
@@ -325,16 +325,14 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   ParaImpl visitPara(Para node) {
     final BaseInline contents = node.contents.accept<AstNode>(this);
-    return contents == node.contents ? node : new ParaImpl(contents);
+    return contents == node.contents ? node : ParaImpl(contents);
   }
 
   @override
   ReferenceImpl visitReference(Reference node) {
     final Target target = node.target.accept<AstNode>(this);
 
-    return target == node.target
-        ? node
-        : new ReferenceImpl(node.reference, target);
+    return target == node.target ? node : ReferenceImpl(node.reference, target);
   }
 
   @override
@@ -348,8 +346,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
             reference == node.reference &&
             contents == null
         ? node
-        : new ReferenceImageImpl(
-            contents ?? node.contents, reference, attributes);
+        : ReferenceImageImpl(contents ?? node.contents, reference, attributes);
   }
 
   @override
@@ -363,8 +360,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
             reference == node.reference &&
             contents == null
         ? node
-        : new ReferenceLinkImpl(
-            contents ?? node.contents, reference, attributes);
+        : ReferenceLinkImpl(contents ?? node.contents, reference, attributes);
   }
 
   @override
@@ -390,25 +386,25 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   StrikeoutImpl visitStrikeout(Strikeout node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null ? new StrikeoutImpl(contents) : node;
+    return contents != null ? StrikeoutImpl(contents) : node;
   }
 
   @override
   StrongImpl visitStrong(Strong node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null ? new StrongImpl(contents) : node;
+    return contents != null ? StrongImpl(contents) : node;
   }
 
   @override
   SubscriptImpl visitSubscript(Subscript node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null ? new SubscriptImpl(contents) : node;
+    return contents != null ? SubscriptImpl(contents) : node;
   }
 
   @override
   SuperscriptImpl visitSuperscript(Superscript node) {
     final List<InlineNode> contents = _visitInlineNodeList(node.contents);
-    return contents != null ? new SuperscriptImpl(contents) : node;
+    return contents != null ? SuperscriptImpl(contents) : node;
   }
 
   @override
@@ -422,7 +418,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
     final List<TableCell> headers = _visitCellNodeList(node.headers);
     final List<TableRow> contents = _visitRowNodeList(node.contents);
     return caption != node.caption || headers != null || contents != null
-        ? new TableImpl.rows(node.alignment, caption, headers ?? node.headers,
+        ? TableImpl.rows(node.alignment, caption, headers ?? node.headers,
             contents ?? node.contents)
         :
         // ignore: avoid_as
@@ -432,14 +428,14 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   @override
   TableCellImpl visitTableCell(TableCell node) {
     final List<BlockNodeImpl> contents = _visitBlockNodeList(node.contents);
-    return contents != null ? new TableCellImpl(contents) : node;
+    return contents != null ? TableCellImpl(contents) : node;
   }
 
   @override
   TableRowImpl visitTableRow(TableRow node) {
     final List<TableCellImpl> contents = _visitCellNodeList(node.contents);
     return contents != null
-        ? new TableRowImpl(contents)
+        ? TableRowImpl(contents)
         :
         // ignore: avoid_as
         node as TableRowImpl;
@@ -474,7 +470,7 @@ class ReplacingAstVisitor extends AstVisitor<AstNodeImpl> {
   UnorderedListImpl visitUnorderedList(UnorderedList node) {
     final List<ListItem> items = _visitListItemNodeList(node.items);
     return items != null
-        ? new UnorderedListImpl(items, node.tight, node.bulletType)
+        ? UnorderedListImpl(items, node.tight, node.bulletType)
         : node;
   }
 }

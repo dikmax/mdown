@@ -29,19 +29,18 @@ bool fastBlockTest2(
 
 /// Parser for paragraphs and setext headings.
 class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
-  static final RegExp _setextHeadingRegExp =
-      new RegExp('^ {0,3}(-+|=+)[ \t]*\$');
-
-  static final Pattern _listSimpleTest = new RegExp(r'([+\-*]|1[.)])( |$)');
-
-  Map<int, List<Lookup>> _paragraphBreaks;
-
   /// Constructor.
   ParaSetextHeadingParser(ParsersContainer container) : super(container);
 
+  static final RegExp _setextHeadingRegExp = RegExp('^ {0,3}(-+|=+)[ \t]*\$');
+
+  static final Pattern _listSimpleTest = RegExp(r'([+\-*]|1[.)])( |$)');
+
+  Map<int, List<Lookup>> _paragraphBreaks;
+
   @override
   void init() {
-    _paragraphBreaks = new HashMap<int, List<Lookup>>();
+    _paragraphBreaks = HashMap<int, List<Lookup>>();
 
     _paragraphBreaks[starCodeUnit] = <Lookup>[thematicBreakLookup];
     _paragraphBreaks[minusCodeUnit] = <Lookup>[thematicBreakLookup];
@@ -75,7 +74,7 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
     while (off < length) {
       final ParseResult<String> lineResult =
           container.lineParser.parse(text, off);
-      assert(lineResult.isSuccess);
+      assert(lineResult.isSuccess, 'lineParser should always succeed');
 
       final String line = lineResult.value;
 
@@ -176,25 +175,25 @@ class ParaSetextHeadingParser extends AbstractParser<BlockNodeImpl> {
           }
         }
       }
-      final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
+      final BaseInline inlines = UnparsedInlinesImpl(contentsString);
 
-      return new ParseResult<BlockNodeImpl>.success(
-          new HeadingImpl(inlines, level, attr), off);
+      return ParseResult<BlockNodeImpl>.success(
+          HeadingImpl(inlines, level, attr), off);
     }
 
-    final BaseInline inlines = new UnparsedInlinesImpl(contentsString);
+    final BaseInline inlines = UnparsedInlinesImpl(contentsString);
 
     if (listAddition != null) {
-      final List<BlockNodeImpl> result = <BlockNodeImpl>[new ParaImpl(inlines)];
+      final List<BlockNodeImpl> result = <BlockNodeImpl>[ParaImpl(inlines)];
       if (listAddition is CombiningBlockNodeImpl) {
         final CombiningBlockNodeImpl combining = listAddition;
         result.addAll(combining.list);
       } else {
         result.add(listAddition);
       }
-      return new ParseResult<BlockNodeImpl>.success(
-          new CombiningBlockNodeImpl(result), off);
+      return ParseResult<BlockNodeImpl>.success(
+          CombiningBlockNodeImpl(result), off);
     }
-    return new ParseResult<BlockNodeImpl>.success(new ParaImpl(inlines), off);
+    return ParseResult<BlockNodeImpl>.success(ParaImpl(inlines), off);
   }
 }

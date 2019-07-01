@@ -25,8 +25,7 @@ class AtxHeadingParser extends AbstractParser<BlockNodeImpl> {
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final ParseResult<String> lineResult =
         container.lineParser.parse(text, offset);
-
-    assert(lineResult.isSuccess);
+    assert(lineResult.isSuccess, 'lineParser should always succeed');
 
     final String line = lineResult.value;
     final int length = line.length;
@@ -118,12 +117,12 @@ class AtxHeadingParser extends AbstractParser<BlockNodeImpl> {
           }
         }
       }
-      inlines = new UnparsedInlinesImpl(content);
+      inlines = UnparsedInlinesImpl(content);
     } else {
       inlines = astFactory.baseCompositeInline(<InlineNodeImpl>[]);
     }
 
-    return new ParseResult<BlockNodeImpl>.success(
-        new HeadingImpl(inlines, level, attr), lineResult.offset);
+    return ParseResult<BlockNodeImpl>.success(
+        HeadingImpl(inlines, level, attr), lineResult.offset);
   }
 }

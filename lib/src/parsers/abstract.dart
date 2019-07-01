@@ -5,11 +5,11 @@ import 'package:mdown/src/parsers/container.dart';
 
 /// Base abstract parser class.
 abstract class AbstractParser<A> {
-  /// DI container + options.
-  ParsersContainer container;
-
   /// Constructor.
   AbstractParser(this.container);
+
+  /// DI container + options.
+  ParsersContainer container;
 
   /// Init method, called by [container] after construction and
   /// before running, when all fiels in [container] are defined.

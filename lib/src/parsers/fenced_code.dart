@@ -15,14 +15,14 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
   FencedCodeParser(ParsersContainer container) : super(container);
 
   static final RegExp _fencedCodeStartTest =
-      new RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
+      RegExp('^( {0,3})(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$');
 
   @override
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
     int off = offset;
 
     ParseResult<String> lineResult = container.lineParser.parse(text, off);
-    assert(lineResult.isSuccess);
+    assert(lineResult.isSuccess, 'lineParser should always succeed');
 
     final Match startRes = _fencedCodeStartTest.firstMatch(lineResult.value);
     if (startRes == null) {
@@ -34,7 +34,7 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
     final String infoString = (startRes[3] ?? startRes[5]).trim();
     final String char = line[0];
 
-    final RegExp endTest = new RegExp('^ {0,3}$char{${line.length},}[ \t]*\$');
+    final RegExp endTest = RegExp('^ {0,3}$char{${line.length},}[ \t]*\$');
 
     final List<String> code = <String>[];
 
@@ -42,7 +42,7 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
     final int length = text.length;
     while (off < length) {
       lineResult = container.lineParser.parse(text, off);
-      assert(lineResult.isSuccess);
+      assert(lineResult.isSuccess, 'lineParser should always succeed');
 
       String line = lineResult.value;
       off = lineResult.offset;
@@ -70,8 +70,8 @@ class FencedCodeParser extends AbstractParser<BlockNodeImpl> {
       }
       attributes = attributes ?? _parseInfoString(infoString);
     }
-    final CodeBlockImpl codeBlock = new CodeBlockImpl(code, attributes);
-    return new ParseResult<BlockNodeImpl>.success(codeBlock, off);
+    final CodeBlockImpl codeBlock = CodeBlockImpl(code, attributes);
+    return ParseResult<BlockNodeImpl>.success(codeBlock, off);
   }
 
   InfoString _parseInfoString(String infoString) {

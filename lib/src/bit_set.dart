@@ -5,20 +5,20 @@ import 'dart:typed_data';
 
 /// Fast bit-set implementation.
 class BitSet extends SetMixin<int> {
+  /// Constructs new instance of BitSet with specified size.
+  BitSet(this._size) : _list = Uint32List(_size >> 5);
+
   final int _size;
   final Uint32List _list;
 
-  /// Constructs new instance of BitSet with specified size.
-  BitSet(this._size) : _list = new Uint32List(_size >> 5);
-
   @override
-  bool add(int element) {
-    if (element > _size || element < 0) {
-      throw new ArgumentError();
+  bool add(int value) {
+    if (value > _size || value < 0) {
+      throw ArgumentError();
     }
 
-    final int idx = element >> 5;
-    final int bit = 1 << (element & 0x1f);
+    final int idx = value >> 5;
+    final int bit = 1 << (value & 0x1f);
     if (_list[idx] & bit == 0) {
       _list[idx] |= bit;
       return true;
@@ -30,7 +30,7 @@ class BitSet extends SetMixin<int> {
   @override
   bool contains(Object element) {
     if (element is! int) {
-      throw new ArgumentError();
+      throw ArgumentError();
     }
     final int value = element;
     if (value > _size || value < 0) {
@@ -42,30 +42,31 @@ class BitSet extends SetMixin<int> {
     return _list[idx] & bit != 0;
   }
 
-  // TODO: implement iterator
+  // TODO(dikmax): implement iterator
   @override
   Iterator<int> get iterator => null;
 
-  // TODO: implement length
+  // TODO(dikmax): implement length
   @override
   int get length => null;
 
   @override
   int lookup(Object element) {
     if (element is! int) {
-      throw new ArgumentError();
+      throw ArgumentError();
     }
     return contains(element) ? element : null;
   }
 
   @override
+  // ignore: avoid_renaming_method_parameters
   bool remove(Object element) {
     if (element is! int) {
-      throw new ArgumentError();
+      throw ArgumentError();
     }
     final int value = element;
     if (value > _size || value < 0) {
-      throw new ArgumentError();
+      throw ArgumentError();
     }
 
     final int idx = value >> 5;
@@ -80,6 +81,6 @@ class BitSet extends SetMixin<int> {
 
   @override
   Set<int> toSet() {
-    // TODO: implement toSet
+    // TODO(dikmax): implement toSet
   }
 }

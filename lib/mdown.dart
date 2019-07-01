@@ -15,8 +15,7 @@ String markdownToHtml(String markdown, [Options options]) {
   if (options == null) {
     result = HtmlWriter.defaults.write(MarkdownParser.defaults.parse(markdown));
   } else {
-    result = new HtmlWriter(options)
-        .write(new MarkdownParser(options).parse(markdown));
+    result = HtmlWriter(options).write(MarkdownParser(options).parse(markdown));
   }
 
   return result;

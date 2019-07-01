@@ -6,8 +6,8 @@ import 'package:mdown/options.dart';
 import 'package:mdown/src/code_units.dart';
 import 'package:mdown/src/ast/enums.dart';
 
-final RegExp _urlEncodeRegExp = new RegExp(r'%[0-9a-fA-F]{2}');
-final RegExp _htmlEntityRegExp = new RegExp(
+final RegExp _urlEncodeRegExp = RegExp(r'%[0-9a-fA-F]{2}');
+final RegExp _htmlEntityRegExp = RegExp(
     r'&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});',
     caseSensitive: false);
 
@@ -18,7 +18,7 @@ String _urlEncode(String url) {
       onMatch: (Match m) => m.group(0), onNonMatch: _htmlEscape);
 }
 
-RegExp _forbiddenTagsRegExp = new RegExp(
+RegExp _forbiddenTagsRegExp = RegExp(
     r'<(title|textarea|style|xmp|iframe|noembed|noframes|script|plaintext)',
     caseSensitive: false);
 
@@ -70,7 +70,7 @@ String _htmlEscape(String str) {
         charCodes.add(codeUnit);
     }
   }
-  return new String.fromCharCodes(charCodes);
+  return String.fromCharCodes(charCodes);
 }
 
 class _InfoStringVisitor extends SimpleAstVisitor<String> {
@@ -83,7 +83,7 @@ class _InfoStringVisitor extends SimpleAstVisitor<String> {
   }
 }
 
-final _InfoStringVisitor _infoStringVisitor = new _InfoStringVisitor();
+final _InfoStringVisitor _infoStringVisitor = _InfoStringVisitor();
 
 class _IdAttributesVisitor extends SimpleAstVisitor<String> {
   @override
@@ -93,7 +93,7 @@ class _IdAttributesVisitor extends SimpleAstVisitor<String> {
   @override
   String visitExtendedAttributes(ExtendedAttributes node) {
     String result = '';
-    for (Attribute attribute in node.attributes) {
+    for (final Attribute attribute in node.attributes) {
       final String id = attribute.accept(this);
       if (id != null) {
         result += id;
@@ -104,7 +104,7 @@ class _IdAttributesVisitor extends SimpleAstVisitor<String> {
   }
 }
 
-final _IdAttributesVisitor _idAttributesVisitor = new _IdAttributesVisitor();
+final _IdAttributesVisitor _idAttributesVisitor = _IdAttributesVisitor();
 
 class _ClassAttributesVisitor extends SimpleAstVisitor<String> {
   @override
@@ -113,7 +113,7 @@ class _ClassAttributesVisitor extends SimpleAstVisitor<String> {
   @override
   String visitExtendedAttributes(ExtendedAttributes node) {
     final List<String> result = <String>[];
-    for (Attribute attribute in node.attributes) {
+    for (final Attribute attribute in node.attributes) {
       final String className = attribute.accept(this);
       if (className != null) {
         result.add(className);
@@ -124,7 +124,7 @@ class _ClassAttributesVisitor extends SimpleAstVisitor<String> {
   }
 }
 
-_ClassAttributesVisitor _classAttributesVisitor = new _ClassAttributesVisitor();
+_ClassAttributesVisitor _classAttributesVisitor = _ClassAttributesVisitor();
 
 class _KeyValueAttributesVisitor extends SimpleAstVisitor<String> {
   @override
@@ -134,7 +134,7 @@ class _KeyValueAttributesVisitor extends SimpleAstVisitor<String> {
   @override
   String visitExtendedAttributes(ExtendedAttributes node) {
     String result = '';
-    for (Attribute attribute in node.attributes) {
+    for (final Attribute attribute in node.attributes) {
       final String id = attribute.accept(this);
       if (id != null) {
         result += id;
@@ -146,57 +146,50 @@ class _KeyValueAttributesVisitor extends SimpleAstVisitor<String> {
 }
 
 _KeyValueAttributesVisitor _keyValueAttributesVisitor =
-    new _KeyValueAttributesVisitor();
+    _KeyValueAttributesVisitor();
 
-class _ImageLabelVisitor extends GeneralizingAstVisitor<Null> {
-  final StringBuffer _sb = new StringBuffer();
+class _ImageLabelVisitor extends GeneralizingAstVisitor<void> {
+  final StringBuffer _sb = StringBuffer();
 
   String get result => _sb.toString();
 
   @override
-  Null visitCode(Code node) {
+  void visitCode(Code node) {
     _sb.write(node.contents);
-    return null;
   }
 
   @override
-  Null visitCompositeInline(CompositeInline node) {
+  void visitCompositeInline(CompositeInline node) {
     node.contents.accept(this);
-    return null;
   }
 
   @override
-  Null visitHardLineBreak(HardLineBreak node) {
+  void visitHardLineBreak(HardLineBreak node) {
     _sb.write(' ');
-    return null;
   }
 
   @override
-  Null visitHtmlRawInline(HtmlRawInline node) {
+  void visitHtmlRawInline(HtmlRawInline node) {
     _sb.write(node.contents);
-    return null;
   }
 
   @override
-  Null visitImage(Image node) {
+  void visitImage(Image node) {
     node.contents?.accept(this);
-    return null;
   }
 
   @override
-  Null visitLink(Link node) {
+  void visitLink(Link node) {
     node.contents?.accept(this);
-    return null;
   }
 
   @override
-  Null visitNonBreakableSpace(NonBreakableSpace node) {
+  void visitNonBreakableSpace(NonBreakableSpace node) {
     _sb.write('\u{a0}');
-    return null;
   }
 
   @override
-  Null visitSmartChar(SmartChar node) {
+  void visitSmartChar(SmartChar node) {
     switch (node.type) {
       case SmartCharType.ellipsis:
         _sb.write('\u{2026}');
@@ -227,51 +220,45 @@ class _ImageLabelVisitor extends GeneralizingAstVisitor<Null> {
         _sb.write('\u{201d}');
         break;
     }
-
-    return null;
   }
 
   @override
-  Null visitSpace(Space node) {
+  void visitSpace(Space node) {
     _sb.write(' ' * node.amount);
-    return null;
   }
 
   @override
-  Null visitStr(Str node) {
+  void visitStr(Str node) {
     _sb.write(node.contents);
-    return null;
   }
 
   @override
-  Null visitTab(Tab node) {
+  void visitTab(Tab node) {
     _sb.write('\t' * node.amount);
-    return null;
   }
 
   @override
-  Null visitTexMath(TexMath node) {
+  void visitTexMath(TexMath node) {
     _sb.write(node.contents);
-    return null;
   }
 }
 
-class _Visitor extends GeneralizingAstVisitor<Null> {
-  final StringBuffer _sb = new StringBuffer();
+class _Visitor extends GeneralizingAstVisitor<void> {
+  _Visitor(this._options);
+
+  final StringBuffer _sb = StringBuffer();
 
   final Options _options;
 
-  _Visitor(this._options);
-
   String get result => _sb.toString();
 
-  void _writeBlocks(Iterable<BlockNode> nodes, {bool tight: false}) {
+  void _writeBlocks(Iterable<BlockNode> nodes, {bool tight = false}) {
     final Iterator<BlockNode> iterator = nodes.iterator;
 
     if (iterator.moveNext()) {
       final BlockNode block = iterator.current;
       if (tight) {
-        // TODO use separate Visitor.
+        // TODO(dikmax): use separate Visitor.
         if (block is Para) {
           block.contents.accept(this);
         } else {
@@ -296,93 +283,82 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
   }
 
   @override
-  Null visitBlockquote(Blockquote node) {
+  void visitBlockquote(Blockquote node) {
     _sb.write('<blockquote>\n');
     _writeBlocks(node.contents);
     _sb.write('</blockquote>\n');
-
-    return null;
   }
 
   @override
-  Null visitCode(Code node) {
+  void visitCode(Code node) {
     _sb.write('<code');
     node.attributes?.accept(this);
     _sb..write('>')..write(_htmlEscape(node.contents))..write('</code>');
-    return null;
   }
 
   @override
-  Null visitCodeBlock(CodeBlock node) {
+  void visitCodeBlock(CodeBlock node) {
     _sb.write('<pre');
     node.attributes?.accept(this);
     _sb
       ..write('><code')
       ..write(node.attributes?.accept(_infoStringVisitor) ?? '')
       ..write('>');
-    for (String line in node.contents) {
+    for (final String line in node.contents) {
       _sb.writeln(_htmlEscape(line));
     }
     _sb.write('</code></pre>\n');
-    return null;
   }
 
   @override
-  Null visitDocument(Document node) {
+  void visitDocument(Document node) {
     _writeBlocks(node.contents);
-    return null;
   }
 
   @override
-  Null visitEmphasis(Emphasis node) {
+  void visitEmphasis(Emphasis node) {
     _sb.write('<em>');
     node.contents.accept(this);
     _sb.write('</em>');
-    return null;
   }
 
   @override
-  Null visitExtendedAttributes(ExtendedAttributes node) {
+  void visitExtendedAttributes(ExtendedAttributes node) {
     _sb
       ..write(node.accept(_idAttributesVisitor))
       ..write(node.accept(_classAttributesVisitor))
       ..write(node.accept(_keyValueAttributesVisitor));
-    return null;
   }
 
   @override
-  Null visitHardLineBreak(HardLineBreak node) {
+  void visitHardLineBreak(HardLineBreak node) {
     _sb.write('<br/>\n');
-    return null;
   }
 
   @override
-  Null visitHeading(Heading node) {
+  void visitHeading(Heading node) {
     _sb..write('<h')..write(node.level);
     node.attributes?.accept(this);
     _sb.write('>');
     node.contents?.accept(this);
     _sb..write('</h')..write(node.level)..write('>\n');
-    return null;
   }
 
   @override
-  Null visitHtmlRawBlock(HtmlRawBlock node) {
+  void visitHtmlRawBlock(HtmlRawBlock node) {
     _sb.write(_options.tagFilter ? _tagFilter(node.contents) : node.contents);
-    return null;
   }
 
   @override
-  Null visitHtmlRawInline(HtmlRawInline node) {
+  void visitHtmlRawInline(HtmlRawInline node) {
     _sb.write(_options.tagFilter ? _tagFilter(node.contents) : node.contents);
-    return null;
   }
 
   @override
-  Null visitImage(Image node) {
+  void visitImage(Image node) {
     _sb..write('<img src="')..write(_urlEncode(node?.link))..write('" alt="');
 
-    final _ImageLabelVisitor innerVisitor = new _ImageLabelVisitor();
+    final _ImageLabelVisitor innerVisitor = _ImageLabelVisitor();
     node.contents.accept(innerVisitor);
 
     _sb..write(_htmlEscape(innerVisitor.result))..write('"');
@@ -391,11 +367,10 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
     }
     node.attributes?.accept(this);
     _sb.write(' />');
-    return null;
   }
 
   @override
-  Null visitLink(Link node) {
+  void visitLink(Link node) {
     _sb..write('<a href="')..write(_urlEncode(node.link))..write('"');
     if (node.title != null) {
       _sb..write(' title="')..write(_htmlEscape(node.title))..write('"');
@@ -404,15 +379,13 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
     _sb.write('>');
     node.contents?.accept(this);
     _sb.write('</a>');
-
-    return null;
   }
 
   @override
-  Null visitLinkReference(LinkReference node) => null;
+  void visitLinkReference(LinkReference node);
 
   @override
-  Null visitListItem(ListItem node) {
+  void visitListItem(ListItem node) {
     if (node.parent is ListBlock) {
       final ListBlock listBlock = node.parent;
       if (listBlock.tight) {
@@ -429,17 +402,15 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
         }
       }
     }
-    return null;
   }
 
   @override
-  Null visitNonBreakableSpace(NonBreakableSpace node) {
+  void visitNonBreakableSpace(NonBreakableSpace node) {
     _sb.write('\u{a0}');
-    return null;
   }
 
   @override
-  Null visitOrderedList(OrderedList node) {
+  void visitOrderedList(OrderedList node) {
     _sb.write('<ol');
     if (node.startIndex != 1) {
       _sb.write(' start="${node.startIndex}"');
@@ -447,20 +418,17 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
     _sb.write('>\n');
     node.visitChildren(this);
     _sb.write('</ol>\n');
-
-    return null;
   }
 
   @override
-  Null visitPara(Para node) {
+  void visitPara(Para node) {
     _sb.write('<p>');
     node.visitChildren(this);
     _sb.write('</p>\n');
-    return null;
   }
 
   @override
-  Null visitSmartChar(SmartChar node) {
+  void visitSmartChar(SmartChar node) {
     switch (node.type) {
       case SmartCharType.ellipsis:
         _sb.write('\u{2026}');
@@ -491,62 +459,53 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
         _sb.write('\u{201d}');
         break;
     }
-
-    return null;
   }
 
   @override
-  Null visitSpace(Space node) {
+  void visitSpace(Space node) {
     _sb.write(' ' * node.amount);
-    return null;
   }
 
   @override
-  Null visitStr(Str node) {
+  void visitStr(Str node) {
     _sb.write(_htmlEscape(node.contents));
-    return null;
   }
 
   @override
-  Null visitStrikeout(Strikeout node) {
+  void visitStrikeout(Strikeout node) {
     _sb.write('<del>');
     node.contents.accept(this);
     _sb.write('</del>');
-    return null;
   }
 
   @override
-  Null visitSubscript(Subscript node) {
+  void visitSubscript(Subscript node) {
     _sb.write('<sub>');
     node.contents.accept(this);
     _sb.write('</sub>');
-    return null;
   }
 
   @override
-  Null visitSuperscript(Superscript node) {
+  void visitSuperscript(Superscript node) {
     _sb.write('<sup>');
     node.contents.accept(this);
     _sb.write('</sup>');
-    return null;
   }
 
   @override
-  Null visitStrong(Strong node) {
+  void visitStrong(Strong node) {
     _sb.write('<strong>');
     node.contents.accept(this);
     _sb.write('</strong>');
-    return null;
   }
 
   @override
-  Null visitTab(Tab node) {
+  void visitTab(Tab node) {
     _sb.write('\t' * node.amount);
-    return null;
   }
 
   @override
-  Null visitTable(Table node) {
+  void visitTable(Table node) {
     _sb.write('<table>');
     final int alignmentLength = node.alignment.length;
     if (node.headers != null) {
@@ -564,7 +523,7 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
       _sb.write('</tr></thead>');
     }
     _sb.write('<tbody>');
-    for (TableRow row in node.contents) {
+    for (final TableRow row in node.contents) {
       _sb.write('<tr>');
       final int length = row.contents.length;
       for (int i = 0; i < length; i += 1) {
@@ -579,85 +538,76 @@ class _Visitor extends GeneralizingAstVisitor<Null> {
       _sb.write('</tr>');
     }
     _sb.write('</tbody></table>\n');
-    return null;
   }
 
   @override
-  Null visitTableCell(TableCell node) {
+  void visitTableCell(TableCell node) {
     if (node.contents.length == 1 && node.contents.single is Para) {
       final Para para = node.contents.single;
       para.contents.accept(this);
     } else {
       node.contents.accept(this);
     }
-    return null;
   }
 
   @override
-  Null visitTexMathDisplay(TexMathDisplay node) {
+  void visitTexMathDisplay(TexMathDisplay node) {
     _sb
       ..write('<span class="')
       ..write(_options.displayTexMathClasses.join(' '))
       ..write(r'">\[')
       ..write(_htmlEscape(node.contents))
       ..write(r'\]</span>');
-    return null;
   }
 
   @override
-  Null visitTexMathInline(TexMathInline node) {
+  void visitTexMathInline(TexMathInline node) {
     _sb
       ..write('<span class="')
       ..write(_options.inlineTexMathClasses.join(' '))
       ..write(r'">\(')
       ..write(_htmlEscape(node.contents))
       ..write(r'\)</span>');
-
-    return null;
   }
 
   @override
-  Null visitTexRawBlock(TexRawBlock node) {
+  void visitTexRawBlock(TexRawBlock node) {
     _sb.write(_htmlEscape(node.contents));
-    return null;
   }
 
   @override
-  Null visitThematicBreak(ThematicBreak node) {
+  void visitThematicBreak(ThematicBreak node) {
     _sb.write('<hr/>\n');
-    return null;
   }
 
   @override
-  Null visitUnorderedList(UnorderedList node) {
+  void visitUnorderedList(UnorderedList node) {
     _sb.write('<ul>\n');
     node.visitChildren(this);
     _sb.write('</ul>\n');
-
-    return null;
   }
 }
 
 /// Html writer
 class HtmlWriter {
-  final Options _options;
-
   /// Constructor
-  HtmlWriter(this._options);
+  const HtmlWriter(this._options);
+
+  final Options _options;
 
   /// Renders document to string
   String write(Document document) {
-    final _Visitor visitor = new _Visitor(_options);
+    final _Visitor visitor = _Visitor(_options);
     document.accept(visitor);
     return visitor.result;
   }
 
   /// Predefined html writer with CommonMark default settings
-  static HtmlWriter commonmark = new HtmlWriter(Options.commonmark);
+  static const HtmlWriter commonmark = HtmlWriter(Options.commonmark);
 
   /// Predefined html writer with strict settings
-  static HtmlWriter strict = new HtmlWriter(Options.strict);
+  static const HtmlWriter strict = HtmlWriter(Options.strict);
 
   /// Predefined html writer with default settings
-  static HtmlWriter defaults = new HtmlWriter(Options.defaults);
+  static const HtmlWriter defaults = HtmlWriter(Options.defaults);
 }

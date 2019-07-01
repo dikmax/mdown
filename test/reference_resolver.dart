@@ -46,7 +46,7 @@ This is a [link].
 
 /// Link resolver tests
 void referenceResolverTests() {
-  const Options options = const Options(linkResolver: _linkResolver);
+  const Options options = Options(linkResolver: _linkResolver);
 
   t.group('Custom reference resolver test', () {
     t.test('Should leave defined links as is', () {

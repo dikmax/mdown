@@ -8,7 +8,7 @@ abstract class Lookup {
   const Lookup();
 
   /// Constructs lookup class from RegExp.
-  factory Lookup.regExp(Pattern pattern) => new PatternLookup(pattern);
+  factory Lookup.regExp(Pattern pattern) => PatternLookup(pattern);
 
   /// Abstract method, that returns true, when pattern is found on offset.
   bool isFound(String text, int offset);
@@ -16,10 +16,10 @@ abstract class Lookup {
 
 /// RegExp lookup.
 class PatternLookup extends Lookup {
-  final Pattern _pattern;
-
   /// Constructs lookup with [_pattern].
   PatternLookup(this._pattern);
+
+  final Pattern _pattern;
 
   @override
   bool isFound(String text, int offset) =>
@@ -37,7 +37,7 @@ class BlockquoteSimpleLookup extends Lookup {
 }
 
 /// Instance of [BlockquoteSimpleLookup].
-const Lookup blockquoteSimpleLookup = const BlockquoteSimpleLookup();
+const Lookup blockquoteSimpleLookup = BlockquoteSimpleLookup();
 
 /// Simple lookup for thematic break.
 class ThematicBreakLookup extends Lookup {
@@ -78,15 +78,14 @@ class ThematicBreakLookup extends Lookup {
 }
 
 /// Instance of [ThematicBreakLookup].
-const Lookup thematicBreakLookup = const ThematicBreakLookup();
+const Lookup thematicBreakLookup = ThematicBreakLookup();
 
 /// Lookup for atx heading.
-final Lookup atxHeadingLookup =
-    new Lookup.regExp(new RegExp('(#{1,6})(?:[ \t]|\$)'));
+final Lookup atxHeadingLookup = Lookup.regExp(RegExp('(#{1,6})(?:[ \t]|\$)'));
 
 /// Lookup for fenced code start.
 final Lookup fencedCodeStartLookup =
-    new Lookup.regExp(new RegExp('(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$'));
+    Lookup.regExp(RegExp('(?:(`{3,})([^`]*)|(~{3,})([^~]*))\$'));
 
 /// Lookup for HTML block type 1: <(?:script|pre|style)(?:\s|>|$)
 class HtmlBlock1Lookup extends Lookup {
@@ -183,7 +182,7 @@ class HtmlBlock1Lookup extends Lookup {
 }
 
 /// Instance of [HtmlBlock1Lookup].
-const Lookup htmlBlock1Lookup = const HtmlBlock1Lookup();
+const Lookup htmlBlock1Lookup = HtmlBlock1Lookup();
 
 /// Lookup for HTML block type 2: <!--
 class HtmlBlock2Lookup extends Lookup {
@@ -204,7 +203,7 @@ class HtmlBlock2Lookup extends Lookup {
 }
 
 /// Instance of [HtmlBlock2Lookup].
-const Lookup htmlBlock2Lookup = const HtmlBlock2Lookup();
+const Lookup htmlBlock2Lookup = HtmlBlock2Lookup();
 
 /// Lookup for HTML block type 3: <?
 class HtmlBlock3Lookup extends Lookup {
@@ -223,7 +222,7 @@ class HtmlBlock3Lookup extends Lookup {
 }
 
 /// Instance of [HtmlBlock3Lookup].
-const Lookup htmlBlock3Lookup = const HtmlBlock3Lookup();
+const Lookup htmlBlock3Lookup = HtmlBlock3Lookup();
 
 /// Lookup for HTML block type 4: <!
 class HtmlBlock4Lookup extends Lookup {
@@ -242,7 +241,7 @@ class HtmlBlock4Lookup extends Lookup {
 }
 
 /// Instance of [HtmlBlock4Lookup].
-const Lookup htmlBlock4Lookup = const HtmlBlock4Lookup();
+const Lookup htmlBlock4Lookup = HtmlBlock4Lookup();
 
 /// Lookup for HTML block type 5: `<![CDATA[`
 class HtmlBlock5Lookup extends Lookup {
@@ -268,4 +267,4 @@ class HtmlBlock5Lookup extends Lookup {
 }
 
 /// Instance of [HtmlBlock5Lookup].
-const Lookup htmlBlock5Lookup = const HtmlBlock5Lookup();
+const Lookup htmlBlock5Lookup = HtmlBlock5Lookup();

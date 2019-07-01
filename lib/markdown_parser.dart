@@ -10,23 +10,23 @@ import 'package:mdown/src/parsers/container.dart';
 
 /// Main parser class.
 class MarkdownParser {
+  /// Constructor
+  MarkdownParser(this._options) {
+    container = ParsersContainer(_options);
+  }
+
   Options _options;
 
   /// DI container + options.
   ParsersContainer container;
 
-  /// Constructor
-  MarkdownParser(this._options) {
-    container = new ParsersContainer(_options);
-  }
-
   /// Parses [markdown] and returns [Document].
   Document parse(String markdown) {
-    container.references = new HashMap<String, LinkReference>();
+    container.references = HashMap<String, LinkReference>();
     final ParseResult<Document> result =
         container.documentParser.parse(markdown, 0);
 
-    assert(result.isSuccess);
+    assert(result.isSuccess, 'Document parser always succeeds.');
     return result.value;
   }
 
@@ -45,11 +45,11 @@ class MarkdownParser {
   }
 
   /// Predefined html writer with CommonMark default settings
-  static MarkdownParser commonmark = new MarkdownParser(Options.commonmark);
+  static MarkdownParser commonmark = MarkdownParser(Options.commonmark);
 
   /// Predefined html writer with strict settings
-  static MarkdownParser strict = new MarkdownParser(Options.strict);
+  static MarkdownParser strict = MarkdownParser(Options.strict);
 
   /// Predefined html writer with default settings
-  static MarkdownParser defaults = new MarkdownParser(Options.defaults);
+  static MarkdownParser defaults = MarkdownParser(Options.defaults);
 }

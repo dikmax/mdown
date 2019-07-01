@@ -2,6 +2,15 @@ library mdown.src.parse_result;
 
 /// Result of running parser.
 class ParseResult<A> {
+  /// Success result constructor.
+  ParseResult.success(this.value, this.offset) : isSuccess = true;
+
+  /// Failure result constructor.
+  const ParseResult.failure()
+      : value = null,
+        offset = null,
+        isSuccess = false;
+
   /// Is run was successful?
   final bool isSuccess;
 
@@ -10,13 +19,4 @@ class ParseResult<A> {
 
   /// Offset, if [isSuccess] is true.
   final int offset;
-
-  /// Success result constructor.
-  ParseResult.success(this.value, this.offset) : isSuccess = true;
-
-  /// Faulure result constructor.
-  const ParseResult.failure()
-      : value = null,
-        offset = null,
-        isSuccess = false;
 }

@@ -18,18 +18,16 @@ class EntitiesGenerator extends GeneratorForAnnotation<Entities> {
   @override
   Future<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) async {
-    final RegExp r = new RegExp(r'^&(.*);$');
-    final HttpClient client = new HttpClient();
+    final RegExp r = RegExp(r'^&(.*);$');
+    final HttpClient client = HttpClient();
     final String annotationUrl = annotation.read('url').stringValue;
     final HttpClientRequest request =
         await client.getUrl(Uri.parse(annotationUrl));
     final HttpClientResponse response = await request.close();
     final dynamic data =
         await response.transform(utf8.decoder).transform(json.decoder).first;
-    final StringBuffer result =
-        new StringBuffer('final Map<String, String> _\$${
-            element
-                .displayName} = new HashMap<String, String>.from(<String, String>{\n');
+    final StringBuffer result = StringBuffer(
+        'final Map<String, String> _\$${element.displayName} = new HashMap<String, String>.from(<String, String>{\n');
 
     data.forEach((String k, dynamic v) {
       final Match match = r.firstMatch(k);

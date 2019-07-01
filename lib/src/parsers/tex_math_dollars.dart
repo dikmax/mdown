@@ -19,7 +19,7 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
     off++;
     if (off >= length) {
       // Just a `$` at the end of string.
-      return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), off);
+      return ParseResult<InlineNodeImpl>.success(StrImpl(r'$'), off);
     }
     final int codeUnit = text.codeUnitAt(off);
     final bool displayMath = codeUnit == dollarCodeUnit;
@@ -27,7 +27,7 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
       off += 1;
       if (off >= length) {
         // Just a `$` at the end of string.
-        return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$$'), off);
+        return ParseResult<InlineNodeImpl>.success(StrImpl(r'$$'), off);
       }
     } else {
       if (codeUnit == spaceCodeUnit ||
@@ -35,7 +35,7 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
           codeUnit == newLineCodeUnit ||
           codeUnit == carriageReturnCodeUnit ||
           (codeUnit >= zeroCodeUnit && codeUnit <= nineCodeUnit)) {
-        return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), off);
+        return ParseResult<InlineNodeImpl>.success(StrImpl(r'$'), off);
       }
     }
 
@@ -64,14 +64,14 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
     }
 
     if (!found) {
-      return new ParseResult<InlineNodeImpl>.success(
-          new StrImpl(displayMath ? r'$$' : r'$'), off);
+      return ParseResult<InlineNodeImpl>.success(
+          StrImpl(displayMath ? r'$$' : r'$'), off);
     }
 
     String math = text.substring(off, endOffset);
     if (displayMath) {
-      return new ParseResult<InlineNodeImpl>.success(
-          new TexMathDisplayImpl(math), endOffset + 2);
+      return ParseResult<InlineNodeImpl>.success(
+          TexMathDisplayImpl(math), endOffset + 2);
     } else {
       final int lastCodeUnit = math.codeUnitAt(math.length - 1);
       if (lastCodeUnit == newLineCodeUnit ||
@@ -79,12 +79,12 @@ class TexMathDollarsParser extends AbstractParser<InlineNodeImpl> {
           lastCodeUnit == spaceCodeUnit ||
           lastCodeUnit == tabCodeUnit) {
         // Inline math cannot end with space.
-        return new ParseResult<InlineNodeImpl>.success(new StrImpl(r'$'), off);
+        return ParseResult<InlineNodeImpl>.success(StrImpl(r'$'), off);
       }
 
       math = unescapeAndUnreference(math);
-      return new ParseResult<InlineNodeImpl>.success(
-          new TexMathInlineImpl(math), endOffset + 1);
+      return ParseResult<InlineNodeImpl>.success(
+          TexMathInlineImpl(math), endOffset + 1);
     }
   }
 }

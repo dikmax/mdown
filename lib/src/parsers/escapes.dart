@@ -18,11 +18,11 @@ class EscapesParser extends AbstractParser<InlineNodeImpl> {
     if (offset + 1 < text.length) {
       final int codeUnit = text.codeUnitAt(offset + 1);
       if (escapableCodes.contains(codeUnit)) {
-        return new ParseResult<InlineNodeImpl>.success(
-            new StrImpl(new String.fromCharCode(codeUnit)), offset + 2);
+        return ParseResult<InlineNodeImpl>.success(
+            StrImpl(String.fromCharCode(codeUnit)), offset + 2);
       } else if (codeUnit == newLineCodeUnit) {
-        return new ParseResult<InlineNodeImpl>.success(
-            new HardLineBreakImpl(), offset + 2);
+        return ParseResult<InlineNodeImpl>.success(
+            HardLineBreakImpl(), offset + 2);
       }
     }
 

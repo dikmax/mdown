@@ -2,20 +2,44 @@ library mdown.options;
 
 import 'ast/ast.dart';
 
-/// Link resolver accepts two references and should return [Target] with correspondent link.
-/// If link doesn't exists link resolver should return `null`.
+/// Link resolver accepts two references and should return [Target] with
+/// correspondent link. If link doesn't exists link resolver should return
+/// `null`.
 ///
-/// CommonMark defines reference as case insensitive. Use [normalizedReference] when you need reference
-/// normalized according to CommonMark rules, or just [reference] if you want to get reference as it
-/// written in document.
-typedef Target LinkResolver(String normalizedReference, String reference);
+/// CommonMark defines reference as case insensitive. Use [normalizedReference]
+/// when you need reference normalized according to CommonMark rules, or just
+/// [reference] if you want to get reference as it written in document.
+typedef LinkResolver = Target Function(
+    String normalizedReference, String reference);
 
-/// Default resolver doesn't return any link, so parser parses only explicitly written references.
+/// Default resolver doesn't return any link, so parser parses only explicitly
+/// written references.
 Target defaultLinkResolver(String normalizedReference, String reference) =>
     null;
 
 /// Parser or writer options. Mostly contains list of enabled extensions.
 class Options {
+  /// Constant constructor with required options.
+  const Options(
+      {this.rawHtml = true,
+      this.tagFilter = false,
+      this.smartPunctuation = false,
+      this.fencedCodeAttributes = false,
+      this.headingAttributes = false,
+      this.inlineCodeAttributes = false,
+      this.linkAttributes = false,
+      this.strikeout = false,
+      this.subscript = false,
+      this.superscript = false,
+      this.texMathDollars = false,
+      this.texMathSingleBackslash = false,
+      this.texMathDoubleBackslash = false,
+      this.rawTex = false,
+      this.pipeTables = false,
+      this.inlineTexMathClasses = const <String>['math', 'inline'],
+      this.displayTexMathClasses = const <String>['math', 'display'],
+      this.linkResolver = defaultLinkResolver});
+
   /// Enables raw html blocks and inlines. This officially supported extension
   /// from CommonMark and thus requires explicit disabling.
   final bool rawHtml;
@@ -23,8 +47,9 @@ class Options {
   /// Enables GFM HTML tags filtering
   final bool tagFilter;
 
-  /// Enables smart punctuation extension. It's automatic replacement of `...`, `---`, `--`, `"` and `'` to `…`, `—`,
-  /// `–` and curly versions of quote marks accordingly. It's only official extension to date.
+  /// Enables smart punctuation extension. It's automatic replacement of `...`,
+  /// `---`, `--`, `"` and `'` to `…`, `—`, `–` and curly versions of quote
+  /// marks accordingly. It's only official extension to date.
   final bool smartPunctuation;
 
   /// Allows fenced code block to have arbitrary extended attributes.
@@ -67,8 +92,8 @@ class Options {
   /// ``````
   final bool inlineCodeAttributes;
 
-  /// Extended attributes for links and images. Both inline and reference links are
-  /// supported.
+  /// Extended attributes for links and images. Both inline and reference links
+  /// are supported.
   ///
   /// ``````md
   /// ![](image.jpg){width="800" height="600"}
@@ -84,33 +109,38 @@ class Options {
   /// ``````
   final bool linkAttributes;
 
-  /// Enables strikeout extension. Strikeout is a text wrapped with double tilde (`~~`). Example:
+  /// Enables strikeout extension. Strikeout is a text wrapped with double tilde
+  /// (`~~`). Example:
   ///
   /// ```md
   /// Strikeouts text (~~like this~~).
   /// ```
   final bool strikeout;
 
-  /// Enables subscript extension. Subscript is a text wrapped with tilde (`~`). Example:
+  /// Enables subscript extension. Subscript is a text wrapped with tilde (`~`).
+  /// Example:
   ///
   /// ```md
   /// H~2~O
   /// ```
   ///
-  /// Subscript couldn't contain spaces. If you need to insert space into subscript, escape space (`\ `).
+  /// Subscript couldn't contain spaces. If you need to insert space into
+  /// subscript, escape space (`\ `).
   ///
   /// ```md
   /// subscript~with\ spaces~
   /// ```
   final bool subscript;
 
-  /// Enables superscript extension. Superscript is a text wrapped with caret (`^`). Example:
+  /// Enables superscript extension. Superscript is a text wrapped with caret
+  /// (`^`). Example:
   ///
   /// ```md
   /// 2^2^=4
   /// ```
   ///
-  /// Superscript couldn't contain spaces. If you need to insert space into superscript, escape space (`\ `).
+  /// Superscript couldn't contain spaces. If you need to insert space into
+  /// superscript, escape space (`\ `).
   ///
   /// ```md
   /// superscript^with\ spaces^
@@ -167,7 +197,8 @@ class Options {
   ///  */
   /// ```
   ///
-  /// In that case you could supply parser with resolver, which should provide all missing links.
+  /// In that case you could supply parser with resolver, which should provide
+  /// all missing links.
   ///
   /// ```dart
   /// String library = "mdown";
@@ -187,35 +218,14 @@ class Options {
   /// ```
   final LinkResolver linkResolver;
 
-  /// Constant constructor with required options.
-  const Options(
-      {this.rawHtml: true,
-      this.tagFilter: false,
-      this.smartPunctuation: false,
-      this.fencedCodeAttributes: false,
-      this.headingAttributes: false,
-      this.inlineCodeAttributes: false,
-      this.linkAttributes: false,
-      this.strikeout: false,
-      this.subscript: false,
-      this.superscript: false,
-      this.texMathDollars: false,
-      this.texMathSingleBackslash: false,
-      this.texMathDoubleBackslash: false,
-      this.rawTex: false,
-      this.pipeTables: false,
-      this.inlineTexMathClasses: const <String>['math', 'inline'],
-      this.displayTexMathClasses: const <String>['math', 'display'],
-      this.linkResolver: defaultLinkResolver});
-
   /// Predefined version of Options. Alongside with [strict] also supports smart
   /// puctuation, which is declared separately
   /// in [CommonMark](http://commonmark.org).
   static const Options commonmark =
-      const Options(rawHtml: true, smartPunctuation: true);
+      Options(rawHtml: true, smartPunctuation: true);
 
   /// Predefined version of Options. Enables lot of useful extensions.
-  static const Options defaults = const Options(
+  static const Options defaults = Options(
       rawHtml: true,
       smartPunctuation: true,
       fencedCodeAttributes: true,
@@ -231,9 +241,9 @@ class Options {
 
   /// GitHub-flavoured markdown defaults
   static const Options gfm =
-      const Options(rawHtml: true, tagFilter: true, pipeTables: true);
+      Options(rawHtml: true, tagFilter: true, pipeTables: true);
 
   /// Predefined strict version of Options. Only support
   /// [CommonMark specification](http://commonmark.org).
-  static const Options strict = const Options(rawHtml: true);
+  static const Options strict = Options(rawHtml: true);
 }

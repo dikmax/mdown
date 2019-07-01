@@ -89,11 +89,11 @@ class InlineCodeParser extends AbstractParser<InlineNodeImpl> {
           }
         }
       }
-      return new ParseResult<InlineNodeImpl>.success(
-          new CodeImpl(code, fenceSize, attributes), off);
+      return ParseResult<InlineNodeImpl>.success(
+          CodeImpl(code, fenceSize, attributes), off);
     }
 
-    return new ParseResult<InlineNodeImpl>.success(new StrImpl('`' * fenceSize),
+    return ParseResult<InlineNodeImpl>.success(StrImpl('`' * fenceSize),
         codeStartOffset == -1 ? off : codeStartOffset);
   }
 }

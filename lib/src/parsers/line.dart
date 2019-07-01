@@ -36,7 +36,7 @@ class LineParser extends AbstractParser<String> {
       endOffset += 1;
     }
 
-    return new ParseResult<String>.success(
+    return ParseResult<String>.success(
         text.substring(offset, lineEndOffset), endOffset + 1);
   }
 }

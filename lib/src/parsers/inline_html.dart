@@ -13,22 +13,21 @@ class InlineHtmlParser extends AbstractParser<InlineNodeImpl> {
   InlineHtmlParser(ParsersContainer container) : super(container);
 
   static final List<RegExp> _tests = <RegExp>[
-    new RegExp('(?:' + htmlOpenTag + '|' + htmlCloseTag + ')'), // Tag
-    new RegExp('<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->'), // Comment
-    new RegExp('[<][?].*?[?][>]'), // Processing instruction
-    new RegExp('<![A-Z]+\\s+[^>]*>'), // Declaration
-    new RegExp('<!\\[CDATA\\[[\\s\\S]*?\\]\\]>') // CDATA
+    RegExp('(?:' + htmlOpenTag + '|' + htmlCloseTag + ')'), // Tag
+    RegExp('<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->'), // Comment
+    RegExp('[<][?].*?[?][>]'), // Processing instruction
+    RegExp('<![A-Z]+\\s+[^>]*>'), // Declaration
+    RegExp('<!\\[CDATA\\[[\\s\\S]*?\\]\\]>') // CDATA
   ];
 
   @override
   ParseResult<InlineNodeImpl> parse(String text, int offset) {
     if (text.codeUnitAt(offset) == lessThanCodeUnit) {
-      for (RegExp test in _tests) {
+      for (final RegExp test in _tests) {
         final Match match = test.matchAsPrefix(text, offset);
         if (match != null) {
-          return new ParseResult<InlineNodeImpl>.success(
-              new HtmlRawInlineImpl(text.substring(offset, match.end)),
-              match.end);
+          return ParseResult<InlineNodeImpl>.success(
+              HtmlRawInlineImpl(text.substring(offset, match.end)), match.end);
         }
       }
     }

@@ -6,7 +6,7 @@ import 'dart:io';
 void main() {
   String line;
 
-  final Map<int, dynamic> tests = new HashMap<int, dynamic>();
+  final Map<int, dynamic> tests = HashMap<int, dynamic>();
   while ((line = stdin.readLineSync()) != null) {
     final dynamic res = json.decode(line);
     final String type = res['type'];

@@ -13,10 +13,10 @@ abstract class UnparsedInlines implements BaseInline {
 
 /// Default UnparsedInline implementation.
 class UnparsedInlinesImpl extends InlineNodeImpl implements UnparsedInlines {
-  String _contents;
-
   /// Constructs UnparsedInlines implementation.
   UnparsedInlinesImpl(this._contents);
+
+  String _contents;
 
   @override
   // ignore: unnecessary_getters_setters

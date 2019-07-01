@@ -16,14 +16,14 @@ class ThematicBreakParser extends AbstractParser<BlockNodeImpl> {
   ParseResult<BlockNodeImpl> parse(String text, int offset) {
     final ParseResult<String> lineResult =
         container.lineParser.parse(text, offset);
-    assert(lineResult.isSuccess);
+    assert(lineResult.isSuccess, 'listParser should always succeed.');
 
     final int indent = skipIndent(text, offset);
     if (!thematicBreakLookup.isFound(text, indent)) {
       return const ParseResult<BlockNodeImpl>.failure();
     }
 
-    return new ParseResult<BlockNodeImpl>.success(
-        new ThematicBreakImpl(), lineResult.offset);
+    return ParseResult<BlockNodeImpl>.success(
+        ThematicBreakImpl(), lineResult.offset);
   }
 }

@@ -30,13 +30,13 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
     final String annotationPath = annotation.read('path').stringValue;
 
     if (path.isAbsolute(annotationPath)) {
-      throw new Exception('must be relative path to the source file');
+      throw Exception('must be relative path to the source file');
     }
 
     final String annotationUrl = annotation.read('url').stringValue;
 
     // Downloading source.
-    final HttpClient client = new HttpClient();
+    final HttpClient client = HttpClient();
     final HttpClientRequest request =
         await client.getUrl(Uri.parse(annotationUrl));
     final List<int> response = await (await request.close()).fold(<int>[],
@@ -47,17 +47,17 @@ class EmbedBlnsTestsGenerator extends GeneratorForAnnotation<EmbedBlnsTests> {
 
     final String sourcePathDir = path.dirname(buildStep.inputId.path);
     final String filePath = path.join(sourcePathDir, annotationPath);
-    new File(filePath)..writeAsBytesSync(response, mode: FileMode.write);
+    File(filePath).writeAsBytesSync(response, mode: FileMode.write);
 
     final dynamic data =
         json.decode(utf8.decode(response, allowMalformed: true));
 
     final Iterable<String> content = _readFile(data);
 
-    final StringBuffer result = new StringBuffer()
+    final StringBuffer result = StringBuffer()
       ..writeln('final List<String> _\$${element.displayName}Tests = '
           '<String>[');
-    for (String string in content) {
+    for (final String string in content) {
       result.writeln("r'''$string''',");
     }
     result.writeln('];');

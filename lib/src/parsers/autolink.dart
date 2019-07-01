@@ -11,10 +11,10 @@ class AutolinkParser extends AbstractParser<InlineNodeImpl> {
   AutolinkParser(ParsersContainer container) : super(container);
 
   static final RegExp _autolinkRegExp =
-      new RegExp(r'<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}:[^ \t\x00-\x20<>]*)>');
+      RegExp(r'<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}:[^ \t\x00-\x20<>]*)>');
 
   static final RegExp _emailRegExp =
-      new RegExp('<([a-zA-Z0-9.!#\$%&\'*+/=?^_`{|}~\\-]+@'
+      RegExp('<([a-zA-Z0-9.!#\$%&\'*+/=?^_`{|}~\\-]+@'
           '[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?'
           '(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>');
 
@@ -25,8 +25,8 @@ class AutolinkParser extends AbstractParser<InlineNodeImpl> {
     if (autolinkMatch != null) {
       final String autolink = autolinkMatch[1];
 
-      return new ParseResult<InlineNodeImpl>.success(
-          new AutolinkImpl(autolink), autolinkMatch.end);
+      return ParseResult<InlineNodeImpl>.success(
+          AutolinkImpl(autolink), autolinkMatch.end);
     }
 
     final Match emailMatch = _emailRegExp.matchAsPrefix(text, offset);
@@ -34,8 +34,8 @@ class AutolinkParser extends AbstractParser<InlineNodeImpl> {
     if (emailMatch != null) {
       final String email = emailMatch[1];
 
-      return new ParseResult<InlineNodeImpl>.success(
-          new AutolinkEmailImpl(email), emailMatch.end);
+      return ParseResult<InlineNodeImpl>.success(
+          AutolinkEmailImpl(email), emailMatch.end);
     }
 
     return const ParseResult<InlineNodeImpl>.failure();

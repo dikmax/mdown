@@ -9,10 +9,10 @@ import 'package:mdown/src/parsers/container.dart';
 
 /// Parser for arbitrary string.
 class StrParser extends AbstractParser<InlineNodeImpl> {
-  final BitSet _specialChars = new BitSet(256);
-
   /// Constructor.
   StrParser(ParsersContainer container) : super(container);
+
+  final BitSet _specialChars = BitSet(256);
 
   @override
   void init() {
@@ -66,23 +66,23 @@ class StrParser extends AbstractParser<InlineNodeImpl> {
             endOffset < length && text.codeUnitAt(endOffset) == spaceCodeUnit) {
           endOffset += 1;
         }
-        result = new SpaceImpl(endOffset - offset);
+        result = SpaceImpl(endOffset - offset);
       } else if (char == tabCodeUnit) {
         while (
             endOffset < length && text.codeUnitAt(endOffset) == tabCodeUnit) {
           endOffset += 1;
         }
-        result = new TabImpl(endOffset - offset);
+        result = TabImpl(endOffset - offset);
       } else if (char == nonBreakableSpaceCodeUnit) {
         while (endOffset < length &&
             text.codeUnitAt(endOffset) == nonBreakableSpaceCodeUnit) {
           endOffset += 1;
         }
-        result = new NonBreakableSpaceImpl(endOffset - offset);
+        result = NonBreakableSpaceImpl(endOffset - offset);
       } else {
-        result = new StrImpl(new String.fromCharCode(char));
+        result = StrImpl(String.fromCharCode(char));
       }
-      return new ParseResult<InlineNodeImpl>.success(result, endOffset);
+      return ParseResult<InlineNodeImpl>.success(result, endOffset);
     } else {
       int endOffset = offset + 1;
       while (endOffset < length &&
@@ -90,8 +90,8 @@ class StrParser extends AbstractParser<InlineNodeImpl> {
         endOffset += 1;
       }
 
-      return new ParseResult<InlineNodeImpl>.success(
-          new StrImpl(text.substring(offset, endOffset)), endOffset);
+      return ParseResult<InlineNodeImpl>.success(
+          StrImpl(text.substring(offset, endOffset)), endOffset);
     }
   }
 }

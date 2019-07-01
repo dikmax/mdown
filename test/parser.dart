@@ -4,13 +4,13 @@ import 'package:test/test.dart' as t;
 import 'package:mdown/mdown.dart';
 
 /// Filter function
-typedef bool FilterFunc(int num);
+typedef FilterFunc = bool Function(int num);
 
 /// Default filter function, that accepts everything
 bool emptyFilter(int num) => true;
 
 /// Inner tests iterable function
-typedef void TestFunc(int num, String source, String destination);
+typedef TestFunc = void Function(int num, String source, String destination);
 
 /// Actual test function
 void tests(String name, Map<String, String> tests, TestFunc testFunc) {
@@ -24,10 +24,10 @@ void tests(String name, Map<String, String> tests, TestFunc testFunc) {
 }
 
 class _ExampleDescription extends t.Matcher {
+  _ExampleDescription(this.inner, this.example);
+
   t.Matcher inner;
   String example;
-
-  _ExampleDescription(this.inner, this.example);
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) =>
@@ -50,10 +50,10 @@ class _ExampleDescription extends t.Matcher {
   }
 }
 
-RegExp _leadingSpacesRegExp = new RegExp(r'^ *');
-RegExp _trailingSpacesRegExp = new RegExp(r' *$');
-RegExp _consecutiveSpacesRegExp = new RegExp(r' +');
-RegExp _spaceBeforeTagCloseRegExp = new RegExp(r' */>');
+RegExp _leadingSpacesRegExp = RegExp(r'^ *');
+RegExp _trailingSpacesRegExp = RegExp(r' *$');
+RegExp _consecutiveSpacesRegExp = RegExp(r' +');
+RegExp _spaceBeforeTagCloseRegExp = RegExp(r' */>');
 
 String _tidy(String html) {
   final List<String> lines = html.split('\n');
@@ -89,8 +89,8 @@ String _tidy(String html) {
 
 /// Generate md->html tests
 TestFunc generateTestFunc(Options options, [FilterFunc filter = emptyFilter]) {
-  final MarkdownParser parser = new MarkdownParser(options);
-  final HtmlWriter writer = new HtmlWriter(options);
+  final MarkdownParser parser = MarkdownParser(options);
+  final HtmlWriter writer = HtmlWriter(options);
 
   return (int num, String mdOrig, String html) {
     if (filter(num)) {
@@ -100,7 +100,7 @@ TestFunc generateTestFunc(Options options, [FilterFunc filter = emptyFilter]) {
 
         final Document doc = parser.parse(md);
         t.expect(_tidy(writer.write(doc)),
-            new _ExampleDescription(t.equals(_tidy(html)), mdOrig));
+            _ExampleDescription(t.equals(_tidy(html)), mdOrig));
       });
     }
   };

@@ -12,6 +12,6 @@ void customClassesTests() {
       texMathCustomClasses,
       generateTestFunc(const Options(
           texMathDollars: true,
-          inlineTexMathClasses: const <String>['custom_inline'],
-          displayTexMathClasses: const <String>['custom_display'])));
+          inlineTexMathClasses: <String>['custom_inline'],
+          displayTexMathClasses: <String>['custom_display'])));
 }

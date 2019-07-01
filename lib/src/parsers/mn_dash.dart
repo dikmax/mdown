@@ -25,29 +25,29 @@ class MNDashParser extends AbstractParser<InlineNodeImpl> {
     if (count > 1) {
       List<InlineNodeImpl> result;
       if (count % 3 == 0) {
-        result = new List<InlineNodeImpl>.filled(
-            count ~/ 3, new SmartCharImpl(SmartCharType.mdash));
+        result = List<InlineNodeImpl>.filled(
+            count ~/ 3, SmartCharImpl(SmartCharType.mdash));
       } else if (count % 2 == 0) {
-        result = new List<InlineNodeImpl>.filled(
-            count ~/ 2, new SmartCharImpl(SmartCharType.ndash));
+        result = List<InlineNodeImpl>.filled(
+            count ~/ 2, SmartCharImpl(SmartCharType.ndash));
       } else if (count % 3 == 2) {
-        result = new List<InlineNodeImpl>.filled(
-            count ~/ 3, new SmartCharImpl(SmartCharType.mdash),
+        result = List<InlineNodeImpl>.filled(
+            count ~/ 3, SmartCharImpl(SmartCharType.mdash),
             growable: true)
-          ..add(new SmartCharImpl(SmartCharType.ndash));
+          ..add(SmartCharImpl(SmartCharType.ndash));
       } else {
         // count % 3 == 1
-        result = new List<InlineNodeImpl>.filled(
-            (count - 4) ~/ 3, new SmartCharImpl(SmartCharType.mdash),
+        result = List<InlineNodeImpl>.filled(
+            (count - 4) ~/ 3, SmartCharImpl(SmartCharType.mdash),
             growable: true)
-          ..add(new SmartCharImpl(SmartCharType.ndash))
-          ..add(new SmartCharImpl(SmartCharType.ndash));
+          ..add(SmartCharImpl(SmartCharType.ndash))
+          ..add(SmartCharImpl(SmartCharType.ndash));
       }
       if (result.length == 1) {
-        return new ParseResult<InlineNodeImpl>.success(result.single, off);
+        return ParseResult<InlineNodeImpl>.success(result.single, off);
       }
-      return new ParseResult<InlineNodeImpl>.success(
-          new CombiningInlineNodeImpl(result), off);
+      return ParseResult<InlineNodeImpl>.success(
+          CombiningInlineNodeImpl(result), off);
     }
 
     return const ParseResult<InlineNodeImpl>.failure();

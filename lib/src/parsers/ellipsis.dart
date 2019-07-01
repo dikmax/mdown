@@ -18,8 +18,8 @@ class EllipsisParser extends AbstractParser<InlineNodeImpl> {
         text.codeUnitAt(offset) == dotCodeUnit &&
         text.codeUnitAt(offset + 1) == dotCodeUnit &&
         text.codeUnitAt(offset + 2) == dotCodeUnit) {
-      return new ParseResult<InlineNodeImpl>.success(
-          new SmartCharImpl(SmartCharType.ellipsis), offset + 3);
+      return ParseResult<InlineNodeImpl>.success(
+          SmartCharImpl(SmartCharType.ellipsis), offset + 3);
     }
 
     return const ParseResult<InlineNodeImpl>.failure();

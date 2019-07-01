@@ -16,7 +16,7 @@ class TexMathSingleBackslashParser extends AbstractParser<InlineNodeImpl> {
     int off = offset + 1;
     final int length = text.length;
     if (off >= length) {
-      return new ParseResult<InlineNodeImpl>.success(new StrImpl('\\'), off);
+      return ParseResult<InlineNodeImpl>.success(StrImpl('\\'), off);
     }
     final int codeUnit = text.codeUnitAt(off);
     if (codeUnit != openParenCodeUnit && codeUnit != openBracketCodeUnit) {
@@ -43,11 +43,11 @@ class TexMathSingleBackslashParser extends AbstractParser<InlineNodeImpl> {
 
     final String math = text.substring(off, endOffset);
     if (displayMath) {
-      return new ParseResult<InlineNodeImpl>.success(
-          new TexMathDisplayImpl(math), endOffset + 2);
+      return ParseResult<InlineNodeImpl>.success(
+          TexMathDisplayImpl(math), endOffset + 2);
     } else {
-      return new ParseResult<InlineNodeImpl>.success(
-          new TexMathInlineImpl(math), endOffset + 2);
+      return ParseResult<InlineNodeImpl>.success(
+          TexMathInlineImpl(math), endOffset + 2);
     }
   }
 }

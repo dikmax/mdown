@@ -34,6 +34,84 @@ import 'package:mdown/src/parsers/thematic_break.dart';
 
 /// Simple DI container
 class ParsersContainer {
+  /// Constructor.
+  ParsersContainer(this.options) {
+    lineParser = LineParser(this);
+    attributesParser = ExtendedAttributesParser(this);
+
+    // Block parsers
+    atxHeadingParser = AtxHeadingParser(this);
+    blanklineParser = BlanklineParser(this);
+    blockquoteListParser = BlockquoteListParser(this);
+    fencedCodeParser = FencedCodeParser(this);
+    indentedCodeParser = IndentedCodeParser(this);
+    linkReferenceParser = LinkReferenceParser(this);
+    paraSetextHeadingParser = ParaSetextHeadingParser(this);
+    thematicBreakParser = ThematicBreakParser(this);
+    htmlBlockParser = HtmlBlockParser(this);
+    htmlBlock7Parser = HtmlBlock7Parser(this);
+    rawTexParser = RawTexParser(this);
+    pipeTablesParser = PipeTablesParser(this);
+
+    // Inline parsers
+    escapesParser = EscapesParser(this);
+    entityParser = EntityParser(this);
+    hardLineBreakParser = HardLineBreakParser(this);
+    inlineCodeParser = InlineCodeParser(this);
+    inlineStructureParser = InlineStructureParser(this);
+    linkImageParser = LinkImageParser(this);
+    autolinkParser = AutolinkParser(this);
+    inlineHtmlParser = InlineHtmlParser(this);
+    ellipsisParser = EllipsisParser(this);
+    mnDashParser = MNDashParser(this);
+    texMathDollarsParser = TexMathDollarsParser(this);
+    texMathSingleBackslashParser = TexMathSingleBackslashParser(this);
+    texMathDoubleBackslashParser = TexMathDoubleBackslashParser(this);
+    strParser = StrParser(this);
+
+    // Document
+    documentParser = DocumentParser(this);
+
+    // All parsers are instantiated, they should be linked with each other.
+    // There's [AbstractParser.init] for it.
+
+    lineParser.init();
+    attributesParser.init();
+
+    // Block parsers
+    atxHeadingParser.init();
+    blanklineParser.init();
+    blockquoteListParser.init();
+    fencedCodeParser.init();
+    indentedCodeParser.init();
+    linkReferenceParser.init();
+    paraSetextHeadingParser.init();
+    thematicBreakParser.init();
+    htmlBlockParser.init();
+    htmlBlock7Parser.init();
+    rawTexParser.init();
+    pipeTablesParser.init();
+
+    // Inline parsers
+    escapesParser.init();
+    entityParser.init();
+    hardLineBreakParser.init();
+    inlineCodeParser.init();
+    inlineStructureParser.init();
+    linkImageParser.init();
+    autolinkParser.init();
+    inlineHtmlParser.init();
+    ellipsisParser.init();
+    mnDashParser.init();
+    texMathDollarsParser.init();
+    texMathSingleBackslashParser.init();
+    texMathDoubleBackslashParser.init();
+    strParser.init();
+
+    // Document
+    documentParser.init();
+  }
+
   /// Parser options.
   Options options;
 
@@ -127,82 +205,4 @@ class ParsersContainer {
 
   /// Parser for whole document.
   DocumentParser documentParser;
-
-  /// Constructor.
-  ParsersContainer(this.options) {
-    lineParser = new LineParser(this);
-    attributesParser = new ExtendedAttributesParser(this);
-
-    // Block parsers
-    atxHeadingParser = new AtxHeadingParser(this);
-    blanklineParser = new BlanklineParser(this);
-    blockquoteListParser = new BlockquoteListParser(this);
-    fencedCodeParser = new FencedCodeParser(this);
-    indentedCodeParser = new IndentedCodeParser(this);
-    linkReferenceParser = new LinkReferenceParser(this);
-    paraSetextHeadingParser = new ParaSetextHeadingParser(this);
-    thematicBreakParser = new ThematicBreakParser(this);
-    htmlBlockParser = new HtmlBlockParser(this);
-    htmlBlock7Parser = new HtmlBlock7Parser(this);
-    rawTexParser = new RawTexParser(this);
-    pipeTablesParser = new PipeTablesParser(this);
-
-    // Inline parsers
-    escapesParser = new EscapesParser(this);
-    entityParser = new EntityParser(this);
-    hardLineBreakParser = new HardLineBreakParser(this);
-    inlineCodeParser = new InlineCodeParser(this);
-    inlineStructureParser = new InlineStructureParser(this);
-    linkImageParser = new LinkImageParser(this);
-    autolinkParser = new AutolinkParser(this);
-    inlineHtmlParser = new InlineHtmlParser(this);
-    ellipsisParser = new EllipsisParser(this);
-    mnDashParser = new MNDashParser(this);
-    texMathDollarsParser = new TexMathDollarsParser(this);
-    texMathSingleBackslashParser = new TexMathSingleBackslashParser(this);
-    texMathDoubleBackslashParser = new TexMathDoubleBackslashParser(this);
-    strParser = new StrParser(this);
-
-    // Document
-    documentParser = new DocumentParser(this);
-
-    // All parsers are instantiated, they should be linked with each other.
-    // There's [AbstractParser.init] for it.
-
-    lineParser.init();
-    attributesParser.init();
-
-    // Block parsers
-    atxHeadingParser.init();
-    blanklineParser.init();
-    blockquoteListParser.init();
-    fencedCodeParser.init();
-    indentedCodeParser.init();
-    linkReferenceParser.init();
-    paraSetextHeadingParser.init();
-    thematicBreakParser.init();
-    htmlBlockParser.init();
-    htmlBlock7Parser.init();
-    rawTexParser.init();
-    pipeTablesParser.init();
-
-    // Inline parsers
-    escapesParser.init();
-    entityParser.init();
-    hardLineBreakParser.init();
-    inlineCodeParser.init();
-    inlineStructureParser.init();
-    linkImageParser.init();
-    autolinkParser.init();
-    inlineHtmlParser.init();
-    ellipsisParser.init();
-    mnDashParser.init();
-    texMathDollarsParser.init();
-    texMathSingleBackslashParser.init();
-    texMathDoubleBackslashParser.init();
-    strParser.init();
-
-    // Document
-    documentParser.init();
-  }
 }

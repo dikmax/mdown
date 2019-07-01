@@ -19,7 +19,7 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
     int off = offset;
     final ParseResult<String> firstLineResult =
         container.lineParser.parse(text, off);
-    assert(firstLineResult.isSuccess);
+    assert(firstLineResult.isSuccess, 'lineParser should always succeed');
     final String firstLine = firstLineResult.value;
 
     off = firstLineResult.offset;
@@ -94,8 +94,8 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
       off = lineResult.offset;
     }
 
-    return new ParseResult<BlockNodeImpl>.success(
-        new TableImpl(alignment, null, headers, cells), off);
+    return ParseResult<BlockNodeImpl>.success(
+        TableImpl(alignment, null, headers, cells), off);
   }
 
   List<TableCellImpl> _parseRow(List<String> columns) {
@@ -115,9 +115,8 @@ class PipeTablesParser extends AbstractParser<BlockNodeImpl> {
 
     for (int i = start; i < end; i += 1) {
       final String columnString = columns[i];
-      result.add(new TableCellImpl(<BlockNodeImpl>[
-        new ParaImpl(new UnparsedInlinesImpl(columnString.trim()))
-      ]));
+      result.add(TableCellImpl(
+          <BlockNodeImpl>[ParaImpl(UnparsedInlinesImpl(columnString.trim()))]));
     }
 
     return result;

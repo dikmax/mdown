@@ -67,7 +67,7 @@ class ExtendedAttributesParser extends AbstractParser<Attributes> {
       }
     }
 
-    return new ParseResult<Attributes>.success(
+    return ParseResult<Attributes>.success(
         astFactory.extendedAttributes(attributes), off);
   }
 
@@ -96,7 +96,7 @@ class ExtendedAttributesParser extends AbstractParser<Attributes> {
   }
 
   static final RegExp _keyValueRegExp =
-      new RegExp('([a-zA-Z0-9_\-]+)=([^ "\'\t}][^ \t}]*|"[^"]*"|\'[^\']*\')');
+      RegExp('([a-zA-Z0-9_\-]+)=([^ "\'\t}][^ \t}]*|"[^"]*"|\'[^\']*\')');
 
   int _parseAttribute(String text, int offset, List<Attribute> attributes) {
     final Match match = _keyValueRegExp.matchAsPrefix(text, offset);

@@ -72,8 +72,7 @@ class HardLineBreakParser extends AbstractParser<InlineNodeImpl> {
     }
 
     if (state == _stateDone || state == _stateCarriageReturn) {
-      return new ParseResult<InlineNodeImpl>.success(
-          new HardLineBreakImpl(), off);
+      return ParseResult<InlineNodeImpl>.success(HardLineBreakImpl(), off);
     } else {
       return const ParseResult<InlineNodeImpl>.failure();
     }

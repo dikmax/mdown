@@ -19,20 +19,20 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
   Map<String, String> _readFile(String fileName) {
     final Map<String, String> result = <String, String>{};
 
-    final File file = new File(fileName);
+    final File file = File(fileName);
     final String md = file.readAsStringSync();
 
     final Document doc = MarkdownParser.strict.parse(md);
-    for (BlockNode block in doc.contents) {
-      // TODO use visitors
+    for (final BlockNode block in doc.contents) {
+      // TODO(dikmax): use visitors
       if (block is CodeBlock) {
         if (block.attributes is InfoString) {
           final InfoString attr = block.attributes;
           if (attr.language == 'example') {
-            final StringBuffer testBuffer = new StringBuffer();
-            final StringBuffer resBuffer = new StringBuffer();
+            final StringBuffer testBuffer = StringBuffer();
+            final StringBuffer resBuffer = StringBuffer();
             bool writeTest = true;
-            for (String line in block.contents) {
+            for (final String line in block.contents) {
               if (line == '.') {
                 writeTest = false;
               } else {
@@ -59,7 +59,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
       Element element, ConstantReader annotation, BuildStep buildStep) async {
     final String annotationPath = annotation.read('path').stringValue;
     if (path.isAbsolute(annotationPath)) {
-      throw new Exception('must be relative path to the source file');
+      throw Exception('must be relative path to the source file');
     }
 
     final String sourcePathDir = path.dirname(buildStep.inputId.path);
@@ -67,7 +67,7 @@ class EmbedTestsGenerator extends GeneratorForAnnotation<EmbedTests> {
     final String filePath = path.join(sourcePathDir, annotationPath);
 
     if (!FileSystemEntity.isFileSync(filePath)) {
-      throw new Exception('Not a file! - $filePath');
+      throw Exception('Not a file! - $filePath');
     }
 
     final Map<String, String> content = _readFile(filePath);

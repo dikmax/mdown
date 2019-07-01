@@ -7,9 +7,9 @@ import 'package:mdown/src/ast/ast.dart';
 
 /// Combining InlineNode. Used instead of list on parsing time.
 class CombiningInlineNodeImpl extends InlineNodeImpl {
-  final List<InlineNodeImpl> _list;
-
   CombiningInlineNodeImpl(this._list);
+
+  final List<InlineNodeImpl> _list;
 
   List<InlineNodeImpl> get list => _list;
 
@@ -29,9 +29,9 @@ class CombiningInlineNodeImpl extends InlineNodeImpl {
 
 /// Combining BlockNode. Used instead of list on parsing time.
 class CombiningBlockNodeImpl extends BlockNodeImpl {
-  final List<BlockNodeImpl> _list;
-
   CombiningBlockNodeImpl(this._list);
+
+  final List<BlockNodeImpl> _list;
 
   List<BlockNodeImpl> get list => _list;
 

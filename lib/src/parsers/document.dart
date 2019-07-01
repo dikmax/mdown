@@ -17,10 +17,10 @@ import 'package:mdown/src/parsers/container.dart';
 /// Visitor for parsing inlines inside blocks
 class InlineParsingVisitor extends ReplacingAstVisitor
     implements UnparsedInlinesVisitor<AstNodeImpl> {
-  final DocumentParser _documentParser;
-
   /// Constructor.
   InlineParsingVisitor(this._documentParser);
+
+  final DocumentParser _documentParser;
 
   @override
   BaseCompositeInlineImpl visitUnparsedInlines(UnparsedInlines node) {
@@ -32,21 +32,21 @@ class InlineParsingVisitor extends ReplacingAstVisitor
 
 /// Parser for whole document.
 class DocumentParser extends AbstractParser<Document> {
+  /// Constructor.
+  DocumentParser(ParsersContainer container) : super(container);
+
   Map<int, List<AbstractParser<BlockNodeImpl>>> _blockParsers;
 
   List<AbstractParser<BlockNodeImpl>> _blockParsersRest;
 
   Map<int, List<AbstractParser<InlineNodeImpl>>> _inlineParsers;
 
-  /// Constructor.
-  DocumentParser(ParsersContainer container) : super(container);
-
   @override
   void init() {
     // Block parsers
-    _blockParsers = new HashMap<int, List<AbstractParser<BlockNodeImpl>>>();
+    _blockParsers = HashMap<int, List<AbstractParser<BlockNodeImpl>>>();
 
-    for (int char in <int>[starCodeUnit, minusCodeUnit]) {
+    for (final int char in <int>[starCodeUnit, minusCodeUnit]) {
       _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.thematicBreakParser,
         container.blockquoteListParser
@@ -61,26 +61,26 @@ class DocumentParser extends AbstractParser<Document> {
       container.atxHeadingParser
     ];
 
-    for (int char in <int>[spaceCodeUnit, tabCodeUnit]) {
+    for (final int char in <int>[spaceCodeUnit, tabCodeUnit]) {
       _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.blanklineParser,
         container.indentedCodeParser
       ];
     }
 
-    for (int char in <int>[newLineCodeUnit, carriageReturnCodeUnit]) {
+    for (final int char in <int>[newLineCodeUnit, carriageReturnCodeUnit]) {
       _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.blanklineParser
       ];
     }
 
-    for (int char in <int>[tildeCodeUnit, backtickCodeUnit]) {
+    for (final int char in <int>[tildeCodeUnit, backtickCodeUnit]) {
       _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.fencedCodeParser
       ];
     }
 
-    for (int char in <int>[plusCodeUnit, greaterThanCodeUnit]) {
+    for (final int char in <int>[plusCodeUnit, greaterThanCodeUnit]) {
       _blockParsers[char] = <AbstractParser<BlockNodeImpl>>[
         container.blockquoteListParser
       ];
@@ -113,7 +113,7 @@ class DocumentParser extends AbstractParser<Document> {
     _blockParsersRest.add(container.paraSetextHeadingParser);
 
     // Inline parsers
-    _inlineParsers = new HashMap<int, List<AbstractParser<InlineNodeImpl>>>();
+    _inlineParsers = HashMap<int, List<AbstractParser<InlineNodeImpl>>>();
 
     _inlineParsers[spaceCodeUnit] = <AbstractParser<InlineNodeImpl>>[
       container.hardLineBreakParser
@@ -144,7 +144,7 @@ class DocumentParser extends AbstractParser<Document> {
       container.inlineCodeParser
     ];
 
-    for (int char in <int>[starCodeUnit, underscoreCodeUnit]) {
+    for (final int char in <int>[starCodeUnit, underscoreCodeUnit]) {
       _inlineParsers[char] = <AbstractParser<InlineNodeImpl>>[
         container.inlineStructureParser
       ];
@@ -216,7 +216,7 @@ class DocumentParser extends AbstractParser<Document> {
 
       if (firstChar == openBracketCodeUnit) {
         // Special treatment for link references.
-        // TODO we don't need it
+        // TODO(dikmax): we don't need it
         final ParseResult<LinkReferenceImpl> res =
             container.linkReferenceParser.parse(text, offset);
         if (res.isSuccess) {
@@ -230,7 +230,8 @@ class DocumentParser extends AbstractParser<Document> {
         }
       } else if (_blockParsers.containsKey(firstChar)) {
         bool found = false;
-        for (AbstractParser<BlockNodeImpl> parser in _blockParsers[firstChar]) {
+        for (final AbstractParser<BlockNodeImpl> parser
+            in _blockParsers[firstChar]) {
           final ParseResult<BlockNodeImpl> res = parser.parse(text, offset);
           if (res.isSuccess) {
             if (res.value != null) {
@@ -253,7 +254,7 @@ class DocumentParser extends AbstractParser<Document> {
         }
       }
 
-      for (AbstractParser<BlockNodeImpl> parser in _blockParsersRest) {
+      for (final AbstractParser<BlockNodeImpl> parser in _blockParsersRest) {
         final ParseResult<BlockNodeImpl> res = parser.parse(text, offset);
         if (res.isSuccess) {
           if (res.value != null) {
@@ -271,17 +272,17 @@ class DocumentParser extends AbstractParser<Document> {
       }
     }
 
-    final InlineParsingVisitor visitor = new InlineParsingVisitor(this);
+    final InlineParsingVisitor visitor = InlineParsingVisitor(this);
     final int blocksLength = blocks.length;
     final List<BlockNodeImpl> blocksWithInlines =
-        new List<BlockNodeImpl>(blocksLength);
+        List<BlockNodeImpl>(blocksLength);
     for (int i = 0; i < blocksLength; ++i) {
       blocksWithInlines[i] = blocks[i].accept<AstNode>(visitor);
     }
 
     final Document result = astFactory.document(blocksWithInlines);
 
-    return new ParseResult<Document>.success(result, offset);
+    return ParseResult<Document>.success(result, offset);
   }
 
   /// Parses provided string as inlines.
@@ -309,7 +310,7 @@ class DocumentParser extends AbstractParser<Document> {
         }
       } else if (_inlineParsers.containsKey(codeUnit)) {
         bool found = false;
-        for (AbstractParser<InlineNodeImpl> parser
+        for (final AbstractParser<InlineNodeImpl> parser
             in _inlineParsers[codeUnit]) {
           final ParseResult<InlineNodeImpl> res = parser.parse(t, offset);
           if (res.isSuccess) {
@@ -334,7 +335,7 @@ class DocumentParser extends AbstractParser<Document> {
 
       final ParseResult<InlineNodeImpl> res =
           container.strParser.parse(t, offset);
-      assert(res.isSuccess);
+      assert(res.isSuccess, 'strParser should always succeed');
 
       inlines.add(res.value);
       offset = res.offset;

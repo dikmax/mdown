@@ -19,7 +19,7 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
       r'(?:\r\n|\n|\r)(?![ \t]*(?:\r\n|\n|\r))';
 
   static final RegExp _labelAndLinkRegExp =
-      new RegExp(r' {0,3}\[((?:[^\[\]\r\n]|\\\]|\\\[|' +
+      RegExp(r' {0,3}\[((?:[^\[\]\r\n]|\\\]|\\\[|' +
           _notEmptyLineRegExp +
           r')+)\]:' +
           // Space after label
@@ -29,7 +29,7 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
           // Link
           r'([^ \t\r\n]*)');
 
-  static final RegExp _titleRegExp = new RegExp(r'(?:[ \t]|' +
+  static final RegExp _titleRegExp = RegExp(r'(?:[ \t]|' +
       _notEmptyLineRegExp +
       r')+(' +
       r'"(?:[^"\\\r\n]|\\"|\\|' +
@@ -43,7 +43,7 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
       r')*\)' +
       r')');
 
-  static final RegExp _lineEndRegExp = new RegExp(r'[ \t]*(\r\n|\n|\r|$)');
+  static final RegExp _lineEndRegExp = RegExp(r'[ \t]*(\r\n|\n|\r|$)');
   @override
   ParseResult<LinkReferenceImpl> parse(String text, int offset) {
     int off = offset;
@@ -133,20 +133,18 @@ class LinkReferenceParser extends AbstractParser<LinkReferenceImpl> {
     }
 
     if (offsetAfterAttributes != -1) {
-      return new ParseResult<LinkReferenceImpl>.success(
-          new LinkReferenceImpl(
-              label, astFactory.target(link, title), attributes),
+      return ParseResult<LinkReferenceImpl>.success(
+          LinkReferenceImpl(label, astFactory.target(link, title), attributes),
           offsetAfterAttributes);
     }
     if (offsetAfterTitle != -1) {
-      return new ParseResult<LinkReferenceImpl>.success(
-          new LinkReferenceImpl(
-              label, astFactory.target(link, title), attributes),
+      return ParseResult<LinkReferenceImpl>.success(
+          LinkReferenceImpl(label, astFactory.target(link, title), attributes),
           offsetAfterTitle);
     }
     if (offsetAfterLink != -1) {
-      return new ParseResult<LinkReferenceImpl>.success(
-          new LinkReferenceImpl(label, astFactory.target(link, null), null),
+      return ParseResult<LinkReferenceImpl>.success(
+          LinkReferenceImpl(label, astFactory.target(link, null), null),
           offsetAfterLink);
     }
 

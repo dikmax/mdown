@@ -66,7 +66,7 @@ enum SmartCharType {
 }
 
 /// A predicate is a one-argument function that returns a boolean value.
-typedef bool Predicate<E>(E argument);
+typedef Predicate<E> = bool Function(E argument);
 
 /// A node in the AST structure for a Markdown file.
 ///
@@ -437,13 +437,13 @@ abstract class NodeList<E extends AstNode> implements List<E> {
   /// list will initially be populated with the given [elements].
   factory NodeList(AstNode owner, [List<E> elements]) =>
       // ignore: avoid_as
-      new NodeListImpl<E>(owner as AstNodeImpl, elements);
+      NodeListImpl<E>(owner as AstNodeImpl, elements);
 
   /// Return the node that is the parent of each of the elements in the list.
   AstNode get owner;
 
-  /// Return the node at the given [index] in the list or throw a [RangeError] if
-  /// [index] is out of bounds.
+  /// Return the node at the given [index] in the list or throw a [RangeError]
+  /// if [index] is out of bounds.
   @override
   E operator [](int index);
 

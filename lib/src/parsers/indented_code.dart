@@ -31,7 +31,7 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
     while (off < length) {
       final ParseResult<String> lineResult =
           container.lineParser.parse(text, off);
-      assert(lineResult.isSuccess);
+      assert(lineResult.isSuccess, 'lineParser should always succeed');
 
       final String line = lineResult.value;
       if (isOnlyWhitespace(line)) {
@@ -65,11 +65,10 @@ class IndentedCodeParser extends AbstractParser<BlockNodeImpl> {
       return const ParseResult<BlockNodeImpl>.failure();
     }
 
-    return new ParseResult<BlockNodeImpl>.success(
-        new CodeBlockImpl(result, null), off);
+    return ParseResult<BlockNodeImpl>.success(CodeBlockImpl(result, null), off);
   }
 
-  // TODO make it work on text
+  // TODO(dikmax): make it work on text
   static String _codeLine(String text, [int offset = 0]) {
     int off = offset;
     final int length = text.length;

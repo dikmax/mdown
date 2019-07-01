@@ -615,7 +615,8 @@ class GeneralizingAstVisitor<R> implements AstVisitor<R> {
 
 /// An AST visitor that will recursively visit all of the nodes in an AST
 /// structure (like instances of the class [RecursiveAstVisitor]). In addition,
-/// every node will also be visited by using a single unified [visitNode] method.
+/// every node will also be visited by using a single unified [visitNode]
+/// method.
 ///
 /// Subclasses that override a visit method must either invoke the overridden
 /// visit method or explicitly invoke the more general [visitNode] method.

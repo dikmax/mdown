@@ -5,4 +5,4 @@ import 'package:mdown/src/ast/ast_factory.dart';
 import 'ast_factory.dart';
 
 /// Standard AST Factory.
-AstFactory astFactory = new AstFactoryImpl();
+AstFactory astFactory = AstFactoryImpl();
